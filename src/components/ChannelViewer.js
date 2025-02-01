@@ -242,12 +242,6 @@ const ChannelViewer = ({ channels, callBack }) => {
                 className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
                 onClick={() => {
                   setAddingChannel((prev) => ({ ...prev, visible: false }));
-                  setNewChannel({
-                    name: "",
-                    permission: "public",
-                    id: "",
-                    isLobby: false,
-                  });
                 }}
               >
                 取消
@@ -257,12 +251,7 @@ const ChannelViewer = ({ channels, callBack }) => {
                 onClick={() => {
                   setAddingChannel((prev) => ({ ...prev, visible: false }));
                   handleAddChannel(addingChannel.channel.id);
-                  setNewChannel({
-                    name: "",
-                    permission: "public",
-                    id: "",
-                    isLobby: false,
-                  });
+                  setNewChannel((prev)=>({...prev}));
                 }}
               >
                 確定
@@ -290,12 +279,7 @@ const ChannelViewer = ({ channels, callBack }) => {
                 className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
                 onClick={() => {
                   setEditingChannel((prev) => ({ ...prev, visible: false }));
-                  setEditChannel({
-                    name: "",
-                    permission: "public",
-                    id: "",
-                    isLobby: "",
-                  });
+                  setEditChannel(editingChannel.channel);
                 }}
               >
                 取消
@@ -305,12 +289,7 @@ const ChannelViewer = ({ channels, callBack }) => {
                 onClick={() => {
                   setEditingChannel((prev) => ({ ...prev, visible: false }));
                   handleEditChannel(editingChannel.channel.id);
-                  setEditChannel({
-                    name: "",
-                    permission: "public",
-                    id: "",
-                    isLobby: "",
-                  });
+                  setEditChannel((prev)=>({...prev}));
                 }}
               >
                 確定
