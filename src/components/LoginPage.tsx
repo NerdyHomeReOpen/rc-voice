@@ -409,4 +409,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
   );
 };
 
+AuthPage.displayName = "AuthPage";
+
 export default AuthPage;

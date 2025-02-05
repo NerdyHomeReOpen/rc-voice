@@ -199,6 +199,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelect }) => {
 
   const renderServer = (server: Server) => (
     <button
+      key={`server-${server.id}`}
       className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-white hover:bg-gray-50"
       onClick={() => onSelect(server.id)}
     >
@@ -265,5 +266,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelect }) => {
     </div>
   );
 };
+
+HomePage.displayName = "HomePage";
 
 export default HomePage;

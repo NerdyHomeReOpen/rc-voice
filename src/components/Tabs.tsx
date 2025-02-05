@@ -20,10 +20,11 @@ const Tabs: React.FC<TabsProps> = ({ server, selectedId, onSelect }) => {
   return (
     <div className="flex w-[50%] space-x-4">
       {TABS.map((TAB) => (
-        <div className="min-w-32 text-center -mb-2">
+        <div key={`Tabs-${TAB.id}`} className="min-w-32 text-center -mb-2">
           <div
             className={`p-2 h-8 cursor-pointer font-medium ${
               TAB.id === selectedId
+
                 ? "bg-white text-blue-500 rounded-t-xl  text-based"
                 : "bg-blue-600 hover:bg-blue-700 text-white rounded-t-xl text-center"
             }`}

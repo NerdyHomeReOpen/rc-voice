@@ -228,4 +228,6 @@ const PersonalSettingPage: React.FC<PersonalSettingPageProps> = ({
   );
 };
 
+PersonalSettingPage.displayName = "PersonalSettingPage";
+
 export default PersonalSettingPage;

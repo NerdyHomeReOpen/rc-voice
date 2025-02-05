@@ -396,4 +396,6 @@ const ServerPage: React.FC<ServerPageProps> = ({
   );
 };
 
+ServerPage.displayName = "ServerPage";
+
 export default ServerPage;

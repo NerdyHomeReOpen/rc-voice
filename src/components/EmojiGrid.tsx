@@ -47,4 +47,6 @@ const EmojiGrid: React.FC<EmojiGridProps> = ({ onEmojiSelect, isOpen }) => {
   );
 };
 
+EmojiGrid.displayName = "EmojiGrid";
+
 export default EmojiGrid;

@@ -141,4 +141,6 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdownText }) => {
   );
 };
 
+MarkdownViewer.displayName = "MarkdownViewer";
+
 export default MarkdownViewer;

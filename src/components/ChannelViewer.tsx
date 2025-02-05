@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 // Types
-import type { Channel, Server, User, UserList } from "@/types";
+import type { Channel, ChannelPermission, Server, User, UserList } from "@/types";
 
 interface ContextMenuPosState {
   x: number;
@@ -419,7 +419,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
                 onChange={(e) =>
                   setSelectedChannel((prev) => ({
                     ...prev,
-                    permission: e.target.value,
+                    permission: e.target.value as ChannelPermission,
                   }))
                 }
                 className="w-full p-2 border rounded mb-4"
@@ -556,5 +556,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
     </>
   );
 };
+
+ChannelViewer.displayName = "ChannelViewer";
 
 export default ChannelViewer;

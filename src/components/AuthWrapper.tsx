@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { X, Minus, Square } from "lucide-react";
+import { Minus, Square, X } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
 
 // Types
-import type { User, Server, Channel, Message, UserList } from "@/types";
+import type { Channel, Message, Server, User, UserList } from "@/types";
 
 // Pages
+import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
 import ServerPage from "./ServerPage";
-import HomePage from "./HomePage";
 
 // Components
+import { handleError } from "@/utils/errorHandler";
 import Tabs from "./Tabs";
+import LoadingSpinner from "./common/LoadingSpinner";
 
 const STATE_ICON = {
   online: "/online.png",
@@ -106,62 +108,55 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ socket }) => {
     };
   }, [socket, serverId]);
 
-  const handleSendMessage = (
-    serverId: string,
-    channelId: string,
-    message: Message
-  ): void => {
-    try {
-      socket?.emit("chatMessage", {
-        serverId,
-        channelId,
-        message,
-      });
-    } catch (error) {
-      console.error("發送消息失敗:", error);
-    }
-  };
+  const handleSendMessage = useCallback(
+    (serverId: string, channelId: string, message: Message): void => {
+      try {
+        socket?.emit("chatMessage", { serverId, channelId, message });
+      } catch (error) {
+        const appError = handleError(error);
+        console.error("發送消息失敗:", appError.message);
+      }
+    },
+    [socket]
+  );
 
-  const handleAddChannel = (serverId: string, channel: Channel): void => {
-    try {
-      socket?.emit("addChannel", {
-        serverId,
-        channel,
-      });
-    } catch (error) {
-      console.error("新增頻道失敗:", error);
-    }
-  };
+  const handleAddChannel = useCallback(
+    (serverId: string, channel: Channel): void => {
+      try {
+        socket?.emit("addChannel", { serverId, channel });
+      } catch (error) {
+        const appError = handleError(error);
+        console.error("新增頻道失敗:", appError.message);
+      }
+    },
+    [socket]
+  );
 
-  const handleEditChannel = (
-    serverId: string,
-    channelId: string,
-    channel: Partial<Channel>
-  ): void => {
-    try {
-      socket?.emit("editChannel", {
-        serverId,
-        channelId,
-        channel,
-      });
-    } catch (error) {
-      console.error("編輯頻道/類別失敗:", error);
-    }
-  };
+  const handleEditChannel = useCallback(
+    (serverId: string, channelId: string, channel: Partial<Channel>): void => {
+      try {
+        socket?.emit("editChannel", { serverId, channelId, channel });
+      } catch (error) {
+        const appError = handleError(error);
+        console.error("編輯頻道/類別失敗:", appError.message);
+      }
+    },
+    [socket]
+  );
 
-  const handleDeleteChannel = (serverId: string, channelId: string): void => {
-    try {
-      socket?.emit("deleteChannel", { serverId, channelId });
-    } catch (error) {
-      console.error("刪除頻道/類別失敗:", error);
-    }
-  };
+  const handleDeleteChannel = useCallback(
+    (serverId: string, channelId: string): void => {
+      try {
+        socket?.emit("deleteChannel", { serverId, channelId });
+      } catch (error) {
+        const appError = handleError(error);
+        console.error("刪除頻道/類別失敗:", appError.message);
+      }
+    },
+    [socket]
+  );
 
-  const handleJoinChannel = (
-    serverId: string,
-    userId: string,
-    channelId: string
-  ): void => {
+  const handleJoinChannel = (serverId: string, userId: string, channelId: string): void => {
     try {
       socket?.emit("joinChannel", {
         serverId,
@@ -202,15 +197,11 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ socket }) => {
   const [users, setUsers] = useState<UserList>({});
 
   const getMainContent = () => {
-    if (isLoading || !user)
-      return (
-        <div className="flex items-center justify-center w-full h-full">
-          <img src="/loading.gif" className="w-16 h-16" />
-        </div>
-      );
+    if (isLoading || !user) {
+      return <LoadingSpinner />;
+    }
 
-    if (!isAuthenticated)
-      return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    if (!isAuthenticated) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
     switch (selectedTabId) {
       case 1:
@@ -219,21 +210,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ socket }) => {
         return <div>Under develop heehee</div>;
       case 3:
         if (!server) return;
-        return (
-          <ServerPage
-            user={user}
-            server={server}
-            channels={channels}
-            messages={messages}
-            users={users}
-            onAddChannel={handleAddChannel}
-            onDeleteChannel={handleDeleteChannel}
-            onEditChannel={handleEditChannel}
-            onJoinChannel={handleJoinChannel}
-            onSendMessage={handleSendMessage}
-            onLogout={handleLogout}
-          />
-        );
+        return <ServerPage user={user} server={server} channels={channels} messages={messages} users={users} onAddChannel={handleAddChannel} onDeleteChannel={handleDeleteChannel} onEditChannel={handleEditChannel} onJoinChannel={handleJoinChannel} onSendMessage={handleSendMessage} onLogout={handleLogout} />;
     }
   };
 
@@ -243,22 +220,12 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ socket }) => {
       <div className="bg-blue-600 p-2 flex items-center justify-between text-white text-sm flex-none h-12">
         {/* User State Display */}
         <div className="flex items-center space-x-2">
-          <img
-            src="/rc_logo_small.png"
-            alt="RiceCall"
-            className="w-6 h-6 select-none"
-          />
+          <img src="/rc_logo_small.png" alt="RiceCall" className="w-6 h-6 select-none" />
           {user && (
             <>
-              <span className="text-xs font-bold text-black select-none">
-                {user.name}
-              </span>
+              <span className="text-xs font-bold text-black select-none">{user.name}</span>
               <div className="flex items-center">
-                <img
-                  src={STATE_ICON[user.state] || STATE_ICON["online"]}
-                  alt="User State"
-                  className="w-5 h-5 p-1 select-none"
-                />
+                <img src={STATE_ICON[user.state] || STATE_ICON["online"]} alt="User State" className="w-5 h-5 p-1 select-none" />
                 <select
                   value={user.state}
                   onChange={(e) => {}} // change to websocket
@@ -287,13 +254,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ socket }) => {
           )} */}
         </div>
         {/* Switch page */}
-        {isAuthenticated && (
-          <Tabs
-            server={server}
-            selectedId={selectedTabId}
-            onSelect={handleSelectCard}
-          />
-        )}
+        {isAuthenticated && <Tabs server={server} selectedId={selectedTabId} onSelect={handleSelectCard} />}
         <div className="flex space-x-2">
           <button className="hover:bg-blue-700 p-2 rounded">
             <Minus size={16} />
