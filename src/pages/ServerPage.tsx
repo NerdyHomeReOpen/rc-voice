@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Volume2,
   Volume1,
@@ -8,20 +8,18 @@ import {
   MicOff,
   Settings,
   ArrowBigDown,
-} from "lucide-react";
+  BellOff,
+  BellRing,
+} from 'lucide-react';
 
 // Components
-import EmojiGrid from "./EmojiGrid";
-import MarkdownViewer from "./MarkdownViewer";
-import MessageViewer from "./MessageViewer";
-import ChannelViewer from "./ChannelViewer";
-
-// Pages
-import SettingPage from "./SettingPage";
-import PersonalSettingPage from "./PersonalSettingPage";
+import EmojiGrid from '@/components/EmojiGrid';
+import MarkdownViewer from '@/components/MarkdownViewer';
+import MessageViewer from '@/components/MessageViewer';
+import ChannelViewer from '@/components/ChannelViewer';
 
 // Types
-import type { User, Server, Channel, Message, UserList } from "@/types";
+import type { User, Server, Channel, Message, UserList } from '@/types';
 
 interface ServerPageProps {
   user: User;
@@ -33,17 +31,24 @@ interface ServerPageProps {
   onEditChannel: (
     serverId: string,
     channelId: string,
-    channel: Channel
+    channel: Channel,
   ) => void;
   onDeleteChannel: (serverId: string, channelId: string) => void;
   onJoinChannel: (serverId: string, userId: string, channelId: string) => void;
   onSendMessage: (
     serverId: string,
     channelId: string,
-    message: Message
+    message: Message,
   ) => void;
-  onLogout: () => void;
+  onOpenServerSetting: () => void;
+  onOpenUserSetting: () => void;
 }
+
+const getStoredBoolean = (key: string, defaultValue: boolean): boolean => {
+  const stored = localStorage.getItem(key);
+  if (stored === null) return defaultValue;
+  return stored === 'true';
+};
 
 const ServerPage: React.FC<ServerPageProps> = ({
   user,
@@ -56,13 +61,9 @@ const ServerPage: React.FC<ServerPageProps> = ({
   onDeleteChannel,
   onJoinChannel,
   onSendMessage,
-  onLogout,
+  onOpenServerSetting,
+  onOpenUserSetting,
 }) => {
-  // Setting Control
-  const [isPersonalSettingOpen, setIsPersonalSettingOpen] =
-    useState<boolean>(false);
-  const [isSettingOpen, setIsSettingOpen] = useState<boolean>(false);
-
   // Volume Control
   const [volume, setVolume] = useState<number>(100);
   const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
@@ -78,9 +79,9 @@ const ServerPage: React.FC<ServerPageProps> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleCloseVolumeSlider);
+    document.addEventListener('mousedown', handleCloseVolumeSlider);
     return () =>
-      document.removeEventListener("mousedown", handleCloseVolumeSlider);
+      document.removeEventListener('mousedown', handleCloseVolumeSlider);
   }, []);
 
   // Sidebar Control
@@ -102,49 +103,58 @@ const ServerPage: React.FC<ServerPageProps> = ({
         const maxWidth = window.innerWidth * 0.3;
         const newWidth = Math.max(
           220,
-          Math.min(mouseMoveEvent.clientX, maxWidth)
+          Math.min(mouseMoveEvent.clientX, maxWidth),
         );
         setSidebarWidth(newWidth);
       }
     },
-    [isResizing]
+    [isResizing],
   );
 
   useEffect(() => {
-    window.addEventListener("mousemove", resize);
-    window.addEventListener("mouseup", stopResizing);
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
     return () => {
-      window.removeEventListener("mousemove", resize);
-      window.removeEventListener("mouseup", stopResizing);
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
     };
   }, [resize, stopResizing]);
 
   // Input Control
-  const [messageInput, setMessageInput] = useState<string>("");
+  const [messageInput, setMessageInput] = useState<string>('');
   const maxContentLength = 2000;
 
+  // Notification Control
+  const [notification, setNotification] = useState<boolean>(() =>
+    getStoredBoolean('notification', true),
+  );
+
   // Mic Control
-  const [isMicOn, setIsMicOn] = useState<boolean>(false);
+  const [isMicOn, setIsMicOn] = useState<boolean>(() =>
+    getStoredBoolean('mic', false),
+  );
 
   // Emoji Picker Control
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
 
+  useEffect(() => {
+    localStorage.setItem('notification', notification.toString());
+  }, [notification]);
+
+  useEffect(() => {
+    localStorage.setItem('mic', isMicOn.toString());
+  }, [isMicOn]);
+
+  const toggleNotification = useCallback(() => {
+    setNotification((prev) => !prev);
+  }, []);
+
+  const toggleMic = useCallback(() => {
+    setIsMicOn((prev) => !prev);
+  }, []);
+
   return (
     <>
-      {/* Modal Pages */}
-      {isPersonalSettingOpen && (
-        <PersonalSettingPage
-          onClose={() => setIsPersonalSettingOpen(false)}
-          user={users[user.id]}
-        />
-      )}
-      {isSettingOpen && (
-        <SettingPage
-          onClose={() => setIsSettingOpen(false)}
-          server={server}
-          users={users}
-        />
-      )}
       {/* Left Sidebar */}
       <div
         className="flex flex-col min-h-0 min-w-0 w-64 bg-white border-r text-sm"
@@ -154,32 +164,32 @@ const ServerPage: React.FC<ServerPageProps> = ({
         <div className="flex items-center justify-between p-2 border-b mb-4">
           <div className="flex items-center space-x-3">
             <img
-              src={server?.icon ?? "/im/IMLogo.png"}
+              src={server?.icon ?? '/im/IMLogo.png'}
               alt="User Profile"
               className="w-14 h-14 shadow border-2 border-[#A2A2A2] select-none"
             />
             <div>
-              <div className="text-gray-700">{server?.name ?? ""} </div>
+              <div className="text-gray-700">{server?.name ?? ''} </div>
               <div className="flex flex-row items-center gap-1">
                 <img
                   src="/channel/ID.png"
                   alt="User Profile"
                   className="w-3.5 h-3.5 select-none"
                 />
-                <div className="text-xs text-gray-500">{server?.id ?? ""}</div>
+                <div className="text-xs text-gray-500">{server?.id ?? ''}</div>
                 <img
                   src="/channel/member.png"
                   alt="User Profile"
                   className="w-3.5 h-3.5 select-none"
                 />
                 <div className="text-xs text-gray-500 select-none">
-                  {Object.keys(users).length ?? ""}
+                  {Object.keys(users).length ?? ''}
                 </div>
 
                 {server.permissions?.[user.id] >= 5 && (
                   <button
                     className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-                    onClick={() => setIsSettingOpen(true)}
+                    onClick={onOpenServerSetting}
                   >
                     <Settings size={16} className="text-gray-500" />
                   </button>
@@ -223,6 +233,7 @@ const ServerPage: React.FC<ServerPageProps> = ({
               users={users}
               server={server}
               user={user}
+              notification={notification}
             />
           )}
         </div>
@@ -241,7 +252,7 @@ const ServerPage: React.FC<ServerPageProps> = ({
                   if (content.length > maxContentLength) return;
                   setMessageInput(content);
                   setShowEmojiPicker(false);
-                  const input = document.querySelector("textarea");
+                  const input = document.querySelector('textarea');
                   if (input) input.focus();
                 }}
               />
@@ -251,8 +262,8 @@ const ServerPage: React.FC<ServerPageProps> = ({
                 
                 ${
                   messageInput.length >= maxContentLength
-                    ? "border-red-500"
-                    : ""
+                    ? 'border-red-500'
+                    : ''
                 }`}
               rows={2}
               // placeholder={isConnected ? "輸入訊息..." : "連接中..."}
@@ -263,22 +274,22 @@ const ServerPage: React.FC<ServerPageProps> = ({
                 setMessageInput(input);
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   if (!messageInput.trim() || !user.currentChannelId) return;
                   onSendMessage(server.id, user.currentChannelId, {
-                    id: "",
+                    id: '',
                     senderId: user.id,
                     content: messageInput,
-                    timestamp: new Date().valueOf(),
-                    type: "general",
+                    timestamp: 0,
+                    type: 'general',
                   });
-                  setMessageInput("");
+                  setMessageInput('');
                 }
               }}
               onPaste={(e) => {
                 e.preventDefault();
-                const text = e.clipboardData.getData("text");
+                const text = e.clipboardData.getData('text');
                 if (text.length + messageInput.length > maxContentLength)
                   return;
                 setMessageInput((prev) => prev + text);
@@ -286,7 +297,7 @@ const ServerPage: React.FC<ServerPageProps> = ({
               maxLength={maxContentLength}
               // disabled={!isConnected}
               aria-label="訊息輸入框"
-            />{" "}
+            />{' '}
             <div className="text-xs text-gray-400 self-end ml-2">
               {messageInput.length}/{maxContentLength}
             </div>
@@ -308,20 +319,30 @@ const ServerPage: React.FC<ServerPageProps> = ({
               <img
                 src={
                   isMicOn
-                    ? "/channel/icon_speaking_vol_5_24x30.png"
-                    : "/channel/icon_mic_state_1_24x30.png"
+                    ? '/channel/icon_speaking_vol_5_24x30.png'
+                    : '/channel/icon_mic_state_1_24x30.png'
                 }
                 alt="Mic"
               />
               <span
                 className={`text-lg font-bold ${
-                  isMicOn ? "text-[#B9CEB7]" : "text-[#6CB0DF]"
+                  isMicOn ? 'text-[#B9CEB7]' : 'text-[#6CB0DF]'
                 }`}
               >
-                {isMicOn ? "已拿麥" : "拿麥發言"}
+                {isMicOn ? '已拿麥' : '拿麥發言'}
               </span>
             </button>
             <div className="flex items-center space-x-2 p-5">
+              <button
+                onClick={toggleNotification}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                {notification ? (
+                  <BellRing size={16} className="text-foreground" />
+                ) : (
+                  <BellOff size={16} className="text-foreground" />
+                )}
+              </button>{' '}
               <div className="relative" ref={volumeRef}>
                 <button
                   className="p-1 hover:bg-gray-100 rounded"
@@ -371,9 +392,7 @@ const ServerPage: React.FC<ServerPageProps> = ({
                 )}
               </div>
               <button
-                onClick={() => {
-                  setIsMicOn(!isMicOn);
-                }}
+                onClick={toggleMic}
                 className="p-1 hover:bg-gray-100 rounded"
               >
                 {isMicOn ? (
@@ -383,7 +402,7 @@ const ServerPage: React.FC<ServerPageProps> = ({
                 )}
               </button>
               <button
-                onClick={() => setIsPersonalSettingOpen(true)}
+                onClick={onOpenUserSetting}
                 className="p-1 hover:bg-gray-100 rounded"
               >
                 <Settings size={16} className="text-foreground" />
@@ -396,6 +415,6 @@ const ServerPage: React.FC<ServerPageProps> = ({
   );
 };
 
-ServerPage.displayName = "ServerPage";
+ServerPage.displayName = 'ServerPage';
 
 export default ServerPage;

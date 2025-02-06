@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Plus,
   Minus,
@@ -7,10 +7,16 @@ import {
   MoreVertical,
   Edit,
   Trash,
-} from "lucide-react";
+} from 'lucide-react';
 
 // Types
-import type { Channel, ChannelPermission, Server, User, UserList } from "@/types";
+import type {
+  Channel,
+  ChannelPermission,
+  Server,
+  User,
+  UserList,
+} from '@/types';
 
 interface ContextMenuPosState {
   x: number;
@@ -26,7 +32,7 @@ interface ChannelViewerProps {
   onEditChannel: (
     serverId: string,
     channelId: string,
-    channel: Channel
+    channel: Channel,
   ) => void;
   onDeleteChannel: (serverId: string, channelId: string) => void;
   onJoinChannel: (serverId: string, userId: string, channelId: string) => void;
@@ -42,13 +48,56 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
   onDeleteChannel,
   onJoinChannel,
 }) => {
+  const prevChannelsRef = useRef<Channel[]>([]);
+
+  const joinSoundRef = useRef<HTMLAudioElement | null>(null);
+  const leaveSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    joinSoundRef.current = new Audio('/sounds/join.mp3');
+    leaveSoundRef.current = new Audio('/sounds/leave.mp3');
+  }, []);
+
+  useEffect(() => {
+    const currentUserChannel = channels.find(
+      (channel) => channel.id === user.currentChannelId,
+    );
+
+    if (!currentUserChannel) return;
+
+    const prevChannel = prevChannelsRef.current.find(
+      (channel) => channel.id === currentUserChannel.id,
+    );
+
+    if (prevChannel) {
+      const newUsers = currentUserChannel.userIds.filter(
+        (id) => !prevChannel.userIds.includes(id),
+      );
+
+      const leftUsers = prevChannel.userIds.filter(
+        (id) => !currentUserChannel.userIds.includes(id),
+      );
+
+      if (currentUserChannel.userIds.includes(user.id)) {
+        if (newUsers.length > 0 && !newUsers.includes(user.id)) {
+          joinSoundRef.current?.play().catch(console.error);
+        }
+        if (leftUsers.length > 0) {
+          leaveSoundRef.current?.play().catch(console.error);
+        }
+      }
+    }
+
+    prevChannelsRef.current = channels;
+  }, [channels, user.id, user.currentChannelId]);
+
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >(
     channels.reduce((acc, channel) => {
       if (channel.id) acc[channel.id] = true;
       return acc;
-    }, {} as Record<string, boolean>)
+    }, {} as Record<string, boolean>),
   );
 
   const [contentMenuPos, setContentMenuPos] = useState<ContextMenuPosState>({
@@ -74,15 +123,15 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
         setShowContextMenu2(false);
     };
 
-    document.addEventListener("mousedown", handleCloseContextMenu);
+    document.addEventListener('mousedown', handleCloseContextMenu);
     return () =>
-      document.removeEventListener("mousedown", handleCloseContextMenu);
+      document.removeEventListener('mousedown', handleCloseContextMenu);
   }, []);
 
   const [selectedChannel, setSelectedChannel] = useState<Channel>({
-    id: "",
-    name: "",
-    permission: "public",
+    id: '',
+    name: '',
+    permission: 'public',
     isCategory: false,
     isLobby: false,
     userIds: [],
@@ -94,14 +143,14 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
   const [showEditChannelModal, setShowEditChannelModal] =
     useState<Boolean>(false);
 
-  const getPermissionStyle = (permission: Channel["permission"]): string => {
+  const getPermissionStyle = (permission: Channel['permission']): string => {
     switch (permission) {
-      case "private":
-        return "bg-blue-100";
-      case "readonly":
-        return "bg-gray-300";
+      case 'private':
+        return 'bg-blue-100';
+      case 'readonly':
+        return 'bg-gray-300';
       default:
-        return "bg-white";
+        return 'bg-white';
     }
   };
 
@@ -128,10 +177,10 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
           <div className="flex items-center flex-1 min-w-0">
             <div
               className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 ${getPermissionStyle(
-                category.permission
+                category.permission,
               )}`}
             >
-              {category.permission === "readonly" ? (
+              {category.permission === 'readonly' ? (
                 <Dot size={12} />
               ) : !expandedSections[category.id] ? (
                 <Minus size={12} />
@@ -141,7 +190,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
             </div>
             <span className="truncate">{category.name}</span>
           </div>
-          {category.permission !== "readonly" && (
+          {category.permission !== 'readonly' && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -166,7 +215,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
               .map((subChannel) =>
                 subChannel.isCategory
                   ? renderCategory(subChannel)
-                  : renderChannel(subChannel)
+                  : renderChannel(subChannel),
               )}
           </div>
         )}
@@ -177,30 +226,43 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
     return (
       <div key={channel.id}>
         {/* Channel View */}
-        <div
-          className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
-          onDoubleClick={() => {
-            channel.permission !== "readonly" &&
-              onJoinChannel(server.id, user.id, channel.id);
-          }}
-          onContextMenu={(e) => {
-            if (channel.isLobby) return;
-            e.stopPropagation();
-            e.preventDefault();
-            setContentMenuPos({ x: e.pageX, y: e.pageY });
-            setShowContextMenu(true);
-            setSelectedChannel(channel);
-          }}
-        >
-          <div className="flex items-center flex-1 min-w-0">
-            {channel.isLobby ? (
+        {channel.isLobby ? (
+          <div
+            className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
+            onDoubleClick={() => {
+              channel.permission !== 'readonly' &&
+                onJoinChannel(server.id, user.id, channel.id);
+            }}
+          >
+            <div className="flex items-center flex-1 min-w-0">
               <div className="min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1">
                 <House size={12} />
               </div>
-            ) : (
+              <span className={'text-[#ff0000]'}>{channel.name}</span>
+              <span className="ml-1 text-gray-500 text-sm">
+                {`(${channel.userIds.length})`}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
+            onDoubleClick={() => {
+              channel.permission !== 'readonly' &&
+                onJoinChannel(server.id, user.id, channel.id);
+            }}
+            onContextMenu={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setContentMenuPos({ x: e.pageX, y: e.pageY });
+              setShowContextMenu(true);
+              setSelectedChannel(channel);
+            }}
+          >
+            <div className="flex items-center flex-1 min-w-0">
               <div
                 className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 ${getPermissionStyle(
-                  channel.permission
+                  channel.permission,
                 )} cursor-pointer`}
                 onClick={() =>
                   setExpandedSections((prev) => ({
@@ -209,7 +271,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
                   }))
                 }
               >
-                {channel.permission === "readonly" ? (
+                {channel.permission === 'readonly' ? (
                   <Dot size={12} />
                 ) : !expandedSections[channel.id] ? (
                   <Minus size={12} />
@@ -217,16 +279,12 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
                   <Plus size={12} />
                 )}
               </div>
-            )}
-            <span className={`truncate ${channel.isLobby && "text-[#ff0000]"}`}>
-              {channel.name}
-            </span>
-            <span className="ml-1 text-gray-500 text-sm">
-              {channel.permission !== "readonly" &&
-                `(${channel.userIds.length})`}
-            </span>
-          </div>
-          {!channel.isLobby && (
+              <span className={`truncate`}>{channel.name}</span>
+              <span className="ml-1 text-gray-500 text-sm">
+                {channel.permission !== 'readonly' &&
+                  `(${channel.userIds.length})`}
+              </span>
+            </div>
             <button
               className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
               onClick={(e) => {
@@ -239,68 +297,62 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
             >
               <MoreVertical size={14} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Expanded Sections */}
         {!expandedSections[channel.id] && channel.userIds.length > 0 && (
           <div className="ml-6">
-            {Object.entries(users)
-              .filter(([_, user]) => user.currentChannelId === channel.id)
-              .map(([_, user]) => renderUser(user))}
+            {Object.values(users)
+              .filter((user) => channel.userIds.includes(user.id))
+              .map((user) => renderUser(user))}
           </div>
         )}
       </div>
     );
   };
   const renderUser = (_user: User): React.ReactElement => {
+    const userPermission = server.permissions[_user.id] || 1;
+    const userLevel = Math.min(56, Math.ceil(_user.level / 5)); // 56 is max level
     return (
-      <div
-        key={_user.id}
-        className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
-      >
+      <div key={_user.id}>
         {/* User View */}
-        <div className="flex items-center flex-1 min-w-0">
-          <div
-            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center mr-1`}
-          >
-            <img
-              src={`/channel/${users[_user.id].gender}_${
-                server.permissions[_user.id]
-              }.png`}
-              alt={`${users[_user.id].gender}_${server.permissions[_user.id]}`}
-              className="select-none"
-            />
-          </div>
-          <span className="truncate">{users[_user.id].name}</span>
-          <div
-            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
-          >
-            {users[_user.id].level > 1 && (
+        <div className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none">
+          <div className="flex items-center flex-1 min-w-0">
+            <div
+              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center mr-1`}
+            >
               <img
-                src={`/usergrade_${
-                  users[_user.id].level < 5
-                    ? 1
-                    : Math.ceil(users[_user.id].level / 5)
-                }.png`}
-                alt={`usergrade_${users[_user.id].level}`}
+                src={`/channel/${_user.gender}_${userPermission}.png`}
+                alt={`${_user.gender}_${userPermission}`}
                 className="select-none"
               />
+            </div>
+            <span className="truncate">{_user.name}</span>
+            {_user.level > 1 && (
+              <div
+                className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
+              >
+                <img
+                  src={`/usergrade_${userLevel}.png`}
+                  alt={`/usergrade_${userLevel}`}
+                  className="select-none"
+                />
+              </div>
             )}
           </div>
+          {_user.id == user.id && (
+            <div
+              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
+            >
+              <img
+                src={`/mylocation.png`}
+                alt={`mylocation`}
+                className="p-1 select-none"
+              />
+            </div>
+          )}
         </div>
-
-        {_user.id == user.id && (
-          <div
-            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
-          >
-            <img
-              src={`/mylocation.png`}
-              alt={`mylocation`}
-              className="p-1 select-none"
-            />
-          </div>
-        )}
       </div>
     );
   };
@@ -376,7 +428,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg w-80">
             <h3 className="text-lg font-bold mb-4">{`新增${
-              selectedChannel.isCategory ? "類別" : "頻道"
+              selectedChannel.isCategory ? '類別' : '頻道'
             }`}</h3>
             <form
               onSubmit={(e) => {
@@ -388,9 +440,9 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
                   isCategory: selectedChannel.isCategory,
                 });
                 setSelectedChannel({
-                  id: "",
-                  name: "",
-                  permission: "public",
+                  id: '',
+                  name: '',
+                  permission: 'public',
                   isCategory: false,
                   isLobby: false,
                   userIds: [],
@@ -410,7 +462,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
                 }
                 className="w-full p-2 border rounded mb-4"
                 placeholder={`${
-                  selectedChannel.isCategory ? "類別" : "頻道"
+                  selectedChannel.isCategory ? '類別' : '頻道'
                 }名稱`}
                 required
               />
@@ -435,9 +487,9 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
                   onClick={() => {
                     setShowAddChannelModal(false);
                     setSelectedChannel({
-                      id: "",
-                      name: "",
-                      permission: "public",
+                      id: '',
+                      name: '',
+                      permission: 'public',
                       isCategory: false,
                       isLobby: false,
                       userIds: [],
@@ -482,9 +534,9 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
                 onClick={() => {
                   setShowEditChannelModal(false);
                   setSelectedChannel({
-                    id: "",
-                    name: "",
-                    permission: "public",
+                    id: '',
+                    name: '',
+                    permission: 'public',
                     isCategory: false,
                     isLobby: false,
                     userIds: [],
@@ -501,9 +553,9 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
                   setShowEditChannelModal(false);
                   onEditChannel(server.id, selectedChannel.id, selectedChannel);
                   setSelectedChannel({
-                    id: "",
-                    name: "",
-                    permission: "public",
+                    id: '',
+                    name: '',
+                    permission: 'public',
                     isCategory: false,
                     isLobby: false,
                     userIds: [],
@@ -528,7 +580,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
             className="w-6 h-6 select-none"
           />
           <div className="text-gray-500">
-            {channels.find((_) => _.id == user.currentChannelId)?.name ?? ""}
+            {channels.find((_) => _.id == user.currentChannelId)?.name ?? ''}
           </div>
         </div>
       )}
@@ -550,13 +602,13 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
           .map((channel) =>
             channel.isCategory
               ? renderCategory(channel)
-              : renderChannel(channel)
+              : renderChannel(channel),
           )}
       </div>
     </>
   );
 };
 
-ChannelViewer.displayName = "ChannelViewer";
+ChannelViewer.displayName = 'ChannelViewer';
 
 export default ChannelViewer;

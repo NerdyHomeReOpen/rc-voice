@@ -1,22 +1,22 @@
-import { useState, useEffect } from "react";
-import { io, Socket } from "socket.io-client";
+import { useState, useEffect } from 'react';
+import { io, Socket } from 'socket.io-client';
 
-const WS_URL = "ws://localhost:4500";
+const WS_URL = 'ws://localhost:4500';
 
 interface WebSocketProps {
-  socketInstance: Socket | null;
-  isConnected: Boolean;
-  error: String | null;
+  socket: Socket | null;
+  isConnected: boolean;
+  error: string | null;
 }
 
 export const useWebSocket = (): WebSocketProps => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     const socket: Socket = io(WS_URL, {
-      transports: ["websocket"],
+      transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -24,16 +24,15 @@ export const useWebSocket = (): WebSocketProps => {
       timeout: 20000,
     });
 
-    setSocketInstance(socket);
+    setSocket(socket);
 
-    socket.on("connect", () => {
+    socket.on('connect', () => {
       setIsConnected(true);
-      console.log("Connected to server");
-      // socket.emit("connectServer", { userId, serverId });
+      console.log('Connected to server');
     });
-    socket.on("error", (error) => {
+    socket.on('error', (error) => {
       setError(error);
-      console.log("Connect server error");
+      console.log('Connect server error');
     });
 
     return () => {
@@ -41,7 +40,7 @@ export const useWebSocket = (): WebSocketProps => {
     };
   }, []);
 
-  return { socketInstance, isConnected, error };
+  return { socket, isConnected, error };
 };
 
 export default useWebSocket;

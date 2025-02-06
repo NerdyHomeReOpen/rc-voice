@@ -18,4 +18,5 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: SimSun, Arial, Helvetica, sans-serif;
+  font-size: 14px;
 }

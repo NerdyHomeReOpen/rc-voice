@@ -10,6 +10,7 @@ export interface User {
   lastLoginAt?: number;
   state: UserState; // ["online" | "dnd" | "idle" | "gn"]
   currentChannelId?: string;
+  friendIds: string[]; // NEW!! 
 }
 
 export type UserState = "online" | "dnd" | "idle" | "gn";
@@ -37,7 +38,6 @@ export interface Server {
 export interface ServerList {
   [serverId: string]: Server;
 }
-
 export const enum Permission {
   Guest = 1,
   Member = 2,
@@ -48,8 +48,6 @@ export const enum Permission {
   EventStaff = 7,
   Official = 8,
 }
-
-export type ChannelPermission = "public" | "private" | "readonly";
 
 export interface Channel {
   id: string;
@@ -64,6 +62,7 @@ export interface Channel {
 export interface ChannelList {
   [channelId: string]: Channel;
 }
+export type ChannelPermission = "public" | "private" | "readonly";
 
 export interface Message {
   id: string;
@@ -72,7 +71,6 @@ export interface Message {
   timestamp: number;
   type: MessageType;
 }
-
 export interface MessageList {
   [messageId: string]: Message;
 }
@@ -85,6 +83,11 @@ export interface UserData {
 }
 
 export interface MenuItem {
+  id: string;
+  label: string;
+}
+
+export interface ModalTabItem {
   id: string;
   label: string;
 }

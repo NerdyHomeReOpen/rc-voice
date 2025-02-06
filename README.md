@@ -10,10 +10,20 @@
 
 | branch      | role   |
 | ----------- | ------ |
-| `ts-refactor`    | client |
+| `ts-refactor`    | client / test-server |
 | `Websocket` | server |
 
 ## 如何啟動
+
+### 優先安裝 modules
+
+```bash
+# 使用 npm
+npm install
+
+# 使用 yarn
+yarn install
+```
 
 ### 啟動 Client
 
@@ -23,6 +33,12 @@ npm run dev
 
 # 使用 yarn
 yarn dev
+```
+
+### 啟動 Test-Server (前端設計調適用)
+
+```bash
+node /test-server/index.js
 ```
 
 ### 啟動 Server

@@ -1,11 +1,11 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
-import { ChevronDown } from "lucide-react";
+import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { ChevronDown } from 'lucide-react';
 
-// Service
-import authService from "@/service/auth.service";
+// Services
+import authService from '@/services/auth.service';
 
 // Types
-import type { User } from "@/types";
+import type { User } from '@/types';
 
 interface LoginFormData {
   account: string;
@@ -18,7 +18,7 @@ interface RegisterFormData {
   account: string;
   password: string;
   username: string;
-  gender: "Male" | "Female";
+  gender: 'Male' | 'Female';
 }
 
 interface FormErrors {
@@ -63,7 +63,7 @@ const InputField: React.FC<InputFieldProps> = ({
   name,
   value,
   onChange,
-  type = "text",
+  type = 'text',
   placeholder,
   error,
   showDropdown = false,
@@ -81,7 +81,7 @@ const InputField: React.FC<InputFieldProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         className={`w-full p-2 border rounded ${
-          error ? "border-red-500" : "border-gray-300"
+          error ? 'border-red-500' : 'border-gray-300'
         }`}
       />
       {showDropdown && (
@@ -154,7 +154,7 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(
         登入
       </button>
     </form>
-  )
+  ),
 );
 
 // Register Form Component
@@ -221,36 +221,36 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(
         註冊
       </button>
     </form>
-  )
+  ),
 );
 
 // Validation functions
 const validateAccount = (value: string): string => {
   value = value.trim();
-  if (!value) return "帳號為必填";
-  if (value.length < 4) return "帳號至少需要 4 個字";
-  if (value.length > 16) return "帳號最多 16 個字";
+  if (!value) return '帳號為必填';
+  if (value.length < 4) return '帳號至少需要 4 個字';
+  if (value.length > 16) return '帳號最多 16 個字';
   if (!/^[A-Za-z0-9_\.]+$/.test(value))
-    return "帳號只能使用英文、數字、底線(_)和點(.)";
-  return "";
+    return '帳號只能使用英文、數字、底線(_)和點(.)';
+  return '';
 };
 
 const validatePassword = (value: string): string => {
   value = value.trim();
-  if (!value) return "密碼為必填";
-  if (value.length < 8) return "密碼至少需要 8 個字";
-  if (value.length > 20) return "密碼最多 20 個字";
+  if (!value) return '密碼為必填';
+  if (value.length < 8) return '密碼至少需要 8 個字';
+  if (value.length > 20) return '密碼最多 20 個字';
   if (!/^[A-Za-z0-9@$!%*#?&]{8,20}$/.test(value))
-    return "密碼長度需要在8-20個字之間，且不包含@$!%*#?&以外的特殊字元";
-  return "";
+    return '密碼長度需要在8-20個字之間，且不包含@$!%*#?&以外的特殊字元';
+  return '';
 };
 
 const validateUsername = (value: string): string => {
   value = value.trim();
-  if (!value) return "顯示名稱為必填";
-  if (value.length < 1) return "顯示名稱至少需要 1 個字";
-  if (value.length > 32) return "顯示名稱最多 32 個字";
-  return "";
+  if (!value) return '顯示名稱為必填';
+  if (value.length < 1) return '顯示名稱至少需要 1 個字';
+  if (value.length > 32) return '顯示名稱最多 32 個字';
+  return '';
 };
 
 // Main Auth Page Component
@@ -260,32 +260,32 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
   const [registerErrors, setRegisterErrors] = useState<FormErrors>({});
 
   const [loginForm, setLoginForm] = useState<LoginFormData>({
-    account: "",
-    password: "",
+    account: '',
+    password: '',
     rememberAccount: false,
     autoLogin: false,
   });
 
   const [registerForm, setRegisterForm] = useState<RegisterFormData>({
-    account: "",
-    password: "",
-    username: "",
-    gender: "Male",
+    account: '',
+    password: '',
+    username: '',
+    gender: 'Male',
   });
 
   const handleLoginChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value, type, checked } = e.target;
     setLoginForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
 
-    if (name === "account") {
+    if (name === 'account') {
       setLoginErrors((prev) => ({
         ...prev,
         account: validateAccount(value),
       }));
-    } else if (name === "password") {
+    } else if (name === 'password') {
       setLoginErrors((prev) => ({
         ...prev,
         password: validatePassword(value),
@@ -294,7 +294,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
   };
 
   const handleRegisterChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ): void => {
     const { name, value } = e.target;
     setRegisterForm((prev) => ({
@@ -302,17 +302,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
       [name]: value,
     }));
 
-    if (name === "account") {
+    if (name === 'account') {
       setRegisterErrors((prev) => ({
         ...prev,
         account: validateAccount(value),
       }));
-    } else if (name === "password") {
+    } else if (name === 'password') {
       setRegisterErrors((prev) => ({
         ...prev,
         password: validatePassword(value),
       }));
-    } else if (name === "username") {
+    } else if (name === 'username') {
       setRegisterErrors((prev) => ({
         ...prev,
         username: validateUsername(value),
@@ -321,7 +321,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
   };
 
   const handleLoginSubmit = async (
-    e: FormEvent<HTMLFormElement>
+    e: FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     e.preventDefault();
     const accountError = validateAccount(loginForm.account);
@@ -338,14 +338,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
         onLoginSuccess(data.user);
       } catch (error) {
         setLoginErrors({
-          general: error instanceof Error ? error.message : "登入失敗",
+          general: error instanceof Error ? error.message : '登入失敗',
         });
       }
     }
   };
 
   const handleRegisterSubmit = async (
-    e: FormEvent<HTMLFormElement>
+    e: FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     e.preventDefault();
 
@@ -365,7 +365,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
         setIsLogin(true);
       } catch (error) {
         setRegisterErrors({
-          general: error instanceof Error ? error.message : "註冊失敗",
+          general: error instanceof Error ? error.message : '註冊失敗',
         });
       }
     }
@@ -401,7 +401,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
               setRegisterErrors({});
             }}
           >
-            {isLogin ? "註冊帳號" : "返回登入"}
+            {isLogin ? '註冊帳號' : '返回登入'}
           </button>
         </div>
       </div>
@@ -409,6 +409,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
   );
 };
 
-AuthPage.displayName = "AuthPage";
+AuthPage.displayName = 'AuthPage';
 
 export default AuthPage;
