@@ -58,6 +58,11 @@ export default function Home() {
       setUser(user);
     };
     const handleError = (error: Error) => {
+      //TODO: Backend need to handle each type of error, not just depend on the message string
+      if (error.message.includes('Failed to get user')) {
+        localStorage.removeItem('userId');
+        setUserId(null);
+      }
       alert(`錯誤: ${error.message}`);
     };
 
