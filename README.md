@@ -10,7 +10,7 @@
 
 | branch      | role   |
 | ----------- | ------ |
-| `master`    | client |
+| `ts-refactor`    | client |
 | `Websocket` | server |
 
 ## 如何啟動
