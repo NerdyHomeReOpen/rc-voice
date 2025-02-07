@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, FocusEvent } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 // Services
@@ -40,17 +40,20 @@ interface InputFieldProps {
   name: string;
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
   type?: string;
   placeholder?: string;
   error?: string;
   showDropdown?: boolean;
 }
+
 const InputField: React.FC<InputFieldProps> = React.memo(
   ({
     label,
     name,
     value,
     onChange,
+    onBlur,
     type = 'text',
     placeholder,
     error,
@@ -67,6 +70,7 @@ const InputField: React.FC<InputFieldProps> = React.memo(
           name={name}
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder}
           className={`w-full p-2 border rounded ${
             error ? 'border-red-500' : 'border-gray-300'
@@ -110,12 +114,16 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const handleInputChange = (e: any): void => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleBlur = (e: FocusEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
     if (name === 'account') {
       setErrors((prev) => ({
         ...prev,
@@ -163,6 +171,7 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
         name="account"
         value={formData.account}
         onChange={handleInputChange}
+        onBlur={handleBlur}
         placeholder="請輸入帳號"
         error={errors.account}
         showDropdown
@@ -173,6 +182,7 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
         type="password"
         value={formData.password}
         onChange={handleInputChange}
+        onBlur={handleBlur}
         placeholder="請輸入密碼"
         error={errors.password}
       />
@@ -237,19 +247,24 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(
         ...prev,
         [name]: value,
       }));
+    };
 
+    const handleBlur = (
+      e: FocusEvent<HTMLInputElement | HTMLSelectElement>,
+    ): void => {
+      const { name, value } = e.target;
       if (name === 'account') {
-        setFormData((prev) => ({
+        setErrors((prev) => ({
           ...prev,
           account: validateAccount(value),
         }));
       } else if (name === 'password') {
-        setFormData((prev) => ({
+        setErrors((prev) => ({
           ...prev,
           password: validatePassword(value),
         }));
       } else if (name === 'username') {
-        setFormData((prev) => ({
+        setErrors((prev) => ({
           ...prev,
           username: validateUsername(value),
         }));
@@ -294,6 +309,7 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(
           name="account"
           value={formData.account}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           placeholder="請輸入帳號"
           error={errors.account}
         />
@@ -303,6 +319,7 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(
           type="password"
           value={formData.password}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           placeholder="請輸入密碼"
           error={errors.password}
         />
@@ -311,6 +328,7 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(
           name="username"
           value={formData.username}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           placeholder="請輸入顯示名稱"
           error={errors.username}
         />
