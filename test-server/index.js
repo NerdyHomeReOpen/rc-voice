@@ -496,7 +496,7 @@ io.on('connection', async (socket) => {
         return;
       }
       const user = usersList[data.userId];
-      if (!server) {
+      if (!user) {
         new Logger('WebSocket').error(`User(${data.userId}) not found`);
         socket.emit('error', {
           message: `User(${data.userId}) not found`,
@@ -509,7 +509,19 @@ io.on('connection', async (socket) => {
 
       if (!server.userIds.includes(user.id)) {
         server.userIds.push(user.id);
+        new Logger('WebSocket').info(
+          `User(${user.id}) has been added to server(${server.id})`,
+        );
+
+        if (!server.permissions[user.id]) {
+          server.permissions[user.id] = 1;
+          new Logger('WebSocket').info(
+            `User(${user.id}) has been set Permission(1) in server(${server.id})`,
+          );
+        }
       }
+
+
       // if (!server.permissions) {
       user.currentChannelId = channelList[server.lobbyId].id;
       channelList[server.lobbyId].userIds.push(user.id);
@@ -518,6 +530,23 @@ io.on('connection', async (socket) => {
       await db.set('serverList', serverList);
       await db.set('usersList', usersList);
       await db.set('channelList', channelList);
+
+      const recommendedServers = getRecommendedServers(serverList, user.id);
+      const joinedServers = Object.entries(serverList).reduce(
+        (acc, [id, server]) => {
+          if (server.userIds.includes(user.id)) {
+            acc[id] = server;
+          }
+          return acc;
+        },
+        {},
+      );
+
+      const userResponse = {
+        ...user,
+        recommendedServers,
+        joinedServers,
+      };
 
       // Join server and lobby channel
       if (user.currentChannelId)
@@ -532,7 +561,7 @@ io.on('connection', async (socket) => {
         'messages',
         getMessages(messageList, channelList[server.lobbyId]),
       );
-      io.to(socket.id).emit('user', user);
+      io.to(socket.id).emit('user', userResponse);
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit(

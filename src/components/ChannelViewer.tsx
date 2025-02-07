@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Plus,
@@ -22,6 +22,7 @@ import { useSocket } from '@/hooks/SocketProvider';
 
 // Components
 import ContextMenu from '@/components/ContextMenu';
+import UserInfoFloatingBlock from './UserInfoFloatingBlock';
 
 // Modals
 import AddChannelModal from '@/modals/AddChannelModal';
@@ -41,6 +42,13 @@ const getPermissionStyle = (permission: Channel['permission']): string => {
 interface ContextMenuPosState {
   x: number;
   y: number;
+}
+
+interface FloatingBlockState {
+  visible: boolean;
+  x: number;
+  y: number;
+  userId: string;
 }
 
 interface CategoryTabProps {
@@ -359,11 +367,75 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
 
   const userPermission = server.permissions[user.id] ?? 1; // ERROR: Sometime _user is undefined and it will throw an error
   const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
+
+  const [floatingBlock, setFloatingBlock] = useState<FloatingBlockState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    userId: '',
+  });
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (floatingBlock.visible) {
+        const target = event.target as HTMLElement;
+        const clickedUserBlock = target.closest('[data-user-block]');
+
+        if (clickedUserBlock) {
+          const userId = clickedUserBlock.getAttribute('data-user-id');
+          if (userId !== floatingBlock.userId) {
+            setFloatingBlock({
+              visible: false,
+              x: 0,
+              y: 0,
+              userId: '',
+            });
+          }
+        } else {
+          setFloatingBlock({
+            visible: false,
+            x: 0,
+            y: 0,
+            userId: '',
+          });
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [floatingBlock.visible, floatingBlock.userId]);
+
   return (
     <div key={user.id}>
       {/* User View */}
+      {/* 使用者資訊 block */}
+      {floatingBlock.visible && (
+        <UserInfoFloatingBlock
+          user={user}
+          server={server}
+          style={{
+            left: floatingBlock.x,
+            top: floatingBlock.y,
+          }}
+
+        />
+      )}
+
       <div
         className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
+        data-user-block
+        data-user-id={user.id}
+        onDoubleClick={(e) => {
+          if (!floatingBlock.visible || floatingBlock.userId !== user.id) {
+            setFloatingBlock({
+              visible: true,
+              x: e.clientX,
+              y: e.clientY,
+              userId: user.id,
+            });
+          }
+        }}
         onContextMenu={(e) => {
           e.stopPropagation();
           e.preventDefault();
