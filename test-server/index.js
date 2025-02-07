@@ -170,7 +170,7 @@ const server = http.createServer((req, res) => {
             // 創建新伺服器
             const newServer = {
               id: serverId,
-              displayId: 20000000 + Object.keys(serverList).length,
+              displayId: generateUniqueDisplayId(serverList),
               name: data.name,
               announcement: data.description || '',
               icon: req.file
@@ -1085,4 +1085,15 @@ const getFriendList = (usersList, user) => {
         return acc;
       }, {}) ?? {}
   );
+};
+const generateUniqueDisplayId = (serverList, baseId = 20000000) => {
+  let displayId = baseId + Object.keys(serverList).length;
+
+  while (
+    Object.values(serverList).some((server) => server.displayId === displayId)
+  ) {
+    displayId++;
+  }
+
+  return displayId;
 };
