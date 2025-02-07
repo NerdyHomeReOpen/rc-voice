@@ -41,6 +41,8 @@ const serverList = {
       'vvvf-vs': 'I want to join this server',
     },
     nicknames: {},
+    level: 0,
+    createdAt: 1738758855886,
   },
 };
 
@@ -54,7 +56,33 @@ const userList = {
     level: 100,
     currentChannelId: '',
     state: 'online',
-    isMute: false,
+    createdAt: 1738234723000,
+    friendIds: [
+      'a73af1d2-689e-4d7d-9426-3421cce3ade4',
+      'a66af1d2-689e-4d7d-9426-3421cce3ada5',
+      'vvvf-vs',
+    ],
+    friendGroups: [
+      {
+        id: 'uuid_1',
+        name: 'Best Friends',
+        friendIds: [
+          'a73af1d2-689e-4d7d-9426-3421cce3ade4',
+          'a66af1d2-689e-4d7d-9426-3421cce3ada5',
+          'vvvf-vs',
+        ],
+      },
+      {
+        id: 'uuid_2',
+        name: 'nigga',
+        friendIds: [
+          'a73af1d2-689e-4d7d-9426-3421cce3ade4',
+          'a66af1d2-689e-4d7d-9426-3421cce3ada5',
+          'vvvf-vs',
+        ],
+      },
+    ],
+    signature: 'Im cool.',
   },
   'a73af1d2-689e-4d7d-9426-3421cce3ade4': {
     id: 'a73af1d2-689e-4d7d-9426-3421cce3ade4',
@@ -65,7 +93,10 @@ const userList = {
     level: 100,
     currentChannelId: '',
     state: 'online',
-    isMute: false,
+    createdAt: 1738234723000,
+    friendIds: [],
+    friendGroups: [],
+    signature: 'Im gay.',
   },
   'a66af1d2-689e-4d7d-9426-3421cce3ada5': {
     id: 'a66af1d2-689e-4d7d-9426-3421cce3ada5',
@@ -76,7 +107,10 @@ const userList = {
     level: 10000,
     currentChannelId: '',
     state: 'online',
-    isMute: false,
+    createdAt: 1738234723000,
+    friendIds: [],
+    friendGroups: [],
+    signature: 'Im misu.',
   },
   'vvvf-vs': {
     id: 'vvvf-vs',
@@ -87,7 +121,10 @@ const userList = {
     level: 10,
     currentChannelId: '',
     state: 'online',
-    isMute: false,
+    createdAt: 1738234723000,
+    friendIds: [],
+    friendGroups: [],
+    signature: 'Im vvvf.',
   },
 };
 
@@ -96,7 +133,7 @@ const messageList = {
     id: 'info',
     senderId: '',
     content: '此頻道已被設為自由發言',
-    timestamp: '',
+    timestamp: 1738234723000,
     type: 'info',
   },
 };

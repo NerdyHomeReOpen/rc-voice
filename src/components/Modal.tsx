@@ -1,33 +1,40 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, FormEvent } from 'react';
 
 // Types
 import type { ModalTabItem } from '@/types';
 
 interface ModalProps {
   title: string;
-  tabs: ModalTabItem[];
-  hasSideMenu?: boolean;
+  submitText: string;
+  tabs?: ModalTabItem[];
+  width?: string;
+  height?: string;
   onClose: () => void;
-  onSubmit: () => void;
-  onSelectTab: (tab: ModalTabItem) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSelectTab?: (tab: ModalTabItem) => void;
   children: React.ReactNode;
 }
 
 const Modal = memo(
   ({
     title,
+    submitText = '保存',
     tabs,
-    hasSideMenu = false,
+    width = '800',
+    height = '700',
     onClose,
     onSubmit,
     onSelectTab,
     children,
   }: ModalProps) => {
-    const [activeTab, setActiveTab] = useState<string>(tabs[0].id);
+    const [activeTab, setActiveTab] = useState<string>(tabs?.[0].id ?? '');
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="flex flex-col w-[800] h-[700] bg-white rounded shadow-lg overflow-hidden transform outline-g">
+        <form
+          onSubmit={onSubmit}
+          className={`flex flex-col w-\[${width}\] h-\[${height}\] bg-white rounded shadow-lg overflow-hidden transform outline-g`}
+        >
           {/* Top Nevigation */}
           <div className="bg-blue-600 p-2 text-white flex items-center justify-between select-none">
             <div className="flex items-center space-x-2">
@@ -38,7 +45,7 @@ const Modal = memo(
 
           <div className="flex flex-1 min-h-0">
             {/* Side Menu */}
-            {hasSideMenu && (
+            {tabs && (
               <div className="w-40 bg-blue-50 text-sm">
                 {tabs.map((tab) => (
                   <div
@@ -50,7 +57,7 @@ const Modal = memo(
                     }`}
                     onClick={() => {
                       setActiveTab(tab.id);
-                      onSelectTab(tab);
+                      if (onSelectTab) onSelectTab(tab);
                     }}
                   >
                     {tab.label}
@@ -60,16 +67,16 @@ const Modal = memo(
             )}
 
             {/* Main Content */}
-            <div className="flex-1 p-6">{children}</div>
+            <div className="flex-1 p-6 overflow-y-auto">{children}</div>
           </div>
 
           {/* Bottom Buttons */}
           <div className="flex justify-end gap-2 p-4 bg-gray-50">
             <button
+              type="submit"
               className="px-6 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400"
-              onClick={onSubmit}
             >
-              保存
+              {submitText}
             </button>
             <button
               className="px-6 py-1 bg-white rounded hover:bg-gray-300 border border-black-200"
@@ -78,7 +85,7 @@ const Modal = memo(
               取消
             </button>
           </div>
-        </div>
+        </form>
       </div>
     );
   },

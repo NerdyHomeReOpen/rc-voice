@@ -27,7 +27,7 @@ interface MessageViewerProps {
 
 const MessageViewer = memo(
   ({ user, server, messages, users, notification }: MessageViewerProps) => {
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    // Audio Control
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const previousMessagesLength = useRef<number>(0);
 
@@ -35,7 +35,6 @@ const MessageViewer = memo(
       audioRef.current = new Audio('/sounds/message.mp3');
       audioRef.current.volume = 0.5;
     }, []);
-
     useEffect(() => {
       if (messages.length > previousMessagesLength.current) {
         const lastMessage = messages[messages.length - 1];
@@ -55,6 +54,9 @@ const MessageViewer = memo(
       previousMessagesLength.current = messages.length;
     }, [messages, user.id]);
 
+    // Auto Scroll Control
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
     useLayoutEffect(() => {
       messagesEndRef.current?.scrollIntoView({
         behavior: 'auto',
@@ -62,14 +64,13 @@ const MessageViewer = memo(
       });
     }, [messages]);
 
+    // Functions
     const groupMessages = (messages: Message[]): MessageGroup[] => {
       const sorted = [...messages].sort(
         (a, b) => Number(a.timestamp) - Number(b.timestamp),
       );
-
       const grouped = sorted.reduce<MessageGroup[]>((acc, message) => {
         const lastGroup = acc[acc.length - 1];
-
         const currentTime = Number(message.timestamp);
         const lastTime = lastGroup ? Number(lastGroup.timestamp) : 0;
         const timeDiff = currentTime - lastTime;
@@ -92,6 +93,8 @@ const MessageViewer = memo(
       }, []);
       return grouped;
     };
+
+    // Render
     const renderMessage = (group: MessageGroup): React.ReactElement => {
       return (
         <div key={group.id} className="flex items-start space-x-1 mb-1">
@@ -147,13 +150,11 @@ const MessageViewer = memo(
       );
     };
 
-    const groupedMessages = useMemo(() => groupMessages(messages), [messages]);
-
     return (
-      <>
-        {groupedMessages.map((group) => renderMessage(group))}
+      <div className="flex flex-[5] flex-col overflow-y-auto p-3 min-w-0 max-w-full">
+        {groupMessages(messages).map((group) => renderMessage(group))}
         <div ref={messagesEndRef} />
-      </>
+      </div>
     );
   },
 );

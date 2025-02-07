@@ -1,8 +1,9 @@
+export type UserState = "online" | "dnd" | "idle" | "gn";
 export interface User {
   id: string;
   name: string;
-  account: string;
-  password: string;
+  account: string; // Move to another list for security
+  password: string; // Move to another list for security
   gender: "Male" | "Female";
   avatar?: string;
   level: number;
@@ -11,17 +12,34 @@ export interface User {
   state: UserState; 
   currentChannelId?: string;
   friendIds: string[];
+  friendGroups: [
+    {
+      id: string;
+      name: string;
+      friendIds: string[];
+    }
+  ];
+  signature: string;
+  recommendedServers: ServerList;
+  joinedServers: ServerList;
 }
-
-export type UserState = "online" | "dnd" | "idle" | "gn";
-export type MessageType = "general" | "info";
-
 export interface UserList {
   [userId: string]: User;
 }
 
+export const enum Permission {
+  Guest = 1,
+  Member = 2,
+  ChannelAdmin = 3,
+  ChannelManager = 4,
+  ServerAdmin = 5,
+  ServerOwner = 6,
+  EventStaff = 7,
+  Official = 8,
+}
 export interface Server {
   id: string;
+  displayId: number;
   name: string;
   icon: string;
   announcement: string;
@@ -39,17 +57,8 @@ export interface Server {
 export interface ServerList {
   [serverId: string]: Server;
 }
-export const enum Permission {
-  Guest = 1,
-  Member = 2,
-  ChannelAdmin = 3,
-  ChannelManager = 4,
-  ServerAdmin = 5,
-  ServerOwner = 6,
-  EventStaff = 7,
-  Official = 8,
-}
 
+export type ChannelPermission = "public" | "private" | "readonly";
 export interface Channel {
   id: string;
   name: string;
@@ -63,8 +72,8 @@ export interface Channel {
 export interface ChannelList {
   [channelId: string]: Channel;
 }
-export type ChannelPermission = "public" | "private" | "readonly";
 
+export type MessageType = "general" | "info";
 export interface Message {
   id: string;
   senderId: string;
@@ -83,12 +92,19 @@ export interface UserData {
   gender: string;
 }
 
-export interface MenuItem {
-  id: string;
-  label: string;
-}
+// export interface MenuItem {
+//   id: string;
+//   label: string;
+// }
 
 export interface ModalTabItem {
   id: string;
   label: string;
+}
+
+export interface ContextMenuItem {
+  id: string;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
 }

@@ -1,24 +1,21 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { CircleX } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 // Types
 import type { Server, User } from '@/types';
 
 interface TabsProps {
-  user: User | null;
-  server: Server | null;
   selectedId: number;
   onSelect: (tabId: number) => void;
   onLeaveServer: (serverId: string, userId: string) => void;
 }
 
-const Tabs: React.FC<TabsProps> = ({
-  user,
-  server,
-  selectedId,
-  onSelect,
-  onLeaveServer,
-}) => {
+const Tabs: React.FC<TabsProps> = ({ selectedId, onSelect, onLeaveServer }) => {
+  // Redux
+  const user = useSelector((state: { user: User }) => state.user);
+  const server = useSelector((state: { server: Server }) => state.server);
+
   const TABS = [
     { id: 1, label: '發現' },
     { id: 2, label: '好友' },

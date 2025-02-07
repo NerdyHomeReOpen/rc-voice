@@ -7,24 +7,26 @@ import userService from '@/services/user.service';
 import Modal from '@/components/Modal';
 
 // Types
-import type { User, MenuItem, ModalTabItem } from '@/types';
+import type { User, ModalTabItem } from '@/types';
+import { useSelector } from 'react-redux';
 
 const TABS: ModalTabItem[] = [{ id: '基本資料', label: '基本資料' }];
 
 interface UserSettingModal {
   onClose: () => void;
   onLogout: () => void;
-  user: User;
 }
 
 const PersonalSettingPage: React.FC<UserSettingModal> = ({
   onClose,
   onLogout,
-  user,
 }) => {
+  // Redux
+  const user = useSelector((state: { user: User }) => state.user);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<MenuItem>(TABS[0]);
+  const [activeTab, setActiveTab] = useState<ModalTabItem>(TABS[0]);
 
   // Default user data
   const [preview, setPreview] = useState('/im/IMLogo.png');
@@ -166,7 +168,6 @@ const PersonalSettingPage: React.FC<UserSettingModal> = ({
     <Modal
       title="個人資料設定"
       tabs={TABS}
-      hasSideMenu
       onSelectTab={(tab) => setActiveTab(tab)}
       onClose={onClose}
       onSubmit={onClose}

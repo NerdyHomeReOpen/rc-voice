@@ -1,15 +1,20 @@
+import React from 'react';
+import { Flex } from '@radix-ui/themes';
+
 interface LoadingSpinnerProps {
   className?: string;
 }
 
-export const LoadingSpinner = ({ className = "w-16 h-16" }: LoadingSpinnerProps) => {
+export const LoadingSpinner = ({
+  className = 'w-16 h-16',
+}: LoadingSpinnerProps) => {
   return (
-    <div className="flex items-center justify-center w-full h-full">
+    <Flex className={`items-center justify-center w-full h-full`}>
       <img src="/loading.gif" className={className} alt="Loading..." />
-    </div>
+    </Flex>
   );
 };
 
-LoadingSpinner.displayName = "LoadingSpinner";
+LoadingSpinner.displayName = 'LoadingSpinner';
 
 export default LoadingSpinner;

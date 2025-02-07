@@ -1,148 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Search } from 'lucide-react';
+import { searchServers, calculateSimilarity } from '@/utils/searchServers';
 
 // Type
-import type { ServerList, Server } from '@/types';
+import type { ServerList, Server, User } from '@/types';
 
-interface HomePageProps {
-  onSelectServer: (serverId: string) => void;
-  onOpenCreateServer: () => void;
+// Redux
+import { useSelector } from 'react-redux';
+
+// ServerCard Component
+interface ServerCardProps {
+  server: Server;
+  onServerSelect: (serverId: string) => void;
 }
-
-const HomePage: React.FC<HomePageProps> = ({
-  onSelectServer,
-  onOpenCreateServer,
-}) => {
-  const [rencentServerList, setRecentServerList] = useState();
-  const [myServerList, setMyServerList] = useState();
-  const myId = '123456789000';
-
-  const recentVisits: ServerList = {
-    '1725': {
-      id: '1725',
-      name: '●●●● ※Purely 米糊糊 ...',
-      icon: '/api/placeholder/48/48',
-      announcement: '勿忘初衷、黑純將你的那個自己...',
-      level: 0,
-      userIds: [myId],
-      channelIds: [],
-      createdAt: 1738758855886,
-      applications: {},
-      permissions: {},
-      nicknames: {},
-      contributions: {},
-      joinDate: {},
-    },
-    '26531753': {
-      id: '26531753',
-      name: '【C8 Online 】InFinTe',
-      icon: '/api/placeholder/48/48',
-      announcement: '申請會員請告知你的ID謝...',
-      level: 0,
-      userIds: [myId],
-      channelIds: [],
-      createdAt: 1738758855886,
-      applications: {},
-      permissions: {},
-      nicknames: {},
-      contributions: {},
-      joinDate: {},
-    },
-    '27100337': {
-      id: '27100337',
-      name: '黑夜kmiko私人工作室',
-      icon: '/api/placeholder/48/48',
-      announcement: '',
-      level: 0,
-      userIds: [],
-      channelIds: [],
-      createdAt: 1738758855886,
-      applications: {},
-      permissions: {},
-      nicknames: {},
-      contributions: {},
-      joinDate: {},
-    },
-    '27100881': {
-      id: '27100881',
-      name: 'Disillusionment小居服幻博誌',
-      icon: '/api/placeholder/48/48',
-      announcement: '',
-      level: 0,
-      userIds: [],
-      channelIds: [],
-      createdAt: 1738758855886,
-      applications: {},
-      permissions: {},
-      nicknames: {},
-      contributions: {},
-      joinDate: {},
-    },
-    '27315392': {
-      id: '27315392',
-      name: '永恆-Night Star☆彡',
-      icon: '/api/placeholder/48/48',
-      announcement: '創建中',
-      level: 0,
-      userIds: [],
-      channelIds: [],
-      createdAt: 1738758855886,
-      applications: {},
-      permissions: {},
-      nicknames: {},
-      contributions: {},
-      joinDate: {},
-    },
-    '27349728': {
-      id: '27349728',
-      name: '一一* InFinitely☆彡',
-      icon: '/api/placeholder/48/48',
-      announcement: '',
-      level: 0,
-      userIds: [],
-      channelIds: [],
-      createdAt: 1738758855886,
-      applications: {},
-      permissions: {},
-      nicknames: {},
-      contributions: {},
-      joinDate: {},
-    },
-    '123456789': {
-      id: '123456789',
-      name: '543隨你聊',
-      icon: '/api/placeholder/48/48',
-      announcement: '',
-      level: 0,
-      userIds: [myId],
-      channelIds: [],
-      createdAt: 1738758855886,
-      applications: {},
-      permissions: {},
-      nicknames: {},
-      contributions: {},
-      joinDate: {},
-    },
-  };
-
-  const myGroups = Object.entries(recentVisits).reduce((acc, [id, server]) => {
-    if (server.userIds.includes(myId)) {
-      acc[id] = server;
-    }
-    return acc;
-  }, {} as ServerList);
-
-  const renderServer = (server: Server) => (
+const ServerCard: React.FC<ServerCardProps> = React.memo(
+  ({ server, onServerSelect }) => (
     <button
-      key={`server-${server.id}`}
-      className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-white hover:bg-gray-50"
-      onClick={() => onSelectServer(server.id)}
+      className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-white hover:bg-gray-50 w-full"
+      onClick={() => onServerSelect(server.id)}
     >
       <img src="/logo_server_def.png" alt="" className="w-14 h-14 rounded" />
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-medium text-[#4A6B9D] text-start truncate">
           {server.name}
         </h3>
-        <p className="text-xs text-gray-500 text-start ">ID:{server.id}</p>
+        <p className="text-xs text-gray-500 text-start">
+          ID:{server.displayId}
+        </p>
         {server.announcement && (
           <p className="text-xs text-gray-500 text-start truncate">
             {server.announcement}
@@ -150,60 +34,165 @@ const HomePage: React.FC<HomePageProps> = ({
         )}
       </div>
     </button>
-  );
+  ),
+);
+ServerCard.displayName = 'ServerCard';
 
-  return (
-    <div className="flex flex-1 flex-col">
-      <header className="bg-white shadow-sm">
-        <div className="flex items-center justify-between px-8 py-2">
-          <div className="flex items-center space-x-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="輸入群ID或群名稱"
-                className="w-48 h-6 px-2 pr-8 border border-gray-200 rounded text-sm focus:border-blue-500 focus:outline-none"
-              />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2">
-                <img
-                  src="/icon_widgetsearch.png"
-                  alt="search"
-                  className="w-4 h-4"
-                />
-              </button>
-            </div>
-          </div>
-          <div className="flex space-x-4 items-center">
-            <a
-              className="text-gray-600 hover:text-gray-900 text-sm cursor-pointer"
-              onClick={onOpenCreateServer}
-            >
-              創建語音群
-            </a>
+// ServerGrid Component
+interface ServerGridProps {
+  serverList: ServerList;
+  onServerSelect: (serverId: string) => void;
+}
+const ServerGrid: React.FC<ServerGridProps> = React.memo(
+  ({ serverList, onServerSelect }) => {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {Object.values(serverList).map((server) => (
+          <ServerCard
+            key={server.id}
+            server={server}
+            onServerSelect={onServerSelect}
+          />
+        ))}
+      </div>
+    );
+  },
+);
+ServerGrid.displayName = 'ServerGrid';
+
+// Header Component
+interface HeaderProps {
+  onSearch: (query: string) => void;
+  onCreateServer: () => void;
+}
+const Header: React.FC<HeaderProps> = React.memo(
+  ({ onSearch, onCreateServer }) => (
+    <header className="bg-white shadow-sm">
+      <div className="flex items-center justify-between px-8 py-2">
+        <div className="flex items-center space-x-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="輸入群ID或群名稱"
+              className="w-48 h-6 px-2 pr-8 border border-gray-200 rounded text-sm focus:border-blue-500 focus:outline-none"
+              onChange={(e) => onSearch(e.target.value)}
+            />
+            <Search className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           </div>
         </div>
-      </header>
-
-      <main className="flex flex-1 min-h-0 bg-gray-100">
-        <div className="flex flex-1 flex-col item-center space-y-6 p-8 overflow-y-auto">
-          <section className="mb-6">
-            <h2 className="text-lg font-bold mb-3">最近訪問</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {Object.values(recentVisits).map((item) => renderServer(item))}
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold mb-3">我的語音群</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {Object.values(myGroups).map((item) => renderServer(item))}
-            </div>
-          </section>
+        <div className="flex space-x-4 items-center">
+          <button
+            className="text-gray-600 hover:text-gray-900 text-sm"
+            onClick={onCreateServer}
+          >
+            創建語音群
+          </button>
         </div>
-      </main>
-    </div>
-  );
-};
+      </div>
+    </header>
+  ),
+);
+Header.displayName = 'Header';
 
+// HomePage Component
+interface HomePageProps {
+  onSelectServer: (serverId: string) => void;
+  onOpenCreateServer: () => void;
+}
+const HomePage: React.FC<HomePageProps> = React.memo(
+  ({ onSelectServer, onOpenCreateServer }) => {
+    // Redux
+    const user = useSelector((state: { user: User }) => state.user);
+    const serverList = useSelector(
+      (state: { serverList: ServerList }) => state.serverList,
+    );
+
+    // Search Control
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<ServerList>({});
+
+    useEffect(() => {
+      if (searchQuery) {
+        const results = Object.values(serverList)
+          .filter(
+            (server) =>
+              server.displayId?.toString() === searchQuery.trim() ||
+              server.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              calculateSimilarity(
+                server.name.toLowerCase(),
+                searchQuery.toLowerCase(),
+              ) > 0.6,
+          )
+          .sort((a, b) => {
+            const simA = calculateSimilarity(
+              a.name.toLowerCase(),
+              searchQuery.toLowerCase(),
+            );
+            const simB = calculateSimilarity(
+              b.name.toLowerCase(),
+              searchQuery.toLowerCase(),
+            );
+            return simB - simA;
+          })
+          .reduce((acc, server) => {
+            acc[server.id] = server;
+            return acc;
+          }, {} as ServerList);
+
+        setSearchResults(results);
+      }
+    }, [searchQuery]);
+
+    return (
+      <div className="flex flex-1 flex-col">
+        <Header
+          onSearch={(query: string) => setSearchQuery(query)}
+          onCreateServer={onOpenCreateServer}
+        />
+
+        <main className="flex flex-1 min-h-0 bg-gray-100">
+          <div className="flex flex-1 flex-col item-center space-y-6 p-8 overflow-y-auto">
+            {searchQuery ? (
+              <section>
+                <h2 className="text-lg font-bold mb-3">搜尋結果</h2>
+                {Object.keys(searchResults).length > 0 ? (
+                  <ServerGrid
+                    serverList={searchResults}
+                    onServerSelect={onSelectServer}
+                  />
+                ) : (
+                  <div>
+                    <p className="text-center text-gray-500 py-8">
+                      沒有找到相關的語音群
+                    </p>
+                  </div>
+                )}
+              </section>
+            ) : (
+              <>
+                <section className="mb-6">
+                  <h2 className="text-lg font-bold mb-3">推薦語音群</h2>
+                  <ServerGrid
+                    serverList={user.recommendedServers}
+                    onServerSelect={onSelectServer}
+                  />
+                </section>
+
+                <section>
+                  <h2 className="text-lg font-bold mb-3">我的語音群</h2>
+                  <ServerGrid
+                    serverList={user.joinedServers}
+                    onServerSelect={onSelectServer}
+                  />
+                </section>
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  },
+);
 HomePage.displayName = 'HomePage';
 
 export default HomePage;

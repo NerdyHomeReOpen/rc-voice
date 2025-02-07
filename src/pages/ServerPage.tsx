@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Volume2,
   Volume1,
@@ -22,11 +23,6 @@ import ChannelViewer from '@/components/ChannelViewer';
 import type { User, Server, Channel, Message, UserList } from '@/types';
 
 interface ServerPageProps {
-  user: User;
-  server: Server;
-  channels: Channel[];
-  messages: Message[];
-  users: UserList;
   onAddChannel: (serverId: string, channel: Channel) => void;
   onEditChannel: (
     serverId: string,
@@ -51,11 +47,6 @@ const getStoredBoolean = (key: string, defaultValue: boolean): boolean => {
 };
 
 const ServerPage: React.FC<ServerPageProps> = ({
-  user,
-  server,
-  channels,
-  messages,
-  users,
   onAddChannel,
   onEditChannel,
   onDeleteChannel,
@@ -64,21 +55,34 @@ const ServerPage: React.FC<ServerPageProps> = ({
   onOpenServerSetting,
   onOpenUserSetting,
 }) => {
+  // Redux
+  const user = useSelector((state: { user: User }) => state.user);
+  const server = useSelector((state: { server: Server }) => state.server);
+  const channels = useSelector(
+    (state: { channels: Channel[] }) => state.channels,
+  );
+  const messages = useSelector(
+    (state: { messages: Message[] }) => state.messages,
+  );
+  const users = useSelector(
+    (state: { serverUserList: UserList }) => state.serverUserList,
+  );
+
   // Volume Control
   const [volume, setVolume] = useState<number>(100);
   const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
   const volumeRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleCloseVolumeSlider = (event: MouseEvent) => {
-      if (
-        volumeRef.current &&
-        !volumeRef.current.contains(event.target as Node)
-      ) {
-        setShowVolumeSlider(false);
-      }
-    };
+  const handleCloseVolumeSlider = (event: MouseEvent) => {
+    if (
+      volumeRef.current &&
+      !volumeRef.current.contains(event.target as Node)
+    ) {
+      setShowVolumeSlider(false);
+    }
+  };
 
+  useEffect(() => {
     document.addEventListener('mousedown', handleCloseVolumeSlider);
     return () =>
       document.removeEventListener('mousedown', handleCloseVolumeSlider);
@@ -92,11 +96,9 @@ const ServerPage: React.FC<ServerPageProps> = ({
     mouseDownEvent.preventDefault();
     setIsResizing(true);
   }, []);
-
   const stopResizing = useCallback(() => {
     setIsResizing(false);
   }, []);
-
   const resize = useCallback(
     (mouseMoveEvent: MouseEvent) => {
       if (isResizing) {
@@ -160,7 +162,7 @@ const ServerPage: React.FC<ServerPageProps> = ({
         className="flex flex-col min-h-0 min-w-0 w-64 bg-white border-r text-sm"
         style={{ width: `${sidebarWidth}px` }}
       >
-        {/* Profile image and info */}
+        {/* Server image and info */}
         <div className="flex items-center justify-between p-2 border-b mb-4">
           <div className="flex items-center space-x-3">
             <img
@@ -176,7 +178,9 @@ const ServerPage: React.FC<ServerPageProps> = ({
                   alt="User Profile"
                   className="w-3.5 h-3.5 select-none"
                 />
-                <div className="text-xs text-gray-500">{server?.id ?? ''}</div>
+                <div className="text-xs text-gray-500">
+                  {server?.displayId ?? ''}
+                </div>
                 <img
                   src="/channel/member.png"
                   alt="User Profile"
@@ -199,18 +203,7 @@ const ServerPage: React.FC<ServerPageProps> = ({
           </div>
         </div>
         {/* Channel List */}
-        {channels && (
-          <ChannelViewer
-            user={user}
-            server={server}
-            channels={channels}
-            users={users}
-            onAddChannel={onAddChannel}
-            onEditChannel={onEditChannel}
-            onDeleteChannel={onDeleteChannel}
-            onJoinChannel={onJoinChannel}
-          />
-        )}
+        {channels && <ChannelViewer />}
       </div>
       {/* Resize Handle */}
       <div
@@ -226,17 +219,15 @@ const ServerPage: React.FC<ServerPageProps> = ({
           </div>
         )}
         {/* Messages Area */}
-        <div className="flex flex-[5] flex-col overflow-y-auto p-3 min-w-0 max-w-full">
-          {messages && (
-            <MessageViewer
-              messages={messages}
-              users={users}
-              server={server}
-              user={user}
-              notification={notification}
-            />
-          )}
-        </div>
+        {messages && (
+          <MessageViewer
+            messages={messages}
+            users={users}
+            server={server}
+            user={user}
+            notification={notification}
+          />
+        )}
         {/* Input Area */}
         <div className="flex flex-[1] p-3">
           <div className="flex flex-1 flex-row justify-flex-start p-1 border rounded-lg">
@@ -258,15 +249,11 @@ const ServerPage: React.FC<ServerPageProps> = ({
               />
             </button>
             <textarea
-              className={`w-full p-1 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500
-                
-                ${
-                  messageInput.length >= maxContentLength
-                    ? 'border-red-500'
-                    : ''
-                }`}
+              className={`w-full p-1 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                messageInput.length >= maxContentLength ? 'border-red-500' : ''
+              }`}
               rows={2}
-              // placeholder={isConnected ? "輸入訊息..." : "連接中..."}
+              placeholder={'輸入訊息...'}
               value={messageInput}
               onChange={(e) => {
                 const input = e.target.value;
@@ -295,9 +282,8 @@ const ServerPage: React.FC<ServerPageProps> = ({
                 setMessageInput((prev) => prev + text);
               }}
               maxLength={maxContentLength}
-              // disabled={!isConnected}
               aria-label="訊息輸入框"
-            />{' '}
+            />
             <div className="text-xs text-gray-400 self-end ml-2">
               {messageInput.length}/{maxContentLength}
             </div>
@@ -342,7 +328,7 @@ const ServerPage: React.FC<ServerPageProps> = ({
                 ) : (
                   <BellOff size={16} className="text-foreground" />
                 )}
-              </button>{' '}
+              </button>
               <div className="relative" ref={volumeRef}>
                 <button
                   className="p-1 hover:bg-gray-100 rounded"
@@ -371,18 +357,18 @@ const ServerPage: React.FC<ServerPageProps> = ({
                         value={volume}
                         onChange={(e) => setVolume(parseInt(e.target.value))}
                         className="h-24 -rotate-90 transform origin-center
-        appearance-none bg-transparent cursor-pointer
-        [&::-webkit-slider-runnable-track]:rounded-full
-        [&::-webkit-slider-runnable-track]:bg-gray-200
-        [&::-webkit-slider-runnable-track]:h-3
-        [&::-webkit-slider-thumb]:appearance-none
-        [&::-webkit-slider-thumb]:h-3
-        [&::-webkit-slider-thumb]:w-3
-        [&::-webkit-slider-thumb]:rounded-full
-        [&::-webkit-slider-thumb]:bg-blue-600
-        [&::-webkit-slider-thumb]:border-0
-        [&::-webkit-slider-thumb]:transition-all
-        [&::-webkit-slider-thumb]:hover:bg-blue-700"
+                          appearance-none bg-transparent cursor-pointer
+                          [&::-webkit-slider-runnable-track]:rounded-full
+                          [&::-webkit-slider-runnable-track]:bg-gray-200
+                          [&::-webkit-slider-runnable-track]:h-3
+                          [&::-webkit-slider-thumb]:appearance-none
+                          [&::-webkit-slider-thumb]:h-3
+                          [&::-webkit-slider-thumb]:w-3
+                          [&::-webkit-slider-thumb]:rounded-full
+                          [&::-webkit-slider-thumb]:bg-blue-600
+                          [&::-webkit-slider-thumb]:border-0
+                          [&::-webkit-slider-thumb]:transition-all
+                          [&::-webkit-slider-thumb]:hover:bg-blue-700"
                       />
                     </div>
                     <div className="text-center text-xs text-gray-500">

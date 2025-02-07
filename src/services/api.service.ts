@@ -1,5 +1,14 @@
 export const API_URL = "http://localhost:4500";
 
+interface RequestOptions {
+  headers?: Record<string, string>;
+  credentials?: RequestCredentials;
+}
+
+interface ApiRequestData {
+  [key: string]: any;
+}
+
 // Utility functions
 export const base64encode = (str: string): String => {
   try {
@@ -37,15 +46,24 @@ export const apiService = {
   },
 
   // POST request
-  post: async (endpoint: string, data: Record<string, any>) => {
+  post: async (endpoint: string, data: ApiRequestData, options?: RequestOptions) => {
     try {
+      const defaultHeaders = {
+        "Content-Type": "application/json",
+      };
+
+      const headers = {
+        ...defaultHeaders,
+        ...(options?.headers || {}),
+      };
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: headers,
+        credentials: options?.credentials || 'omit',
         body: JSON.stringify(data),
       });
+      
       return handleResponse(response);
     } catch (error: Error | any) {
       throw new Error(error.message || "提交資料失敗");

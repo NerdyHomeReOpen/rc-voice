@@ -1,18 +1,24 @@
-import { useState, useEffect } from 'react';
-import { io, Socket } from 'socket.io-client';
+'use client';
+
+import { createContext, useContext, useEffect, useState } from 'react';
+import { Socket, io } from 'socket.io-client';
 
 const WS_URL = 'ws://localhost:4500';
 
-interface WebSocketProps {
-  socket: Socket | null;
-  isConnected: boolean;
-  error: string | null;
+type SocketContextType = Socket | null;
+
+const SocketContext = createContext<SocketContextType>(null);
+
+export const useSocket = () => useContext(SocketContext);
+
+interface SocketProviderProps {
+  children: React.ReactNode;
 }
 
-export const useWebSocket = (): WebSocketProps => {
+export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [error, setError] = useState<string>('');
+  const [socket, setSocket] = useState<SocketContextType>(null);
 
   useEffect(() => {
     const socket: Socket = io(WS_URL, {
@@ -44,7 +50,7 @@ export const useWebSocket = (): WebSocketProps => {
     };
   }, []);
 
-  return { socket, isConnected, error };
+  return (
+    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+  );
 };
-
-export default useWebSocket;
