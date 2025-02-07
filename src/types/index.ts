@@ -1,6 +1,6 @@
 export interface User {
-  id: string; // UUID
-  name: string; // Display name
+  id: string;
+  name: string;
   account: string;
   password: string;
   gender: "Male" | "Female";
@@ -8,9 +8,9 @@ export interface User {
   level: number;
   createdAt: number;
   lastLoginAt?: number;
-  state: UserState; // ["online" | "dnd" | "idle" | "gn"]
+  state: UserState; 
   currentChannelId?: string;
-  friendIds: string[]; // NEW!! 
+  friendIds: string[];
 }
 
 export type UserState = "online" | "dnd" | "idle" | "gn";
@@ -28,6 +28,7 @@ export interface Server {
   level: number;
   userIds: string[];
   channelIds: string[];
+  lobbyId: string;
   createdAt: number;
   applications: Record<string, string>;
   permissions: Record<string, number>;

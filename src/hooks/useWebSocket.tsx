@@ -34,6 +34,10 @@ export const useWebSocket = (): WebSocketProps => {
       setError(error);
       console.log('Connect server error');
     });
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+      ('Disconnected from server');
+    });
 
     return () => {
       socket.disconnect();

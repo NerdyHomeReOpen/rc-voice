@@ -95,7 +95,9 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
     Record<string, boolean>
   >(
     channels.reduce((acc, channel) => {
-      if (channel.id) acc[channel.id] = true;
+      if (channel.id) {
+        acc[channel.id] = channel.isLobby ? false : true;
+      }
       return acc;
     }, {} as Record<string, boolean>),
   );
@@ -301,13 +303,14 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
         )}
 
         {/* Expanded Sections */}
-        {!expandedSections[channel.id] && channel.userIds.length > 0 && (
-          <div className="ml-6">
-            {Object.values(users)
-              .filter((user) => channel.userIds.includes(user.id))
-              .map((user) => renderUser(user))}
-          </div>
-        )}
+        {(channel.isLobby || !expandedSections[channel.id]) &&
+          channel.userIds.length > 0 && (
+            <div className="ml-6">
+              {Object.values(users)
+                .filter((user) => channel.userIds.includes(user.id))
+                .map((user) => renderUser(user))}
+            </div>
+          )}
       </div>
     );
   };

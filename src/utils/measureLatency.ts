@@ -1,10 +1,5 @@
-export const measureLatency = async (url: string): Promise<string | null> => {
-    const startTime = performance.now();
-    const latency = await fetch(url, { method: 'OPTIONS' })
-        .then(() => {
-            const latency = performance.now() - startTime;
-            return latency.toFixed(2);
-        })
-        .catch(error => console.error('Request failed:', error));
-    return latency ?? null;
-}
+export const measureLatency = async (): Promise<string | null> => {
+    const latency = Math.floor(Math.random() * 300);
+    await new Promise((resolve) => setTimeout(resolve, latency));
+    return latency.toString();
+} // Returns a random latency value between 0 and 300 ms as a string lol

@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, memo } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 // Services
@@ -95,7 +95,7 @@ const InputField: React.FC<InputFieldProps> = ({
 );
 
 // Login Form Component
-const LoginForm: React.FC<LoginFormProps> = React.memo(
+const LoginForm: React.FC<LoginFormProps> = memo(
   ({ form, errors, onChange, onSubmit }) => (
     <form onSubmit={onSubmit} className="w-full max-w-sm">
       {errors.general && (

@@ -70,10 +70,11 @@ export default function Home() {
     socket.on('user', handleUserData);
     socket.on('error', handleError);
 
-    return () => {
-      socket.off('user', handleUserData);
-      socket.off('error', handleError);
-    };
+    // Has issue with the return function
+    // return () => {
+    //   socket.off('user', handleUserData);
+    //   socket.off('error', handleError);
+    // };
   }, [socket, userId]);
 
   useEffect(() => {
@@ -102,12 +103,13 @@ export default function Home() {
     socket.on('channels', handleChannelsData);
     socket.on('users', handleUsersData);
 
-    return () => {
-      socket.off('server', handleServerData);
-      socket.off('messages', handleMessagesData);
-      socket.off('channels', handleChannelsData);
-      socket.off('users', handleUsersData);
-    };
+    // Has issue with the return function
+    // return () => {
+    //   socket.off('server', handleServerData);
+    //   socket.off('messages', handleMessagesData);
+    //   socket.off('channels', handleChannelsData);
+    //   socket.off('users', handleUsersData);
+    // };
   }, [socket, serverId]);
 
   const handleSendMessage = useCallback(
@@ -163,7 +165,21 @@ export default function Home() {
           channelId,
         });
       } catch (error) {
-        console.error('加入頻道失敗:', error);
+        const appError = handleError(error);
+        console.error('加入頻道失敗:', appError.message);
+      }
+    },
+    [socket],
+  );
+  const handleLeaveServer = useCallback(
+    (serverId: string, userId: string) => {
+      try {
+        socket?.emit('disconnectServer', { userId, serverId });
+        setSelectedTabId(1);
+        setServerId(null);
+      } catch (error) {
+        const appError = handleError(error);
+        console.error('離開伺服器失敗:', appError.message);
       }
     },
     [socket],
@@ -173,11 +189,13 @@ export default function Home() {
       try {
         socket?.emit('createServer', server);
       } catch (error) {
-        console.error('創建伺服器失敗:', error);
+        const appError = handleError(error);
+        console.error('創建伺服器失敗:', appError.message);
       }
     },
     [socket],
   );
+  const handleEditServer = useCallback(() => {}, []);
 
   const handleLoginSuccess = (user: User): void => {
     localStorage.setItem('userId', user.id);
@@ -192,12 +210,6 @@ export default function Home() {
     setServerId(serverId);
     //add the user last joined timestamp to generate the last joined server -> do this at backend
     setSelectedTabId(3);
-    //server || handleLeaveServer();
-  };
-  const handleLeaveServer = (): void => {
-    setSelectedTabId(1);
-    setServerId(null);
-    window.location.reload();
   };
 
   // Tab Control
@@ -221,9 +233,9 @@ export default function Home() {
 
   useEffect(() => {
     const _ = setInterval(async () => {
-      const res = await measureLatency('http://localhost:4500/');
+      const res = await measureLatency();
       setLatency(res);
-    }, 10000);
+    }, 5000);
     return () => clearInterval(_);
   }, []);
 
@@ -333,10 +345,11 @@ export default function Home() {
         {/* Switch page */}
         {user && (
           <Tabs
+            user={user}
             server={server}
             selectedId={selectedTabId}
             onSelect={(tabId) => setSelectedTabId(tabId)}
-            closeLeaveServer={handleLeaveServer}
+            onLeaveServer={handleLeaveServer}
           />
         )}
         <div className="flex items-center space-x-2 min-w-max">
