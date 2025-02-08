@@ -6,7 +6,7 @@ import Modal from '@/components/Modal';
 
 // Services
 import { serverService } from '@/services/server.service';
-import { ServerList } from '@/types';
+import { ServerList, User } from '@/types';
 
 // Validation
 const validateName = (name: string): string => {
@@ -42,14 +42,14 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const serverList = useSelector(
       (state: { serverList: ServerList }) => state.serverList,
     );
+    const userId = useSelector((state: { user: User }) => state.user.id);
 
     const maxGroups = 3; // 最多可創建的群組數量
-    const userOwnedServerCount = Object.values(serverList).reduce(
-      // 使用者擁有的群組數量 ( 6 = 群組擁有者 )
+    console.log('serverList111', serverList);
+    const userOwnedServerCount = Object.values(serverList || {}).reduce(
+      // 使用者擁有的群組數量
       (count, server) => {
-        const hasOwnerPermission = Object.values(server.permissions).some(
-          (permission) => permission === 6,
-        );
+        const hasOwnerPermission = server.ownerId === userId;
         return count + (hasOwnerPermission ? 1 : 0);
       },
       0,

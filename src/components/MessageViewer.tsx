@@ -37,7 +37,7 @@ const groupMessages = (messages: Message[]): MessageGroup[] => {
       acc.push({
         id: message.id,
         senderId: message.senderId,
-        timestamp: message.timestamp.toString(),
+        timestamp: message.createdAt.toString(),
         messages: [message],
         type: message.type,
       });

@@ -45,6 +45,7 @@ interface ServerGridProps {
 }
 const ServerGrid: React.FC<ServerGridProps> = React.memo(
   ({ serverList, onServerSelect }) => {
+    console.log('serverList', serverList);
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {Object.values(serverList).map((server) => (
@@ -113,9 +114,12 @@ const HomePage: React.FC<HomePageProps> = React.memo(
 
     useEffect(() => {
       if (searchQuery) {
+        console.log('serverLis111t', serverList);
         const results = Object.values(serverList)
           .filter(
             (server) =>
+              //TODO: id之後不支援
+              server.id?.toString() === searchQuery.trim() ||
               server.displayId?.toString() === searchQuery.trim() ||
               server.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
               calculateSimilarity(
@@ -142,6 +146,8 @@ const HomePage: React.FC<HomePageProps> = React.memo(
         setSearchResults(results);
       }
     }, [searchQuery]);
+
+    console.log('user', user);
 
     return (
       <div className="flex flex-1 flex-col">

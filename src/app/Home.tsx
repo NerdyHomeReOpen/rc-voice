@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { Minus, Square, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 // Types
@@ -9,15 +9,15 @@ import type {
   Channel,
   Message,
   Server,
+  ServerList,
   User,
   UserList,
-  ServerList,
 } from '@/types';
 
 // Pages
 import AuthPage from '@/pages/AuthPage';
-import HomePage from '@/pages/HomePage';
 import FriendPage from '@/pages/FriendPage';
+import HomePage from '@/pages/HomePage';
 import ServerPage from '@/pages/ServerPage';
 
 // Modals
@@ -28,21 +28,21 @@ import Tabs from '@/components/Tabs';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 // Utils
-import { measureLatency } from '@/utils/measureLatency';
 import { standardizedError } from '@/utils/errorHandler';
+import { measureLatency } from '@/utils/measureLatency';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 
 // Redux
-import store from '@/redux/store';
 import { setChannels } from '@/redux/channelsSlice';
 import { setFriendList } from '@/redux/friendListSlice';
 import { setMessages } from '@/redux/messagesSlice';
-import { setServer } from '@/redux/serverSlice';
 import { setServerList } from '@/redux/serverListSlice';
-import { setUser } from '@/redux/userSlice';
+import { setServer } from '@/redux/serverSlice';
 import { setServerUserList } from '@/redux/serverUserListSlice';
+import store from '@/redux/store';
+import { setUser } from '@/redux/userSlice';
 
 const STATE_ICON = {
   online: '/online.png',
@@ -91,11 +91,21 @@ const Home = () => {
       console.log('Recieve serverlist data: ', serverList);
       store.dispatch(setServerList(serverList));
     };
+    const handleUserPresence = (userPresence: any) => {
+      console.log('Recieve user presence: ', userPresence);
+      const currentUser = store.getState().user;
+      if (!currentUser) return;
+      handleUserData({
+        ...currentUser,
+        presence: userPresence,
+      });
+    }
 
     socket.emit('connectUser', { userId });
     socket.on('user', handleUserData);
     socket.on('friendList', handleFriendData);
     socket.on('serverList', handleServerListData);
+    socket.on('user_presence', handleUserPresence);
 
     // Has issue with the return function
     // return () => {
@@ -110,6 +120,8 @@ const Home = () => {
     const handleServerData = (server: Server) => {
       console.log('Recieve server data: ', server);
       store.dispatch(setServer(server));
+      (server as any)?.channels &&
+        handleChannelsData((server as any).channels as Channel[]);
     };
     const handleMessagesData = (messages: Message[]) => {
       console.log('Recieve messages data: ', messages);
@@ -129,14 +141,28 @@ const Home = () => {
     const handlePlayLeaveSound = () => {
       leaveSoundRef.current?.play();
     };
+    const handleServerState = (serverStateObj: any) => {
+      console.log('Recieve server state: ', serverStateObj);
+      const currentServer = store.getState().server;
+      if (!currentServer) return;
+      handleServerData({
+        ...currentServer,
+        channels: serverStateObj.channels || currentServer.channels,
+        members: serverStateObj.members || currentServer.members,
+        onlineMembers: serverStateObj.onlineMembers || currentServer.onlineMembers,
+      });
+    }
 
     socket.emit('connectServer', { userId, serverId });
     socket.on('server', handleServerData);
     socket.on('messages', handleMessagesData);
     socket.on('channels', handleChannelsData);
     socket.on('users', handleUsersData);
+
     socket.on('channel_join', handlePlayJoinSound);
     socket.on('channel_leave', handlePlayLeaveSound);
+
+    socket.on('server_state', handleServerState);
 
     // Has issue with the return function
     // return () => {
@@ -231,7 +257,8 @@ const Home = () => {
       try {
         socket?.emit('disconnectServer', { userId, serverId });
         socket?.on('error', handleError);
-        // setServerId(null);
+        setServerId(null);
+        setSelectedTabId(1);
       } catch (error) {
         const appError = standardizedError(error);
         console.error('離開伺服器失敗:', appError.message);

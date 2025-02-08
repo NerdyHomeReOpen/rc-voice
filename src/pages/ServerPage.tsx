@@ -51,13 +51,21 @@ const ServerPage: React.FC<ServerPageProps> = ({}) => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);
+
   const channels = useSelector(
     (state: { channels: Channel[] }) => state.channels,
   );
-  const messages = useSelector(
-    (state: { messages: Message[] }) => state.messages,
+
+  const currentChannel = channels.find((channel) =>
+    channel.currentMembers.find((member) => member.userId === user.id),
   );
   const serverUserList = useSelector(
+    (state: { serverUserList: UserList }) => state.serverUserList,
+  );
+
+  const [messages, setMessages] = useState<Message[]>(currentChannel?.messages || []);
+
+  const users = useSelector(
     (state: { serverUserList: UserList }) => state.serverUserList,
   );
 
@@ -206,7 +214,7 @@ const ServerPage: React.FC<ServerPageProps> = ({}) => {
                   className="w-3.5 h-3.5 select-none"
                 />
                 <div className="text-xs text-gray-500">
-                  {server?.displayId ?? ''}
+                  {server?.id ?? ''}
                 </div>
                 <img
                   src="/channel/member.png"
@@ -214,7 +222,7 @@ const ServerPage: React.FC<ServerPageProps> = ({}) => {
                   className="w-3.5 h-3.5 select-none"
                 />
                 <div className="text-xs text-gray-500 select-none">
-                  {Object.keys(serverUserList).length ?? ''}
+                  {server?.onlineMembers?.length ?? ''}
                 </div>
 
                 {server.permissions?.[user.id] >= 5 && (

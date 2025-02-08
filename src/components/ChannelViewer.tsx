@@ -1,15 +1,14 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import {
-  Plus,
-  Minus,
   Dot,
-  House,
-  MoreVertical,
   Edit,
+  House,
+  Minus,
+  MoreVertical,
+  Plus,
   Trash,
 } from 'lucide-react';
-import { Dialog } from 'radix-ui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 // Types
 import type { Channel, Server, User, UserList } from '@/types';
@@ -189,7 +188,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
 });
 
 interface ChannelTabProps {
-  channel: Channel;
+  channel: any;
 }
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   // Redux
@@ -227,6 +226,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
     [],
   );
 
+  console.log('channel', channel);
+
   return (
     <div key={channel.id}>
       {/* Channel View */}
@@ -244,7 +245,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
             </div>
             <span className={'text-[#ff0000]'}>{channel.name}</span>
             <span className="ml-1 text-gray-500 text-sm">
-              {`(${channel.userIds.length})`}
+              {`(${channel.currentMembers.length})`}
             </span>
           </div>
         </div>
@@ -284,7 +285,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
             <span className={`truncate`}>{channel.name}</span>
             <span className="ml-1 text-gray-500 text-sm">
               {channel.permission !== 'readonly' &&
-                `(${channel.userIds.length})`}
+                `(${channel.currentMembers.length})`}
             </span>
           </div>
           <button
@@ -302,10 +303,10 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
       )}
 
       {/* Expanded Sections */}
-      {(channel.isLobby || expanded) && channel.userIds.length > 0 && (
+      {(channel.isLobby || expanded) && channel.currentMembers.length > 0 && (
         <div className="ml-6">
-          {channel.userIds.map((userId) => (
-            <UserTab key={userId} user={serverUserList[userId]} />
+          {channel.currentMembers.map((member: any) => (
+            <UserTab key={member.id} member={member} />
           ))}
         </div>
       )}
@@ -352,10 +353,11 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
 });
 
 interface UserTabProps {
-  user: User;
+  member: any;
 }
-const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
+const UserTab: React.FC<UserTabProps> = React.memo(({ member }) => {
   // Redux
+
   const server = useSelector((state: { server: Server }) => state.server);
 
   // Context Menu Control
@@ -365,8 +367,9 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
   });
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
 
-  const userPermission = server.permissions[user.id] ?? 1; // ERROR: Sometime user is undefined and it will throw an error
-  const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
+  const userInfo = member.user;
+  const userPermission = member.permission || 1; // ERROR: Sometime _user is undefined and it will throw an error
+  const userLevel = Math.min(56, Math.ceil(userInfo.level / 5)); // 56 is max level
 
   const [floatingBlock, setFloatingBlock] = useState<FloatingBlockState>({
     visible: false,
@@ -407,12 +410,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
   }, [floatingBlock.visible, floatingBlock.userId]);
 
   return (
-    <div key={user.id}>
+    <div key={userInfo.id}>
       {/* User View */}
       {/* 使用者資訊 block */}
       {floatingBlock.visible && (
         <UserInfoFloatingBlock
-          user={user}
+          user={userInfo}
           server={server}
           style={{
             left: floatingBlock.x,
@@ -424,14 +427,14 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
       <div
         className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
         data-user-block
-        data-user-id={user.id}
+        data-user-id={userInfo.id}
         onDoubleClick={(e) => {
-          if (!floatingBlock.visible || floatingBlock.userId !== user.id) {
+          if (!floatingBlock.visible || floatingBlock.userId !== userInfo.id) {
             setFloatingBlock({
               visible: true,
               x: e.clientX,
               y: e.clientY,
-              userId: user.id,
+              userId: userInfo.id,
             });
           }
         }}
@@ -447,13 +450,14 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
             className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center mr-1`}
           >
             <img
-              src={`/channel/${user.gender}_${userPermission}.png`}
-              alt={`${user.gender}_${userPermission}`}
+              src={`/channel/${userInfo.gender}_${userPermission}.png`}
+              alt={`${userInfo.gender}_${userPermission}`}
               className="select-none"
             />
           </div>
-          <span className="truncate">{user.name}</span>
-          {user.level > 1 && (
+          <span className="truncate">{userInfo.name}</span>
+
+          {userInfo.level > 1 && (
             <div
               className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
             >
@@ -465,7 +469,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
             </div>
           )}
         </div>
-        {user.id == store.getState().user?.id && (
+        {userInfo.id == store.getState().user?.id && (
           <div
             className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
           >

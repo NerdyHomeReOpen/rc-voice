@@ -129,7 +129,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                     <label className="w-20 text-right text-sm">ID</label>
                     <input
                       type="text"
-                      value={server.displayId}
+                      value={server.displayId || server.id}
                       className="w-32 p-1 border rounded text-sm"
                       disabled
                     />

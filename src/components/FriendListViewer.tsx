@@ -53,10 +53,9 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(
             </div>
             <span className={`truncate`}>{tab.name}</span>
             <span className="ml-1 text-gray-500 text-sm">
-              {`(${
-                tab.friendIds.filter((friendId) => friendList[friendId]).length
-              })`}
+              {`(${tab.friends?.length || 0})`}
             </span>
+
           </div>
           <button
             className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
@@ -70,10 +69,10 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(
         </div>
 
         {/* Expanded Sections */}
-        {expanded && tab.friendIds && (
+        {expanded && tab.friends && (
           <div className="ml-6">
-            {tab.friendIds.map((friendId) => (
-              <FriendCard key={friendId} friend={friendList[friendId]} />
+            {tab.friends.map((friend) => (
+              <FriendCard key={friend.id} friend={friend} />
             ))}
           </div>
         )}
@@ -133,11 +132,11 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(() => {
   const friendList = useSelector(
     (state: { friendList: UserList }) => state.friendList,
   );
-  const tabs = user.friendGroups.map((friendGroup) => {
+  const tabs = user.friendships.map((friendGroup) => {
     return {
       id: friendGroup.id,
       name: friendGroup.name,
-      friendIds: friendGroup.friendIds,
+      friends: friendGroup.friends,
     };
   });
 

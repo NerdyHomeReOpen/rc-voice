@@ -162,6 +162,7 @@ const FriendPage = () => {
     };
   }, [resize, stopResizing]);
 
+  console.log('user123123', user);
   const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
 
   return (
