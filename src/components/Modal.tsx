@@ -58,6 +58,7 @@ const Modal = memo(
                     onClick={() => {
                       setActiveTab(tab.id);
                       if (onSelectTab) onSelectTab(tab);
+                      // tab.onClick(); // Can use this instead of onSelectTab
                     }}
                   >
                     {tab.label}

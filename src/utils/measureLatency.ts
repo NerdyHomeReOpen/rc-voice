@@ -1,5 +1,7 @@
 export const measureLatency = async (): Promise<string | null> => {
-    const latency = Math.floor(Math.random() * 300);
-    await new Promise((resolve) => setTimeout(resolve, latency));
+    let latency = Date.now().valueOf();
+    await fetch('http://localhost:4500').then(() => {
+        latency = Date.now().valueOf() - latency;
+    });
     return latency.toString();
-} // Returns a random latency value between 0 and 300 ms as a string lol
+}

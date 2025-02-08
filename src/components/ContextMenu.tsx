@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 // Types
-import { ContextMenuItem } from '../types';
+import { ContextMenuItem } from '@/types';
 
 interface ContextMenuProps {
   items: ContextMenuItem[];
@@ -11,17 +11,19 @@ interface ContextMenuProps {
 }
 const ContextMenu: React.FC<ContextMenuProps> = React.memo(
   ({ onClose, x, y, items }) => {
+    // Ref
+    const ref = React.useRef<HTMLDivElement>(null);
+
     useEffect(() => {
       const handleClick = (e: MouseEvent) => {
-        if (!e.target) return;
-        const target = e.target as HTMLElement;
-        if (!target.closest('.fixed')) {
-          onClose();
-        }
+        if (!ref.current?.contains(e.target as Node)) onClose();
       };
+
       window.addEventListener('click', handleClick);
+      // window.addEventListener('contextmenu', handleClick);
       return () => {
         window.removeEventListener('click', handleClick);
+        // window.addEventListener('contextmenu', handleClick);
       };
     }, [onClose]);
 
@@ -29,6 +31,7 @@ const ContextMenu: React.FC<ContextMenuProps> = React.memo(
       <div
         className="fixed bg-white shadow-lg rounded border py-1 z-50"
         style={{ top: y, left: x }}
+        ref={ref}
       >
         {items.map((item, index) => (
           <button

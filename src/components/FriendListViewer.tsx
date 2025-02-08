@@ -12,7 +12,10 @@ import {
 } from 'lucide-react';
 
 // Types
-import type { User, UserList } from '@/types';
+import type { FriendCategory, User, UserList } from '@/types';
+
+// Components
+import BadgeViewer from '@/components/BadgeViewer';
 
 interface ContextMenuPosState {
   x: number;
@@ -20,66 +23,56 @@ interface ContextMenuPosState {
 }
 
 interface FriendGroupProps {
-  friendList: UserList;
-  tab: {
-    id: string;
-    name: string;
-    friendIds: string[];
-  };
+  category: FriendCategory;
 }
-const FriendGroup: React.FC<FriendGroupProps> = React.memo(
-  ({ friendList, tab }) => {
-    // Expanded Control
-    const [expanded, setExpanded] = useState<boolean>(true);
+const FriendGroup: React.FC<FriendGroupProps> = React.memo(({ category }) => {
+  // Expanded Control
+  const [expanded, setExpanded] = useState<boolean>(true);
 
-    return (
-      <div key={tab.id} className="mb">
-        {/* Tab View */}
-        <div
-          className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
-          onDoubleClick={() => {}} // Open Chat Maybe?
-          onContextMenu={(e) => {
-            e.stopPropagation();
+  return (
+    <div key={category.id} className="mb">
+      {/* Tab View */}
+      <div
+        className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
+        onDoubleClick={() => {}} // Open Chat Maybe?
+        onContextMenu={(e) => {
+          e.preventDefault();
+          // Open Context Menu
+        }}
+      >
+        <div className="flex items-center flex-1 min-w-0">
+          <div
+            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 cursor-pointer`}
+            onClick={() => setExpanded((prevExpanded) => !prevExpanded)}
+          >
+            {expanded ? <Minus size={12} /> : <Plus size={12} />}
+          </div>
+          <span className={`truncate`}>{category.name}</span>
+          <span className="ml-1 text-gray-500 text-sm">
+            {`(${category.friends?.length || 0})`}
+          </span>
+        </div>
+        <button
+          className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
+          onClick={(e) => {
             e.preventDefault();
-            // Open Context Menu
           }}
         >
-          <div className="flex items-center flex-1 min-w-0">
-            <div
-              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 cursor-pointer`}
-              onClick={() => setExpanded((prevExpanded) => !prevExpanded)}
-            >
-              {expanded ? <Minus size={12} /> : <Plus size={12} />}
-            </div>
-            <span className={`truncate`}>{tab.name}</span>
-            <span className="ml-1 text-gray-500 text-sm">
-              {`(${tab.friends?.length || 0})`}
-            </span>
-
-          </div>
-          <button
-            className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            <MoreVertical size={14} />
-          </button>
-        </div>
-
-        {/* Expanded Sections */}
-        {expanded && tab.friends && (
-          <div className="ml-6">
-            {tab.friends.map((friend) => (
-              <FriendCard key={friend.id} friend={friend} />
-            ))}
-          </div>
-        )}
+          <MoreVertical size={14} />
+        </button>
       </div>
-    );
-  },
-);
+
+      {/* Expanded Sections */}
+      {expanded && category.friends && (
+        <div className="ml-6">
+          {category.friends.map((friend) => (
+            <FriendCard key={friend.id} friend={friend} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
 
 interface FriendCardProps {
   friend: User;
@@ -87,7 +80,8 @@ interface FriendCardProps {
 const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   if (!friend) return <></>;
 
-  const userLevel = Math.min(56, Math.ceil(friend.level / 5)); // 56 is max level
+  const friendLevel = Math.min(56, Math.ceil(friend.level / 5)); // 56 is max level
+
   return (
     <div key={friend.id}>
       {/* User View */}
@@ -97,8 +91,8 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
             className={`w-14 h-14 bg-gray-200 rounded-sm flex items-center justify-center mr-1`}
           >
             <img
-              src={friend.avatar ?? '/pfp/default.png'}
-              alt={friend.avatar ?? '/pfp/default.png'}
+              src={friend.avatarUrl ?? '/pfp/default.png'}
+              alt={`${friend.name} Avatar`}
               className="select-none"
             />
           </div>
@@ -109,10 +103,15 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
                 className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
               >
                 <img
-                  src={`/usergrade_${userLevel}.png`}
-                  alt={`/usergrade_${userLevel}`}
+                  src={`/usergrade_${friendLevel}.png`}
+                  alt={`User Grade ${friendLevel}`}
                   className="select-none"
                 />
+              </div>
+              <div className="flex items-center space-x-1 ml-2 gap-1">
+                {friend.badges?.length > 0 && (
+                  <BadgeViewer badges={friend.badges} maxDisplay={3} />
+                )}
               </div>
             </div>
             <div className="flex items-center flex-1 min-w-0 ">
@@ -125,42 +124,32 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   );
 });
 
-interface FriendListViewerProps {}
-const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(() => {
+const FriendListViewer: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
-  const friendList = useSelector(
-    (state: { friendList: UserList }) => state.friendList,
-  );
-  const tabs = user.friendships.map((friendGroup) => {
-    return {
-      id: friendGroup.id,
-      name: friendGroup.name,
-      friends: friendGroup.friends,
-    };
-  });
 
   // Search Control
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<UserList>({});
+  const [searchResults, setSearchResults] = useState<FriendCategory[]>([]);
 
   useEffect(() => {
+    const userFriendCategories = user.friendCategories || [];
     if (searchQuery) {
-      const getResults = (friendList: UserList) => {
-        return Object.values(friendList)
-          .filter((friend) =>
+      const getResults = (
+        friendCategories: FriendCategory[],
+      ): FriendCategory[] => {
+        return friendCategories.map((category) => ({
+          ...category,
+          friends: category.friends?.filter((friend) =>
             friend.name.toLowerCase().includes(searchQuery.toLowerCase()),
-          )
-          .reduce((acc, friend) => {
-            acc[friend.id] = friend;
-            return acc;
-          }, {} as UserList);
+          ),
+        }));
       };
-      setSearchResults(getResults(friendList));
+      setSearchResults(getResults(userFriendCategories));
     } else {
-      setSearchResults(friendList);
+      setSearchResults(userFriendCategories);
     }
-  }, [searchQuery, friendList]);
+  }, [searchQuery, user]);
 
   return (
     <>
@@ -188,7 +177,6 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(() => {
       <div
         className="p-2 flex items-center justify-between text-gray-400 text-xs select-none"
         onContextMenu={(e) => {
-          e.stopPropagation();
           e.preventDefault();
           //   setContentMenuPos({ x: e.pageX, y: e.pageY });
           //   setShowContextMenu2(true);
@@ -197,8 +185,8 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(() => {
         所有好友
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
-        {tabs.map((tab) => (
-          <FriendGroup key={tab.id} friendList={searchResults} tab={tab} />
+        {searchResults.map((category) => (
+          <FriendGroup key={category.id} category={category} />
         ))}
       </div>
 

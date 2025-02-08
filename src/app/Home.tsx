@@ -5,14 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 // Types
-import type {
-  Channel,
-  Message,
-  Server,
-  ServerList,
-  User,
-  UserList,
-} from '@/types';
+import type { Presence, Server, User } from '@/types';
 
 // Pages
 import AuthPage from '@/pages/AuthPage';
@@ -21,28 +14,22 @@ import HomePage from '@/pages/HomePage';
 import ServerPage from '@/pages/ServerPage';
 
 // Modals
-import CreateServerModal from '@/modals/CreateServerModal';
 
 // Components
 import Tabs from '@/components/Tabs';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 // Utils
-import { standardizedError } from '@/utils/errorHandler';
 import { measureLatency } from '@/utils/measureLatency';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 
 // Redux
-import { setChannels } from '@/redux/channelsSlice';
-import { setFriendList } from '@/redux/friendListSlice';
-import { setMessages } from '@/redux/messagesSlice';
-import { setServerList } from '@/redux/serverListSlice';
-import { setServer } from '@/redux/serverSlice';
-import { setServerUserList } from '@/redux/serverUserListSlice';
 import store from '@/redux/store';
+import { clearServer, setServer } from '@/redux/serverSlice';
 import { setUser } from '@/redux/userSlice';
+import { clearSessionToken } from '@/redux/sessionTokenSlice';
 
 const STATE_ICON = {
   online: '/online.png',
@@ -52,6 +39,9 @@ const STATE_ICON = {
 } as const;
 
 const Home = () => {
+  // Socket Control
+  const socket = useSocket();
+
   // Sound Control
   const joinSoundRef = useRef<HTMLAudioElement | null>(null);
   const leaveSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -61,236 +51,88 @@ const Home = () => {
     leaveSoundRef.current = new Audio('/sounds/leave.mp3');
   }, []);
 
-  // Authenticate Control
-  const [serverId, setServerId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const urlParm = new URLSearchParams(window.location.search);
-    const serverId = urlParm.get('serverId');
-    const userId = localStorage.getItem('userId') ?? '';
-    setUserId(userId);
-    setServerId(serverId ?? '');
-  }, []);
-
-  // Socket Control
-  const socket = useSocket();
-
-  useEffect(() => {
-    if (!socket || !userId) return;
-
-    const handleUserData = (user: User) => {
-      console.log('Recieve user data: ', user);
-      store.dispatch(setUser(user));
-    };
-    const handleFriendData = (friendList: UserList) => {
-      console.log('Recieve friend list data: ', friendList);
-      store.dispatch(setFriendList(friendList));
-    };
-    const handleServerListData = (serverList: ServerList) => {
-      console.log('Recieve serverlist data: ', serverList);
-      store.dispatch(setServerList(serverList));
-    };
-    const handleUserPresence = (userPresence: any) => {
-      console.log('Recieve user presence: ', userPresence);
-      const currentUser = store.getState().user;
-      if (!currentUser) return;
-      handleUserData({
-        ...currentUser,
-        presence: userPresence,
-      });
-    }
-
-    socket.emit('connectUser', { userId });
-    socket.on('user', handleUserData);
-    socket.on('friendList', handleFriendData);
-    socket.on('serverList', handleServerListData);
-    socket.on('user_presence', handleUserPresence);
-
-    // Has issue with the return function
-    // return () => {
-    //   socket.off('user', handleUserData);
-    //   socket.off('error', handleError);
-    // };
-  }, [socket, userId]);
-
-  useEffect(() => {
-    if (!socket || !serverId) return;
-
-    const handleServerData = (server: Server) => {
-      console.log('Recieve server data: ', server);
-      store.dispatch(setServer(server));
-      (server as any)?.channels &&
-        handleChannelsData((server as any).channels as Channel[]);
-    };
-    const handleMessagesData = (messages: Message[]) => {
-      console.log('Recieve messages data: ', messages);
-      store.dispatch(setMessages(messages));
-    };
-    const handleChannelsData = (channels: Channel[]) => {
-      console.log('Recieve channels data: ', channels);
-      store.dispatch(setChannels(channels));
-    };
-    const handleUsersData = (userList: UserList) => {
-      console.log('Recieve server userlist data: ', userList);
-      store.dispatch(setServerUserList(userList));
-    };
-    const handlePlayJoinSound = () => {
-      joinSoundRef.current?.play();
-    };
-    const handlePlayLeaveSound = () => {
-      leaveSoundRef.current?.play();
-    };
-    const handleServerState = (serverStateObj: any) => {
-      console.log('Recieve server state: ', serverStateObj);
-      const currentServer = store.getState().server;
-      if (!currentServer) return;
-      handleServerData({
-        ...currentServer,
-        channels: serverStateObj.channels || currentServer.channels,
-        members: serverStateObj.members || currentServer.members,
-        onlineMembers: serverStateObj.onlineMembers || currentServer.onlineMembers,
-      });
-    }
-
-    socket.emit('connectServer', { userId, serverId });
-    socket.on('server', handleServerData);
-    socket.on('messages', handleMessagesData);
-    socket.on('channels', handleChannelsData);
-    socket.on('users', handleUsersData);
-
-    socket.on('channel_join', handlePlayJoinSound);
-    socket.on('channel_leave', handlePlayLeaveSound);
-
-    socket.on('server_state', handleServerState);
-
-    // Has issue with the return function
-    // return () => {
-    //   socket.off('server', handleServerData);
-    //   socket.off('messages', handleMessagesData);
-    //   socket.off('channels', handleChannelsData);
-    //   socket.off('users', handleUsersData);
-    // };
-  }, [socket, serverId]);
-
-  // Redux Control
+  // Redux
+  const sessionId = useSelector(
+    (state: { sessionToken: string }) => state.sessionToken,
+  );
   const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);
+
+  useEffect(() => {
+    const token =
+      store.getState().sessionToken ?? localStorage.getItem('sessionToken');
+    if (!socket || !token) return;
+    console.log('Connect to socket with token:', token);
+    socket?.emit('connectUser', { sessionId: token });
+  }, [socket, sessionId]);
+
+  useEffect(() => {
+    if (!socket || !sessionId) return;
+    const handleConnectUser = (user: any) => {
+      console.log('User connected: ', user);
+      store.dispatch(setUser(user));
+    };
+    const handleDisconnectUser = () => {
+      console.log('User disconnected');
+      store.dispatch(clearSessionToken());
+    };
+    const handleConnectServer = (server: Server) => {
+      console.log('Server connected: ', server);
+      socket.emit('connectChannel', { sessionId, channelId: server.lobbyId });
+      store.dispatch(setServer(server));
+    };
+    const handleDisconnectServer = () => {
+      console.log('Server disconnected');
+      store.dispatch(clearServer());
+    };
+    const handleConnectChannel = () => {
+      console.log('Channel connected');
+    };
+    const handleDisconnectChannel = () => {
+      console.log('Channel disconnected');
+    };
+    const handleUpdateUserPresence = (userPresence: Presence) => {
+      console.log('User presence update: ', userPresence);
+      store.dispatch(
+        setUser({
+          ...user,
+          presence: userPresence,
+        }),
+      );
+    };
+    const handleServerUpdate = (server: Server) => {
+      console.log('Server update: ', server);
+      store.dispatch(setServer(server));
+    };
+
+    socket.on('connectUser', handleConnectUser);
+    socket.on('disconnectUser', handleDisconnectUser);
+    socket.on('connectServer', handleConnectServer);
+    socket.on('disconnectServer', handleDisconnectServer);
+    socket.on('connectChannel', handleConnectChannel);
+    socket.on('disconnectChannel', handleDisconnectChannel);
+    socket.on('userPresenceUpdate', handleUpdateUserPresence);
+    socket.on('serverUpdate', handleServerUpdate);
+
+    return () => {
+      socket.off('connectUser', handleConnectUser);
+      socket.off('disconnectUser', handleDisconnectUser);
+      socket.off('connectServer', handleConnectServer);
+      socket.off('disconnectServer', handleDisconnectServer);
+      socket.off('connectChannel', handleConnectChannel);
+      socket.off('disconnectChannel', handleDisconnectChannel);
+      socket.off('userPresenceUpdate', handleUpdateUserPresence);
+      socket.off('serverUpdate', handleServerUpdate);
+    };
+  }, [sessionId, user, server]);
 
   useEffect(() => {
     if (server) setSelectedTabId(3);
     else setSelectedTabId(1);
   }, [server]);
 
-  const handleError = (_error: unknown) => {
-    const error = standardizedError(_error);
-    alert(`錯誤: ${error.message}`);
-    //TODO: Backend need to handle each type of error, not just depend on the message string //Done
-    if (error.part === 'CONNECTUSER') {
-      localStorage.removeItem('userId');
-      setUserId(null);
-      return;
-    }
-    if (error.part === 'CONNECTSERVER') {
-      if (error.tag === 'SERVER_ERROR' && error.status_code === 404) {
-        setServerId(null);
-        setSelectedTabId(1);
-        return;
-      }
-    }
-  };
-
-  // const handleAddChannel = useCallback(
-  //   (serverId: string, channel: Channel): void => {
-  //     try {
-  //       socket?.emit('addChannel', { serverId, channel });
-  //       socket?.on('error', handleError);
-  //     } catch (error) {
-  //       const appError = standardizedError(error);
-  //       console.error('新增頻道失敗:', appError.message);
-  //     }
-  //   },
-  //   [socket],
-  // );
-  // const handleEditChannel = useCallback(
-  //   (serverId: string, channelId: string, channel: Partial<Channel>): void => {
-  //     try {
-  //       socket?.emit('editChannel', { serverId, channelId, channel });
-  //       socket?.on('error', handleError);
-  //     } catch (error) {
-  //       const appError = standardizedError(error);
-  //       console.error('編輯頻道/類別失敗:', appError.message);
-  //     }
-  //   },
-  //   [socket],
-  // );
-  // const handleDeleteChannel = useCallback(
-  //   (serverId: string, channelId: string): void => {
-  //     try {
-  //       socket?.emit('deleteChannel', { serverId, channelId });
-  //       socket?.on('error', handleError);
-  //     } catch (error) {
-  //       const appError = standardizedError(error);
-  //       console.error('刪除頻道/類別失敗:', appError.message);
-  //     }
-  //   },
-  //   [socket],
-  // );
-  // const handleJoinChannel = useCallback(
-  //   (serverId: string, userId: string, channelId: string): void => {
-  //     try {
-  //       socket?.emit('joinChannel', {
-  //         serverId,
-  //         userId,
-  //         channelId,
-  //       });
-  //       socket?.on('error', handleError);
-  //     } catch (error) {
-  //       const appError = standardizedError(error);
-  //       console.error('加入頻道失敗:', appError.message);
-  //     }
-  //   },
-  //   [socket],
-  // );
-  const handleLeaveServer = useCallback(
-    (serverId: string, userId: string) => {
-      try {
-        socket?.emit('disconnectServer', { userId, serverId });
-        socket?.on('error', handleError);
-        setServerId(null);
-        setSelectedTabId(1);
-      } catch (error) {
-        const appError = standardizedError(error);
-        console.error('離開伺服器失敗:', appError.message);
-      }
-    },
-    [socket],
-  );
-  // const handleEditServer = useCallback(() => {}, []);
-
-  const handleLoginSuccess = (user: User): void => {
-    localStorage.setItem('userId', user.id);
-    setUserId(user.id);
-  };
-  const handleLogout = (): void => {
-    localStorage.removeItem('userId');
-    setUserId(null);
-    window.location.reload();
-  };
-  const handleSelectServer = (serverId: string): void => {
-    setServerId(serverId);
-    // Add the user last joined timestamp to generate the last joined server -> do this at backend
-  };
-  const handleServerCreated = (serverId: string) => {
-    setServerId(serverId);
-    setShowCreateServer(false);
-  };
-
   // Tab Control
   const [selectedTabId, setSelectedTabId] = useState<number>(1);
-
-  // Page Control
-  const [showCreateServer, setShowCreateServer] = useState<boolean>(false);
 
   // Latency Control
   const [latency, setLatency] = useState<string | null>('0');
@@ -299,23 +141,16 @@ const Home = () => {
     const _ = setInterval(async () => {
       const res = await measureLatency();
       setLatency(res);
-    }, 5000);
+    }, 500);
     return () => clearInterval(_);
   }, []);
 
   const getMainContent = () => {
     if (!socket) return <LoadingSpinner />;
-
-    if (!user) return <AuthPage onLoginSuccess={handleLoginSuccess} />;
-
+    if (!user) return <AuthPage />;
     switch (selectedTabId) {
       case 1:
-        return (
-          <HomePage
-            onSelectServer={handleSelectServer}
-            onOpenCreateServer={() => setShowCreateServer(true)}
-          />
-        );
+        return <HomePage />;
       case 2:
         return <FriendPage />;
       case 3:
@@ -326,13 +161,6 @@ const Home = () => {
 
   return (
     <>
-      {/* Can we move all the page to here ?? -> I tried -> No need to */}
-      {showCreateServer && (
-        <CreateServerModal
-          onClose={() => setShowCreateServer(false)}
-          onServerCreated={handleServerCreated}
-        />
-      )}
       <div className="h-screen flex flex-col bg-background font-['SimSun'] overflow-hidden">
         {/* Top Navigation */}
         <div className="bg-blue-600 p-2 flex items-center justify-between text-white text-sm flex-none h-12 gap-3 min-w-max">
@@ -350,12 +178,12 @@ const Home = () => {
                 </span>
                 <div className="flex items-center">
                   <img
-                    src={STATE_ICON[user.state] || STATE_ICON['online']}
+                    src={STATE_ICON[user.presence?.status ?? 'online']}
                     alt="User State"
                     className="w-5 h-5 p-1 select-none"
                   />
                   <select
-                    value={user.state}
+                    value={user.presence?.status ?? 'online'}
                     onChange={(e) => {}} // change to websocket
                     className="bg-transparent text-white text-xs appearance-none hover:bg-blue-700 p-1 rounded cursor-pointer focus:outline-none select-none"
                   >
@@ -375,7 +203,7 @@ const Home = () => {
                 </div>
               </>
             )}
-            <div className="px-3 py-1 bg-gray-100 text-xs text-gray-600">
+            <div className="px-3 py-1 bg-gray-100 text-xs text-gray-600 select-none">
               {latency} ms
             </div>
           </div>
@@ -384,7 +212,6 @@ const Home = () => {
             <Tabs
               selectedId={selectedTabId}
               onSelect={(tabId) => setSelectedTabId(tabId)}
-              onLeaveServer={handleLeaveServer}
             />
           )}
           <div className="flex items-center space-x-2 min-w-max">

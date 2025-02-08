@@ -6,7 +6,7 @@ import rehypeRaw from 'rehype-raw';
 import DOMPurify from 'dompurify';
 
 // Componenets
-import emojis from './emojis';
+import emojis from '@/components/emojis';
 
 interface PurifyConfig {
   ALLOWED_TAGS: string[];

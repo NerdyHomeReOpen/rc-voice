@@ -38,7 +38,9 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     const socket = useSocket();
 
     // Redux
-    const server = useSelector((state: { server: Server }) => state.server);
+    const sessionId = useSelector(
+      (state: { sessionToken: string }) => state.sessionToken,
+    );
 
     // Form Control
     const [formData, setFormData] = useState<ChannelFormData>({
@@ -64,11 +66,9 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
       if (!nameError) {
         try {
           socket?.emit('editChannel', {
-            serverId: server.id,
-            channelId: channel.id,
-            editedChannel,
+            sessionId: sessionId,
+            channel: editedChannel,
           });
-          //   onChannelEdited();
           onClose();
         } catch (error) {
           setErrors({

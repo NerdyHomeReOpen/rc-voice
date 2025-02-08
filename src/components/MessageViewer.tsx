@@ -1,11 +1,11 @@
-import React, { useLayoutEffect, useRef, useEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 // Components
 import MarkdownViewer from '@/components/MarkdownViewer';
 
 // Types
-import type { Message, MessageType, Server, User, UserList } from '@/types';
+import type { Message, Server, User, UserList } from '@/types';
 
 // Util
 import { formatTimestamp } from '@/utils/formatters';
@@ -13,12 +13,13 @@ import { formatTimestamp } from '@/utils/formatters';
 interface MessageGroup {
   id: string;
   senderId: string;
+  sender: User;
   timestamp: string;
   messages: Message[];
-  type: MessageType;
+  type: 'general' | 'info';
 }
 
-const groupMessages = (messages: Message[]): MessageGroup[] => {
+const getGroupMessages = (messages: Message[]): MessageGroup[] => {
   const sorted = [...messages].sort(
     (a, b) => Number(a.timestamp) - Number(b.timestamp),
   );
@@ -37,7 +38,8 @@ const groupMessages = (messages: Message[]): MessageGroup[] => {
       acc.push({
         id: message.id,
         senderId: message.senderId,
-        timestamp: message.createdAt.toString(),
+        sender: message.sender,
+        timestamp: message.timestamp.toString(),
         messages: [message],
         type: message.type,
       });
@@ -54,7 +56,7 @@ interface MessageBoxProps {
 const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
   // Redux
   const server = useSelector((state: { server: Server }) => state.server);
-  const users = useSelector((state: { users: UserList }) => state.users);
+  const user = useSelector((state: { user: User }) => state.user);
 
   return (
     <div key={messageGroup.id} className="flex items-start space-x-1 mb-1">
@@ -78,18 +80,16 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
       ) : (
         <>
           <img
-            src={`/channel/${users[messageGroup.senderId].gender}_${
-              server.permissions[messageGroup.senderId]
+            src={`/channel/${messageGroup.sender.gender}_${
+              server.members[messageGroup.senderId].permissionLevel
             }.png`}
-            alt={`${users[messageGroup.senderId].gender}_${
-              server.permissions[messageGroup.senderId]
-            }`}
+            alt={`image`}
             className="select-none flex-shrink-0 mt-1"
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center">
               <span className="font-bold text-gray-900">
-                {users[messageGroup.senderId].name}
+                {messageGroup.sender.name}
               </span>
               <span className="text-xs text-gray-500 ml-2">
                 {formatTimestamp(parseInt(messageGroup.timestamp))}
@@ -114,37 +114,24 @@ interface MessageViewerProps {}
 
 const MessageViewer: React.FC<MessageViewerProps> = React.memo(() => {
   // Redux
-  const messages = useSelector(
-    (state: { messages: Message[] }) => state.messages,
-  );
+  const server = useSelector((state: { server: Server }) => state.server);
+  const user = useSelector((state: { user: User }) => state.user);
 
-  // // Audio Control
-  // const audioRef = useRef<HTMLAudioElement | null>(null);
-  // const previousMessagesLength = useRef<number>(0);
+  const [groupMessages, setGroupMessages] = useState<MessageGroup[]>([]);
 
-  // useEffect(() => {
-  //   audioRef.current = new Audio('/sounds/message.mp3');
-  //   audioRef.current.volume = 0.5;
-  // }, []);
-
-  // useEffect(() => {
-  //   if (messages.length > previousMessagesLength.current) {
-  //     const lastMessage = messages[messages.length - 1];
-  //     if (
-  //       lastMessage.senderId !== user.id &&
-  //       lastMessage.type !== 'info' &&
-  //       notification
-  //     ) {
-  //       if (audioRef.current) {
-  //         audioRef.current.currentTime = 0;
-  //         audioRef.current.play().catch((error) => {
-  //           console.log('音效播放失敗:', error);
-  //         });
-  //       }
-  //     }
-  //   }
-  //   previousMessagesLength.current = messages.length;
-  // }, [messages, user.id]);
+  useEffect(() => {
+    if (!server || !user) {
+      setGroupMessages([]);
+      return;
+    }
+    setGroupMessages(
+      getGroupMessages(
+        server.channels.find(
+          (channel) => channel.id === user.presence?.currentChannelId,
+        )?.messages ?? [],
+      ),
+    );
+  }, [server, user]);
 
   // Auto Scroll Control
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -154,11 +141,11 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(() => {
       behavior: 'auto',
       block: 'end',
     });
-  }, [messages]);
+  }, [groupMessages]);
 
   return (
     <div className="flex flex-[5] flex-col overflow-y-auto p-3 min-w-0 max-w-full">
-      {groupMessages(messages).map((groupMessage) => (
+      {groupMessages.map((groupMessage) => (
         <MessageBox key={groupMessage.id} messageGroup={groupMessage} />
       ))}
       <div ref={messagesEndRef} />

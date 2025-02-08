@@ -48,20 +48,17 @@ export const apiService = {
   // POST request
   post: async (endpoint: string, data: ApiRequestData, options?: RequestOptions) => {
     try {
-      const defaultHeaders = {
-        "Content-Type": "application/json",
-      };
-
-      const headers = {
-        ...defaultHeaders,
+      const isFormData = data instanceof FormData;
+      const headers = new Headers({
+        ...(isFormData ? {} : { "Content-Type": "application/json" }), // Set content type to JSON if not FormData
         ...(options?.headers || {}),
-      };
+      });
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
-        headers: headers,
-        credentials: options?.credentials || 'omit',
-        body: JSON.stringify(data),
+        headers: headers, 
+        credentials: options?.credentials || "omit",
+        body: isFormData ? data : JSON.stringify(data), 
       });
       
       return handleResponse(response);

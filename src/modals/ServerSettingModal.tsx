@@ -15,7 +15,12 @@ import { getPermissionText } from '@/utils/formatters';
 import { useSelector } from 'react-redux';
 
 interface SortState {
-  field: 'name' | 'permission' | 'contribution' | 'joinDate';
+  field:
+    | 'name'
+    | 'permission'
+    | 'contribution'
+    | 'joinDate'
+    | 'applyContribution';
   direction: 'asc' | 'desc';
 }
 
@@ -23,26 +28,32 @@ const TABS: ModalTabItem[] = [
   {
     id: '基本資料',
     label: '基本資料',
+    onClick: () => {},
   },
   {
     id: '公告',
     label: '公告',
+    onClick: () => {},
   },
   {
     id: '會員管理',
     label: '會員管理',
+    onClick: () => {},
   },
   {
     id: '訪問許可權',
     label: '訪問許可權',
+    onClick: () => {},
   },
   {
     id: '會員申請管理',
     label: '會員申請管理',
+    onClick: () => {},
   },
   {
     id: '黑名單管理',
     label: '黑名單管理',
+    onClick: () => {},
   },
 ];
 
@@ -66,7 +77,14 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   });
 
   const handleSort = useCallback(
-    (field: 'name' | 'permission' | 'contribution' | 'joinDate') => {
+    (
+      field:
+        | 'name'
+        | 'permission'
+        | 'contribution'
+        | 'joinDate'
+        | 'applyContribution',
+    ) => {
       if (sortState.field === field) {
         setSortState((prev) => ({
           ...prev,
@@ -188,7 +206,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
               <div className="w-48 flex flex-col items-center">
                 <img
                   src="/logo_server_def.png"
-                  alt="Avatar"
+                  alt="Icon"
                   className="w-32 h-32 border-2 border-gray-300 mb-2"
                 />
                 <button className="px-4 py-1 bg-blue-50 hover:bg-blue-100 rounded text-sm">
@@ -491,42 +509,81 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
         );
 
       case '會員申請管理':
+        const application = Object.entries(server.applications || {}).sort(
+          (a, b) => {
+            const direction = sortState.direction === 'asc' ? -1 : 1;
+
+            const contribA = server.contributions[a[0]] || 0;
+            const contribB = server.contributions[b[0]] || 0;
+            return direction * (contribB - contribA);
+          },
+        );
+
         return (
           <div className="flex flex-col h-full">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-sm font-medium">最新申請</span>
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-sm font-medium">
+                申請人數:{application.length}
+              </span>
               <button className="text-sm text-blue-400 hover:underline">
                 申請設定
               </button>
             </div>
-            <div className="grid grid-cols-3 text-sm bg-gray-100 border">
-              <div className="p-2 border-r">暱稱</div>
-              <div className="p-2 border-r">貢獻值</div>
-              <div className="p-2">申請說明</div>
+
+            <div className="flex flex-col border rounded-lg overflow-hidden">
+              <div className="max-h-[500px] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-gray-50 text-gray-600 select-none">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
+                        暱稱
+                      </th>
+                      <th
+                        className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('applyContribution')}
+                      >
+                        <div className="flex items-center relative pr-6">
+                          貢獻值
+                          <span className="absolute right-0">
+                            {sortState.field === 'applyContribution' &&
+                              (sortState.direction === 'asc' ? (
+                                <ChevronUp size={16} />
+                              ) : (
+                                <ChevronDown size={16} />
+                              ))}
+                          </span>
+                        </div>
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
+                        申請說明
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {application.map(([userId, message]) => {
+                      const applicantUser = users[userId];
+                      const displayName =
+                        server.nicknames[userId] ||
+                        (applicantUser?.name ?? '未知用戶');
+
+                      return (
+                        <tr key={userId} className="border-b hover:bg-gray-50">
+                          <td className="px-4 py-3 truncate">{displayName}</td>
+                          <td className="px-4 py-3">
+                            {server.contributions[userId] || 0}
+                          </td>
+                          <td className="px-4 py-3">{message}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <div className="flex-1 border-x border-b overflow-auto">
-              {Object.entries(server.applications || {}).map(
-                ([userId, message]) => {
-                  const applicantUser = users[userId];
-                  const displayName =
-                    server.nicknames[userId] ||
-                    (applicantUser?.name ?? '未知用戶');
-
-                  return (
-                    <div key={userId} className="grid grid-cols-3 border-b">
-                      <div className="p-2 border-r">{displayName}</div>
-                      <div className="p-2 border-r">
-                        {server.contributions[userId] || 0}
-                      </div>
-                      <div className="p-2">{message}</div>
-                    </div>
-                  );
-                },
-              )}
+            <div className="mt-2 text-sm text-gray-500 text-end">
+              右鍵可以進行處理
             </div>
-
-            <div className="mt-2 text-sm text-gray-500">右鍵可以進行處理</div>
           </div>
         );
       default:

@@ -5,16 +5,31 @@ import { useSelector } from 'react-redux';
 // Types
 import type { Server, User } from '@/types';
 
+// Hooks
+import { useSocket } from '@/hooks/SocketProvider';
+
 interface TabsProps {
   selectedId: number;
   onSelect: (tabId: number) => void;
-  onLeaveServer: (serverId: string, userId: string) => void;
 }
 
-const Tabs: React.FC<TabsProps> = ({ selectedId, onSelect, onLeaveServer }) => {
+const Tabs: React.FC<TabsProps> = React.memo(({ selectedId, onSelect }) => {
   // Redux
-  const user = useSelector((state: { user: User }) => state.user);
+  const sessionId = useSelector(
+    (state: { sessionToken: string }) => state.sessionToken,
+  );
   const server = useSelector((state: { server: Server }) => state.server);
+  const user = useSelector((state: { user: User }) => state.user);
+
+  // Socket Control
+  const socket = useSocket();
+
+  const handleLeaveServer = () => {
+    const serverId = user.presence?.currentServerId;
+    const channelId = user.presence?.currentChannelId;
+    if (serverId) socket?.emit('disconnectServer', { serverId, sessionId });
+    if (channelId) socket?.emit('disconnectChannel', { channelId, sessionId });
+  };
 
   const TABS = [
     { id: 1, label: '發現' },
@@ -27,7 +42,10 @@ const Tabs: React.FC<TabsProps> = ({ selectedId, onSelect, onLeaveServer }) => {
       {TABS.map((TAB) => {
         if (TAB)
           return (
-            <div key={`Tabs-${TAB?.id}`} className="min-w-32 text-center -mb-2">
+            <div
+              key={`Tabs-${TAB?.id}`}
+              className="min-w-32 text-center -mb-2 select-none"
+            >
               <div
                 className={`p-2 h-8 cursor-pointer font-medium ${
                   TAB.id === selectedId
@@ -40,10 +58,7 @@ const Tabs: React.FC<TabsProps> = ({ selectedId, onSelect, onLeaveServer }) => {
                   <span className="truncate">{TAB.label}</span>
                   {TAB.id === 3 && (
                     <CircleX
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (server && user) onLeaveServer(server.id, user.id);
-                      }}
+                      onClick={() => handleLeaveServer()}
                       size={16}
                       className="ml-2 -mr-2 cursor-pointer"
                     />
@@ -60,6 +75,6 @@ const Tabs: React.FC<TabsProps> = ({ selectedId, onSelect, onLeaveServer }) => {
       })}
     </div>
   );
-};
+});
 
 export default Tabs;

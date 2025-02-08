@@ -1,11 +1,19 @@
-import React, { useState, ChangeEvent, FormEvent, FocusEvent } from 'react';
-import { ChevronDown } from 'lucide-react';
+import React, {
+  useState,
+  ChangeEvent,
+  FormEvent,
+  FocusEvent,
+  useCallback,
+} from 'react';
+import { ChevronDown, EyeClosed, Eye } from 'lucide-react';
 
 // Services
 import authService from '@/services/auth.service';
 
 // Types
 import type { User } from '@/types';
+import store from '@/redux/store';
+import { setSessionToken } from '@/redux/sessionTokenSlice';
 
 // Validation
 const validateAccount = (value: string): string => {
@@ -44,7 +52,7 @@ interface InputFieldProps {
   type?: string;
   placeholder?: string;
   error?: string;
-  showDropdown?: boolean;
+  showFunctionButton?: string;
 }
 
 const InputField: React.FC<InputFieldProps> = React.memo(
@@ -57,35 +65,59 @@ const InputField: React.FC<InputFieldProps> = React.memo(
     type = 'text',
     placeholder,
     error,
-    showDropdown = false,
-  }) => (
-    <div className="mb-4">
-      <label className="block text-sm mb-1">
-        {label}
-        <span className="text-red-500 ml-1">*</span>
-      </label>
-      <div className="relative flex items-center">
-        <input
-          type={type}
-          name={name}
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          placeholder={placeholder}
-          className={`w-full p-2 border rounded ${
-            error ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {showDropdown && (
-          <div className="absolute right-2 pointer-events-none">
-            <ChevronDown size={16} className="text-gray-400" />
-          </div>
-        )}
+    showFunctionButton = '',
+  }) => {
+    const [showPassword, setShowPassword] = useState(false);
+
+    const toggleShowPassword = useCallback(
+      (state?: boolean) => setShowPassword(state ?? !showPassword),
+      [],
+    );
+
+    const isPasswordField = name === 'password'; // 確認是否為密碼欄位
+
+    return (
+      <div className="mb-4">
+        <label className="block text-sm mb-1">
+          {label}
+          <span className="text-red-500 ml-1">*</span>
+        </label>
+        <div className="relative flex items-center">
+          <input
+            type={isPasswordField && !showPassword ? 'password' : 'text'}
+            name={name}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            placeholder={placeholder}
+            className={`w-full p-2 border rounded ${
+              error ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+          {showFunctionButton === 'account' && (
+            <button
+              type="button"
+              className="absolute right-3 text-gray-500 hover:text-gray-700"
+            >
+              <ChevronDown size={20} />
+            </button>
+          )}
+          {isPasswordField && (
+            <button
+              type="button"
+              className="absolute right-3 text-gray-500 hover:text-gray-700"
+              onClick={() => toggleShowPassword()}
+            >
+              {showPassword ? <Eye size={20} /> : <EyeClosed size={20} />}
+            </button>
+          )}
+        </div>
+        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-    </div>
-  ),
+    );
+  },
 );
+
 InputField.displayName = 'InputField';
 
 interface FormErrors {
@@ -102,10 +134,8 @@ interface LoginFormData {
   rememberAccount: boolean;
   autoLogin: boolean;
 }
-interface LoginFormProps {
-  onLoginSuccess: (user: User) => void;
-}
-const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
+
+const LoginForm: React.FC = React.memo(() => {
   const [formData, setFormData] = useState<LoginFormData>({
     account: '',
     password: '',
@@ -150,7 +180,14 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
     if (!accountError && !passwordError) {
       try {
         const data = await authService.login(formData);
-        onLoginSuccess(data.user as User);
+        if (data.token) {
+          localStorage.setItem('sessionToken', data.token);
+          store.dispatch(setSessionToken(data.token));
+        } else {
+          setErrors({
+            general: data.message,
+          });
+        }
       } catch (error) {
         setErrors({
           general: error instanceof Error ? error.message : '登入失敗',
@@ -174,7 +211,7 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
         onBlur={handleBlur}
         placeholder="請輸入帳號"
         error={errors.account}
-        showDropdown
+        showFunctionButton={'account'}
       />
       <InputField
         label="密碼"
@@ -185,6 +222,7 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
         onBlur={handleBlur}
         placeholder="請輸入密碼"
         error={errors.password}
+        showFunctionButton={'password'}
       />
       <div className="flex justify-between mb-4">
         <label className="flex items-center">
@@ -217,6 +255,7 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
     </form>
   );
 });
+
 LoginForm.displayName = 'LoginForm';
 
 // Register Form Component
@@ -226,9 +265,11 @@ interface RegisterFormData {
   username: string;
   gender: 'Male' | 'Female';
 }
+
 interface RegisterFormProps {
   onRegisterSuccess: () => void;
 }
+
 const RegisterForm: React.FC<RegisterFormProps> = React.memo(
   ({ onRegisterSuccess }) => {
     const [formData, setFormData] = useState<RegisterFormData>({
@@ -360,14 +401,18 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(
     );
   },
 );
+
 RegisterForm.displayName = 'RegisterForm';
 
 // Main Auth Page Component
-interface AuthPageProps {
-  onLoginSuccess: (user: User) => void;
-}
-const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
+interface AuthPageProps {}
+const AuthPage: React.FC<AuthPageProps> = () => {
+  // State
   const [isLogin, setIsLogin] = useState<boolean>(true);
+
+  const toggleIsLogin = useCallback((state?: boolean) => {
+    setIsLogin(state ?? !isLogin);
+  }, []);
 
   return (
     <>
@@ -375,17 +420,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
         <img src="/login_logo.png" alt="RiceCall Logo" className="mb-8" />
 
         {isLogin ? (
-          <LoginForm onLoginSuccess={onLoginSuccess} />
+          <LoginForm />
         ) : (
-          <RegisterForm onRegisterSuccess={() => setIsLogin(true)} />
+          <RegisterForm onRegisterSuccess={() => toggleIsLogin(false)} />
         )}
 
         <div className="flex justify-between w-full max-w-sm mt-4">
           <button
             className="text-sm text-gray-600 hover:text-blue-500"
-            onClick={() => {
-              setIsLogin(!isLogin);
-            }}
+            onClick={() => toggleIsLogin()}
           >
             {isLogin ? '註冊帳號' : '返回登入'}
           </button>

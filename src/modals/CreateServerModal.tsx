@@ -6,7 +6,13 @@ import Modal from '@/components/Modal';
 
 // Services
 import { serverService } from '@/services/server.service';
-import { ServerList, User } from '@/types';
+
+// Types
+import { User } from '@/types';
+
+// Redux
+import store from '@/redux/store';
+import { setServer } from '@/redux/serverSlice';
 
 // Validation
 const validateName = (name: string): string => {
@@ -20,9 +26,10 @@ const validateDescription = (description: string): string => {
 };
 
 interface ServerFormData {
+  userId: string;
   name: string;
   description: string;
-  avatar: File | null;
+  icon: File | null;
 }
 
 interface FormErrors {
@@ -33,33 +40,24 @@ interface FormErrors {
 
 interface CreateServerModalProps {
   onClose: () => void;
-  onServerCreated: (serverId: string) => void;
 }
 
 const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
-  ({ onClose, onServerCreated }) => {
+  ({ onClose }) => {
     // Redux
-    const serverList = useSelector(
-      (state: { serverList: ServerList }) => state.serverList,
-    );
-    const userId = useSelector((state: { user: User }) => state.user.id);
+    const user = useSelector((state: { user: User }) => state.user);
 
-    const maxGroups = 3; // 最多可創建的群組數量
-    console.log('serverList111', serverList);
-    const userOwnedServerCount = Object.values(serverList || {}).reduce(
-      // 使用者擁有的群組數量
-      (count, server) => {
-        const hasOwnerPermission = server.ownerId === userId;
-        return count + (hasOwnerPermission ? 1 : 0);
-      },
-      0,
-    );
+    const maxGroups = 3;
+    const userOwnedServerCount =
+      user.joinedServers?.filter((server) => server.ownerId === user.id)
+        .length ?? 0;
 
     // Form Control
     const [formData, setFormData] = useState<ServerFormData>({
+      userId: user.id,
       name: '',
       description: '',
-      avatar: null,
+      icon: null,
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [previewImage, setPreviewImage] = useState<string>(
@@ -90,7 +88,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       if (!nameError && !descriptionError) {
         try {
           const data = await serverService.createServer(formData);
-          onServerCreated(data.id);
+          store.dispatch(setServer(data));
           onClose();
         } catch (error) {
           setErrors({
@@ -114,7 +112,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       const reader = new FileReader();
       reader.onloadend = () => setPreviewImage(reader.result as string);
       reader.readAsDataURL(file);
-      setFormData((prev) => ({ ...prev, avatar: file }));
+      setFormData((prev) => ({ ...prev, icon: file }));
     };
 
     return (
@@ -209,19 +207,19 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
             <div className="relative group">
               <img
                 src={previewImage}
-                alt="Avatar"
+                alt="Icon"
                 className="w-32 h-32 rounded-lg border-2 border-gray-300 object-cover transition-all"
               />
               <input
                 type="file"
-                id="avatar-upload"
+                id="icon-upload"
                 className="hidden"
                 accept="image/*"
                 onChange={handleImageChange}
                 disabled={!canCreateGroup}
               />
               <label
-                htmlFor="avatar-upload"
+                htmlFor="icon-upload"
                 className={`mt-3 w-full px-4 py-2 rounded-lg text-sm font-medium transition-all border text-center block ${
                   canCreateGroup
                     ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 hover:border-blue-300 cursor-pointer'

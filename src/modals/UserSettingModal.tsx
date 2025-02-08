@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 // Service
 import userService from '@/services/user.service';
@@ -8,9 +9,10 @@ import Modal from '@/components/Modal';
 
 // Types
 import type { User, ModalTabItem } from '@/types';
-import { useSelector } from 'react-redux';
 
-const TABS: ModalTabItem[] = [{ id: '基本資料', label: '基本資料' }];
+const TABS: ModalTabItem[] = [
+  { id: '基本資料', label: '基本資料', onClick: () => {} },
+];
 
 interface UserSettingModalProps {
   onClose: () => void;
@@ -31,11 +33,13 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
 
   const handleLogout = () => {
     // TODO: Implement logout
+    console.log('Logout');
+    localStorage.removeItem('sessionToken');
+    window.location.reload();
   };
 
-  const handleSave = async () => {
+  const handleSubmit = async () => {
     if (userName !== user.name || selectedGender !== user.gender) {
-      console.log(user);
       try {
         setIsLoading(true);
         setError('');
@@ -119,14 +123,19 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
                   <div className="flex items-center gap-4 select-none">
                     <label className="w-20 text-right text-sm">創建時間</label>
                     <label className="w-48 p-1 rounded text-sm">
-                      {new Date(user?.createdAt || 0).toLocaleString()}
+                      {new Date(
+                        Date.now() - Math.floor(Math.random() * 100000000),
+                      ).toLocaleString()}
                     </label>
                   </div>
 
                   <div className="flex justify-center select-none">
                     <button
                       className="px-6 py-1 mt-5 bg-red-600 text-white rounded hover:bg-red-700"
-                      onClick={() => handleLogout}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLogout();
+                      }}
                     >
                       登出
                     </button>
@@ -138,7 +147,7 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
               <div className="w-48 flex flex-col items-center select-none">
                 <img
                   src={preview}
-                  alt="Avatar"
+                  alt="Icon"
                   className="w-32 h-32 border-2 border-gray-300 mb-2 rounded-full object-cover"
                 />
                 <button className="px-4 py-1 bg-blue-50 hover:bg-blue-100 rounded text-sm">
