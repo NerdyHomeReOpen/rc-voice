@@ -26,9 +26,7 @@ const Tabs: React.FC<TabsProps> = React.memo(({ selectedId, onSelect }) => {
 
   const handleLeaveServer = () => {
     const serverId = user.presence?.currentServerId;
-    const channelId = user.presence?.currentChannelId;
-    if (serverId) socket?.emit('disconnectServer', { serverId, sessionId });
-    if (channelId) socket?.emit('disconnectChannel', { channelId, sessionId });
+    socket?.emit('disconnectServer', { serverId, sessionId });
   };
 
   const TABS = [

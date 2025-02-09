@@ -26,7 +26,7 @@ export const serverService = {
         formData.append('icon', serverData.icon);
       }
 
-      const response = await apiService.post(`${API_URL}/servers`, formData)
+      const response = await apiService.post("/servers", formData)
 
       if (response.error) {
         throw new Error(response.error || '創建伺服器失敗');

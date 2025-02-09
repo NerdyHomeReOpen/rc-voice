@@ -1,17 +1,10 @@
-import React, {
-  useState,
-  ChangeEvent,
-  FormEvent,
-  FocusEvent,
-  useCallback,
-} from 'react';
+import React, { useState, ChangeEvent, FormEvent, FocusEvent } from 'react';
 import { ChevronDown, EyeClosed, Eye } from 'lucide-react';
 
 // Services
 import authService from '@/services/auth.service';
 
-// Types
-import type { User } from '@/types';
+// Redux
 import store from '@/redux/store';
 import { setSessionToken } from '@/redux/sessionTokenSlice';
 

@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import Modal from '@/components/Modal';
 
 // Types
-import { Channel, ChannelPermission } from '@/types';
+import { Channel, ChannelPermission, Server } from '@/types';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
@@ -38,6 +38,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     const socket = useSocket();
 
     // Redux
+    const server = useSelector((state: { server: Server }) => state.server);
     const sessionId = useSelector(
       (state: { sessionToken: string }) => state.sessionToken,
     );
@@ -62,6 +63,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
         ...formData,
         id: '',
         isLobby: false,
+        serverId: server.id,
         users: [],
         userIds: [],
         messages: [],

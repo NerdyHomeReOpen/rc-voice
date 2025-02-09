@@ -12,7 +12,7 @@ const servers = {
     name: '543 Random Chat',
     level: 0,
     announcement: 'Example Announcement',
-    iconUrl: null,
+    icon: null,
     lobbyId: '4d7d-9426-a73af1d2689e',
     displayId: 543,
     ownerId: '612a7797-f970-4f23-9983-f08d863d9552',

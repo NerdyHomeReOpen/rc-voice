@@ -144,7 +144,14 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(() => {
   }, [groupMessages]);
 
   return (
-    <div className="flex flex-[5] flex-col overflow-y-auto p-3 min-w-0 max-w-full">
+    <div
+      className="flex flex-[5] flex-col overflow-y-auto p-3 min-w-0 max-w-full 
+        [&::-webkit-scrollbar]:w-2 
+        [&::-webkit-scrollbar]:h-2 
+        [&::-webkit-scrollbar-thumb]:bg-gray-300 
+        [&::-webkit-scrollbar-thumb]:rounded-lg 
+        [&::-webkit-scrollbar-thumb]:hover:bg-gray-400"
+    >
       {groupMessages.map((groupMessage) => (
         <MessageBox key={groupMessage.id} messageGroup={groupMessage} />
       ))}

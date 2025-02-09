@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 
 // Components
 import CreateServerModal from '@/modals/CreateServerModal';
+import ServerIcon from '@/components/ServerIcon';
 
 // Utils
 import { calculateSimilarity } from '@/utils/searchServers';
@@ -42,11 +43,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
       className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-white hover:bg-gray-50 w-full"
       onClick={() => handleServerSelect(server.id)}
     >
-      <img
-        src={`${server.iconUrl ?? '/logo_server_def.png'}`}
-        alt=""
-        className="w-14 h-14 rounded"
-      />
+      <ServerIcon iconPath={server?.icon} />
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-medium text-[#4A6B9D] text-start truncate">
           {server.name}

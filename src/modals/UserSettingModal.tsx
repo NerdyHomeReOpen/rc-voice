@@ -40,11 +40,7 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
 
   const handleLogout = () => {
     // TODO: Implement logout
-    const serverId = user.presence?.currentServerId;
-    const channelId = user.presence?.currentChannelId;
-    if (serverId) socket?.emit('disconnectServer', { serverId, sessionId });
-    if (channelId) socket?.emit('disconnectChannel', { channelId, sessionId });
-    if (serverId) socket?.emit('disconnectUser', { sessionId });
+    socket?.emit('disconnectUser', { sessionId });
   };
 
   const handleSubmit = async () => {

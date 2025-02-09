@@ -64,7 +64,7 @@ export const enum ServerPermission {
 export interface Server {
   id: string;
   name: string;
-  iconUrl: string | null;
+  icon: string | null;
   announcement: string;
   level: number;
   createdAt: number;
@@ -94,6 +94,7 @@ export interface Channel {
   permission: ChannelPermission;
   isCategory: boolean;
   isLobby: boolean;
+  serverId: string;
   userIds: string[];
   users: User[];
   messageIds: string[];

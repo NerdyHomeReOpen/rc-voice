@@ -88,8 +88,8 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       if (!nameError && !descriptionError) {
         try {
           const data = await serverService.createServer(formData);
-          store.dispatch(setServer(data));
           onClose();
+          store.dispatch(setServer(data));
         } catch (error) {
           setErrors({
             general: error instanceof Error ? error.message : '創建群組失敗',

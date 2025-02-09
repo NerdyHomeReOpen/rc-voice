@@ -87,6 +87,20 @@ const sendSuccess = (res, data) => {
   res.end(JSON.stringify(data));
 };
 
+const MIME_TYPES = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+};
+
+// Update upload directory
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
+
+// Ensure uploads directory exists
+fs.mkdir(UPLOADS_DIR, { recursive: true }).catch(console.error);
+
 // HTTP Server with CORS
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -102,6 +116,46 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (req.method === 'GET' && req.url.startsWith('/uploads/')) {
+    try {
+      // Get the file path relative to uploads directory
+      const relativePath = req.url.replace('/uploads/', '');
+      const filePath = path.join(UPLOADS_DIR, relativePath);
+
+      // Validate file path to prevent directory traversal
+      if (!filePath.startsWith(UPLOADS_DIR)) {
+        sendError(res, 403, '無權限存取此檔案');
+        return;
+      }
+
+      // Get file extension and MIME type
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+      // Read and serve the file
+      fs.readFile(filePath)
+        .then((data) => {
+          res.writeHead(200, {
+            'Content-Type': contentType,
+            'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+            'Access-Control-Allow-Origin': '*', // 允許跨域存取
+          });
+          res.end(data);
+        })
+        .catch((error) => {
+          if (error.code === 'ENOENT') {
+            sendError(res, 404, '找不到檔案');
+          } else {
+            sendError(res, 500, '讀取檔案失敗');
+          }
+        });
+      return;
+    } catch (error) {
+      sendError(res, 500, '伺服器錯誤');
+      return;
+    }
+  }
+
   if (req.method === 'POST' && req.url === '/servers') {
     const form = new formidable.IncomingForm({
       uploadDir: uploadDir,
@@ -112,55 +166,59 @@ const server = http.createServer((req, res) => {
     });
 
     form.parse(req, async (err, fields, files) => {
-      if (err) {
-        sendError(res, 400, '檔案上傳失敗');
-        return;
-      }
+      // 用於追蹤上傳的檔案路徑
+      let uploadedFilePath = null;
 
-      console.log(fields, files);
       try {
-        const userId = fields.userId;
-        if (!userId) {
-          sendError(res, 400, '缺少使用者ID');
+        if (err) {
+          sendError(res, 400, '檔案上傳失敗');
           return;
         }
+
+        // 保存上傳的檔案路徑以便需要時刪除
+        if (files.icon && files.icon[0]) {
+          uploadedFilePath = files.icon[0].filepath;
+        }
+
+        // 處理頭像路徑
+        let iconPath = '/logo_server_def.png';
+        if (uploadedFilePath) {
+          iconPath = `/uploads/serverAvatars/${path.basename(
+            uploadedFilePath,
+          )}`;
+        }
+
+        const userId = fields.userId;
+        if (!userId) {
+          throw new Error('缺少使用者ID');
+        }
+
         const name = fields.name;
         const description = fields.description || '';
 
         // 驗證必要欄位
         if (!name || !userId) {
-          sendError(res, 400, '缺少必要欄位');
-          return;
+          throw new Error('缺少必要欄位');
         }
 
         // 獲取資料庫
-        const serverList = (await db.get('serverList')) || {};
-        const channelList = (await db.get('channelList')) || {};
-        const usersList = (await db.get('usersList')) || {};
-        const serverMembers = (await db.get('serverMembers')) || {};
+        const servers = (await db.get('servers')) || {};
+        const channels = (await db.get('channels')) || {};
+        const users = (await db.get('users')) || {};
+        const members = (await db.get('members')) || {};
 
         // 檢查用戶是否存在
-        const user = usersList[userId];
+        const user = users[userId];
         if (!user) {
-          sendError(res, 404, '用戶不存在');
-          return;
+          throw new Error('用戶不存在');
         }
 
         // 檢查用戶創建的伺服器數量
-        const userOwnedServerCount = Object.values(serverList).filter(
+        const userOwnedServerCount = Object.values(servers).filter(
           (server) => server.ownerId === userId,
         ).length;
         if (userOwnedServerCount >= 3) {
-          sendError(res, 400, '已達到最大擁有伺服器數量限制');
-          return;
-        }
-
-        // 獲取上傳的文件
-        let avatarPath = '/logo_server_def.png';
-        if (files.avatar) {
-          avatarPath = `/uploads/serverAvatars/${path.basename(
-            files.avatar[0].filepath,
-          )}`;
+          throw new Error('已達到最大擁有伺服器數量限制');
         }
 
         // 創建新伺服器
@@ -168,13 +226,12 @@ const server = http.createServer((req, res) => {
         const lobbyId = uuidv4();
         const membershipId = uuidv4();
 
-        // 創建新伺服器
         const newServer = {
           id: serverId,
-          displayId: generateUniqueDisplayId(serverList),
+          displayId: generateUniqueDisplayId(servers),
           name: name,
           announcement: description || '',
-          icon: avatarPath,
+          icon: iconPath,
           userIds: [userId],
           channelIds: [lobbyId],
           lobbyId: lobbyId,
@@ -193,9 +250,9 @@ const server = http.createServer((req, res) => {
           createdAt: Date.now().valueOf(),
         };
 
-        // 保存到資料庫
-        serverList[serverId] = newServer;
-        channelList[lobbyId] = {
+        // 儲存到資料庫
+        servers[serverId] = newServer;
+        channels[lobbyId] = {
           id: lobbyId,
           name: '大廳',
           permission: 'public',
@@ -207,7 +264,7 @@ const server = http.createServer((req, res) => {
         };
 
         // 更新用戶的伺服器成員資格
-        serverMembers[membershipId] = {
+        members[membershipId] = {
           id: membershipId,
           serverId: serverId,
           userId: userId,
@@ -218,22 +275,38 @@ const server = http.createServer((req, res) => {
           joinedAt: Date.now().valueOf(),
         };
 
-        await db.set('serverList', serverList);
-        await db.set('channelList', channelList);
-        await db.set('serverMembers', serverMembers);
+        console.log('Created a new server', {
+          server: servers[serverId],
+          channels: channels[lobbyId],
+          members: members[membershipId],
+        });
+
+        await db.set('servers', servers);
+        await db.set('channels', channels);
+        await db.set('members', members);
 
         new Logger('Server').success(
           `New server created: ${serverId} by user ${userId}`,
         );
 
-        // 返回成功
         sendSuccess(res, {
           message: '伺服器創建成功',
           server: newServer,
         });
       } catch (error) {
+        // 刪除上傳的檔案
+        if (uploadedFilePath) {
+          fs.unlink(uploadedFilePath).catch((err) => {
+            new Logger('Server').error(`Error deleting file: ${err.message}`);
+          });
+        }
+
         new Logger('Server').error(`Create server error: ${error.message}`);
-        sendError(res, 500, '伺服器創建失敗');
+        sendError(
+          res,
+          error.message === '用戶不存在' ? 404 : 400,
+          error.message,
+        );
       }
     });
     return;
@@ -296,7 +369,7 @@ const server = http.createServer((req, res) => {
         //   "password": "123456",
         //   "account": "test",
         // }
-        console.log(data);
+        // console.log(data);
 
         // Get database
         const userAccPwdList = (await db.get(`account_password`)) || {};
@@ -328,8 +401,6 @@ const server = http.createServer((req, res) => {
         const presenceId = `presence_${user.id}`;
         const presence = {
           ...presenceStates[presenceId],
-          currentServerId: null,
-          currentChannelId: null,
           status: 'online',
           lastActiveAt: Date.now(),
           updatedAt: Date.now(),
@@ -365,7 +436,7 @@ const server = http.createServer((req, res) => {
         //   "password": "123456",
         //   "username": "test",
         // }
-        console.log(data);
+        // console.log(data);
 
         // Get database
         const userAccPwdList = (await db.get(`account_password`)) || {};
@@ -517,6 +588,9 @@ io.on('connection', async (socket) => {
         });
       }
 
+      // Remove user socket connection
+      userSockets.delete(socket.id);
+
       // Update user presence
       const presenceId = `presence_${user.id}`;
       const presence = {
@@ -530,14 +604,14 @@ io.on('connection', async (socket) => {
       presenceStates[presenceId] = presence;
       await db.set(`userPresence.${presenceId}`, presence);
 
-      if (server && channel) {
+      if (channel) {
         // Update channel
         channel.userIds = channel.userIds.filter((id) => id !== user.id);
         await db.set(`channels.${channel.id}`, channel);
 
         // Emit data (to all users in the channel)
-        io.to(`channel_${server.id}`).emit('serverUpdate', {
-          ...(await getServer(channel.serverId)),
+        io.to(`server_${server.id}`).emit('serverUpdate', {
+          ...(await getServer(server.id)),
         });
       }
 
@@ -563,7 +637,7 @@ io.on('connection', async (socket) => {
       // data = {
       //   sessionId: '123456',
       // }
-      console.log(data);
+      // console.log(data);
 
       // Validate data
       const userId = userSessions.get(data.sessionId);
@@ -593,6 +667,18 @@ io.on('connection', async (socket) => {
           status_code: 404,
         });
         return;
+      }
+
+      // Check if user is already connected
+      for (const [key, value] of userSockets) {
+        if (value === user.id) {
+          new Logger('WebSocket').error(
+            `User(${user.id}) already connected from another socket`,
+          );
+          io.to(key).emit('forceDisconnect');
+          userSockets.delete(key);
+          break;
+        }
       }
 
       // Save user socket connection
@@ -626,6 +712,8 @@ io.on('connection', async (socket) => {
   socket.on('disconnectUser', async (data) => {
     // Get database
     const users = (await db.get('users')) || {};
+    const servers = (await db.get('servers')) || {};
+    const channels = (await db.get('channels')) || {};
     const presenceStates = (await db.get('presenceStates')) || {};
 
     try {
@@ -633,7 +721,7 @@ io.on('connection', async (socket) => {
       // data = {
       //   sessionId: '123456',
       // }
-      console.log(data);
+      // console.log(data);
 
       const userId = userSessions.get(data.sessionId);
       if (!userId) {
@@ -657,6 +745,39 @@ io.on('connection', async (socket) => {
         });
         return;
       }
+      const server =
+        servers[presenceStates[`presence_${user.id}`].currentServerId];
+      if (!server) {
+        new Logger('WebSocket').error(
+          `Server(${
+            presenceStates[`presence_${user.id}`].currentServerId
+          }) not found`,
+        );
+        socket.emit('error', {
+          message: `伺服器不存在`,
+          part: 'DISCONNECTSERVER',
+          tag: 'SERVER_ERROR',
+          status_code: 404,
+        });
+      }
+      const channel =
+        channels[presenceStates[`presence_${user.id}`].currentChannelId];
+      if (!channel) {
+        new Logger('WebSocket').error(
+          `Channel(${
+            presenceStates[`presence_${user.id}`].currentChannelId
+          }) not found`,
+        );
+        socket.emit('error', {
+          message: `頻道不存在`,
+          part: 'DISCONNECTCHANNEL',
+          tag: 'CHANNEL_ERROR',
+          status_code: 404,
+        });
+      }
+
+      // Remove user socket connection
+      userSockets.delete(socket.id);
 
       // Update user presence
       const presenceId = `presence_${user.id}`;
@@ -670,6 +791,31 @@ io.on('connection', async (socket) => {
       };
       presenceStates[presenceId] = presence;
       await db.set(`userPresence.${presenceId}`, presence);
+
+      if (channel) {
+        // Update channel
+        channel.userIds = channel.userIds.filter((id) => id !== user.id);
+        await db.set(`channels.${channel.id}`, channel);
+
+        // leave the channel
+        socket.leave(`channel_${channel.id}`);
+
+        // Emit data (only to the user)
+        io.to(socket.id).emit('disconnectChannel');
+
+        // Emit data (to all users in the channel)
+        io.to(`server_${server.id}`).emit('serverUpdate', {
+          ...(await getServer(server.id)),
+        });
+      }
+
+      if (server) {
+        // leave the server
+        socket.leave(`server_${server.id}`);
+
+        // Emit data (only to the user)
+        io.to(socket.id).emit('disconnectServer');
+      }
 
       // Emit data (only to the user)
       io.to(socket.id).emit('disconnectUser');
@@ -701,7 +847,7 @@ io.on('connection', async (socket) => {
       //   sessionId:
       //   serverId:
       // }
-      console.log(data);
+      // console.log(data);
 
       const userId = userSessions.get(data.sessionId);
       if (!userId) {
@@ -758,7 +904,7 @@ io.on('connection', async (socket) => {
           serverId: server.id,
           userId: user.id,
           nickname: user.name,
-          permission: 1,
+          permissionLevel: 1,
           managedChannels: [],
           contribution: 0,
           joinedAt: Date.now(),
@@ -812,6 +958,7 @@ io.on('connection', async (socket) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
+    const channels = (await db.get('channels')) || {};
     const presenceStates = (await db.get('presenceStates')) || {};
 
     try {
@@ -819,7 +966,7 @@ io.on('connection', async (socket) => {
       // data = {
       //   sessionId: '123456',
       // }
-      console.log(data);
+      // console.log(data);
 
       const userId = userSessions.get(data.sessionId);
       if (!userId) {
@@ -859,6 +1006,22 @@ io.on('connection', async (socket) => {
         });
         return;
       }
+      const channel =
+        channels[presenceStates[`presence_${user.id}`].currentChannelId];
+      if (!channel) {
+        new Logger('WebSocket').error(
+          `Channel(${
+            presenceStates[`presence_${user.id}`].currentChannelId
+          }) not found`,
+        );
+        socket.emit('error', {
+          message: `頻道不存在`,
+          part: 'DISCONNECTSERVER',
+          tag: 'CHANNEL_ERROR',
+          status_code: 404,
+        });
+        return;
+      }
 
       // Update user presence
       const presenceId = `presence_${user.id}`;
@@ -872,14 +1035,31 @@ io.on('connection', async (socket) => {
       presenceStates[presenceId] = presence;
       await db.set(`userPresence.${presenceId}`, presence);
 
+      if (channel) {
+        // Update channel
+        channel.userIds = channel.userIds.filter((id) => id !== user.id);
+        await db.set(`channels.${channel.id}`, channel);
+
+        // leave the channel
+        socket.leave(`channel_${channel.id}`);
+
+        // Emit data (only to the user)
+        io.to(socket.id).emit('disconnectChannel');
+
+        // Emit data (to all users in the channel)
+        io.to(`server_${server.id}`).emit('serverUpdate', {
+          ...(await getServer(server.id)),
+        });
+      }
+
       // Leave the server
       socket.leave(`server_${server.id}`);
 
       // Emit data (only to the user)
+      io.to(socket.id).emit('disconnectServer');
       io.to(socket.id).emit('userPresenceUpdate', {
         ...(await getPresenceState(user.id)),
       });
-      io.to(socket.id).emit('disconnectServer');
 
       new Logger('WebSocket').success(
         `User(${user.id}) disconnected from server(${server.id})`,
@@ -900,6 +1080,7 @@ io.on('connection', async (socket) => {
   socket.on('chatMessage', async (data) => {
     // Get database
     const users = (await db.get('users')) || {};
+    const servers = (await db.get('servers')) || {};
     const messages = (await db.get('messages')) || {};
     const channels = (await db.get('channels')) || {};
     const presenceStates = (await db.get('presenceStates')) || {};
@@ -913,7 +1094,7 @@ io.on('connection', async (socket) => {
       //     content: "",
       //   }
       // };
-      console.log(data);
+      // console.log(data);
 
       const _message = data.message;
       if (!_message) {
@@ -964,6 +1145,22 @@ io.on('connection', async (socket) => {
         });
         return;
       }
+      const server =
+        servers[presenceStates[`presence_${user.id}`].currentServerId];
+      if (!server) {
+        new Logger('WebSocket').error(
+          `Server(${
+            presenceStates[`presence_${user.id}`].currentServerId
+          }) not found`,
+        );
+        socket.emit('error', {
+          message: `伺服器不存在`,
+          part: 'ADDCHANNEL',
+          tag: 'SERVER_ERROR',
+          status_code: 404,
+        });
+        return;
+      }
 
       // Create new message
       const messageId = uuidv4();
@@ -981,7 +1178,7 @@ io.on('connection', async (socket) => {
 
       // Emit updated data (to all users in the channel)
       io.to(`channel_${channel.id}`).emit('serverUpdate', {
-        ...(await getServer(channel.serverId)),
+        ...(await getServer(server.id)),
       });
 
       new Logger('WebSocket').info(
@@ -1016,7 +1213,7 @@ io.on('connection', async (socket) => {
       //     isCategory: false,
       //   },
       // }
-      console.log(data);
+      // console.log(data);
 
       const _channel = data.channel;
       if (!_channel) {
@@ -1118,7 +1315,7 @@ io.on('connection', async (socket) => {
       //     isCategory:
       //   },
       // };
-      console.log(data);
+      // console.log(data);
 
       const channel = data.channel;
       if (!channel) {
@@ -1204,7 +1401,7 @@ io.on('connection', async (socket) => {
       //   sessionId: '123456',
       //   channelId: '123456',
       // }
-      console.log(data);
+      // console.log(data);
 
       const channel = channels[data.channelId];
       if (!channel) {
@@ -1293,7 +1490,7 @@ io.on('connection', async (socket) => {
       //   sessionId: '123456',
       //   channelId: '123456',
       // }
-      console.log(data);
+      // console.log(data);
 
       const channel = channels[data.channelId];
       if (!channel && data.channelId) {
@@ -1362,11 +1559,15 @@ io.on('connection', async (socket) => {
         currentChannelId: channel.id,
         updatedAt: Date.now(),
       };
+      presenceStates[presenceId] = presence;
       await db.set(`presenceStates.${presenceId}`, presence);
 
       // Update channel
       channel.userIds.push(user.id);
       await db.set(`channels.${channel.id}`, channel);
+
+      // Play sound
+      io.to(`channel_${channel.id}`).emit('playSound', 'join');
 
       // Join the channel
       socket.join(`channel_${channel.id}`);
@@ -1379,16 +1580,13 @@ io.on('connection', async (socket) => {
         ...(await getPresenceState(user.id)),
       });
 
-      // Emit updated data (to all users in the channel)
-      io.to(`channel_${channel.id}`).emit('userJoinChannel');
-
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
         ...(await getServer(server.id)),
       });
 
       new Logger('WebSocket').success(
-        `User(${data.userId}) connected to channel(${channel.id})`,
+        `User(${user.id}) connected to channel(${channel.id})`,
       );
     } catch (error) {
       // Emit error data (only to the user)
@@ -1418,7 +1616,7 @@ io.on('connection', async (socket) => {
       // data = {
       //   sessionId: '123456',
       // }
-      console.log(data);
+      // console.log(data);
 
       const userId = userSessions.get(data.sessionId);
       if (!userId) {
@@ -1492,18 +1690,18 @@ io.on('connection', async (socket) => {
       socket.leave(`channel_${channel.id}`);
 
       // Emit updated data (only to the user)
+      io.to(socket.id).emit('disconnectChannel');
       io.to(socket.id).emit('userPresenceUpdate', {
         ...(await getPresenceState(user.id)),
       });
-      io.to(socket.id).emit('disconnectChannel');
-
-      // Emit updated data (to all users in the channel)
-      io.to(`channel_${channel.id}`).emit('userLeaveChannel');
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
         ...(await getServer(server.id)),
       });
+
+      // Play sound
+      io.to(`channel_${channel.id}`).emit('playSound', 'leave');
 
       new Logger('WebSocket').success(
         `User(${user.id}) disconnected from channel(${channel.id})`,

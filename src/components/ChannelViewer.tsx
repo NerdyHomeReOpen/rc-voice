@@ -215,7 +215,9 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
     (channelId: string) => {
       if (user.presence?.currentChannelId !== channelId) {
         socket?.emit('disconnectChannel', { sessionId });
-        socket?.emit('connectChannel', { sessionId, channelId });
+        socket?.once('disconnectChannel', () =>
+          socket?.emit('connectChannel', { sessionId, channelId }),
+        );
       }
     },
     [socket, user],
@@ -293,8 +295,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
       {/* Expanded Sections */}
       {(channel.isLobby || expanded) && channel.users.length > 0 && (
         <div className="ml-6">
-          {[...channel?.users].map((member: User) => (
-            <UserTab key={member.id} user={user} />
+          {[...channel?.users].map((_user: User) => (
+            <UserTab key={_user.id} user={_user} />
           ))}
         </div>
       )}

@@ -30,6 +30,7 @@ import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
+import { once } from 'events';
 
 const STATE_ICON = {
   online: '/online.png',
@@ -61,23 +62,36 @@ const Home = () => {
   useEffect(() => {
     const token =
       store.getState().sessionToken ?? localStorage.getItem('sessionToken');
-    if (!socket || !token) return;
-    console.log('Connect to socket with token:', token);
+    if (!token) return;
     store.dispatch(setSessionToken(token));
     localStorage.setItem('sessionToken', token);
-    socket.emit('connectUser', { sessionId: token });
-  }, [socket, sessionId]);
+  }, [sessionId]);
 
   useEffect(() => {
     if (!socket || !sessionId) return;
+    console.log('Connect to socket with session Id:', sessionId);
+    socket.emit('connectUser', { sessionId });
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!socket || !sessionId) return;
+    const handleDisconnect = () => {
+      console.log('Socket disconnected, ', sessionId);
+      socket.emit('disconnectUser', { sessionId });
+    };
+    const handleForceDisconnect = () => {
+      console.log('Socket force disconnected: ', sessionId);
+      socket.emit('disconnectUser', { sessionId });
+    };
     const handleConnectUser = (user: any) => {
       console.log('User connected: ', user);
       store.dispatch(setUser(user));
     };
     const handleDisconnectUser = () => {
       console.log('User disconnected');
-      store.dispatch(clearSessionToken());
+      store.dispatch(clearServer());
       store.dispatch(clearUser());
+      store.dispatch(clearSessionToken());
       localStorage.removeItem('sessionToken');
     };
     const handleConnectServer = (server: Server) => {
@@ -108,7 +122,21 @@ const Home = () => {
       console.log('Server update: ', server);
       store.dispatch(setServer(server));
     };
+    const handlePlaySound = (sound: 'join' | 'leave') => {
+      switch (sound) {
+        case 'join':
+          console.log('Play join sound');
+          joinSoundRef.current?.play();
+          break;
+        case 'leave':
+          console.log('Play leave sound');
+          leaveSoundRef.current?.play();
+          break;
+      }
+    };
 
+    socket.on('disconnect', handleDisconnect);
+    socket.on('forceDisconnect', handleForceDisconnect);
     socket.on('connectUser', handleConnectUser);
     socket.on('disconnectUser', handleDisconnectUser);
     socket.on('connectServer', handleConnectServer);
@@ -117,8 +145,11 @@ const Home = () => {
     socket.on('disconnectChannel', handleDisconnectChannel);
     socket.on('userPresenceUpdate', handleUpdateUserPresence);
     socket.on('serverUpdate', handleServerUpdate);
+    socket.on('playSound', handlePlaySound);
 
     return () => {
+      socket.off('disconnect', handleDisconnect);
+      socket.off('forceDisconnect', handleForceDisconnect);
       socket.off('connectUser', handleConnectUser);
       socket.off('disconnectUser', handleDisconnectUser);
       socket.off('connectServer', handleConnectServer);
@@ -127,8 +158,9 @@ const Home = () => {
       socket.off('disconnectChannel', handleDisconnectChannel);
       socket.off('userPresenceUpdate', handleUpdateUserPresence);
       socket.off('serverUpdate', handleServerUpdate);
+      socket.off('playSound', handlePlaySound);
     };
-  }, [sessionId, user, server]);
+  }, [sessionId, server, user]);
 
   useEffect(() => {
     if (server) setSelectedTabId(3);
