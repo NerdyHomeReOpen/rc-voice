@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
+import { errorHandler } from '@/utils/errorHandler';
 
 // ServerCard Component
 interface ServerCardProps {
@@ -31,12 +32,15 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
 
   const handleServerSelect = (serverId: string) => {
     sokcet?.emit('connectServer', { serverId, sessionId });
+    errorHandler.handle = () => {
+      console.log('error');
+    };
   };
 
   return (
     <button
       className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-white hover:bg-gray-50 w-full"
-      onClick={() => handleServerSelect(server.id)}
+      onClick={() => handleServerSelect(server.id + '1')}
     >
       <img
         src={`${server.iconUrl ?? '/logo_server_def.png'}`}

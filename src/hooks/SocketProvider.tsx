@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
+import { errorHandler, standardizedError } from '@/utils/errorHandler';
 
 const WS_URL = 'ws://localhost:4500';
 
@@ -38,6 +39,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     });
     socket.on('error', (error) => {
       setError(error);
+      errorHandler.ResponseError(error);
       console.log('Connect server error');
     });
     socket.on('disconnect', () => {
