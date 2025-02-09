@@ -70,6 +70,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>('');
+  const [page, setPage] = useState<number>(1);
 
   const [sortState, setSortState] = useState<SortState>({
     field: 'permission',
@@ -112,7 +113,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   const usersList = useCallback((): UserList => {
     return getServerUsers()
       .filter((user) => {
-        const permissionLevel = server.permissions?.[user.id] || 1;
+        const permissionLevel = server.members?.[user.id].permissionLevel || 1;
         return permissionLevel < 7;
       })
       .reduce((acc, user) => {
@@ -584,6 +585,146 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
             <div className="mt-2 text-sm text-gray-500 text-end">
               右鍵可以進行處理
             </div>
+          </div>
+        );
+      case '黑名單管理':
+        const blockAccountList = {
+          '1': { name: 'test1' },
+          '2': { name: 'test2' },
+          '3': { name: 'test3' },
+          '4': { name: 'test4' },
+          '5': { name: 'test5' },
+          '6': { name: 'test6' },
+          '7': { name: 'test7' },
+          '8': { name: 'test8' },
+          '9': { name: 'test9' },
+          '10': { name: 'test10' },
+        };
+
+        const blockAccountPage = (
+          <div className="flex flex-col">
+            <div className="flex justify-end items-center border rounded-md overflow-hidden">
+              <Search className="text-gray-400 h-5 w-5 ml-2" />
+              <input
+                type="text"
+                placeholder="輸入關鍵字搜尋"
+                className="w-60 px-2 py-1.5 text-sm border-none outline-none"
+              />
+            </div>
+            {/* <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-gray-50 text-gray-600 select-none">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
+                        暱稱
+                      </th>
+                      <th
+                        className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('applyContribution')}
+                      >
+                        <div className="flex items-center relative pr-6">
+                          貢獻值
+                          <span className="absolute right-0">
+                            {sortState.field === 'applyContribution' &&
+                              (sortState.direction === 'asc' ? (
+                                <ChevronUp size={16} />
+                              ) : (
+                                <ChevronDown size={16} />
+                              ))}
+                          </span>
+                        </div>
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
+                        申請說明
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {application.map(([userId, message]) => {
+                      const applicantUser = users[userId];
+                      const displayName =
+                        server.nicknames[userId] ||
+                        (applicantUser?.name ?? '未知用戶');
+
+                      return (
+                        <tr key={userId} className="border-b hover:bg-gray-50">
+                          <td className="px-4 py-3 truncate">{displayName}</td>
+                          <td className="px-4 py-3">
+                            {server.contributions[userId] || 0}
+                          </td>
+                          <td className="px-4 py-3">{message}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table> */}
+            <div className="flex flex-col border rounded-lg overflow-hidden mt-2">
+              <div className="max-h-[500px] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-gray-50 text-gray-600 select-none">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
+                        勾選
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
+                        暱稱
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
+                        ID
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(blockAccountList).map(([userId, user]) => {
+                      const displayName = user.name || '未知用戶';
+
+                      return (
+                        <tr key={userId} className="border-b hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <input type="checkbox" />
+                          </td>
+                          <td className="px-4 py-3 truncate">{displayName}</td>
+                          <td className="px-4 py-3">{userId}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+        const blockIpPage = <div></div>;
+
+        return (
+          <div className="w-80 h-80">
+            <div className="flex flex-row items-center justify-start mb-2">
+              <div className="flex flex-row border rounded text-sm font-medium">
+                <div
+                  className={`p-2 bg-${
+                    page == 1 ? 'gray-200' : 'white'
+                  } cursor-pointer hover:bg-gray-200`}
+                  onClick={() => {
+                    setPage(1);
+                  }}
+                >
+                  封鎖帳號
+                </div>
+                <div
+                  className={`p-2 bg-${
+                    page == 1 ? 'white' : 'gray-200'
+                  } cursor-pointer hover:bg-gray-200`}
+                  onClick={() => {
+                    setPage(2);
+                  }}
+                >
+                  封鎖IP
+                </div>
+              </div>
+            </div>
+            <div>
+              {page === 1 ? blockAccountPage : page === 2 ? blockIpPage : null}
+            </div>
+            <div className="text-end text-sm">右鍵可以進行處理</div>
           </div>
         );
       default:

@@ -8,14 +8,14 @@
 
 若是想參與測試開發版本，此 repo 的 branch 分別為：
 
-| branch      | role   |
-| ----------- | ------ |
-| `ts-refactor`    | client / test-server |
-| `Websocket` | server |
+| branch        | role                 |
+| ------------- | -------------------- |
+| `ts-refactor` | client / test-server |
+| `Websocket`   | server               |
 
 ## 如何啟動
 
-### 優先安裝 modules
+### !!!請先安裝 modules!!!
 
 ```bash
 # 使用 npm
