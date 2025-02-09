@@ -40,7 +40,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   return (
     <button
       className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-white hover:bg-gray-50 w-full"
-      onClick={() => handleServerSelect(server.id + '1')}
+      onClick={() => handleServerSelect(server.id)}
     >
       <img
         src={`${server.iconUrl ?? '/logo_server_def.png'}`}
