@@ -611,52 +611,6 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                 className="w-60 px-2 py-1.5 text-sm border-none outline-none"
               />
             </div>
-            {/* <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-gray-50 text-gray-600 select-none">
-                    <tr>
-                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
-                        暱稱
-                      </th>
-                      <th
-                        className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100"
-                        onClick={() => handleSort('applyContribution')}
-                      >
-                        <div className="flex items-center relative pr-6">
-                          貢獻值
-                          <span className="absolute right-0">
-                            {sortState.field === 'applyContribution' &&
-                              (sortState.direction === 'asc' ? (
-                                <ChevronUp size={16} />
-                              ) : (
-                                <ChevronDown size={16} />
-                              ))}
-                          </span>
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium border-b cursor-pointer hover:bg-gray-100">
-                        申請說明
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {application.map(([userId, message]) => {
-                      const applicantUser = users[userId];
-                      const displayName =
-                        server.nicknames[userId] ||
-                        (applicantUser?.name ?? '未知用戶');
-
-                      return (
-                        <tr key={userId} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3 truncate">{displayName}</td>
-                          <td className="px-4 py-3">
-                            {server.contributions[userId] || 0}
-                          </td>
-                          <td className="px-4 py-3">{message}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table> */}
             <div className="flex flex-col border rounded-lg overflow-hidden mt-2">
               <div className="max-h-[500px] overflow-y-auto">
                 <table className="w-full text-sm">
