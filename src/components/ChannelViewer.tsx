@@ -20,8 +20,8 @@ import store from '@/redux/store';
 import { useSocket } from '@/hooks/SocketProvider';
 
 // Components
-import ContextMenu from '@/components/ContextMenu';
 import BadgeViewer from '@/components/BadgeViewer';
+import ContextMenu from '@/components/ContextMenu';
 import UserInfoBlock from '@/components/UserInfoBlock';
 
 // Modals
@@ -214,10 +214,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   const handleJoinChannel = useCallback(
     (channelId: string) => {
       if (user.presence?.currentChannelId !== channelId) {
-        socket?.emit('disconnectChannel', { sessionId });
-        socket?.once('disconnectChannel', () =>
-          socket?.emit('connectChannel', { sessionId, channelId }),
-        );
+        socket?.emit('connectChannel', { sessionId, channelId });
       }
     },
     [socket, user],
