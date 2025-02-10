@@ -71,6 +71,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>('');
   const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(1);
 
   const [sortState, setSortState] = useState<SortState>({
     field: 'permission',
