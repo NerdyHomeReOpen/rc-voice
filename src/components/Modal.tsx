@@ -20,8 +20,8 @@ const Modal = memo(
     title,
     submitText = '保存',
     tabs,
-    width = '800',
-    height = '700',
+    width = '800px',
+    height = '700px',
     onClose,
     onSubmit,
     onSelectTab,
@@ -33,7 +33,8 @@ const Modal = memo(
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <form
           onSubmit={onSubmit}
-          className={`flex flex-col w-\[${width}\] h-\[${height}\] bg-white rounded shadow-lg overflow-hidden transform outline-g`}
+          style={{ width: width, height: height }}
+          className={`flex flex-col bg-white rounded shadow-lg overflow-hidden transform outline-g`}
         >
           {/* Top Nevigation */}
           <div className="bg-blue-600 p-2 text-white flex items-center justify-between select-none">

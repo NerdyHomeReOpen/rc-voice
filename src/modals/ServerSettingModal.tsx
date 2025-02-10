@@ -103,26 +103,45 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
 
   const togglePreview = (): void => setIsPreviewMode(!isPreviewMode);
 
-  const getServerUsers = useCallback((): User[] => {
-    if (!server?.userIds) return [];
-    return Object.values(users).filter(
-      (user) => user && user.id && server.userIds.includes(user.id),
-    );
-  }, [server?.userIds, users]);
-
   const usersList = useCallback((): UserList => {
-    return getServerUsers()
-      .filter((user) => {
-        const permissionLevel = server.members?.[user.id].permissionLevel || 1;
-        return permissionLevel < 7;
-      })
-      .reduce((acc, user) => {
-        if (user?.id) {
-          acc[user.id] = user;
+    if (!server?.members || !users) return {};
+    // return Object.values(users)
+    //   .filter(
+    //     (user) =>
+    //       user &&
+    //       user.id &&
+    //       server.members.hasOwnProperty(user.id) &&
+    //       server.members[user.id].permissionLevel < 7,
+    //   )
+    //   .reduce((acc, user) => {
+    //     if (user?.id) {
+    //       acc[user.id] = user;
+    //     }
+    //     return acc;
+    //   }, {} as UserList);
+    return Object.values(server.members)
+      .filter((user) => user.permissionLevel < 7)
+      .reduce((acc, member) => {
+        if (member.userId && users[member.userId]) {
+          acc[member.userId] = users[member.userId];
         }
         return acc;
       }, {} as UserList);
-  }, [getServerUsers, server.permissions]);
+  }, [server?.members, users]);
+
+  // const usersList = useCallback((): UserList => {
+  //   return getServerUsers();
+  //   // .filter((user) => {
+  //   //   const permissionLevel = server.members?.[user.id].permissionLevel || 1;
+  //   //   return permissionLevel < 7;
+  //   // })
+  //   // .reduce((acc, user) => {
+  //   //   if (user?.id) {
+  //   //     acc[user.id] = user;
+  //   //   }
+  //   //   return acc;
+  //   // }, {} as UserList);
+  // }, [getServerUsers]);
 
   const renderContent = (): React.ReactElement | null => {
     switch (activeTab.id) {
@@ -272,7 +291,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
         const sortedUsers = Object.entries(usersList())
           .filter(([, user]) => {
             const displayName = (
-              server.nicknames?.[user.id] ||
+              server.members[user.id].nickname ||
               user.name ||
               ''
             ).toLowerCase();
@@ -283,26 +302,28 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
           })
           .sort(([, a], [, b]) => {
             const direction = sortState.direction === 'asc' ? 1 : -1;
+            const memberA = server.members[a.id];
+            const memberB = server.members[b.id];
 
             switch (sortState.field) {
               case 'name':
-                const nameA = server.nicknames?.[a.id] || a.name || '';
-                const nameB = server.nicknames?.[b.id] || b.name || '';
+                const nameA = memberA.nickname || a.name || '';
+                const nameB = memberB.nickname || b.name || '';
                 return direction * nameA.localeCompare(nameB);
 
               case 'permission':
-                const permissionA = server.permissions?.[a.id] || 1;
-                const permissionB = server.permissions?.[b.id] || 1;
+                const permissionA = memberA.permissionLevel || 1;
+                const permissionB = memberB.permissionLevel || 1;
                 return direction * (permissionA - permissionB);
 
               case 'contribution':
-                const contribA = server.contributions?.[a.id] || 0;
-                const contribB = server.contributions?.[b.id] || 0;
+                const contribA = memberA.contribution || 0;
+                const contribB = memberB.contribution || 0;
                 return direction * (contribA - contribB);
 
               case 'joinDate':
-                const dateA = server.joinDate[a.id] || a.createdAt;
-                const dateB = server.joinDate[b.id] || b.createdAt;
+                const dateA = memberA.joinedAt || 0;
+                const dateB = memberB.joinedAt || 0;
                 return direction * (dateA - dateB);
 
               default:
@@ -408,16 +429,16 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                           <div className="flex items-center gap-2">
                             <img
                               src={`/channel/${user.gender}_${
-                                server.permissions[user.id] || 0
+                                server.members[user.id].permissionLevel || 0
                               }.png`}
                               className="w-4 h-5 select-none"
                               alt={user.name}
                             />
                             <div>
                               <div className="font-medium text-gray-900">
-                                {server.nicknames?.[user.id] || user.name}
+                                {server.members[user.id].nickname || user.name}
                               </div>
-                              {server.nicknames[user.id] && (
+                              {server.members[user.id].nickname && (
                                 <div className="text-gray-500 text-xs">
                                   原始名稱: {user.name}
                                 </div>
@@ -429,17 +450,17 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                           <div className="flex flex-col">
                             <span className="text-gray-500 text-xs">
                               {getPermissionText(
-                                server.permissions?.[user.id] || 1,
+                                server.members[user.id].permissionLevel || 1,
                               )}
                             </span>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-gray-500">
-                          {server.contributions?.[user.id] || 0}
+                          {server.members[user.id].contribution || 0}
                         </td>
                         <td className="px-4 py-3 text-gray-500">
                           {new Date(
-                            server.joinDate[user.id] || user.createdAt,
+                            server.members[user.id].joinedAt || 0,
                           ).toLocaleString()}
                         </td>
                       </tr>
@@ -511,11 +532,11 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
 
       case '會員申請管理':
         const application = Object.entries(server.applications || {}).sort(
-          (a, b) => {
+          ([, a], [, b]) => {
             const direction = sortState.direction === 'asc' ? -1 : 1;
 
-            const contribA = server.contributions[a[0]] || 0;
-            const contribB = server.contributions[b[0]] || 0;
+            const contribA = server.members[a.userId].contribution || 0;
+            const contribB = server.members[b.userId].contribution || 0;
             return direction * (contribB - contribA);
           },
         );
@@ -526,7 +547,12 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
               <span className="text-sm font-medium">
                 申請人數:{application.length}
               </span>
-              <button className="text-sm text-blue-400 hover:underline">
+              <button
+                className="text-sm text-blue-400 hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+              >
                 申請設定
               </button>
             </div>
@@ -564,16 +590,29 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                     {application.map(([userId, message]) => {
                       const applicantUser = users[userId];
                       const displayName =
-                        server.nicknames[userId] ||
+                        server.members[userId].nickname ||
                         (applicantUser?.name ?? '未知用戶');
 
                       return (
                         <tr key={userId} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3 truncate">{displayName}</td>
-                          <td className="px-4 py-3">
-                            {server.contributions[userId] || 0}
+                          <td className="px-4 py-3 truncate">
+                            {displayName}
+                            {server.members[userId].nickname && (
+                              <div className="text-gray-500 text-xs">
+                                原始名稱: {applicantUser?.name}
+                              </div>
+                            )}
                           </td>
-                          <td className="px-4 py-3">{message}</td>
+                          <td className="px-4 py-3">
+                            {server.members[userId].contribution || 0}
+                          </td>
+                          {message ? (
+                            <div className="px-4 py-3">{message}</div>
+                          ) : (
+                            <div className="px-4 py-3 text-gray-500 text-xs">
+                              {'該使用者並未撰寫申請訊息'}
+                            </div>
+                          )}
                         </tr>
                       );
                     })}
@@ -589,28 +628,36 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
         );
       case '黑名單管理':
         const blockAccountList = {
-          '1': { name: 'test1' },
-          '2': { name: 'test2' },
-          '3': { name: 'test3' },
-          '4': { name: 'test4' },
-          '5': { name: 'test5' },
-          '6': { name: 'test6' },
-          '7': { name: 'test7' },
-          '8': { name: 'test8' },
-          '9': { name: 'test9' },
-          '10': { name: 'test10' },
+          // '1': { name: 'test1' },
+          // '2': { name: 'test2' },
+          // '3': { name: 'test3' },
+          // '4': { name: 'test4' },
+          // '5': { name: 'test5' },
+          // '6': { name: 'test6' },
+          // '7': { name: 'test7' },
+          // '8': { name: 'test8' },
+          // '9': { name: 'test9' },
+          // '10': { name: 'test10' },
         };
 
         const blockAccountPage = (
-          <div className="flex flex-col">
-            <div className="flex justify-end items-center border rounded-md overflow-hidden">
-              <Search className="text-gray-400 h-5 w-5 ml-2" />
-              <input
-                type="text"
-                placeholder="輸入關鍵字搜尋"
-                className="w-60 px-2 py-1.5 text-sm border-none outline-none"
-              />
+          <div className="flex flex-col w-full">
+            {/* head */}
+            <div className="flex flex-row justify-between items-center mb-6  select-none">
+              <span className="text-sm font-medium">
+                黑名單: {Object.keys(blockAccountList).length}
+              </span>
+              <div className="flex justify-end items-center border rounded-md overflow-hidden">
+                <Search className="text-gray-400 h-5 w-5 ml-2" />
+                <input
+                  type="text"
+                  placeholder="輸入關鍵字搜尋"
+                  className="w-60 px-2 py-1.5 text-sm border-none outline-none"
+                />
+              </div>
             </div>
+
+            {/* body */}
             <div className="flex flex-col border rounded-lg overflow-hidden mt-2">
               <div className="max-h-[500px] overflow-y-auto">
                 <table className="w-full text-sm">
@@ -650,32 +697,32 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
         const blockIpPage = <div></div>;
 
         return (
-          <div className="w-80 h-80">
-            <div className="flex flex-row items-center justify-start mb-2">
-              <div className="flex flex-row border rounded text-sm font-medium">
-                <div
-                  className={`p-2 bg-${
-                    page == 1 ? 'gray-200' : 'white'
-                  } cursor-pointer hover:bg-gray-200`}
-                  onClick={() => {
-                    setPage(1);
-                  }}
-                >
-                  封鎖帳號
-                </div>
-                <div
-                  className={`p-2 bg-${
-                    page == 1 ? 'white' : 'gray-200'
-                  } cursor-pointer hover:bg-gray-200`}
-                  onClick={() => {
-                    setPage(2);
-                  }}
-                >
-                  封鎖IP
+          <div>
+            <div className="flex flex-col items-center">
+              <div className="flex flex-row items-center justify-start mb-2">
+                <div className="flex flex-row border rounded text-sm font-medium">
+                  <div
+                    className={`p-2 bg-${
+                      page == 1 ? 'gray-200' : 'white'
+                    } cursor-pointer hover:bg-gray-200`}
+                    onClick={() => {
+                      setPage(1);
+                    }}
+                  >
+                    封鎖帳號
+                  </div>
+                  <div
+                    className={`p-2 bg-${
+                      page == 1 ? 'white' : 'gray-200'
+                    } cursor-pointer hover:bg-gray-200`}
+                    onClick={() => {
+                      setPage(2);
+                    }}
+                  >
+                    封鎖IP
+                  </div>
                 </div>
               </div>
-            </div>
-            <div>
               {page === 1 ? blockAccountPage : page === 2 ? blockIpPage : null}
             </div>
             <div className="text-end text-sm">右鍵可以進行處理</div>
