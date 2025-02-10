@@ -1551,6 +1551,17 @@ io.on('connection', async (socket) => {
         return;
       }
 
+      // check if user is already in a channel, if so, disconnect the channel
+      const oldChannelId =
+        presenceStates[`presence_${user.id}`]?.currentChannelId;
+      if (oldChannelId && channels[oldChannelId]) {
+        const oldChannel = channels[oldChannelId];
+        oldChannel.userIds = oldChannel.userIds.filter((id) => id !== user.id);
+        await db.set(`channels.${oldChannel.id}`, oldChannel);
+        socket.leave(`channel_${oldChannel.id}`);
+        io.to(`channel_${oldChannel.id}`).emit('playSound', 'leave');
+      }
+
       // Update user presence
       const presenceId = `presence_${user.id}`;
       const presence = {
@@ -1563,8 +1574,10 @@ io.on('connection', async (socket) => {
       await db.set(`presenceStates.${presenceId}`, presence);
 
       // Update channel
-      channel.userIds.push(user.id);
-      await db.set(`channels.${channel.id}`, channel);
+      if (!channel.userIds.includes(user.id)) {
+        channel.userIds.push(user.id);
+        await db.set(`channels.${channel.id}`, channel);
+      }
 
       // Play sound
       io.to(`channel_${channel.id}`).emit('playSound', 'join');
@@ -1573,9 +1586,7 @@ io.on('connection', async (socket) => {
       socket.join(`channel_${channel.id}`);
 
       // Emit updated data (only to the user)
-      io.to(socket.id).emit('connectChannel', {
-        // ...(await getChannel(channel.id)),
-      });
+      io.to(socket.id).emit('connectChannel', {});
       io.to(socket.id).emit('userPresenceUpdate', {
         ...(await getPresenceState(user.id)),
       });
