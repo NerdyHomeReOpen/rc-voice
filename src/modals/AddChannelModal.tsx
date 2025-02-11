@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import Modal from '@/components/Modal';
 
 // Types
-import { Channel, ChannelPermission, Server } from '@/types';
+import { Channel, Server, Visibility } from '@/types';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
@@ -19,7 +19,7 @@ const validateName = (name: string): string => {
 
 interface ChannelFormData {
   name: string;
-  permission: ChannelPermission;
+  visibility: Visibility;
   isCategory: boolean;
 }
 
@@ -46,7 +46,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     // Form Control
     const [formData, setFormData] = useState<ChannelFormData>({
       name: '',
-      permission: 'public',
+      visibility: 'public',
       isCategory: false,
     });
     const [errors, setErrors] = useState<FormErrors>({});
@@ -74,24 +74,20 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
         settings: {
           bitrate: 0,
           visibility: 'public',
-          slowmode: 0,
-          topic: '',
+          slowmode: false,
           userLimit: 0,
         },
       };
 
       if (!nameError) {
-        try {
-          socket?.emit('addChannel', {
-            sessionId: sessionId,
-            channel: channel,
-          });
-          onClose();
-        } catch (error) {
-          setErrors({
-            general: error instanceof Error ? error.message : '登入失敗',
-          });
-        }
+        socket?.emit('addChannel', {
+          sessionId: sessionId,
+          channel: channel,
+        });
+        socket?.on('error', (error: { message: string }) => {
+          setErrors({ general: error.message });
+        });
+        onClose();
       }
     };
 
@@ -116,11 +112,11 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
           required
         />
         <select
-          value={formData.permission}
+          value={formData.visibility}
           onChange={(e) =>
             setFormData((prev) => ({
               ...prev,
-              permission: e.target.value as ChannelPermission,
+              permission: e.target.value as Visibility,
             }))
           }
           className="w-full p-2 border rounded mb-4"

@@ -22,6 +22,7 @@ import { errorHandler } from '@/utils/errorHandler';
 interface ServerCardProps {
   server: Server;
 }
+
 const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   // Redux
   const sessionId = useSelector(
@@ -39,6 +40,10 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   };
 
   const serverIcon = server.icon ?? '/logo_server_def.png';
+  const serverName = server.name ?? '';
+  const serverDisplayId = server.displayId ?? '';
+  const serverAnnouncement = server.announcement ?? '';
+
   return (
     <button
       className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-white hover:bg-gray-50 w-full"
@@ -47,52 +52,49 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
       <img src={serverIcon} alt="Server Icon" className="w-14 h-14" />
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-medium text-[#4A6B9D] text-start truncate">
-          {server.name}
+          {serverName}
         </h3>
-        <p className="text-xs text-gray-500 text-start">
-          ID:{server.displayId}
+        <p className="text-xs text-gray-500 text-start">ID:{serverDisplayId}</p>
+        <p className="text-xs text-gray-500 text-start truncate">
+          {serverAnnouncement}
         </p>
-        {server.announcement && (
-          <p className="text-xs text-gray-500 text-start truncate">
-            {server.announcement}
-          </p>
-        )}
       </div>
     </button>
   );
 });
+
 ServerCard.displayName = 'ServerCard';
 
 // ServerGrid Component
 interface ServerGridProps {
   servers: Server[];
 }
+
 const ServerGrid: React.FC<ServerGridProps> = React.memo(({ servers }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-      {servers?.map(
+      {servers.map(
         (server) => server && <ServerCard key={server?.id} server={server} />,
       )}
     </div>
   );
 });
+
 ServerGrid.displayName = 'ServerGrid';
 
 // Header Component
 interface HeaderProps {
   onSearch: (query: string) => void;
 }
+
 const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
   // Create Server Modal Control
   const [showCreateServer, setShowCreateServer] = useState(false);
 
-  const toggleCreateServer = (state?: boolean) =>
-    setShowCreateServer(state ?? !showCreateServer);
-
   return (
     <>
       {showCreateServer && (
-        <CreateServerModal onClose={() => toggleCreateServer(false)} />
+        <CreateServerModal onClose={() => setShowCreateServer(false)} />
       )}
       <header className="bg-white shadow-sm">
         <div className="flex items-center justify-between px-8 py-2">
@@ -110,7 +112,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
           <div className="flex space-x-4 items-center">
             <button
               className="text-gray-600 hover:text-gray-900 text-sm select-none"
-              onClick={() => toggleCreateServer()}
+              onClick={() => setShowCreateServer(false)}
             >
               創建語音群
             </button>
@@ -120,11 +122,11 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
     </>
   );
 });
+
 Header.displayName = 'Header';
 
 // HomePage Component
-interface HomePageProps {}
-const HomePage: React.FC<HomePageProps> = React.memo(() => {
+const HomePage: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
 
@@ -138,8 +140,6 @@ const HomePage: React.FC<HomePageProps> = React.memo(() => {
         return servers
           .filter(
             (server) =>
-              //TODO: id之後不支援
-              server.id?.toString() === searchQuery.trim() ||
               server.displayId?.toString() === searchQuery.trim() ||
               server.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
               calculateSimilarity(
@@ -165,46 +165,37 @@ const HomePage: React.FC<HomePageProps> = React.memo(() => {
           ...(user.joinedServers ?? []),
         ]),
       );
+    } else {
+      setSearchResults([]);
     }
   }, [searchQuery]);
 
   return (
     <div className="flex flex-1 flex-col">
       <Header onSearch={(query: string) => setSearchQuery(query)} />
-
       <main className="flex flex-1 min-h-0 bg-gray-100">
         <div className="flex flex-1 flex-col item-center space-y-6 p-8 overflow-y-auto">
-          {searchQuery ? (
+          {searchResults.length > 0 && (
             <section>
               <h2 className="text-lg font-bold mb-3">搜尋結果</h2>
-              {searchResults.length > 0 ? (
-                <ServerGrid servers={searchResults || []} />
-              ) : (
-                <div>
-                  <p className="text-center text-gray-500 py-8">
-                    沒有找到相關的語音群
-                  </p>
-                </div>
-              )}
+              <ServerGrid servers={searchResults || []} />
             </section>
-          ) : (
-            <>
-              <section className="mb-6">
-                <h2 className="text-lg font-bold mb-3">推薦語音群</h2>
-                <ServerGrid servers={user.recommendedServers || []} />
-              </section>
-
-              <section>
-                <h2 className="text-lg font-bold mb-3">我的語音群</h2>
-                <ServerGrid servers={user.joinedServers || []} />
-              </section>
-            </>
           )}
+          <section className="mb-6">
+            <h2 className="text-lg font-bold mb-3">推薦語音群</h2>
+            <ServerGrid servers={user.recommendedServers || []} />
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold mb-3">我的語音群</h2>
+            <ServerGrid servers={user.joinedServers || []} />
+          </section>
         </div>
       </main>
     </div>
   );
 });
+
 HomePage.displayName = 'HomePage';
 
 export default HomePage;

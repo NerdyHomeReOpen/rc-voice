@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import Modal from '@/components/Modal';
 
 // Types
-import { Channel, ChannelPermission, Server } from '@/types';
+import { Channel, Visibility } from '@/types';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
@@ -19,7 +19,7 @@ const validateName = (name: string): string => {
 
 interface ChannelFormData {
   name: string;
-  permission: ChannelPermission;
+  visibility: Visibility;
   isCategory: boolean;
 }
 
@@ -45,7 +45,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     // Form Control
     const [formData, setFormData] = useState<ChannelFormData>({
       name: channel.name,
-      permission: channel.permission,
+      visibility: channel.settings.visibility,
       isCategory: channel.isCategory,
     });
     const [errors, setErrors] = useState<FormErrors>({});
@@ -99,11 +99,11 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
           required
         />
         <select
-          value={formData.permission}
+          value={formData.visibility}
           onChange={(e) =>
             setFormData((prev) => ({
               ...prev,
-              permission: e.target.value as ChannelPermission,
+              permission: e.target.value as Visibility,
             }))
           }
           className="w-full p-2 border rounded mb-4"

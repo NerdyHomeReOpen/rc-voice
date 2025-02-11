@@ -15,11 +15,11 @@ interface TabsProps {
 
 const Tabs: React.FC<TabsProps> = React.memo(({ selectedId, onSelect }) => {
   // Redux
+  const user = useSelector((state: { user: User }) => state.user);
+  const server = useSelector((state: { server: Server }) => state.server);
   const sessionId = useSelector(
     (state: { sessionToken: string }) => state.sessionToken,
   );
-  const server = useSelector((state: { server: Server }) => state.server);
-  const user = useSelector((state: { user: User }) => state.user);
 
   // Socket Control
   const socket = useSocket();
@@ -37,39 +37,41 @@ const Tabs: React.FC<TabsProps> = React.memo(({ selectedId, onSelect }) => {
 
   return (
     <div className="flex min-w-[50%] space-x-4">
-      {TABS.map((TAB) => {
-        if (TAB)
-          return (
+      {TABS.filter((_) => _).map((Tab, index) => {
+        const TabId = Tab.id;
+        const TabLable = Tab.label;
+
+        return (
+          <div
+            key={`Tabs-${TabId}`}
+            className="min-w-32 text-center -mb-2 select-none"
+          >
             <div
-              key={`Tabs-${TAB?.id}`}
-              className="min-w-32 text-center -mb-2 select-none"
+              className={`p-2 h-8 cursor-pointer font-medium ${
+                TabId === selectedId
+                  ? 'bg-white text-blue-500 rounded-t-xl  text-based'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white rounded-t-xl text-center'
+              }`}
+              onClick={() => onSelect(TabId)}
             >
-              <div
-                className={`p-2 h-8 cursor-pointer font-medium ${
-                  TAB.id === selectedId
-                    ? 'bg-white text-blue-500 rounded-t-xl  text-based'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white rounded-t-xl text-center'
-                }`}
-                onClick={() => onSelect(TAB.id)}
-              >
-                <div className="flex flex-row items-center justify-center">
-                  <span className="truncate">{TAB.label}</span>
-                  {TAB.id === 3 && (
-                    <CircleX
-                      onClick={() => handleLeaveServer()}
-                      size={16}
-                      className="ml-2 -mr-2 cursor-pointer"
-                    />
-                  )}
-                </div>
+              <div className="flex flex-row items-center justify-between">
+                <span className="truncate">{TabLable}</span>
+                {index === 2 && (
+                  <CircleX
+                    onClick={() => handleLeaveServer()}
+                    size={16}
+                    className="cursor-pointer right-0 bg-none"
+                  />
+                )}
               </div>
-              <div
-                className={`h-2 ${
-                  TAB.id === selectedId ? 'bg-white' : 'bg-blue-600'
-                }`}
-              />
             </div>
-          );
+            <div
+              className={`h-2 ${
+                TabId === selectedId ? 'bg-white' : 'bg-blue-600'
+              }`}
+            />
+          </div>
+        );
       })}
     </div>
   );

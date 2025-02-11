@@ -9,6 +9,7 @@ interface ContextMenuProps {
   y: number;
   onClose: () => void;
 }
+
 const ContextMenu: React.FC<ContextMenuProps> = React.memo(
   ({ onClose, x, y, items }) => {
     // Ref
@@ -47,6 +48,7 @@ const ContextMenu: React.FC<ContextMenuProps> = React.memo(
     );
   },
 );
+
 ContextMenu.displayName = 'ContextMenu';
 
 export default ContextMenu;

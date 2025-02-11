@@ -1,4 +1,4 @@
-import { ServerPermission } from "@/types";
+import { Permission } from "@/types";
 
 export const formatTimestamp = (timestamp: number): string => {
   const now = new Date();
@@ -27,14 +27,14 @@ export const formatTimestamp = (timestamp: number): string => {
 
 export const getPermissionText = (permission: number): string => {
   const permissionMap: Record<number, string> = {
-    [ServerPermission.Guest]: "遊客",
-    [ServerPermission.Member]: "會員",
-    [ServerPermission.ChannelAdmin]: "頻道管理員",
-    [ServerPermission.ChannelManager]: "頻道管理員",
-    [ServerPermission.ServerAdmin]: "群管理員",
-    [ServerPermission.ServerOwner]: "群創建者",
-    [ServerPermission.EventStaff]: "官方活動人員",
-    [ServerPermission.Official]: "官方人員",
+    [Permission.Guest]: "遊客",
+    [Permission.Member]: "會員",
+    [Permission.ChannelAdmin]: "頻道管理員",
+    [Permission.ChannelManager]: "頻道管理員",
+    [Permission.ServerAdmin]: "群管理員",
+    [Permission.ServerOwner]: "群創建者",
+    [Permission.EventStaff]: "官方活動人員",
+    [Permission.Official]: "官方人員",
   };
   return permissionMap[permission] || "未知";
 };

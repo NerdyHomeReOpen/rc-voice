@@ -92,7 +92,6 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
         try {
           const serverId = await serverService.createServer(formData);
           onClose();
-
           // Connect to the server
           socket?.emit('connectServer', {
             sessionId: sessionId,

@@ -29,6 +29,9 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(({ category }) => {
   // Expanded Control
   const [expanded, setExpanded] = useState<boolean>(true);
 
+  const categoryName = category.name;
+  const categoryFriends = category.friends || [];
+
   return (
     <div key={category.id} className="mb">
       {/* Tab View */}
@@ -43,13 +46,13 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(({ category }) => {
         <div className="flex items-center flex-1 min-w-0">
           <div
             className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 cursor-pointer`}
-            onClick={() => setExpanded((prevExpanded) => !prevExpanded)}
+            onClick={() => setExpanded(!expanded)}
           >
             {expanded ? <Minus size={12} /> : <Plus size={12} />}
           </div>
-          <span className={`truncate`}>{category.name}</span>
+          <span className={`truncate`}>{categoryName}</span>
           <span className="ml-1 text-gray-500 text-sm">
-            {`(${category.friends?.length || 0})`}
+            {`(${categoryFriends.length})`}
           </span>
         </div>
         <button
@@ -65,7 +68,7 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(({ category }) => {
       {/* Expanded Sections */}
       {expanded && category.friends && (
         <div className="ml-6">
-          {category.friends.map((friend) => (
+          {categoryFriends.map((friend) => (
             <FriendCard key={friend.id} friend={friend} />
           ))}
         </div>
@@ -78,9 +81,11 @@ interface FriendCardProps {
   friend: User;
 }
 const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
-  if (!friend) return <></>;
-
   const friendLevel = Math.min(56, Math.ceil(friend.level / 5)); // 56 is max level
+  const friendAvatarUrl = friend.avatarUrl ?? '/pfp/default.png';
+  const friendName = friend.name;
+  const friendBadges = friend.badges || [];
+  const friendSignature = friend.signature || '';
 
   return (
     <div key={friend.id}>
@@ -91,31 +96,31 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
             className={`w-14 h-14 bg-gray-200 rounded-sm flex items-center justify-center mr-1`}
           >
             <img
-              src={friend.avatarUrl ?? '/pfp/default.png'}
-              alt={`${friend.name} Avatar`}
+              src={friendAvatarUrl}
+              alt={`${friendName} Avatar`}
               className="select-none"
             />
           </div>
           <div className="flex flex-1 flex-col gap-2">
             <div className="flex items-center flex-1 min-w-0">
-              <span className="truncate">{friend.name}</span>
+              <span className="truncate">{friendName}</span>
               <div
                 className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
               >
                 <img
                   src={`/usergrade_${friendLevel}.png`}
-                  alt={`User Grade ${friendLevel}`}
+                  alt={`usergrade_${friendLevel}`}
                   className="select-none"
                 />
               </div>
               <div className="flex items-center space-x-1 ml-2 gap-1">
-                {friend.badges?.length > 0 && (
-                  <BadgeViewer badges={friend.badges} maxDisplay={3} />
+                {friendBadges.length > 0 && (
+                  <BadgeViewer badges={friendBadges} maxDisplay={3} />
                 )}
               </div>
             </div>
             <div className="flex items-center flex-1 min-w-0 ">
-              <span className="truncate text-gray-500">{friend.signature}</span>
+              <span className="truncate text-gray-500">{friendSignature}</span>
             </div>
           </div>
         </div>
@@ -130,26 +135,19 @@ const FriendListViewer: React.FC = React.memo(() => {
 
   // Search Control
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<FriendCategory[]>([]);
 
-  useEffect(() => {
-    const userFriendCategories = user.friendCategories || [];
-    if (searchQuery) {
-      const getResults = (
-        friendCategories: FriendCategory[],
-      ): FriendCategory[] => {
-        return friendCategories.map((category) => ({
-          ...category,
-          friends: category.friends?.filter((friend) =>
-            friend.name.toLowerCase().includes(searchQuery.toLowerCase()),
-          ),
-        }));
-      };
-      setSearchResults(getResults(userFriendCategories));
-    } else {
-      setSearchResults(userFriendCategories);
-    }
-  }, [searchQuery, user]);
+  const userFriendCategories = (user.friendCategories || []).map(
+    (category) => ({
+      ...category,
+      friends: category.friends
+        ? category.friends.filter(
+            (friend) =>
+              friend.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              searchQuery === '',
+          )
+        : null,
+    }),
+  );
 
   return (
     <>
@@ -185,7 +183,7 @@ const FriendListViewer: React.FC = React.memo(() => {
         所有好友
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
-        {searchResults.map((category) => (
+        {userFriendCategories.map((category) => (
           <FriendGroup key={category.id} category={category} />
         ))}
       </div>

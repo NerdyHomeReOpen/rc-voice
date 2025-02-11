@@ -224,62 +224,60 @@ const server = http.createServer((req, res) => {
           throw new Error('已達到最大擁有伺服器數量限制');
         }
 
-        // 創建新伺服器
+        // Create new server and channel
         const serverId = uuidv4();
         const channelId = uuidv4();
-        const membershipId = uuidv4();
-
         const server = {
           id: serverId,
-          displayId: generateUniqueDisplayId(servers),
           name: name,
-          announcement: description || '',
-          icon: iconPath,
-          userIds: [],
-          channelIds: [channelId],
-          lobbyId: channelId,
-          permissions: {
-            [userId]: 6, // 6 = 群組擁有者
-          },
-          contributions: {
-            [userId]: 0,
-          },
-          joinDate: {
-            [userId]: Date.now().valueOf(),
-          },
-          applications: {},
-          nicknames: {},
+          iconUrl: iconPath,
           level: 0,
+          announcement: description || '',
+          channelIds: [channelId],
+          displayId: generateUniqueDisplayId(servers),
+          lobbyId: channelId,
+          ownerId: userId,
+          settings: {
+            allowDirectMessage: true,
+            visibility: 'public',
+            defaultChannelId: channelId,
+          },
           createdAt: Date.now().valueOf(),
         };
-
-        // 儲存到資料庫
         const channel = {
           id: channelId,
           name: '大廳',
-          permission: 'public',
-          isLobby: true,
-          isCategory: false,
-          userIds: [],
           messageIds: [],
+          serverId: serverId,
           parentId: null,
+          userIds: [],
+          isCategory: false,
+          isLobby: true,
+          settings: {
+            bitrate: 64000,
+            slowmode: false,
+            userLimit: -1,
+            visibility: 'public',
+          },
+          createdAt: Date.now().valueOf(),
         };
 
-        // 更新用戶的伺服器成員資格
+        // Create new member
+        const memberId = uuidv4();
         const member = {
-          id: membershipId,
+          id: memberId,
+          nickname: user.name,
           serverId: serverId,
           userId: userId,
-          nickname: user.name,
-          permission: 6,
-          managedChannels: [],
           contribution: 0,
+          managedChannels: [],
+          permissionLevel: 6,
           joinedAt: Date.now().valueOf(),
         };
 
         await db.set(`servers.${serverId}`, server);
         await db.set(`channels.${channelId}`, channel);
-        await db.set(`members.${membershipId}`, member);
+        await db.set(`members.${memberId}`, member);
 
         new Logger('Server').success(
           `New server created: ${serverId} by user ${userId}`,

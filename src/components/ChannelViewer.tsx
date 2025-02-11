@@ -1,3 +1,5 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Dot,
   Edit,
@@ -7,11 +9,9 @@ import {
   Plus,
   Trash,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 // Types
-import type { Channel, Server, User } from '@/types';
+import type { Channel, Server, User, Visibility } from '@/types';
 
 // Redux
 import store from '@/redux/store';
@@ -28,8 +28,8 @@ import UserInfoBlock from '@/components/UserInfoBlock';
 import AddChannelModal from '@/modals/AddChannelModal';
 import EditChannelModal from '@/modals/EditChannelModal';
 
-const getPermissionStyle = (permission: Channel['permission']): string => {
-  switch (permission) {
+const getVisibilityStyle = (visibility: Visibility): string => {
+  switch (visibility) {
     case 'private':
       return 'bg-blue-100';
     case 'readonly':
@@ -44,16 +44,10 @@ interface ContextMenuPosState {
   y: number;
 }
 
-interface FloatingBlockState {
-  visible: boolean;
-  x: number;
-  y: number;
-  userId: string;
-}
-
 interface CategoryTabProps {
   category: Channel;
 }
+
 const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
   // Redux
   const server = useSelector((state: { server: Server }) => state.server);
@@ -74,15 +68,17 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
   const [showEditChannelModal, setShowEditChannelModal] =
     useState<boolean>(false);
 
+  const categoryVisibility = category.settings.visibility ?? 'public';
+  const categoryName = category.name ?? '';
+  const serverChannels = server.channels ?? [];
+
   return (
     <div key={category.id} className="mb">
       {/* Category View */}
       <div
         className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
         onClick={() =>
-          setExpanded((prevExpanded) => {
-            return category.permission != 'readonly' ? !prevExpanded : false;
-          })
+          setExpanded(categoryVisibility != 'readonly' ? !expanded : false)
         }
         onContextMenu={(e) => {
           e.preventDefault();
@@ -92,11 +88,10 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
       >
         <div className="flex items-center flex-1 min-w-0">
           <div
-            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 ${getPermissionStyle(
-              category.permission,
-            )}`}
+            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 
+              ${getVisibilityStyle(categoryVisibility)}`}
           >
-            {category.permission === 'readonly' ? (
+            {categoryVisibility === 'readonly' ? (
               <Dot size={12} />
             ) : expanded ? (
               <Minus size={12} />
@@ -104,25 +99,23 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
               <Plus size={12} />
             )}
           </div>
-          <span className="truncate">{category.name}</span>
+          <span className="truncate">{categoryName}</span>
         </div>
-        {category.permission !== 'readonly' && (
-          <div
-            onClick={(e) => {
-              e.preventDefault();
-              setShowAddChannelModal(true);
-            }}
-            className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
-          >
-            <Plus size={14} />
-          </div>
-        )}
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            setShowAddChannelModal(true);
+          }}
+          className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
+        >
+          <Plus size={14} />
+        </div>
       </div>
 
       {/* Expanded Sections */}
-      {expanded && server.channels && (
+      {expanded && serverChannels.length > 0 && (
         <div className="ml-6">
-          {[...server?.channels]
+          {serverChannels
             .filter((c) => c.parentId === category.id)
             .map((subChannel) =>
               subChannel.isCategory ? (
@@ -147,8 +140,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
               label: '編輯',
               onClick: () => {
                 setShowContextMenu(false);
-                setShowEditChannelModal(true);
-                // Open Edit Channel Modal
+                setShowAddChannelModal(true);
               },
             },
             {
@@ -157,7 +149,6 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
               label: '刪除',
               onClick: () => {
                 setShowContextMenu(false);
-
                 // Open Delete Channel Modal
               },
             },
@@ -187,6 +178,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
 interface ChannelTabProps {
   channel: Channel;
 }
+
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
@@ -194,11 +186,11 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
     (state: { sessionToken: string }) => state.sessionToken,
   );
 
-  // Expanded Control
-  const [expanded, setExpanded] = useState<boolean>(true);
-
   // Socket Control
   const socket = useSocket();
+
+  // Expanded Control
+  const [expanded, setExpanded] = useState<boolean>(true);
 
   // Context Menu Control
   const [contentMenuPos, setContentMenuPos] = useState<ContextMenuPosState>({
@@ -211,14 +203,15 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   const [showEditChannelModal, setShowEditChannelModal] =
     useState<boolean>(false);
 
-  const handleJoinChannel = useCallback(
-    (channelId: string) => {
-      if (user.presence?.currentChannelId !== channelId) {
-        socket?.emit('connectChannel', { sessionId, channelId });
-      }
-    },
-    [socket, user],
-  );
+  const handleJoinChannel = (channelId: string) => {
+    if (user.presence?.currentChannelId !== channelId) {
+      socket?.emit('connectChannel', { sessionId, channelId });
+    }
+  };
+
+  const channelVisibility = channel.settings.visibility ?? 'public';
+  const channelName = channel.name ?? '';
+  const channelUsers = channel.users ?? [];
 
   return (
     <div key={channel.id}>
@@ -227,16 +220,16 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
         <div
           className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
           onDoubleClick={() => {
-            channel.permission !== 'readonly' && handleJoinChannel(channel.id);
+            channelVisibility !== 'readonly' && handleJoinChannel(channel.id);
           }}
         >
           <div className="flex items-center flex-1 min-w-0">
             <div className="min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1">
               <House size={12} />
             </div>
-            <span className={'text-[#ff0000]'}>{channel.name}</span>
+            <span className={'text-[#ff0000]'}>{channelName}</span>
             <span className="ml-1 text-gray-500 text-sm">
-              {`(${channel.users?.length ?? 0})`}
+              {`(${channelUsers.length})`}
             </span>
           </div>
         </div>
@@ -244,7 +237,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
         <div
           className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
           onDoubleClick={() => {
-            channel.permission !== 'readonly' && handleJoinChannel(channel.id);
+            channelVisibility !== 'readonly' && handleJoinChannel(channel.id);
           }}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -254,16 +247,13 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
         >
           <div className="flex items-center flex-1 min-w-0">
             <div
-              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 ${getPermissionStyle(
-                channel.permission,
-              )} cursor-pointer`}
+              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 cursor-pointer 
+                ${getVisibilityStyle(channelVisibility)}`}
               onClick={() =>
-                setExpanded((prevExpanded) =>
-                  channel.permission != 'readonly' ? !prevExpanded : false,
-                )
+                setExpanded(channelVisibility != 'readonly' ? !expanded : false)
               }
             >
-              {channel.permission === 'readonly' ? (
+              {channelVisibility === 'readonly' ? (
                 <Dot size={12} />
               ) : expanded ? (
                 <Minus size={12} />
@@ -271,10 +261,9 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
                 <Plus size={12} />
               )}
             </div>
-            <span className={`truncate`}>{channel.name}</span>
+            <span className={`truncate`}>{channelName}</span>
             <span className="ml-1 text-gray-500 text-sm">
-              {channel.permission !== 'readonly' &&
-                `(${channel.users?.length ?? 0})`}
+              {channelVisibility !== 'readonly' && `(${channelUsers.length})`}
             </span>
           </div>
           <button
@@ -291,10 +280,10 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
       )}
 
       {/* Expanded Sections */}
-      {(channel.isLobby || expanded) && channel.users && (
+      {(channel.isLobby || expanded) && channelUsers.length > 0 && (
         <div className="ml-6">
-          {[...channel.users].map((_user: User) => (
-            <UserTab key={_user.id} user={_user} />
+          {channelUsers.map((user: User) => (
+            <UserTab key={user.id} user={user} />
           ))}
         </div>
       )}
@@ -321,7 +310,6 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
               label: '刪除',
               onClick: () => {
                 setShowContextMenu(false);
-
                 // Open Delete Channel Modal
               },
             },
@@ -336,6 +324,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
           channel={channel}
         />
       )}
+
+      {/* Delete Channel Modal */}
     </div>
   );
 });
@@ -343,6 +333,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
 interface UserTabProps {
   user: User;
 }
+
 const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
   // Redux
   const server = useSelector((state: { server: Server }) => state.server);
@@ -354,27 +345,24 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
   });
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
 
-  const toggleContextMenu = (state?: boolean) =>
-    setShowContextMenu(state ?? !showInfoBlock);
-
   const [showInfoBlock, setShowInfoBlock] = useState<boolean>(false);
   const floatingBlockRef = useRef<HTMLDivElement>(null);
-
-  const toggleFloatingBlock = (state?: boolean) =>
-    setShowInfoBlock(state ?? !showInfoBlock);
-
-  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
-  const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (floatingBlockRef.current?.contains(event.target as Node))
-        toggleFloatingBlock(false);
+        setShowInfoBlock(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+  const userNickname = server.members?.[user.id].nickname ?? user.name;
+  const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
+  const userGender = user.gender;
+  const userBadges = user.badges ?? [];
 
   return (
     <div key={user.id}>
@@ -386,12 +374,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
         onDoubleClick={(e) => {
           e.preventDefault();
           setContentMenuPos({ x: e.pageX, y: e.pageY });
-          toggleFloatingBlock();
+          setShowInfoBlock(true);
         }}
         onContextMenu={(e) => {
           e.preventDefault();
           setContentMenuPos({ x: e.pageX, y: e.pageY });
-          toggleContextMenu();
+          setShowContextMenu(true);
         }}
       >
         <div className="flex items-center flex-1 min-w-0">
@@ -399,12 +387,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
             className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center mr-1`}
           >
             <img
-              src={`/channel/${user.gender}_${userPermission}.png`}
-              alt={`${user.gender}_${userPermission}`}
+              src={`/channel/${userGender}_${userPermission}.png`}
+              alt={`${userGender}_${userPermission}`}
               className="select-none"
             />
           </div>
-          <span className="truncate">{user.name}</span>
+          <span className="truncate">{userNickname}</span>
 
           {user.level > 1 && (
             <div
@@ -418,8 +406,8 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
             </div>
           )}
           <div className="flex items-center space-x-1 ml-2 gap-1">
-            {user.badges?.length > 0 && (
-              <BadgeViewer badges={user.badges} maxDisplay={3} />
+            {userBadges.length > 0 && (
+              <BadgeViewer badges={userBadges} maxDisplay={3} />
             )}
           </div>
         </div>
@@ -439,7 +427,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
       {/* Context Menu */}
       {showContextMenu && (
         <ContextMenu
-          onClose={() => toggleContextMenu(false)}
+          onClose={() => setShowContextMenu(false)}
           x={contentMenuPos.x}
           y={contentMenuPos.y}
           items={[
@@ -448,8 +436,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
               icon: <Trash size={14} className="w-5 h-5 mr-2" />,
               label: '踢出',
               onClick: () => {
-                toggleContextMenu(false);
-
+                setShowContextMenu(false);
                 // Open Kick User Modal
               },
             },
@@ -460,7 +447,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
       {/* 使用者資訊 block */}
       {showInfoBlock && (
         <UserInfoBlock
-          onClose={() => toggleFloatingBlock()}
+          onClose={() => setShowInfoBlock(false)}
           x={contentMenuPos.x}
           y={contentMenuPos.y}
           user={user}
@@ -470,8 +457,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
   );
 });
 
-interface ChannelViewerProps {}
-const ChannelViewer: React.FC<ChannelViewerProps> = () => {
+const ChannelViewer: React.FC = () => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);
@@ -485,6 +471,12 @@ const ChannelViewer: React.FC<ChannelViewerProps> = () => {
   // Modal Control
   const [showAddChannelModal, setShowAddChannelModal] =
     useState<boolean>(false);
+
+  const serverChannels = server.channels ?? [];
+  const userCurrentChannel = serverChannels.find(
+    (_) => _.id == user.presence?.currentChannelId,
+  );
+  const userCurrentChannelName = userCurrentChannel?.name ?? '';
 
   return (
     <>
@@ -528,14 +520,11 @@ const ChannelViewer: React.FC<ChannelViewerProps> = () => {
       {/* Current Channel */}
       <div className="flex flex-row p-2 items-center gap-1">
         <img
-          src="/channel/NetworkStatus_5.png"
+          src="/channel/NetworkStatus_5.png" // TODO: Change base on connection status
           alt="User Profile"
           className="w-6 h-6 select-none"
         />
-        <div className="text-gray-500">
-          {server.channels?.find((_) => _.id == user.presence?.currentChannelId)
-            ?.name ?? ''}
-        </div>
+        <div className="text-gray-500">{userCurrentChannelName}</div>
       </div>
 
       <div
@@ -548,19 +537,17 @@ const ChannelViewer: React.FC<ChannelViewerProps> = () => {
       >
         所有頻道
       </div>
-      {server.channels && (
-        <div className="flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
-          {[...server?.channels]
-            .filter((c) => !c.parentId)
-            .map((channel) =>
-              channel.isCategory ? (
-                <CategoryTab key={channel.id} category={channel} />
-              ) : (
-                <ChannelTab key={channel.id} channel={channel} />
-              ),
-            )}
-        </div>
-      )}
+      <div className="flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
+        {[...serverChannels]
+          .filter((c) => !c.parentId)
+          .map((channel) =>
+            channel.isCategory ? (
+              <CategoryTab key={channel.id} category={channel} />
+            ) : (
+              <ChannelTab key={channel.id} channel={channel} />
+            ),
+          )}
+      </div>
     </>
   );
 };

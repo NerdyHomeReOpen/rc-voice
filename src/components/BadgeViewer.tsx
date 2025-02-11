@@ -1,20 +1,10 @@
-import React, { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef } from 'react';
 import type { Badge } from '@/types';
-
-interface BadgeViewerProps {
-  badges: Badge[];
-  maxDisplay?: number;
-}
 
 const failedImageCache = new Set<string>();
 
 // BadgeImage Component
-const BadgeImage = memo(({ badge }: { badge: Badge }) => {
-  const [shouldShowFallback, setShouldShowFallback] = useState(() => {
-    const imageUrl = `/badge/${badge.id.trim()}.png`;
-    return failedImageCache.has(imageUrl);
-  });
-
+const BadgeImage: React.FC<Badge> = React.memo((badge) => {
   const getInitialColor = () => {
     const colors = [
       'bg-blue-500',
@@ -37,8 +27,13 @@ const BadgeImage = memo(({ badge }: { badge: Badge }) => {
     return name.slice(0, 1).toUpperCase();
   };
 
-  if (shouldShowFallback) {
+  const [showFallBack, setShowFallBack] = useState(false);
+
+  const badgeUrl = `/badge/${badge.id.trim()}.png`;
+
+  if (failedImageCache.has(badgeUrl) || showFallBack) {
     return (
+      // Fallback Badge
       <div
         className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-medium text-white ${getInitialColor()}`}
       >
@@ -46,16 +41,14 @@ const BadgeImage = memo(({ badge }: { badge: Badge }) => {
       </div>
     );
   }
-
   return (
     <img
-      src={`/badge/${badge.id.trim()}.png`}
+      src={badgeUrl}
       alt={`${badge.name} Badge`}
       className="select-none w-4 h-4 rounded-full"
-      onError={(e) => {
-        const imageUrl = `/badge/${badge.id.trim()}.png`;
-        failedImageCache.add(imageUrl);
-        setShouldShowFallback(true);
+      onError={() => {
+        failedImageCache.add(badgeUrl);
+        setShowFallBack(true);
       }}
       loading="lazy"
       referrerPolicy="no-referrer"
@@ -65,64 +58,56 @@ const BadgeImage = memo(({ badge }: { badge: Badge }) => {
 
 BadgeImage.displayName = 'BadgeImage';
 
-// Tooltip Component
-const Tooltip = memo(
-  ({
-    badge,
-    position,
-  }: {
-    badge: Badge;
-    position: { top: number; left: number; placement: 'top' | 'bottom' };
-  }) => {
-    const tooltipContent = (
-      <>
-        <div className="flex flex-row items-center justify-center space-x-2">
-          <BadgeImage badge={badge} />
-          <div className="font-medium text-center">{badge.name}</div>
-        </div>
-        <div className="text-xs text-center text-gray-400 mt-1">
-          {badge.description}
-        </div>
-      </>
-    );
+interface TooltipProps {
+  badge: Badge;
+  position: { top: number; left: number; placement: 'top' | 'bottom' };
+}
 
-    const arrowClass =
-      position.placement === 'top'
-        ? 'top-full border-t-gray-800'
-        : 'bottom-full border-b-gray-800';
-
-    return (
-      <div
-        className="fixed z-50 w-36 px-2 py-1 text-sm bg-gray-800 text-white rounded-md shadow-lg pointer-events-none"
-        style={{
-          top: position.top,
-          left: position.left,
-        }}
-      >
-        <div
-          className={`absolute -translate-x-1/2 left-1/2 border-4 border-transparent ${arrowClass}`}
-        />
-        {tooltipContent}
+const Tooltip: React.FC<TooltipProps> = React.memo(({ badge, position }) => {
+  const tooltipContent = (
+    <>
+      <div className="flex flex-row items-center justify-center space-x-2">
+        <BadgeImage {...badge} />
+        <div className="font-medium text-center">{badge.name}</div>
       </div>
-    );
-  },
-);
+      <div className="text-xs text-center text-gray-400 mt-1">
+        {badge.description}
+      </div>
+    </>
+  );
+
+  const arrowClass =
+    position.placement === 'top'
+      ? 'top-full border-t-gray-800'
+      : 'bottom-full border-b-gray-800';
+
+  return (
+    <div
+      className="fixed z-50 w-36 px-2 py-1 text-sm bg-gray-800 text-white rounded-md shadow-lg pointer-events-none"
+      style={{
+        top: position.top,
+        left: position.left,
+      }}
+    >
+      <div
+        className={`absolute -translate-x-1/2 left-1/2 border-4 border-transparent ${arrowClass}`}
+      />
+      {tooltipContent}
+    </div>
+  );
+});
 
 Tooltip.displayName = 'Tooltip';
 
-// Badge Container Component
-const BadgeContainer = memo(
-  ({
-    badge,
-    onMouseEnter,
-    onMouseLeave,
-    showTooltip,
-  }: {
-    badge: Badge;
-    onMouseEnter: (rect: DOMRect) => void;
-    onMouseLeave: () => void;
-    showTooltip: boolean;
-  }) => {
+interface BadgeContainerProps {
+  badge: Badge;
+  onMouseEnter: (rect: DOMRect) => void;
+  onMouseLeave: () => void;
+  showTooltip: boolean;
+}
+
+const BadgeContainer: React.FC<BadgeContainerProps> = React.memo(
+  ({ badge, onMouseEnter, onMouseLeave, showTooltip }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handleMouseEnter = () => {
@@ -138,7 +123,7 @@ const BadgeContainer = memo(
         onMouseEnter={handleMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        <BadgeImage badge={badge} />
+        <BadgeImage {...badge} />
       </div>
     );
   },
@@ -146,8 +131,12 @@ const BadgeContainer = memo(
 
 BadgeContainer.displayName = 'BadgeContainer';
 
-// Main BadgeViewer Component
-const BadgeViewer: React.FC<BadgeViewerProps> = memo(
+interface BadgeViewerProps {
+  badges: Badge[];
+  maxDisplay?: number;
+}
+
+const BadgeViewer: React.FC<BadgeViewerProps> = React.memo(
   ({ badges, maxDisplay = 99 }) => {
     const [activeTooltip, setActiveTooltip] = useState<{
       badge: Badge;

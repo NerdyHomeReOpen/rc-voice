@@ -12,11 +12,11 @@ import { formatTimestamp } from '@/utils/formatters';
 
 interface MessageGroup {
   id: string;
-  senderId: string;
-  sender: User;
-  timestamp: string;
-  messages: Message[];
   type: 'general' | 'info';
+  contents: string[];
+  senderId: string;
+  timestamp: string;
+  sender: User | null;
 }
 
 const getGroupMessages = (messages: Message[]): MessageGroup[] => {
@@ -33,14 +33,14 @@ const getGroupMessages = (messages: Message[]): MessageGroup[] => {
     const isInfoMsg = message.type == 'info';
 
     if (sameSender && nearTime && !isInfoMsg) {
-      lastGroup.messages.push(message);
+      lastGroup.contents.push(message.content);
     } else {
       acc.push({
         id: message.id,
         senderId: message.senderId,
-        sender: message.sender,
+        sender: message.sender ?? null,
         timestamp: message.timestamp.toString(),
-        messages: [message],
+        contents: [message.content],
         type: message.type,
       });
     }
@@ -57,9 +57,11 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
   // Redux
   const server = useSelector((state: { server: Server }) => state.server);
 
-  const gender = messageGroup.sender.gender;
-  const permissionLevel =
-    server.members?.[messageGroup.senderId].permissionLevel ?? 0;
+  const senderGender = messageGroup.sender?.gender ?? 'Male';
+  const senderName = messageGroup.sender?.name ?? 'Unknown';
+  const senderPermission =
+    server.members?.[messageGroup.senderId].permissionLevel ?? 1;
+  const messageTimestamp = formatTimestamp(parseInt(messageGroup.timestamp));
 
   return (
     <div key={messageGroup.id} className="flex items-start space-x-1 mb-1">
@@ -72,9 +74,9 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
           />
           <div className="flex-1 min-w-0">
             <div className="text-gray-700">
-              {messageGroup.messages.map((message) => (
-                <div key={message.id} className="break-words">
-                  <MarkdownViewer markdownText={message.content} />
+              {messageGroup.contents.map((content) => (
+                <div key={content} className="break-words">
+                  <MarkdownViewer markdownText={content} />
                 </div>
               ))}
             </div>
@@ -83,24 +85,22 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
       ) : (
         <>
           <img
-            src={`/channel/${gender}_${permissionLevel}.png`}
+            src={`/channel/${senderGender}_${senderPermission}.png`}
             alt={`image`}
             className="select-none flex-shrink-0 mt-1"
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center">
-              <span className="font-bold text-gray-900">
-                {messageGroup.sender.name}
-              </span>
+              <span className="font-bold text-gray-900">{senderName}</span>
               <span className="text-xs text-gray-500 ml-2">
-                {formatTimestamp(parseInt(messageGroup.timestamp))}
+                {messageTimestamp}
               </span>
             </div>
 
             <div className="text-gray-700">
-              {messageGroup.messages.map((message) => (
-                <div key={message.id} className="break-words">
-                  <MarkdownViewer markdownText={message.content} />
+              {messageGroup.contents.map((content) => (
+                <div key={content} className="break-words">
+                  <MarkdownViewer markdownText={content} />
                 </div>
               ))}
             </div>
@@ -118,21 +118,10 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(() => {
   const server = useSelector((state: { server: Server }) => state.server);
   const user = useSelector((state: { user: User }) => state.user);
 
-  const [groupMessages, setGroupMessages] = useState<MessageGroup[]>([]);
-
-  useEffect(() => {
-    if (!server || !user) {
-      setGroupMessages([]);
-      return;
-    }
-    setGroupMessages(
-      getGroupMessages(
-        server.channels?.find(
-          (channel) => channel.id === user.presence?.currentChannelId,
-        )?.messages ?? [],
-      ),
-    );
-  }, [server, user]);
+  const userCurrentChannel = server.channels?.find(
+    (channel) => channel.id === user.presence?.currentChannelId,
+  );
+  const groupMessages = getGroupMessages(userCurrentChannel?.messages ?? []);
 
   // Auto Scroll Control
   const messagesEndRef = useRef<HTMLDivElement>(null);

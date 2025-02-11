@@ -66,10 +66,10 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   const server = useSelector((state: { server: Server }) => state.server);
 
   const [activeTab, setActiveTab] = useState<ModalTabItem>(TABS[0]);
-  const [markdownContent, setMarkdownContent] = useState<string>('');
-  const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
+
   const [searchText, setSearchText] = useState<string>('');
-  const [page, setPage] = useState<number>(1);
+
+  // const [page, setPage] = useState<number>(1);
 
   const [sortState, setSortState] = useState<SortState>({
     field: 'permission',
@@ -100,7 +100,10 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
     [sortState.field],
   );
 
-  const togglePreview = (): void => setIsPreviewMode(!isPreviewMode);
+  // const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
+  // const togglePreview = (): void => setIsPreviewMode(!isPreviewMode);
+
+  // const [markdownContent, setMarkdownContent] = useState<string>('');
 
   // const usersList = useCallback((): UserList => {
   //   if (!server?.members || !users) return {};
@@ -221,15 +224,15 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">公告編輯</label>
-              <button
+              {/* <button
                 onClick={togglePreview}
                 className="px-3 py-1 text-sm bg-blue-50 hover:bg-blue-100 rounded"
               >
                 {isPreviewMode ? '編輯' : '預覽'}
-              </button>
+              </button> */}
             </div>
 
-            <div className="border rounded p-4">
+            {/* <div className="border rounded p-4">
               {isPreviewMode ? (
                 <div className="prose prose-sm max-w-none">
                   <MarkdownViewer markdownText={markdownContent} />
@@ -254,44 +257,41 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                   [連結](https://)
                 </span>
               </div>
-            )}
+            )} */}
           </div>
         );
 
       case '會員管理':
         const members = Object.values(server.members || [])
           .filter((member) => {
-            const displayName =
-              server.members[member.userId].nickname.toLowerCase();
+            const displayName = member.nickname.toLowerCase();
             return (
               displayName.includes(searchText.toLowerCase()) ||
-              searchText === '未知'
+              searchText === ''
             );
           })
           .sort((a, b) => {
             const direction = sortState.direction === 'asc' ? 1 : -1;
-            const memberA = server.members[a.userId];
-            const memberB = server.members[b.userId];
 
             switch (sortState.field) {
               case 'name':
-                const nameA = memberA.nickname || '未知';
-                const nameB = memberB.nickname || '未知';
+                const nameA = a.nickname || '未知';
+                const nameB = b.nickname || '未知';
                 return direction * nameA.localeCompare(nameB);
 
               case 'permission':
-                const permissionA = memberA.permissionLevel || 1;
-                const permissionB = memberB.permissionLevel || 1;
+                const permissionA = a.permissionLevel || 1;
+                const permissionB = b.permissionLevel || 1;
                 return direction * (permissionA - permissionB);
 
               case 'contribution':
-                const contribA = memberA.contribution || 0;
-                const contribB = memberB.contribution || 0;
+                const contribA = a.contribution || 0;
+                const contribB = b.contribution || 0;
                 return direction * (contribA - contribB);
 
               case 'joinDate':
-                const dateA = memberA.joinedAt || 0;
-                const dateB = memberB.joinedAt || 0;
+                const dateA = a.joinedAt || 0;
+                const dateB = b.joinedAt || 0;
                 return direction * (dateA - dateB);
 
               default:
@@ -391,44 +391,57 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {members.map((member) => (
-                      <tr key={member.id} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={`/channel/${user.gender}_${
-                                member.permissionLevel || 0
-                              }.png`}
-                              className="w-4 h-5 select-none"
-                              alt={''}
-                            />
-                            <div>
-                              <div className="font-medium text-gray-900">
-                                {member.nickname}
-                              </div>
-                              {member.nickname && (
-                                <div className="text-gray-500 text-xs">
-                                  原始名稱: {user.name}
+                    {members.map((member) => {
+                      const user = member.user;
+                      const userName = user?.name ?? '未知用戶';
+                      const userGender = user?.gender ?? 'Male';
+                      const userNickname = member.nickname ?? '';
+                      const userPermission = member.permissionLevel ?? 1;
+                      const userContributions = member.contribution ?? 0;
+                      const userJoinDate = new Date(
+                        member.joinedAt || 0,
+                      ).toLocaleString();
+
+                      return (
+                        <tr
+                          key={member.id}
+                          className="border-b hover:bg-gray-50"
+                        >
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={`/channel/${userGender}_${userPermission}.png`}
+                                className="w-4 h-5 select-none"
+                                alt={`${userGender}_${userPermission}`}
+                              />
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {userNickname}
                                 </div>
-                              )}
+                                {userNickname && (
+                                  <div className="text-gray-500 text-xs">
+                                    原始名稱: {userName}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-col">
-                            <span className="text-gray-500 text-xs">
-                              {getPermissionText(member.permissionLevel || 1)}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-gray-500">
-                          {member.contribution || 0}
-                        </td>
-                        <td className="px-4 py-3 text-gray-500">
-                          {new Date(member.joinedAt || 0).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-col">
+                              <span className="text-gray-500 text-xs">
+                                {getPermissionText(userPermission || 1)}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-gray-500">
+                            {userContributions}
+                          </td>
+                          <td className="px-4 py-3 text-gray-500">
+                            {userJoinDate}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -498,8 +511,8 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
         const applications = (server.applications || []).sort((a, b) => {
           const direction = sortState.direction === 'asc' ? -1 : 1;
 
-          const contribA = server.members[a.userId].contribution || 0;
-          const contribB = server.members[b.userId].contribution || 0;
+          const contribA = server.members?.[a.userId].contribution || 0;
+          const contribB = server.members?.[b.userId].contribution || 0;
           return direction * (contribB - contribA);
         });
 
@@ -549,30 +562,29 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {applications.map((application) => {
-                      const user = users[application.userId];
-                      const description = application.description || '';
-                      const displayName =
-                        server.members[user.id].nickname ||
-                        user.name ||
-                        '未知用戶';
+                    {applications.map((application, index) => {
+                      const user = application.user;
+                      const member = server.members?.[user?.id || ''] ?? null;
+                      const userName = user?.name ?? '未知用戶';
+                      const userNickname = member?.nickname ?? '';
+                      const userContributions = member?.contribution ?? 0;
+                      const applicationDesc =
+                        application.description ?? '該使用者未填寫訊息';
 
                       return (
-                        <tr key={user.id} className="border-b hover:bg-gray-50">
+                        <tr key={index} className="border-b hover:bg-gray-50">
                           <td className="px-4 py-3 truncate">
-                            {displayName}
-                            {server.members[user.id].nickname && (
+                            <div className="font-medium text-gray-900">
+                              {userNickname}
+                            </div>
+                            {userNickname && (
                               <div className="text-gray-500 text-xs">
-                                原始名稱: {user.name}
+                                原始名稱: {userName}
                               </div>
                             )}
                           </td>
-                          <td className="px-4 py-3">
-                            {server.members[user.id].contribution || 0}
-                          </td>
-                          <div className="px-4 py-3">
-                            {description || '該使用者未填寫訊息'}
-                          </div>
+                          <td className="px-4 py-3">{userContributions}</td>
+                          <div className="px-4 py-3">{applicationDesc}</div>
                         </tr>
                       );
                     })}
@@ -581,7 +593,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
               </div>
             </div>
 
-            <div className="mt-2 text-sm text-gray-500 text-end">
+            <div className="mt-4 text-right text-sm text-gray-500 select-none">
               右鍵可以進行處理
             </div>
           </div>
@@ -659,7 +671,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
         return (
           <div>
             <div className="flex flex-col items-center">
-              <div className="flex flex-row items-center justify-start mb-2">
+              {/* <div className="flex flex-row items-center justify-start mb-2">
                 <div className="flex flex-row border rounded text-sm font-medium">
                   <div
                     className={`p-2 bg-${
@@ -682,10 +694,14 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                     封鎖IP
                   </div>
                 </div>
-              </div>
-              {page === 1 ? blockAccountPage : page === 2 ? blockIpPage : null}
+              </div> */}
+              {/* {page === 1 ? blockAccountPage : page === 2 ? blockIpPage : null} */}
+              {blockAccountPage}
             </div>
-            <div className="text-end text-sm">右鍵可以進行處理</div>
+
+            <div className="mt-4 text-right text-sm text-gray-500 select-none">
+              右鍵可以進行處理
+            </div>
           </div>
         );
       default:

@@ -1,75 +1,6 @@
 
-export interface UserList {
-  [userId: string]: User;
-}
-export interface User {
-  id: string;
-  name: string;
-  gender: "Male" | "Female";
-  level: number;
-  badges: Badge[];
-  signature: string;
-  avatarUrl: string | null;
-  presence: Presence | null;
-  friendCategories?: FriendCategory[] | null;
-  joinedServers?: Server[] | null;
-  recommendedServers?: Server[] | null;
-  members: {
-    [serverId: string]: Member;
-  } | null;
-}
-export interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  order: number; // Higher order means it will be displayed first
-}
-export interface Presence {
-  id : string;
-  status: "online" | "dnd" | "idle" | "gn"; 
-  currentChannelId: string;
-  currentServerId: string;
-  customStatus: string;
-  lastActiveAt: number;
-  updatedAt: number;
-}
-export interface FriendCategory {
-  id: string;
-  name: string;
-  order: number;
-  friendIds: string[];
-  friends: User[] | null;
-}
-export interface FriendCategories {
-  [categoryId: string]: FriendCategory;
-}
-export interface Member {
-  id: string;
-  userId: string;
-  user: User | null;
-  serverId: string;
-  server: Server | null;
-  permissionLevel: ServerPermission;
-  joinedAt: number;
-  nickname: string;
-  managedChannels: string[];
-  contribution: number;
-}
-export interface Application {
-  id: string;
-  userId: string;
-  user: User| null;
-  serverId: string;
-  server: Server | null;
-  name: string;
-  description: string;
-  // icon: string;
-  // redirectUri: string;
-  // scopes: string[];
-  createdAt: number;
-  updatedAt: number;
-}
-export const enum ServerPermission {
+export type Visibility = "public" | "private" | "readonly";
+export const enum Permission {
   Guest = 1,
   Member = 2,
   ChannelAdmin = 3,
@@ -79,25 +10,87 @@ export const enum ServerPermission {
   EventStaff = 7,
   Official = 8,
 }
+
+
+export interface User {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  badges: Badge[];
+  gender: "Male" | "Female";
+  level: number;
+  signature: string;
+  createdAt: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  presence: Presence | null;
+  members: {
+    [serverId: string]: Member;
+  } | null;
+  friendCategories?: FriendCategory[] | null;
+  joinedServers?: Server[] | null;
+  recommendedServers?: Server[] | null;
+}
+export interface UserList {
+  [userId: string]: User;
+}
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  order: number;
+}
+export interface FriendCategory {
+  id: string;
+  name: string;
+  friendIds: string[];
+  order: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  friends: User[] | null;
+}
+export interface Presence {
+  id: string;
+  status: "online" | "dnd" | "idle" | "gn";
+  currentChannelId: string;
+  currentServerId: string;
+  customStatus: string;
+  lastActiveAt: number;
+  updatedAt: number;
+}
+
+export interface Member {
+  id: string;
+  nickname: string;
+  serverId: string;
+  userId: string;
+  contribution: number;
+  managedChannels: string[];
+  permissionLevel: Permission;
+  joinedAt: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  user: User | null;
+  server: Server | null;
+}
+
 export interface Server {
   id: string;
   name: string;
-  icon: string | null;
-  announcement: string;
+  iconUrl: string | null;
   level: number;
-  createdAt: number;
+  announcement: string;
+  channelIds: string[];
   displayId: string;
   lobbyId: string;
-  lobby: Channel| null;
-  channelIds: string[];
-  channels: Channel[]| null;
   ownerId: string;
-  owner: User| null;
   settings: {
     allowDirectMessage: boolean;
     visibility: "public" | "private" | "invisible";
     defaultChannelId: string;
   }
+  createdAt: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  channels: Channel[]| null;
+  lobby: Channel| null;
+  owner: User| null;
   members: {
     [userId: string]: Member
   } | null;
@@ -106,43 +99,57 @@ export interface Server {
 export interface ServerList {
   [serverId: string]: Server;
 }
-export type ChannelPermission = "public" | "private" | "readonly";
+export interface Application {
+  id: string;
+  userId: string;
+  serverId: string;
+  description: string;
+  createdAt: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  user: User| null;
+  server: Server | null;
+}
+
 export interface Channel {
   id: string;
   name: string;
-  permission: ChannelPermission;
+  messageIds: string[];
+  serverId: string;
+  parentId: string | null;
+  userIds: string[];
   isCategory: boolean;
   isLobby: boolean;
-  serverId: string;
-  userIds: string[];
-  users: User[] | null;
-  messageIds: string[];
-  messages: Message[] | null;
-  parentId: string | null;
-  parent: Channel | null;
-  createdAt: number;
   settings: {
     bitrate: number;
-    visibility: "public" | "private" | "invisible";
-    slowmode: number;
-    topic: string;
+    slowmode: boolean;
     userLimit: number;
+    visibility: Visibility;
   }
+  createdAt: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  messages: Message[] | null;
+  parent: Channel | null;
+  users: User[] | null;
 }
 export interface ChannelList {
   [channelId: string]: Channel;
 }
+
 export interface Message {
   id: string;
   content: string;
   type: "general" | "info";
-  timestamp: number;
+  channelId: string;
   senderId: string;
-  sender: User;
+  timestamp: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  channel: Channel | null;
+  sender: User | null;
 }
 export interface MessageList {
   [messageId: string]: Message;
 }
+
 export interface ModalTabItem {
   id: string;
   label: string;

@@ -43,7 +43,7 @@ const Modal = memo(
               <span>{title}</span>
             </div>
           </div>
-
+          {/* Mid Part */}
           <div className="flex flex-1 min-h-0">
             {/* Side Menu */}
             {tabs && (
@@ -67,11 +67,9 @@ const Modal = memo(
                 ))}
               </div>
             )}
-
             {/* Main Content */}
             <div className="flex-1 p-6 overflow-y-auto">{children}</div>
           </div>
-
           {/* Bottom Buttons */}
           <div className="flex justify-end gap-2 p-4 bg-gray-50">
             <button

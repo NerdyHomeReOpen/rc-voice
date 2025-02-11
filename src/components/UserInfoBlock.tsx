@@ -56,7 +56,6 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
                 className="select-none w-full h-full object-contain"
               />
             </div>
-
             {/* Right Info */}
             <div className="flex-1 ml-3 relative">
               <div className="flex justify-between items-start">
