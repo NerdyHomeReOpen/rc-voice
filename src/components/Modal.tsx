@@ -9,6 +9,7 @@ interface ModalProps {
   tabs?: ModalTabItem[];
   width?: string;
   height?: string;
+  changeContent?: string[];
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onSelectTab?: (tab: ModalTabItem) => void;
@@ -22,6 +23,7 @@ const Modal = memo(
     tabs,
     width = '800px',
     height = '700px',
+    changeContent = [],
     onClose,
     onSubmit,
     onSelectTab,
@@ -72,20 +74,34 @@ const Modal = memo(
             <div className="flex-1 p-6 overflow-y-auto">{children}</div>
           </div>
 
-          {/* Bottom Buttons */}
-          <div className="flex justify-end gap-2 p-4 bg-gray-50">
-            <button
-              type="submit"
-              className="px-6 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400"
-            >
-              {submitText}
-            </button>
-            <button
-              className="px-6 py-1 bg-white rounded hover:bg-gray-300 border border-black-200"
-              onClick={onClose}
-            >
-              取消
-            </button>
+          {/* Bottom */}
+          <div className="flex flex-row justify-end items-center bg-gray-50">
+            {/* Changed content */}
+            {changeContent.length !== 0 && (
+              <div className="flex flex-row text-sm text-red-400">
+                更動內容： *
+                {changeContent.map((content, i) => (
+                  <div key={i}>{(i ? ',' : '') + content}</div>
+                ))}
+                *
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-2 p-4 bg-gray-50">
+              <button
+                type="submit"
+                className="px-6 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400"
+              >
+                {submitText}
+              </button>
+              <button
+                className="px-6 py-1 bg-white rounded hover:bg-gray-300 border border-black-200"
+                onClick={onClose}
+              >
+                取消
+              </button>
+            </div>
           </div>
         </form>
       </div>
