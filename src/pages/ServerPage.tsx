@@ -151,6 +151,13 @@ const ServerPage: React.FC = () => {
   const toggleServerSetting = (state?: boolean) =>
     setShowServerSetting(state ?? !showUserSetting);
 
+  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+  const serverChannels = server.channels ?? [];
+  const serverIcon = server.icon ?? '';
+  const serverName = server.name ?? '';
+  const serverDisplayId = server.displayId ?? '';
+  const serverAnnouncement = server.announcement ?? '';
+
   return (
     <>
       {showUserSetting && (
@@ -167,30 +174,28 @@ const ServerPage: React.FC = () => {
         {/* Server image and info */}
         <div className="flex items-center justify-between p-2 border-b mb-4">
           <div className="flex items-center space-x-3">
-            <ServerIcon iconPath={server?.icon} />
+            <ServerIcon iconPath={serverIcon} />
             <div>
-              <div className="text-gray-700">{server?.name ?? ''} </div>
+              <div className="text-gray-700">{serverName} </div>
               <div className="flex flex-row items-center gap-1">
                 <img
                   src="/channel/ID.png"
                   alt="User Profile"
                   className="w-3.5 h-3.5 select-none"
                 />
-                <div className="text-xs text-gray-500">
-                  {server?.displayId ?? ''}
-                </div>
+                <div className="text-xs text-gray-500">{serverDisplayId}</div>
                 <img
                   src="/channel/member.png"
                   alt="User Profile"
                   className="w-3.5 h-3.5 select-none"
                 />
                 <div className="text-xs text-gray-500 select-none">
-                  {server.channels.reduce((acc, channel) => {
+                  {serverChannels.reduce((acc, channel) => {
                     return acc + channel.userIds.length;
                   }, 0)}
                 </div>
 
-                {server.members[user.id].permissionLevel >= 5 && (
+                {userPermission >= 5 && (
                   <button
                     className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
                     onClick={() => toggleServerSetting()}
@@ -213,13 +218,11 @@ const ServerPage: React.FC = () => {
       {/* Right Content */}
       <div className="flex flex-1 flex-col min-h-0 min-w-0">
         {/* Announcement Area */}
-        {server.announcement && (
-          <div className="flex flex-[2] overflow-y-auto border-b bg-gray-50 p-3 mb-1">
-            <MarkdownViewer markdownText={server.announcement} />
-          </div>
-        )}
+        <div className="flex flex-[2] overflow-y-auto border-b bg-gray-50 p-3 mb-1">
+          <MarkdownViewer markdownText={serverAnnouncement} />
+        </div>
         {/* Messages Area */}
-        {user.presence?.currentChannelId && <MessageViewer />}
+        <MessageViewer />
         {/* Input Area */}
         <div className="flex flex-[1] p-3">
           <div

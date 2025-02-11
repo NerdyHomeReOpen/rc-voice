@@ -32,7 +32,8 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
       };
     }, [onClose]);
 
-    const userPermission = server.members[user.id].permissionLevel || 1;
+    const userGender = user.gender;
+    const userPermission = server.members?.[user.id].permissionLevel ?? 1;
     const userLevel = Math.min(56, Math.ceil(user.level / 5));
 
     return (
@@ -77,8 +78,8 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
             <div className="text-sm">
               <div className="min-w-3.5 min-h-3.5 rounded-sm flex items-center mr-1">
                 <img
-                  src={`/channel/${user.gender}_${userPermission}.png`}
-                  alt={`${user.gender}_${userPermission}`}
+                  src={`/channel/${userGender}_${userPermission}.png`}
+                  alt={`${userGender}_${userPermission}`}
                   className="select-none"
                 />
               </div>

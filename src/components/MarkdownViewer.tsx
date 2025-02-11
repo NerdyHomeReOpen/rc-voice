@@ -18,6 +18,8 @@ interface MarkdownProps {
   markdownText: string;
 }
 const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
+  const safeMarkdownText = typeof markdownText === 'string' ? markdownText : '';
+
   const purifyConfig: PurifyConfig = {
     ALLOWED_TAGS: [
       'img',
@@ -57,7 +59,7 @@ const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
     });
   };
 
-  const withEmojis = processEmojis(markdownText);
+  const withEmojis = processEmojis(safeMarkdownText);
   const sanitized = DOMPurify.sanitize(withEmojis, purifyConfig);
 
   const components: Components = {

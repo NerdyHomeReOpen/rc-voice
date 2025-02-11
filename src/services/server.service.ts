@@ -26,13 +26,13 @@ export const serverService = {
         formData.append('icon', serverData.icon);
       }
 
-      const response = await apiService.post("/servers", formData)
+      const response = await apiService.post('/servers', formData);
 
       if (response.error) {
         throw new Error(response.error || '創建伺服器失敗');
       }
 
-      return response.server;
+      return response.serverId;
     } catch (error: Error | any) {
       throw new Error(error.message || '更新個人資料時發生錯誤');
     }

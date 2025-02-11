@@ -120,7 +120,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
       </div>
 
       {/* Expanded Sections */}
-      {expanded && (
+      {expanded && server.channels && (
         <div className="ml-6">
           {[...server?.channels]
             .filter((c) => c.parentId === category.id)
@@ -236,7 +236,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
             </div>
             <span className={'text-[#ff0000]'}>{channel.name}</span>
             <span className="ml-1 text-gray-500 text-sm">
-              {`(${channel.users.length})`}
+              {`(${channel.users?.length ?? 0})`}
             </span>
           </div>
         </div>
@@ -273,7 +273,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
             </div>
             <span className={`truncate`}>{channel.name}</span>
             <span className="ml-1 text-gray-500 text-sm">
-              {channel.permission !== 'readonly' && `(${channel.users.length})`}
+              {channel.permission !== 'readonly' &&
+                `(${channel.users?.length ?? 0})`}
             </span>
           </div>
           <button
@@ -290,9 +291,9 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
       )}
 
       {/* Expanded Sections */}
-      {(channel.isLobby || expanded) && channel.users.length > 0 && (
+      {(channel.isLobby || expanded) && channel.users && (
         <div className="ml-6">
-          {[...channel?.users].map((_user: User) => (
+          {[...channel.users].map((_user: User) => (
             <UserTab key={_user.id} user={_user} />
           ))}
         </div>
@@ -362,7 +363,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
   const toggleFloatingBlock = (state?: boolean) =>
     setShowInfoBlock(state ?? !showInfoBlock);
 
-  const userPermission = server.members[user.id].permissionLevel;
+  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
   const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
 
   useEffect(() => {
@@ -532,7 +533,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = () => {
           className="w-6 h-6 select-none"
         />
         <div className="text-gray-500">
-          {server?.channels.find((_) => _.id == user.presence?.currentChannelId)
+          {server.channels?.find((_) => _.id == user.presence?.currentChannelId)
             ?.name ?? ''}
         </div>
       </div>
@@ -547,17 +548,19 @@ const ChannelViewer: React.FC<ChannelViewerProps> = () => {
       >
         所有頻道
       </div>
-      <div className="flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
-        {[...server?.channels]
-          .filter((c) => !c.parentId)
-          .map((channel) =>
-            channel.isCategory ? (
-              <CategoryTab key={channel.id} category={channel} />
-            ) : (
-              <ChannelTab key={channel.id} channel={channel} />
-            ),
-          )}
-      </div>
+      {server.channels && (
+        <div className="flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
+          {[...server?.channels]
+            .filter((c) => !c.parentId)
+            .map((channel) =>
+              channel.isCategory ? (
+                <CategoryTab key={channel.id} category={channel} />
+              ) : (
+                <ChannelTab key={channel.id} channel={channel} />
+              ),
+            )}
+        </div>
+      )}
     </>
   );
 };

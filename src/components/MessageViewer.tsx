@@ -56,7 +56,10 @@ interface MessageBoxProps {
 const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
   // Redux
   const server = useSelector((state: { server: Server }) => state.server);
-  const user = useSelector((state: { user: User }) => state.user);
+
+  const gender = messageGroup.sender.gender;
+  const permissionLevel =
+    server.members?.[messageGroup.senderId].permissionLevel ?? 0;
 
   return (
     <div key={messageGroup.id} className="flex items-start space-x-1 mb-1">
@@ -80,9 +83,7 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
       ) : (
         <>
           <img
-            src={`/channel/${messageGroup.sender.gender}_${
-              server.members[messageGroup.senderId].permissionLevel
-            }.png`}
+            src={`/channel/${gender}_${permissionLevel}.png`}
             alt={`image`}
             className="select-none flex-shrink-0 mt-1"
           />
@@ -126,7 +127,7 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(() => {
     }
     setGroupMessages(
       getGroupMessages(
-        server.channels.find(
+        server.channels?.find(
           (channel) => channel.id === user.presence?.currentChannelId,
         )?.messages ?? [],
       ),

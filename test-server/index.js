@@ -188,13 +188,18 @@ const server = http.createServer((req, res) => {
           )}`;
         }
 
-        const userId = fields.userId;
+        const _userId = fields.userId;
+        const userId = _userId ? _userId.toString() : null;
         if (!userId) {
           throw new Error('缺少使用者ID');
         }
 
-        const name = fields.name;
-        const description = fields.description || '';
+        const name = fields.name
+          ? fields.name.toString().trim().substring(0, 30)
+          : 'Untitled Server';
+        const description = fields.description
+          ? fields.description.toString().substring(0, 200)
+          : '';
 
         // 驗證必要欄位
         if (!name || !userId) {
@@ -203,9 +208,7 @@ const server = http.createServer((req, res) => {
 
         // 獲取資料庫
         const servers = (await db.get('servers')) || {};
-        const channels = (await db.get('channels')) || {};
         const users = (await db.get('users')) || {};
-        const members = (await db.get('members')) || {};
 
         // 檢查用戶是否存在
         const user = users[userId];
@@ -223,18 +226,18 @@ const server = http.createServer((req, res) => {
 
         // 創建新伺服器
         const serverId = uuidv4();
-        const lobbyId = uuidv4();
+        const channelId = uuidv4();
         const membershipId = uuidv4();
 
-        const newServer = {
+        const server = {
           id: serverId,
           displayId: generateUniqueDisplayId(servers),
           name: name,
           announcement: description || '',
           icon: iconPath,
-          userIds: [userId],
-          channelIds: [lobbyId],
-          lobbyId: lobbyId,
+          userIds: [],
+          channelIds: [channelId],
+          lobbyId: channelId,
           permissions: {
             [userId]: 6, // 6 = 群組擁有者
           },
@@ -251,9 +254,8 @@ const server = http.createServer((req, res) => {
         };
 
         // 儲存到資料庫
-        servers[serverId] = newServer;
-        channels[lobbyId] = {
-          id: lobbyId,
+        const channel = {
+          id: channelId,
           name: '大廳',
           permission: 'public',
           isLobby: true,
@@ -264,7 +266,7 @@ const server = http.createServer((req, res) => {
         };
 
         // 更新用戶的伺服器成員資格
-        members[membershipId] = {
+        const member = {
           id: membershipId,
           serverId: serverId,
           userId: userId,
@@ -275,23 +277,17 @@ const server = http.createServer((req, res) => {
           joinedAt: Date.now().valueOf(),
         };
 
-        console.log('Created a new server', {
-          server: servers[serverId],
-          channels: channels[lobbyId],
-          members: members[membershipId],
-        });
-
-        await db.set('servers', servers);
-        await db.set('channels', channels);
-        await db.set('members', members);
+        await db.set(`servers.${serverId}`, server);
+        await db.set(`channels.${channelId}`, channel);
+        await db.set(`members.${membershipId}`, member);
 
         new Logger('Server').success(
           `New server created: ${serverId} by user ${userId}`,
         );
 
         sendSuccess(res, {
-          message: '伺服器創建成功',
-          server: newServer,
+          message: 'success',
+          serverId: serverId,
         });
       } catch (error) {
         // 刪除上傳的檔案
@@ -1891,28 +1887,37 @@ const getFriendCategory = async (categoryId) => {
   };
 };
 const getJoinRecServers = async (userId, limit = 10) => {
-  const _servers = (await db.get('servers')) || {};
-  const _members = (await db.get('members')) || {};
-  const { joinedServers, notJoinedServers } = Object.values(_servers).reduce(
-    (result, server) => {
-      const member = Object.values(_members).find(
-        (member) => member.userId === userId && member.serverId === server.id,
-      );
-      if (member) {
-        result.joinedServers.push(server);
-      } else {
-        result.notJoinedServers.push(server);
-      }
-      return result;
-    },
-    { joinedServers: [], notJoinedServers: [] },
-  );
-  const recommendedServers = _.sampleSize(notJoinedServers, limit) ?? [];
+  try {
+    const [_servers = {}, _members = {}] = await Promise.all([
+      db.get('servers'),
+      db.get('members'),
+    ]);
 
-  return {
-    joinedServers: joinedServers,
-    recommendedServers: recommendedServers,
-  };
+    const userServerIds = new Set(
+      Object.values(_members)
+        .filter((member) => member.userId === userId)
+        .map((member) => member.serverId),
+    );
+
+    const { joinedServers, notJoinedServers } = Object.values(_servers).reduce(
+      (result, server) => {
+        if (userServerIds.has(server.id)) result.joinedServers.push(server);
+        else result.notJoinedServers.push(server);
+        return result;
+      },
+      { joinedServers: [], notJoinedServers: [] },
+    );
+
+    const recommendedServers = _.sampleSize(notJoinedServers, limit) ?? [];
+
+    return {
+      joinedServers,
+      recommendedServers,
+    };
+  } catch (error) {
+    console.error('Error in getJoinRecServers:', error);
+    throw new Error('Failed to get recommended servers');
+  }
 };
 const generateUniqueDisplayId = (serverList, baseId = 20000000) => {
   let displayId = baseId + Object.keys(serverList).length;

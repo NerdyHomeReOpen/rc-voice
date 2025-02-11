@@ -11,12 +11,12 @@ export interface User {
   signature: string;
   avatarUrl: string | null;
   presence: Presence | null;
-  friendCategories?: FriendCategory[];
-  joinedServers?: Server[];
-  recommendedServers?: Server[];
+  friendCategories?: FriendCategory[] | null;
+  joinedServers?: Server[] | null;
+  recommendedServers?: Server[] | null;
   members: {
-    [serverId: string]: Member
-  };
+    [serverId: string]: Member;
+  } | null;
 }
 export interface Badge {
   id: string;
@@ -37,7 +37,8 @@ export interface FriendCategory {
   id: string;
   name: string;
   order: number;
-  friends: User[];
+  friendIds: string[];
+  friends: User[] | null;
 }
 export interface FriendCategories {
   [categoryId: string]: FriendCategory;
@@ -45,11 +46,28 @@ export interface FriendCategories {
 export interface Member {
   id: string;
   userId: string;
+  user: User | null;
   serverId: string;
+  server: Server | null;
   permissionLevel: ServerPermission;
   joinedAt: number;
   nickname: string;
   managedChannels: string[];
+  contribution: number;
+}
+export interface Application {
+  id: string;
+  userId: string;
+  user: User| null;
+  serverId: string;
+  server: Server | null;
+  name: string;
+  description: string;
+  // icon: string;
+  // redirectUri: string;
+  // scopes: string[];
+  createdAt: number;
+  updatedAt: number;
 }
 export const enum ServerPermission {
   Guest = 1,
@@ -68,13 +86,13 @@ export interface Server {
   announcement: string;
   level: number;
   createdAt: number;
-  displayId: number;
+  displayId: string;
   lobbyId: string;
-  lobby: Channel;
+  lobby: Channel| null;
   channelIds: string[];
-  channels: Channel[];
+  channels: Channel[]| null;
   ownerId: string;
-  owner: User;
+  owner: User| null;
   settings: {
     allowDirectMessage: boolean;
     visibility: "public" | "private" | "invisible";
@@ -82,7 +100,8 @@ export interface Server {
   }
   members: {
     [userId: string]: Member
-  };
+  } | null;
+  applications?: Application[] | null;
 }
 export interface ServerList {
   [serverId: string]: Server;
@@ -96,9 +115,9 @@ export interface Channel {
   isLobby: boolean;
   serverId: string;
   userIds: string[];
-  users: User[];
+  users: User[] | null;
   messageIds: string[];
-  messages: Message[];
+  messages: Message[] | null;
   parentId: string | null;
   parent: Channel | null;
   createdAt: number;

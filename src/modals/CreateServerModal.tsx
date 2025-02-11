@@ -1,5 +1,6 @@
 import React, { FormEvent, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useSocket } from '@/hooks/SocketProvider';
 
 // Components
 import Modal from '@/components/Modal';
@@ -9,10 +10,6 @@ import { serverService } from '@/services/server.service';
 
 // Types
 import { User } from '@/types';
-
-// Redux
-import store from '@/redux/store';
-import { setServer } from '@/redux/serverSlice';
 
 // Validation
 const validateName = (name: string): string => {
@@ -46,6 +43,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
   ({ onClose }) => {
     // Redux
     const user = useSelector((state: { user: User }) => state.user);
+    const sessionId = useSelector(
+      (state: { sessionToken: string }) => state.sessionToken,
+    );
+
+    // Socket Control
+    const socket = useSocket();
 
     const maxGroups = 3;
     const userOwnedServerCount =
@@ -87,9 +90,14 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
 
       if (!nameError && !descriptionError) {
         try {
-          const data = await serverService.createServer(formData);
+          const serverId = await serverService.createServer(formData);
           onClose();
-          store.dispatch(setServer(data));
+
+          // Connect to the server
+          socket?.emit('connectServer', {
+            sessionId: sessionId,
+            serverId: serverId,
+          });
         } catch (error) {
           setErrors({
             general: error instanceof Error ? error.message : '創建群組失敗',
