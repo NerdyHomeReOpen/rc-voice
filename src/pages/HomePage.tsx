@@ -38,12 +38,13 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
     };
   };
 
+  const serverIcon = server.icon ?? '/logo_server_def.png';
   return (
     <button
       className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-white hover:bg-gray-50 w-full"
       onClick={() => handleServerSelect(server.id)}
     >
-      <ServerIcon iconPath={server?.icon} />
+      <img src={serverIcon} alt="Server Icon" className="w-14 h-14" />
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-medium text-[#4A6B9D] text-start truncate">
           {server.name}

@@ -153,7 +153,7 @@ const ServerPage: React.FC = () => {
 
   const userPermission = server.members?.[user.id].permissionLevel ?? 1;
   const serverChannels = server.channels ?? [];
-  const serverIcon = server.icon ?? '';
+  const serverIcon = server.icon ?? '/logo_server_def.png';
   const serverName = server.name ?? '';
   const serverDisplayId = server.displayId ?? '';
   const serverAnnouncement = server.announcement ?? '';
@@ -174,7 +174,7 @@ const ServerPage: React.FC = () => {
         {/* Server image and info */}
         <div className="flex items-center justify-between p-2 border-b mb-4">
           <div className="flex items-center space-x-3">
-            <ServerIcon iconPath={serverIcon} />
+            <img src={serverIcon} alt="Server Icon" className="w-14 h-14" />
             <div>
               <div className="text-gray-700">{serverName} </div>
               <div className="flex flex-row items-center gap-1">
