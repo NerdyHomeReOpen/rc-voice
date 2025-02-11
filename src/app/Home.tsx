@@ -13,8 +13,6 @@ import FriendPage from '@/pages/FriendPage';
 import HomePage from '@/pages/HomePage';
 import ServerPage from '@/pages/ServerPage';
 
-// Modals
-
 // Components
 import Tabs from '@/components/Tabs';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -30,7 +28,6 @@ import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
-import { once } from 'events';
 
 const STATE_ICON = {
   online: '/online.png',

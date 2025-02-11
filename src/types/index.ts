@@ -44,6 +44,7 @@ export interface FriendCategory {
   name: string;
   friendIds: string[];
   order: number;
+  createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   friends: User[] | null;
 }

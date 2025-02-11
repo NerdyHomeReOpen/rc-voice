@@ -18,7 +18,6 @@ import EmojiGrid from '@/components/EmojiGrid';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import MessageViewer from '@/components/MessageViewer';
 import ChannelViewer from '@/components/ChannelViewer';
-import ServerIcon from '@/components/ServerIcon';
 
 // Modals
 import ServerSettingModal from '@/modals/ServerSettingModal';
@@ -153,7 +152,7 @@ const ServerPage: React.FC = () => {
 
   const userPermission = server.members?.[user.id].permissionLevel ?? 1;
   const serverChannels = server.channels ?? [];
-  const serverIcon = server.icon ?? '/logo_server_def.png';
+  const serverIcon = server.iconUrl ?? '/logo_server_def.png';
   const serverName = server.name ?? '';
   const serverDisplayId = server.displayId ?? '';
   const serverAnnouncement = server.announcement ?? '';
@@ -272,11 +271,11 @@ const ServerPage: React.FC = () => {
                 e.preventDefault();
                 handleSendMessage({
                   id: '',
-                  senderId: user.id,
-                  sender: user,
                   content: messageInput,
-                  timestamp: 0,
                   type: 'general',
+                  channelId: user.presence?.currentChannelId ?? '',
+                  senderId: user.id,
+                  timestamp: 0,
                 });
                 setMessageInput('');
               }}

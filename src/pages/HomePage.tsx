@@ -3,7 +3,6 @@ import { Search } from 'lucide-react';
 
 // Components
 import CreateServerModal from '@/modals/CreateServerModal';
-import ServerIcon from '@/components/ServerIcon';
 
 // Utils
 import { calculateSimilarity } from '@/utils/searchServers';
@@ -39,7 +38,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
     };
   };
 
-  const serverIcon = server.icon ?? '/logo_server_def.png';
+  const serverIcon = server.iconUrl ?? '/logo_server_def.png';
   const serverName = server.name ?? '';
   const serverDisplayId = server.displayId ?? '';
   const serverAnnouncement = server.announcement ?? '';
@@ -112,7 +111,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
           <div className="flex space-x-4 items-center">
             <button
               className="text-gray-600 hover:text-gray-900 text-sm select-none"
-              onClick={() => setShowCreateServer(false)}
+              onClick={() => setShowCreateServer(true)}
             >
               創建語音群
             </button>

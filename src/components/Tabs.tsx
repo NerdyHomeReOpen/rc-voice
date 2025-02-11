@@ -54,13 +54,13 @@ const Tabs: React.FC<TabsProps> = React.memo(({ selectedId, onSelect }) => {
               }`}
               onClick={() => onSelect(TabId)}
             >
-              <div className="flex flex-row items-center justify-between">
+              <div className="flex flex-row items-center justify-center">
                 <span className="truncate">{TabLable}</span>
                 {index === 2 && (
                   <CircleX
                     onClick={() => handleLeaveServer()}
                     size={16}
-                    className="cursor-pointer right-0 bg-none"
+                    className="ml-4 cursor-pointer right-0 bg-none"
                   />
                 )}
               </div>

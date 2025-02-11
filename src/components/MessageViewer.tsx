@@ -74,8 +74,8 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
           />
           <div className="flex-1 min-w-0">
             <div className="text-gray-700">
-              {messageGroup.contents.map((content) => (
-                <div key={content} className="break-words">
+              {messageGroup.contents.map((content, index) => (
+                <div key={index} className="break-words">
                   <MarkdownViewer markdownText={content} />
                 </div>
               ))}
@@ -98,8 +98,8 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
             </div>
 
             <div className="text-gray-700">
-              {messageGroup.contents.map((content) => (
-                <div key={content} className="break-words">
+              {messageGroup.contents.map((content, index) => (
+                <div key={index} className="break-words">
                   <MarkdownViewer markdownText={content} />
                 </div>
               ))}
