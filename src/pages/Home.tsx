@@ -253,7 +253,6 @@ const Home = () => {
               <Minus size={16} />
             </button>
             <FullscreenSquare className="hover:bg-blue-700 p-2 rounded">
-              <Square size={16} />
             </FullscreenSquare>
             <button className="hover:bg-blue-700 p-2 rounded">
               <X size={16} />
