@@ -16,6 +16,7 @@ import ServerPage from '@/pages/ServerPage';
 // Components
 import Tabs from '@/components/Tabs';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import FullscreenSquare from '@/components/FullscreenSquare';
 
 // Utils
 import { measureLatency } from '@/utils/measureLatency';
@@ -251,9 +252,9 @@ const Home = () => {
             <button className="hover:bg-blue-700 p-2 rounded">
               <Minus size={16} />
             </button>
-            <button className="hover:bg-blue-700 p-2 rounded">
+            <FullscreenSquare className="hover:bg-blue-700 p-2 rounded">
               <Square size={16} />
-            </button>
+            </FullscreenSquare>
             <button className="hover:bg-blue-700 p-2 rounded">
               <X size={16} />
             </button>
