@@ -234,7 +234,7 @@ const server = http.createServer((req, res) => {
           displayId: generateUniqueDisplayId(servers),
           name: name,
           announcement: description || '',
-          icon: iconPath,
+          icon: iconPath || null,
           userIds: [],
           channelIds: [channelId],
           lobbyId: channelId,
