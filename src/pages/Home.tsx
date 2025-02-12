@@ -1,6 +1,6 @@
 'use client';
 
-import { Minus, Square, X } from 'lucide-react';
+import { Minus, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
