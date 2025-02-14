@@ -5,14 +5,39 @@ import FriendListViewer from '@/components/FriendListViewer';
 import BadgeViewer from '@/components/BadgeViewer';
 
 // Types
-import type { User } from '@/types';
+import type { User, FriendCategory } from '@/types';
 
 // Redux
 import { useSelector } from 'react-redux';
 
+// Services
+import { apiService } from '@/services/api.service';
+
 const FriendPage: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
+  const sessionId = useSelector(
+    (state: { sessionToken: string }) => state.sessionToken,
+  );
+
+  // API
+  const [friendCategories, setFriendCategories] = useState<FriendCategory[]>(
+    [],
+  );
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const fetchFriendDatas = async () => {
+      try {
+        const data = await apiService.post('/user/friends', { sessionId });
+        setFriendCategories(data.friendCategories ?? []);
+      } catch (error: Error | any) {
+        console.error(error);
+      }
+    };
+    fetchFriendDatas();
+  }, []);
 
   // Sidebar Control
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
@@ -93,7 +118,7 @@ const FriendPage: React.FC = React.memo(() => {
           style={{ width: `${sidebarWidth}px` }}
         >
           {/* Friend List */}
-          <FriendListViewer />
+          <FriendListViewer friendCategories={friendCategories} />
         </div>
         {/* Resize Handle */}
         <div

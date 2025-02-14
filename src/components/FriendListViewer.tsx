@@ -129,15 +129,16 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   );
 });
 
-const FriendListViewer: React.FC = React.memo(() => {
-  // Redux
-  const user = useSelector((state: { user: User }) => state.user);
+interface FriendListViewerProps {
+  friendCategories: FriendCategory[];
+}
 
-  // Search Control
-  const [searchQuery, setSearchQuery] = useState<string>('');
+const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
+  ({ friendCategories }) => {
+    // Search Control
+    const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const userFriendCategories = (user.friendCategories || []).map(
-    (category) => ({
+    const userFriendCategories = friendCategories.map((category) => ({
       ...category,
       friends: category.friends
         ? category.friends.filter(
@@ -146,62 +147,62 @@ const FriendListViewer: React.FC = React.memo(() => {
               searchQuery === '',
           )
         : null,
-    }),
-  );
+    }));
 
-  return (
-    <>
-      {/* Navigation Tabs */}
-      <div className="flex border-b">
-        <button className="flex-1 p-2 hover:bg-gray-100">
-          <Users className="w-5 h-5 mx-auto text-gray-600" />
-        </button>
-        <button className="flex-1 p-2 hover:bg-gray-100">
-          <History className="w-5 h-5 mx-auto text-gray-600" />
-        </button>
-      </div>
+    return (
+      <>
+        {/* Navigation Tabs */}
+        <div className="flex border-b">
+          <button className="flex-1 p-2 hover:bg-gray-100">
+            <Users className="w-5 h-5 mx-auto text-gray-600" />
+          </button>
+          <button className="flex-1 p-2 hover:bg-gray-100">
+            <History className="w-5 h-5 mx-auto text-gray-600" />
+          </button>
+        </div>
 
-      {/* Search Bar */}
-      <div className="w-full pl-8 pr-3 py-1 border-b relative">
-        <Search className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          placeholder="搜尋好友"
-          className="w-full rounded focus:outline-none"
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+        {/* Search Bar */}
+        <div className="w-full pl-8 pr-3 py-1 border-b relative">
+          <Search className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="搜尋好友"
+            className="w-full rounded focus:outline-none"
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-      <div
-        className="p-2 flex items-center justify-between text-gray-400 text-xs select-none"
-        onContextMenu={(e) => {
-          e.preventDefault();
-          //   setContentMenuPos({ x: e.pageX, y: e.pageY });
-          //   setShowContextMenu2(true);
-        }}
-      >
-        所有好友
-      </div>
-      <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
-        {userFriendCategories.map((category) => (
-          <FriendGroup key={category.id} category={category} />
-        ))}
-      </div>
+        <div
+          className="p-2 flex items-center justify-between text-gray-400 text-xs select-none"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            //   setContentMenuPos({ x: e.pageX, y: e.pageY });
+            //   setShowContextMenu2(true);
+          }}
+        >
+          所有好友
+        </div>
+        <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
+          {userFriendCategories.map((category) => (
+            <FriendGroup key={category.id} category={category} />
+          ))}
+        </div>
 
-      {/* Bottom Buttons */}
-      <div className="flex border-t">
-        <button className="flex-1 p-2 text-blue-500 hover:bg-gray-100 flex items-center justify-center">
-          <FolderPlus className="w-4 h-4 mr-1" />
-          添加分组
-        </button>
-        <button className="flex-1 p-2 text-blue-500 hover:bg-gray-100 flex items-center justify-center">
-          <UserPlus className="w-4 h-4 mr-1" />
-          添加好友
-        </button>
-      </div>
-    </>
-  );
-});
+        {/* Bottom Buttons */}
+        <div className="flex border-t">
+          <button className="flex-1 p-2 text-blue-500 hover:bg-gray-100 flex items-center justify-center">
+            <FolderPlus className="w-4 h-4 mr-1" />
+            添加分组
+          </button>
+          <button className="flex-1 p-2 text-blue-500 hover:bg-gray-100 flex items-center justify-center">
+            <UserPlus className="w-4 h-4 mr-1" />
+            添加好友
+          </button>
+        </div>
+      </>
+    );
+  },
+);
 
 FriendListViewer.displayName = 'FriendListViewer';
 

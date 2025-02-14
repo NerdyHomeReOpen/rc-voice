@@ -1,4 +1,5 @@
-import { apiService, base64encode } from "./api.service";
+// Services
+import { apiService, base64encode } from "@/services/api.service";
 
 interface LoginFormData {
   account: string;
@@ -15,18 +16,18 @@ interface RegisterFormData {
 }
 
 export const authService = {
-  login: async (credentials: LoginFormData) => {
+  login: async (formData: LoginFormData) => {
     const loginData = {
-      ...credentials,
-      password: base64encode(credentials.password),
+      ...formData,
+      password: base64encode(formData.password),
     };
     return apiService.post("/login", loginData);
   },
 
-  register: async (userData: RegisterFormData) => {
+  register: async (formData: RegisterFormData) => {
     const registerData = {
-      ...userData,
-      password: base64encode(userData.password),
+      ...formData,
+      password: base64encode(formData.password),
     };
     return apiService.post("/register", registerData);
   },

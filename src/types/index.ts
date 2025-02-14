@@ -20,15 +20,13 @@ export interface User {
   gender: "Male" | "Female";
   level: number;
   signature: string;
+  ownedServerIds: string[];
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   presence: Presence | null;
   members: {
     [serverId: string]: Member;
   } | null;
-  friendCategories?: FriendCategory[] | null;
-  joinedServers?: Server[] | null;
-  recommendedServers?: Server[] | null;
 }
 export interface UserList {
   [userId: string]: User;

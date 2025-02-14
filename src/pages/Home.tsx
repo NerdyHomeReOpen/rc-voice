@@ -120,9 +120,9 @@ const Home = () => {
       console.log('Server update: ', server);
       store.dispatch(setServer(server));
     };
-    const handleLevelUp = (user: User) => {
+    const handleUserUpdate = (data: Partial<User>) => {
       console.log('Level up!: ', user.level);
-      store.dispatch(updateUser({ level: user.level }));
+      store.dispatch(setUser({ ...user, ...data }));
     };
     const handlePlaySound = (sound: 'join' | 'leave') => {
       switch (sound) {
@@ -147,7 +147,7 @@ const Home = () => {
     socket.on('disconnectChannel', handleDisconnectChannel);
     socket.on('userPresenceUpdate', handleUpdateUserPresence);
     socket.on('serverUpdate', handleServerUpdate);
-    socket.on('levelUp', handleLevelUp);
+    socket.on('userUpdate', handleUserUpdate);
     socket.on('playSound', handlePlaySound);
 
     return () => {
@@ -161,18 +161,18 @@ const Home = () => {
       socket.off('disconnectChannel', handleDisconnectChannel);
       socket.off('userPresenceUpdate', handleUpdateUserPresence);
       socket.off('serverUpdate', handleServerUpdate);
-      socket.off('levelUp', handleLevelUp);
+      socket.off('userUpdate', handleUserUpdate);
       socket.off('playSound', handlePlaySound);
     };
   }, [sessionId, server, user]);
+
+  // Tab Control
+  const [selectedTabId, setSelectedTabId] = useState<number>(1);
 
   useEffect(() => {
     if (server) setSelectedTabId(3);
     else setSelectedTabId(1);
   }, [server]);
-
-  // Tab Control
-  const [selectedTabId, setSelectedTabId] = useState<number>(1);
 
   // Latency Control
   const [latency, setLatency] = useState<string | null>('0');

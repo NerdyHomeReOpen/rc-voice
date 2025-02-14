@@ -1,4 +1,8 @@
-import { apiService } from "./api.service";
+
+// Services
+import { apiService } from '@/services/api.service';
+
+// Types
 import type { User } from "@/types";
 
 interface UpdateProfileData {

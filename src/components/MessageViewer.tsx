@@ -111,44 +111,41 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
   );
 });
 
-interface MessageViewerProps {}
+interface MessageViewerProps {
+  messages: Message[];
+}
 
-const MessageViewer: React.FC<MessageViewerProps> = React.memo(() => {
-  // Redux
-  const server = useSelector((state: { server: Server }) => state.server);
-  const user = useSelector((state: { user: User }) => state.user);
+const MessageViewer: React.FC<MessageViewerProps> = React.memo(
+  ({ messages }) => {
+    const groupMessages = getGroupMessages(messages);
 
-  const userCurrentChannel = server.channels?.find(
-    (channel) => channel.id === user.presence?.currentChannelId,
-  );
-  const groupMessages = getGroupMessages(userCurrentChannel?.messages ?? []);
+    // Auto Scroll Control
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto Scroll Control
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+    useLayoutEffect(() => {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: 'auto',
+        block: 'end',
+      });
+    }, [groupMessages]);
 
-  useLayoutEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: 'auto',
-      block: 'end',
-    });
-  }, [groupMessages]);
-
-  return (
-    <div
-      className="flex flex-[5] flex-col overflow-y-auto p-3 min-w-0 max-w-full 
+    return (
+      <div
+        className="flex flex-[5] flex-col overflow-y-auto p-3 min-w-0 max-w-full 
         [&::-webkit-scrollbar]:w-2 
         [&::-webkit-scrollbar]:h-2 
         [&::-webkit-scrollbar-thumb]:bg-gray-300 
         [&::-webkit-scrollbar-thumb]:rounded-lg 
         [&::-webkit-scrollbar-thumb]:hover:bg-gray-400"
-    >
-      {groupMessages.map((groupMessage) => (
-        <MessageBox key={groupMessage.id} messageGroup={groupMessage} />
-      ))}
-      <div ref={messagesEndRef} />
-    </div>
-  );
-});
+      >
+        {groupMessages.map((groupMessage) => (
+          <MessageBox key={groupMessage.id} messageGroup={groupMessage} />
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+    );
+  },
+);
 
 MessageViewer.displayName = 'MessageViewer';
 

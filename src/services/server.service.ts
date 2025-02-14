@@ -1,5 +1,6 @@
-import { API_URL, apiService } from './api.service';
-import type { Server } from '@/types';
+// Services
+import { apiService } from '@/services/api.service';
+
 
 interface CreateServerData {
   userId: string;
@@ -11,30 +12,17 @@ interface CreateServerData {
 // ServerService
 export const serverService = {
   // Create new a server
-  createServer: async (serverData: CreateServerData): Promise<Server> => {
+  createServer: async (serverData: CreateServerData): Promise<any> => {
     try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        throw new Error('用戶未登入');
-      }
-
       const formData = new FormData();
       formData.append('userId', serverData.userId);
       formData.append('name', serverData.name);
       formData.append('description', serverData.description);
-      if (serverData.icon) {
-        formData.append('icon', serverData.icon);
-      }
+      if(serverData.icon) formData.append('icon', serverData.icon);
 
-      const response = await apiService.post('/servers', formData);
-
-      if (response.error) {
-        throw new Error(response.error || '創建伺服器失敗');
-      }
-
-      return response.serverId;
+      return await apiService.post('/servers', formData);
     } catch (error: Error | any) {
-      throw new Error(error.message || '更新個人資料時發生錯誤');
+      throw new Error(error.message || '創建群組失敗');
     }
   },
 };

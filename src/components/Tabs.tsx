@@ -29,8 +29,12 @@ const Tabs: React.FC<TabsProps> = React.memo(({ selectedId, onSelect }) => {
     socket?.emit('disconnectServer', { serverId, sessionId });
   };
 
+  const handleRequestUserUpdate = () => {
+    socket?.emit('requestUserUpdate', { sessionId });
+  };
+
   const TABS = [
-    { id: 1, label: '發現' },
+    { id: 1, label: '發現', onClick: handleRequestUserUpdate },
     { id: 2, label: '好友' },
     server && { id: 3, label: server.name },
   ];
@@ -52,7 +56,10 @@ const Tabs: React.FC<TabsProps> = React.memo(({ selectedId, onSelect }) => {
                   ? 'bg-white text-blue-500 rounded-t-xl  text-based'
                   : 'bg-blue-600 hover:bg-blue-700 text-white rounded-t-xl text-center'
               }`}
-              onClick={() => onSelect(TabId)}
+              onClick={() => {
+                onSelect(TabId);
+                Tab.onClick && Tab.onClick();
+              }}
             >
               <div className="flex flex-row items-center justify-center">
                 <span className="truncate">{TabLable}</span>

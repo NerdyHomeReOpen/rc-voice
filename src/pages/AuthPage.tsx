@@ -171,14 +171,8 @@ const LoginForm: React.FC = React.memo(() => {
     if (!accountError && !passwordError) {
       try {
         const data = await authService.login(formData);
-        if (data.token) {
-          localStorage.setItem('sessionToken', data.token);
-          store.dispatch(setSessionToken(data.token));
-        } else {
-          setErrors({
-            general: data.message,
-          });
-        }
+        localStorage.setItem('sessionToken', data.sessionId);
+        store.dispatch(setSessionToken(data.sessionId));
       } catch (error) {
         setErrors({
           general: error instanceof Error ? error.message : '登入失敗',
@@ -320,13 +314,7 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(
       if (!accountError && !passwordError && !usernameError) {
         try {
           const data = await authService.register(formData);
-          if (data) {
-            onRegisterSuccess();
-          } else {
-            setErrors({
-              general: data.message,
-            });
-          }
+          onRegisterSuccess();
         } catch (error) {
           setErrors({
             general: error instanceof Error ? error.message : '註冊失敗',

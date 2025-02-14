@@ -51,9 +51,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const socket = useSocket();
 
     const maxGroups = 3;
-    const userOwnedServerCount =
-      user.joinedServers?.filter((server) => server.ownerId === user.id)
-        .length ?? 0;
+    const userOwnedServerCount = user.ownedServerIds.length;
 
     // Form Control
     const [formData, setFormData] = useState<ServerFormData>({
@@ -90,12 +88,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
 
       if (!nameError && !descriptionError) {
         try {
-          const serverId = await serverService.createServer(formData);
+          const data = await serverService.createServer(formData);
           onClose();
           // Connect to the server
           socket?.emit('connectServer', {
             sessionId: sessionId,
-            serverId: serverId,
+            serverId: data.serverId,
           });
         } catch (error) {
           setErrors({

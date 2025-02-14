@@ -18,7 +18,7 @@ import { useSocket } from '@/hooks/SocketProvider';
 import { errorHandler } from '@/utils/errorHandler';
 
 // Services
-import { API_URL } from '@/services/api.service';
+import { API_URL, apiService } from '@/services/api.service';
 
 // ServerCard Component
 interface ServerCardProps {
@@ -132,12 +132,34 @@ Header.displayName = 'Header';
 // HomePage Component
 const HomePage: React.FC = React.memo(() => {
   // Redux
-  const user = useSelector((state: { user: User }) => state.user);
+  const sessionId = useSelector(
+    (state: { sessionToken: string }) => state.sessionToken,
+  );
+
+  // API
+  const [recommendedServers, setRecommendedServers] = useState<Server[]>([]);
+  const [joinedServers, setJoinedServers] = useState<Server[]>([]);
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const fetchServerDatas = async () => {
+      try {
+        const data = await apiService.post('/user/servers', { sessionId });
+        setRecommendedServers(data.recommendedServers ?? []);
+        setJoinedServers(data.joinedServers ?? []);
+      } catch (error: Error | any) {
+        console.error(error);
+      }
+    };
+    fetchServerDatas();
+  }, []);
 
   // Search Control
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Server[]>([]);
 
+  // REFACTOR: use websocket to get server data
   useEffect(() => {
     if (searchQuery) {
       const getResults = (servers: Server[]) => {
@@ -164,10 +186,7 @@ const HomePage: React.FC = React.memo(() => {
           });
       };
       setSearchResults(
-        getResults([
-          ...(user.recommendedServers ?? []),
-          ...(user.joinedServers ?? []),
-        ]),
+        getResults([...(recommendedServers ?? []), ...(joinedServers ?? [])]),
       );
     } else {
       setSearchResults([]);
@@ -182,17 +201,16 @@ const HomePage: React.FC = React.memo(() => {
           {searchResults.length > 0 && (
             <section>
               <h2 className="text-lg font-bold mb-3">搜尋結果</h2>
-              <ServerGrid servers={searchResults || []} />
+              <ServerGrid servers={searchResults} />
             </section>
           )}
           <section className="mb-6">
             <h2 className="text-lg font-bold mb-3">推薦語音群</h2>
-            <ServerGrid servers={user.recommendedServers || []} />
+            <ServerGrid servers={recommendedServers} />
           </section>
-
           <section>
             <h2 className="text-lg font-bold mb-3">我的語音群</h2>
-            <ServerGrid servers={user.joinedServers || []} />
+            <ServerGrid servers={joinedServers} />
           </section>
         </div>
       </main>

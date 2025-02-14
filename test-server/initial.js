@@ -67,6 +67,7 @@ const users = {
     gender: 'Male',
     level: 100,
     signature: 'Im cool.',
+    ownedServerIds: ['4d7d-9426-689e-a73af1d2'],
     settings: {
       theme: 'dark',
       notifications: true,
@@ -82,6 +83,7 @@ const users = {
     gender: 'Male',
     level: 100,
     signature: 'Im yeci.',
+    ownedServerIds: [],
     settings: {
       theme: 'dark',
       notifications: true,
@@ -97,6 +99,7 @@ const users = {
     gender: 'Female',
     level: 100,
     signature: 'Im yeci.',
+    ownedServerIds: [],
     settings: {
       theme: 'dark',
       notifications: true,

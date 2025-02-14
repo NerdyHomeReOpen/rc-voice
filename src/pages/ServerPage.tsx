@@ -154,6 +154,10 @@ const ServerPage: React.FC = () => {
     setShowServerSetting(state ?? !showUserSetting);
 
   const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+  const userCurrentChannelId = user.presence?.currentChannelId ?? '';
+  const userCurrentChannel = server.channels?.find(
+    (channel) => channel.id === userCurrentChannelId,
+  );
   const serverChannels = server.channels ?? [];
   const serverIcon = server.iconUrl
     ? API_URL + server.iconUrl
@@ -161,6 +165,7 @@ const ServerPage: React.FC = () => {
   const serverName = server.name ?? '';
   const serverDisplayId = server.displayId ?? '';
   const serverAnnouncement = server.announcement ?? '';
+  const messages = userCurrentChannel?.messages ?? [];
 
   return (
     <>
@@ -212,7 +217,7 @@ const ServerPage: React.FC = () => {
           </div>
         </div>
         {/* Channel List */}
-        {server.channels && <ChannelViewer />}
+        <ChannelViewer channels={serverChannels} />
       </div>
       {/* Resize Handle */}
       <div
@@ -226,7 +231,7 @@ const ServerPage: React.FC = () => {
           <MarkdownViewer markdownText={serverAnnouncement} />
         </div>
         {/* Messages Area */}
-        <MessageViewer />
+        <MessageViewer messages={messages} />
         {/* Input Area */}
         <div className="flex flex-[1] p-3">
           <div

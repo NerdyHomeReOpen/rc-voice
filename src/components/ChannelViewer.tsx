@@ -470,10 +470,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
   );
 });
 
-const ChannelViewer: React.FC = () => {
+interface ChannelViewerProps {
+  channels: Channel[];
+}
+
+const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
-  const server = useSelector((state: { server: Server }) => state.server);
 
   const [contentMenuPos, setContentMenuPos] = useState<ContextMenuPosState>({
     x: 0,
@@ -485,8 +488,7 @@ const ChannelViewer: React.FC = () => {
   const [showAddChannelModal, setShowAddChannelModal] =
     useState<boolean>(false);
 
-  const serverChannels = server.channels ?? [];
-  const userCurrentChannel = serverChannels.find(
+  const userCurrentChannel = channels.find(
     (_) => _.id == user.presence?.currentChannelId,
   );
   const userCurrentChannelName = userCurrentChannel?.name ?? '';
@@ -543,7 +545,7 @@ const ChannelViewer: React.FC = () => {
         所有頻道
       </div>
       <div className="flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none">
-        {[...serverChannels]
+        {[...channels]
           .filter((c) => !c.parentId)
           .map((channel) =>
             channel.isCategory ? (
