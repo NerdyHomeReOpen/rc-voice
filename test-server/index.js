@@ -1773,7 +1773,9 @@ const getUser = async (userId) => {
 const getUserBadges = async (userId) => {
   const _users = (await db.get('users')) || {};
   const _badges = (await db.get('badgeList')) || {};
-  const userBadges = _users[userId].badgeIds.map((badgeId) => _badges[badgeId]);
+  const userBadges = _users[userId].badgeIds
+    .map((badgeId) => _badges[badgeId])
+    .filter((badge) => badge);
   if (!userBadges) return null;
   return [...userBadges];
 };

@@ -19,9 +19,6 @@ const handleResponse = async (response: Response): Promise<any> => {
     }
     throw new Error(data.error || "請求失敗");
   }
-  if (!data.data){
-    throw new Error(data.error || "請求失敗");
-  }
 
   return data.data;
 };
