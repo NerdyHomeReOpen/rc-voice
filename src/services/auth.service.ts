@@ -1,5 +1,8 @@
 // Services
-import { apiService, base64encode } from "@/services/api.service";
+import { apiService } from "@/services/api.service";
+
+// Utils
+import { base64encode } from "@/utils/base64encode";
 
 interface LoginFormData {
   account: string;

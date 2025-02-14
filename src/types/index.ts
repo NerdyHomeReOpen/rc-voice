@@ -16,13 +16,14 @@ export interface User {
   id: string;
   name: string;
   avatarUrl: string | null;
-  badges: Badge[];
   gender: "Male" | "Female";
   level: number;
   signature: string;
+  badgeIds: string[];
   ownedServerIds: string[];
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
+  badges: Badge[];
   presence: Presence | null;
   members: {
     [serverId: string]: Member;
@@ -126,9 +127,9 @@ export interface Channel {
   }
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  messages: Message[] | null;
-  parent: Channel | null;
-  users: User[] | null;
+  messages?: Message[] | null;
+  parent?: Channel | null;
+  users?: User[] | null;
 }
 export interface ChannelList {
   [channelId: string]: Channel;

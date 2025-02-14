@@ -9,29 +9,18 @@ interface ApiRequestData {
   [key: string]: any;
 }
 
-// Utility functions
-export const base64encode = (str: string): String => {
-  try {
-    return btoa(str);
-  } catch (e) {
-    return str;
-  }
-};
-
-// Error handling utility
 const handleResponse = async (response: Response): Promise<any> => {
   const data = await response.json();
-  console.log(data);
 
   if (!response.ok) {
     // Handle specific error codes
     if (response.status === 409) {
-      throw new Error(data.message || "資源已存在");
+      throw new Error(data.error || "資源已存在");
     }
-    throw new Error(data.message || "請求失敗");
+    throw new Error(data.error || "請求失敗");
   }
   if (!data.data){
-    throw new Error(data.message || "請求失敗");
+    throw new Error(data.error || "請求失敗");
   }
 
   return data.data;
@@ -90,20 +79,4 @@ export const apiService = {
       throw new Error(error.message || "更新資料失敗");
     }
   },
-
-  // // Upload file
-  // upload: async (endpoint: string, file:) => {
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-
-  //     const response = await fetch(`${API_URL}${endpoint}`, {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-  //     return handleResponse(response);
-  //   } catch (error: Error | any) {
-  //     throw new Error(error.message || "上傳檔案失敗");
-  //   }
-  // },
 };

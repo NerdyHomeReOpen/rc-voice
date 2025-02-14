@@ -19,7 +19,6 @@ export const serverService = {
       formData.append('name', serverData.name);
       formData.append('description', serverData.description);
       if(serverData.icon) formData.append('icon', serverData.icon);
-
       return await apiService.post('/servers', formData);
     } catch (error: Error | any) {
       throw new Error(error.message || '創建群組失敗');

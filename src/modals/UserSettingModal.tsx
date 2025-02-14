@@ -1,19 +1,126 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-
-// Service
-import userService from '@/services/user.service';
 
 // Components
 import Modal from '@/components/Modal';
 
 // Types
 import type { User, ModalTabItem } from '@/types';
+
+// Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 
-const TABS: ModalTabItem[] = [
-  { id: '基本資料', label: '基本資料', onClick: () => {} },
-];
+interface BasicInfoTabProps {
+  user: Partial<User>;
+  setUser: (user: Partial<User>) => void;
+}
+
+const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ user, setUser }) => {
+  // Redux
+  const sessionId = useSelector(
+    (state: { sessionToken: string }) => state.sessionToken,
+  );
+
+  // Socket
+  const socket = useSocket();
+
+  const handleLogout = () => {
+    // TODO: Implement logout
+    socket?.emit('disconnectUser', { sessionId });
+  };
+
+  // User data
+  const userAvatar = user?.avatarUrl ?? '/im/IMLogo.png';
+  const userName = user?.name ?? '';
+  const userGender = user?.gender ?? 'Male';
+  const userCreatedAt = new Date(user?.createdAt ?? 0).toLocaleString();
+
+  return (
+    <div className="flex mt-8">
+      <div className="flex-1">
+        <div className="mb-4">
+          <div className="flex items-center gap-4 mb-2 select-none">
+            <label className="w-20 text-right text-sm">顯示名稱</label>
+            <input
+              type="text"
+              value={userName}
+              onChange={(e) => setUser({ ...user, name: e.target.value })}
+              className="flex-1 p-1 border rounded text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-4 mb-2">
+            <label className="w-20 text-right text-sm select-none">ID</label>
+            <input
+              type="text"
+              value="27054971"
+              className="w-32 p-1 border rounded text-sm"
+              disabled
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-4 select-none">
+            <label className="w-20 text-right text-sm select-none">性別</label>
+            <select
+              value={userGender}
+              onChange={(e) =>
+                setUser({
+                  ...user,
+                  gender: e.target.value as 'Male' | 'Female',
+                })
+              }
+              className="p-1 border rounded text-sm"
+            >
+              <option value="Male">男性</option>
+              <option value="Female">女性</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-4 select-none">
+            <label className="w-20 text-right text-sm">創建時間</label>
+            <label className="w-48 p-1 rounded text-sm">{userCreatedAt}</label>
+          </div>
+
+          <div className="flex justify-center select-none">
+            <button
+              className="px-6 py-1 mt-5 bg-red-600 text-white rounded hover:bg-red-700"
+              onClick={(e) => {
+                e.preventDefault();
+                handleLogout();
+              }}
+            >
+              登出
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-48 flex flex-col items-center select-none">
+        <img
+          src={userAvatar}
+          alt="Icon"
+          className="w-32 h-32 border-2 border-gray-300 mb-2 rounded-full object-cover"
+        />
+        {/* <button className="px-4 py-1 bg-blue-50 hover:bg-blue-100 rounded text-sm">
+          更換頭像
+        </button> */}
+        <input
+          id="avatar-upload"
+          type="file"
+          className="hidden"
+          onChange={(e) => {}}
+          accept="image/*"
+        />
+        <label
+          htmlFor="avatar-upload"
+          className="px-4 py-1 bg-blue-50 hover:bg-blue-100 rounded text-sm cursor-pointer transition-colors"
+        >
+          更換頭像
+        </label>
+      </div>
+    </div>
+  );
+};
 
 interface UserSettingModalProps {
   onClose: () => void;
@@ -29,148 +136,35 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
   // Socket
   const socket = useSocket();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  // Tabs Control
+  const TABS: ModalTabItem[] = [
+    { id: '基本資料', label: '基本資料', onClick: () => {} },
+  ];
   const [activeTab, setActiveTab] = useState<ModalTabItem>(TABS[0]);
 
-  // Default user data
-  const [preview, setPreview] = useState('/im/IMLogo.png');
-  const [userName, setUserName] = useState(user?.name || '');
-  const [selectedGender, setSelectedGender] = useState(user?.gender || 'Male');
+  // User data (temporary)
+  const [editedUser, setEditedUser] = useState<Partial<User>>({
+    name: user.name,
+    gender: user.gender,
+    avatarUrl: user.avatarUrl,
+  });
 
-  const handleLogout = () => {
-    // TODO: Implement logout
-    socket?.emit('disconnectUser', { sessionId });
-  };
+  // Error Control
+  const [error, setError] = useState('');
 
   const handleSubmit = async () => {
-    if (userName !== user.name || selectedGender !== user.gender) {
-      try {
-        setIsLoading(true);
-        setError('');
-
-        const response = await userService.updateProfile({
-          userId: user.id,
-          name: userName,
-          gender: selectedGender,
-        });
-
-        localStorage.setItem(
-          'userData',
-          JSON.stringify({
-            ...user,
-            name: userName,
-            gender: selectedGender,
-          }),
-        );
-        console.log(response);
-        onClose();
-      } catch (err: Error | any) {
-        setError(err.message || 'Save failed');
-      }
-    } else {
-      onClose();
-    }
-    setIsLoading(false);
+    socket?.emit('updateUser', { sessionId, user: editedUser });
+    socket?.on('error', (error: { message: string }) => {
+      setError(error.message);
+    });
+    onClose();
   };
 
   const renderContent = () => {
+    if (!editedUser) return null;
     switch (activeTab.id) {
       case '基本資料':
-        return (
-          <>
-            {error && (
-              <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
-                {error}
-              </div>
-            )}
-            <div className="flex mt-8">
-              <div className="flex-1">
-                <div className="mb-4">
-                  <div className="flex items-center gap-4 mb-2 select-none">
-                    <label className="w-20 text-right text-sm">顯示名稱</label>
-                    <input
-                      type="text"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      className="flex-1 p-1 border rounded text-sm"
-                    />
-                  </div>
-                  <div className="flex items-center gap-4 mb-2">
-                    <label className="w-20 text-right text-sm select-none">
-                      ID
-                    </label>
-                    <input
-                      type="text"
-                      value="27054971"
-                      className="w-32 p-1 border rounded text-sm"
-                      disabled
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-4 select-none">
-                    <label className="w-20 text-right text-sm select-none">
-                      性別
-                    </label>
-                    <select
-                      value={selectedGender}
-                      onChange={(e) =>
-                        setSelectedGender(e.target.value as 'Male' | 'Female')
-                      }
-                      className="p-1 border rounded text-sm"
-                    >
-                      <option value="Male">男性</option>
-                      <option value="Female">女性</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-4 select-none">
-                    <label className="w-20 text-right text-sm">創建時間</label>
-                    <label className="w-48 p-1 rounded text-sm">
-                      {new Date(
-                        Date.now() - Math.floor(Math.random() * 100000000),
-                      ).toLocaleString()}
-                    </label>
-                  </div>
-
-                  <div className="flex justify-center select-none">
-                    <button
-                      className="px-6 py-1 mt-5 bg-red-600 text-white rounded hover:bg-red-700"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleLogout();
-                      }}
-                    >
-                      登出
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* 頭像區域 */}
-              <div className="w-48 flex flex-col items-center select-none">
-                <img
-                  src={preview}
-                  alt="Icon"
-                  className="w-32 h-32 border-2 border-gray-300 mb-2 rounded-full object-cover"
-                />
-                <button className="px-4 py-1 bg-blue-50 hover:bg-blue-100 rounded text-sm">
-                  更換頭像
-                </button>
-                {/* <label className="px-4 py-1 bg-blue-50 hover:bg-blue-100 rounded text-sm cursor-pointer transition-colors">
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={handleFileChange}
-                    accept="image/*"
-                  />
-                  更換頭像
-                </label> */}
-              </div>
-            </div>
-          </>
-        );
+        return <BasicInfoTab user={editedUser} setUser={setEditedUser} />;
       default:
         return <div>{activeTab.label}</div>;
     }
@@ -183,8 +177,13 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
       tabs={TABS}
       onSelectTab={(tab) => setActiveTab(tab)}
       onClose={onClose}
-      onSubmit={onClose}
+      onSubmit={handleSubmit}
     >
+      {error && (
+        <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+          {error}
+        </div>
+      )}
       {renderContent()}
     </Modal>
   );

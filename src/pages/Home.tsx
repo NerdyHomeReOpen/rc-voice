@@ -81,47 +81,43 @@ const Home = () => {
       console.log('Socket force disconnected: ', sessionId);
       socket.emit('disconnectUser', { sessionId });
     };
-    const handleConnectUser = (user: any) => {
+    const handleUserConnect = (user: any) => {
       console.log('User connected: ', user);
       store.dispatch(setUser(user));
     };
-    const handleDisconnectUser = () => {
+    const handleUserDisconnect = () => {
       console.log('User disconnected');
       store.dispatch(clearServer());
       store.dispatch(clearUser());
       store.dispatch(clearSessionToken());
       localStorage.removeItem('sessionToken');
     };
-    const handleConnectServer = (server: Server) => {
+    const handleServerConnect = (server: Server) => {
       console.log('Server connected: ', server);
       store.dispatch(setServer(server));
       socket.emit('connectChannel', { sessionId, channelId: server.lobbyId });
     };
-    const handleDisconnectServer = () => {
+    const handleServerDisconnect = () => {
       console.log('Server disconnected');
       store.dispatch(clearServer());
     };
-    const handleConnectChannel = () => {
+    const handleChannelConnect = () => {
       console.log('Channel connected');
     };
-    const handleDisconnectChannel = () => {
+    const handleChannelDisconnect = () => {
       console.log('Channel disconnected');
     };
-    const handleUpdateUserPresence = (userPresence: Presence) => {
-      console.log('User presence update: ', userPresence);
-      store.dispatch(
-        setUser({
-          ...user,
-          presence: userPresence,
-        }),
-      );
+    const handleUpdateUserPresence = (data: Partial<Presence>) => {
+      console.log('User presence update: ', data);
+      const presence = user.presence ? { ...user.presence, ...data } : null;
+      store.dispatch(setUser({ ...user, presence }));
     };
-    const handleServerUpdate = (server: Server) => {
-      console.log('Server update: ', server);
-      store.dispatch(setServer(server));
+    const handleServerUpdate = (data: Partial<Server>) => {
+      console.log('Server update: ', data);
+      store.dispatch(setServer({ ...server, ...data }));
     };
     const handleUserUpdate = (data: Partial<User>) => {
-      console.log('Level up!: ', user.level);
+      console.log('User update: ', data);
       store.dispatch(setUser({ ...user, ...data }));
     };
     const handlePlaySound = (sound: 'join' | 'leave') => {
@@ -139,12 +135,12 @@ const Home = () => {
 
     socket.on('disconnect', handleDisconnect);
     socket.on('forceDisconnect', handleForceDisconnect);
-    socket.on('connectUser', handleConnectUser);
-    socket.on('disconnectUser', handleDisconnectUser);
-    socket.on('connectServer', handleConnectServer);
-    socket.on('disconnectServer', handleDisconnectServer);
-    socket.on('connectChannel', handleConnectChannel);
-    socket.on('disconnectChannel', handleDisconnectChannel);
+    socket.on('userConnect', handleUserConnect);
+    socket.on('userDisconnect', handleUserDisconnect);
+    socket.on('serverConnect', handleServerConnect);
+    socket.on('serverDisconnect', handleServerDisconnect);
+    socket.on('channelConnect', handleChannelConnect);
+    socket.on('channelDisconnect', handleChannelDisconnect);
     socket.on('userPresenceUpdate', handleUpdateUserPresence);
     socket.on('serverUpdate', handleServerUpdate);
     socket.on('userUpdate', handleUserUpdate);
@@ -153,12 +149,12 @@ const Home = () => {
     return () => {
       socket.off('disconnect', handleDisconnect);
       socket.off('forceDisconnect', handleForceDisconnect);
-      socket.off('connectUser', handleConnectUser);
-      socket.off('disconnectUser', handleDisconnectUser);
-      socket.off('connectServer', handleConnectServer);
-      socket.off('disconnectServer', handleDisconnectServer);
-      socket.off('connectChannel', handleConnectChannel);
-      socket.off('disconnectChannel', handleDisconnectChannel);
+      socket.off('userConnect', handleUserConnect);
+      socket.off('userDisconnect', handleUserDisconnect);
+      socket.off('serverConnect', handleServerConnect);
+      socket.off('serverDisconnect', handleServerDisconnect);
+      socket.off('channelConnect', handleChannelConnect);
+      socket.off('channelDisconnect', handleChannelDisconnect);
       socket.off('userPresenceUpdate', handleUpdateUserPresence);
       socket.off('serverUpdate', handleServerUpdate);
       socket.off('userUpdate', handleUserUpdate);
@@ -199,75 +195,78 @@ const Home = () => {
     }
   };
 
+  const handleUpdateStatus = (status: Presence['status']) => {
+    socket?.emit('updatePresence', { sessionId, presence: { status } });
+  };
+
+  const userName = user?.name ?? 'RiceCall';
+  const userPresenceStatus = user?.presence?.status ?? 'online';
+
   return (
-    <>
-      <div className="h-screen flex flex-col bg-background font-['SimSun'] overflow-hidden">
-        {/* Top Navigation */}
-        <div className="bg-blue-600 flex items-center justify-between text-white text-sm flex-none h-12 gap-3 min-w-max">
-          {/* User State Display */}
-          <div className="flex items-center space-x-2 min-w-max m-2">
+    <div className="h-screen flex flex-col bg-background font-['SimSun'] overflow-hidden">
+      {/* Top Navigation */}
+      <div className="bg-blue-600 flex items-center justify-between text-white text-sm flex-none h-12 gap-3 min-w-max">
+        {/* User State Display */}
+        <div className="flex items-center space-x-2 min-w-max m-2">
+          <img
+            src="/rc_logo_small.png"
+            alt="RiceCall"
+            className="w-6 h-6 select-none"
+          />
+          <span className="text-xs font-bold text-black select-none">
+            {userName}
+          </span>
+          <div className="flex items-center">
             <img
-              src="/rc_logo_small.png"
-              alt="RiceCall"
-              className="w-6 h-6 select-none"
+              src={STATE_ICON[userPresenceStatus]}
+              alt="User State"
+              className="w-5 h-5 p-1 select-none"
             />
-            {user && (
-              <>
-                <span className="text-xs font-bold text-black select-none">
-                  {user.name}
-                </span>
-                <div className="flex items-center">
-                  <img
-                    src={STATE_ICON[user.presence?.status ?? 'online']}
-                    alt="User State"
-                    className="w-5 h-5 p-1 select-none"
-                  />
-                  <select
-                    value={user.presence?.status ?? 'online'}
-                    onChange={(e) => {}} // change to websocket
-                    className="bg-transparent text-white text-xs appearance-none hover:bg-blue-700 p-1 rounded cursor-pointer focus:outline-none select-none"
-                  >
-                    <option value="online" className="bg-blue-600">
-                      線上
-                    </option>
-                    <option value="dnd" className="bg-blue-600">
-                      勿擾
-                    </option>
-                    <option value="idle" className="bg-blue-600">
-                      暫離
-                    </option>
-                    <option value="gn" className="bg-blue-600">
-                      離線
-                    </option>
-                  </select>
-                </div>
-              </>
-            )}
-            <div className="px-3 py-1 bg-gray-100 text-xs text-gray-600 select-none">
-              {latency} ms
-            </div>
+            <select
+              value={userPresenceStatus}
+              onChange={(e) => {
+                handleUpdateStatus(e.target.value as Presence['status']);
+              }}
+              className="bg-transparent text-white text-xs appearance-none hover:bg-blue-700 p-1 rounded cursor-pointer focus:outline-none select-none"
+            >
+              <option value="online" className="bg-blue-600">
+                線上
+              </option>
+              <option value="dnd" className="bg-blue-600">
+                勿擾
+              </option>
+              <option value="idle" className="bg-blue-600">
+                暫離
+              </option>
+              <option value="gn" className="bg-blue-600">
+                離線
+              </option>
+            </select>
           </div>
-          {/* Switch page */}
-          {user && (
-            <Tabs
-              selectedId={selectedTabId}
-              onSelect={(tabId) => setSelectedTabId(tabId)}
-            />
-          )}
-          <div className="flex items-center space-x-2 min-w-max m-2">
-            <button className="hover:bg-blue-700 p-2 rounded">
-              <Minus size={16} />
-            </button>
-            <FullscreenSquare className="hover:bg-blue-700 p-2 rounded"></FullscreenSquare>
-            <button className="hover:bg-blue-700 p-2 rounded">
-              <X size={16} />
-            </button>
+          <div className="px-3 py-1 bg-gray-100 text-xs text-gray-600 select-none">
+            {latency} ms
           </div>
         </div>
-        {/* Main Content */}
-        <div className="flex flex-1 min-h-0">{getMainContent()}</div>
+        {/* Switch page */}
+        {user && (
+          <Tabs
+            selectedId={selectedTabId}
+            onSelect={(tabId) => setSelectedTabId(tabId)}
+          />
+        )}
+        <div className="flex items-center space-x-2 min-w-max m-2">
+          <button className="hover:bg-blue-700 p-2 rounded">
+            <Minus size={16} />
+          </button>
+          <FullscreenSquare className="hover:bg-blue-700 p-2 rounded"></FullscreenSquare>
+          <button className="hover:bg-blue-700 p-2 rounded">
+            <X size={16} />
+          </button>
+        </div>
       </div>
-    </>
+      {/* Main Content */}
+      <div className="flex flex-1 min-h-0">{getMainContent()}</div>
+    </div>
   );
 };
 Home.displayName = 'Home';

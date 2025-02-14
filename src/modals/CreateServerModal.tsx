@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useSocket } from '@/hooks/SocketProvider';
 
@@ -50,9 +50,6 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     // Socket Control
     const socket = useSocket();
 
-    const maxGroups = 3;
-    const userOwnedServerCount = user.ownedServerIds.length;
-
     // Form Control
     const [formData, setFormData] = useState<ServerFormData>({
       userId: user.id,
@@ -60,23 +57,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       description: '',
       icon: null,
     });
-    const [errors, setErrors] = useState<FormErrors>({});
-    const [previewImage, setPreviewImage] = useState<string>(
-      '/logo_server_def.png',
-    );
 
-    const remainingGroups = maxGroups - userOwnedServerCount;
-    const canCreateGroup = remainingGroups > 0;
+    // Error Control
+    const [errors, setErrors] = useState<FormErrors>({});
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-
-      if (!canCreateGroup) {
-        setErrors({
-          general: '您已達到可創建的群組上限',
-        });
-        return;
-      }
 
       const nameError = validateName(formData.name);
       const descriptionError = validateDescription(formData.description);
@@ -103,6 +89,11 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       }
     };
 
+    // Image Preview
+    const [previewImage, setPreviewImage] = useState<string>(
+      '/logo_server_def.png',
+    );
+
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (!file) {
@@ -120,6 +111,10 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       setFormData((prev) => ({ ...prev, icon: file }));
     };
 
+    const maxGroups = 0;
+    const userOwnedServerCount = user.ownedServerIds.length;
+    const remainingGroups = maxGroups - userOwnedServerCount;
+
     return (
       <Modal
         onClose={onClose}
@@ -134,14 +129,14 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
             <div className="space-y-6">
               <div
                 className={`border rounded-lg px-4 py-3 text-sm shadow-sm select-none ${
-                  canCreateGroup
-                    ? 'bg-yellow-50 border-yellow-200 text-yellow-800'
-                    : 'bg-red-50 border-red-200 text-red-800'
+                  errors.general
+                    ? 'bg-red-50 border-red-200 text-red-800'
+                    : 'bg-yellow-50 border-yellow-200 text-yellow-800'
                 }`}
               >
-                {canCreateGroup
-                  ? `您還可以創建${remainingGroups}個群，創建之後不能刪除或轉讓`
-                  : '您已達到可創建的群組上限'}
+                {errors.general
+                  ? errors.general
+                  : `您還可以創建${remainingGroups}個群，創建之後不能刪除或轉讓`}
               </div>
 
               <div className="space-y-4">
@@ -160,12 +155,11 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                           name: e.target.value,
                         }))
                       }
-                      disabled={!canCreateGroup}
-                      className={`w-full p-2 border ${
+                      // disabled={!canCreateGroup}
+                      className={`w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
                         errors.name ? 'border-red-500' : 'border-gray-300'
-                      } rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
-                        !canCreateGroup ? 'bg-gray-100 cursor-not-allowed' : ''
-                      }`}
+                      } `}
+                      // ${!canCreateGroup ? 'bg-gray-100 cursor-not-allowed' : ''}
                       placeholder="請輸入群組名稱 (最多30字)"
                     />
                     {errors.name && (
@@ -187,14 +181,13 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                           description: e.target.value,
                         }))
                       }
-                      disabled={!canCreateGroup}
-                      className={`w-full p-2 border ${
+                      // disabled={!canCreateGroup}
+                      className={`w-full p-2 border rounded-lg text-sm h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none ${
                         errors.description
                           ? 'border-red-500'
                           : 'border-gray-300'
-                      } rounded-lg text-sm h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none ${
-                        !canCreateGroup ? 'bg-gray-100 cursor-not-allowed' : ''
                       }`}
+                      // ${!canCreateGroup ? 'bg-gray-100 cursor-not-allowed' : ''}
                       placeholder="請輸入群組介紹 (最多200字)"
                     />
                     {errors.description && (
@@ -221,15 +214,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                 className="hidden"
                 accept="image/*"
                 onChange={handleImageChange}
-                disabled={!canCreateGroup}
+                // disabled={!canCreateGroup}
               />
               <label
                 htmlFor="icon-upload"
-                className={`mt-3 w-full px-4 py-2 rounded-lg text-sm font-medium transition-all border text-center block ${
-                  canCreateGroup
-                    ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 hover:border-blue-300 cursor-pointer'
-                    : 'bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed'
-                }`}
+                className={`mt-3 w-full px-4 py-2 rounded-lg text-sm font-medium transition-all border text-center block bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 hover:border-blue-300 cursor-pointer`}
+                // ${canCreateGroup ? '' : 'bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed'}
               >
                 更換頭像
               </label>

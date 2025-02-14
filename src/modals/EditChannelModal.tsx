@@ -17,11 +17,6 @@ const validateName = (name: string): string => {
   return '';
 };
 
-interface ChannelFormData {
-  name: string;
-  visibility: Visibility;
-}
-
 interface FormErrors {
   general?: string;
   name?: string;
@@ -31,6 +26,7 @@ interface EditChannelModalProps {
   onClose: () => void;
   channel: Channel;
 }
+
 const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
   ({ onClose, channel }) => {
     // Socket
@@ -42,28 +38,23 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     );
 
     // Form Control
-    const [formData, setFormData] = useState<ChannelFormData>({
+    const [editedChannel, setEditedChannel] = useState<Partial<Channel>>({
       name: channel.name,
-      visibility: channel.settings.visibility,
+      settings: {
+        ...channel.settings,
+      },
     });
+
+    // Error Control
     const [errors, setErrors] = useState<FormErrors>({});
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const nameError = validateName(formData.name);
+      const nameError = validateName(editedChannel.name ?? '');
 
       setErrors({
         name: nameError,
       });
-
-      const editedChannel: Channel = {
-        ...channel,
-        name: formData.name,
-        settings: {
-          ...channel.settings,
-          visibility: formData.visibility,
-        },
-      };
 
       if (!nameError) {
         socket?.emit('editChannel', {
@@ -90,9 +81,9 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
       >
         <input
           type="text"
-          value={formData.name}
+          value={editedChannel.name}
           onChange={(e) =>
-            setFormData((prev) => ({
+            setEditedChannel((prev) => ({
               ...prev,
               name: e.target.value,
             }))
@@ -102,9 +93,9 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
           required
         />
         <select
-          value={formData.visibility}
+          value={editedChannel.settings?.visibility}
           onChange={(e) =>
-            setFormData((prev) => ({
+            setEditedChannel((prev) => ({
               ...prev,
               visibility: e.target.value as Visibility,
             }))
@@ -119,6 +110,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     );
   },
 );
+
 EditChannelModal.displayName = 'EditChannelModal';
 
 export default EditChannelModal;

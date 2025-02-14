@@ -17,12 +17,6 @@ const validateName = (name: string): string => {
   return '';
 };
 
-interface ChannelFormData {
-  name: string;
-  visibility: Visibility;
-  isCategory: boolean;
-}
-
 interface FormErrors {
   general?: string;
   name?: string;
@@ -32,6 +26,7 @@ interface AddChannelModalProps {
   onClose: () => void;
   parentChannel: Channel | null;
 }
+
 const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
   ({ onClose, parentChannel }) => {
     // Socket
@@ -44,45 +39,39 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     );
 
     // Form Control
-    const [formData, setFormData] = useState<ChannelFormData>({
+    const [newChannel, setNewChannel] = useState<Channel>({
+      id: '',
       name: '',
-      visibility: 'public',
+      isLobby: false,
       isCategory: false,
+      serverId: server.id,
+      userIds: [],
+      messageIds: [],
+      parentId: parentChannel?.id ?? null,
+      createdAt: 0,
+      settings: {
+        bitrate: 0,
+        visibility: 'public',
+        slowmode: false,
+        userLimit: 0,
+      },
     });
+
+    // Error Control
     const [errors, setErrors] = useState<FormErrors>({});
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const nameError = validateName(formData.name);
+      const nameError = validateName(newChannel.name);
 
       setErrors({
         name: nameError,
       });
 
-      const channel: Channel = {
-        ...formData,
-        id: '',
-        isLobby: false,
-        serverId: server.id,
-        users: [],
-        userIds: [],
-        messages: [],
-        messageIds: [],
-        parentId: parentChannel?.id ?? null,
-        parent: parentChannel ?? null,
-        createdAt: 0,
-        settings: {
-          bitrate: 0,
-          visibility: 'public',
-          slowmode: false,
-          userLimit: 0,
-        },
-      };
-
       if (!nameError) {
         socket?.emit('addChannel', {
           sessionId: sessionId,
-          channel: channel,
+          channel: newChannel,
         });
         socket?.on('error', (error: { message: string }) => {
           setErrors({ general: error.message });
@@ -102,9 +91,9 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
       >
         <input
           type="text"
-          value={formData.name}
+          value={newChannel.name}
           onChange={(e) =>
-            setFormData((prev) => ({
+            setNewChannel((prev) => ({
               ...prev,
               name: e.target.value,
             }))
@@ -114,9 +103,9 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
           required
         />
         <select
-          value={formData.visibility}
+          value={newChannel.settings.visibility}
           onChange={(e) =>
-            setFormData((prev) => ({
+            setNewChannel((prev) => ({
               ...prev,
               visibility: e.target.value as Visibility,
             }))
@@ -128,9 +117,9 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
           <option value="readonly">唯讀</option>
         </select>
         <select
-          value={formData.isCategory.toString()}
+          value={newChannel.isCategory.toString()}
           onChange={(e) =>
-            setFormData((prev) => ({
+            setNewChannel((prev) => ({
               ...prev,
               isCategory: e.target.value === 'true',
             }))
@@ -144,6 +133,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     );
   },
 );
+
 AddChannelModal.displayName = 'AddChannelModal';
 
 export default AddChannelModal;
