@@ -51,6 +51,7 @@ interface CategoryTabProps {
 
 const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
   // Redux
+  const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);
 
   // Expanded Control
@@ -73,6 +74,8 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
 
   const categoryVisibility = category.settings.visibility ?? 'public';
   const categoryName = category.name ?? '';
+  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+  const canEdit = userPermission >= 5;
   const serverChannels = server.channels ?? [];
 
   return (
@@ -105,16 +108,18 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
           </div>
           <span className="truncate">{categoryName}</span>
         </div>
-        <div
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setShowAddChannelModal(true);
-          }}
-          className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
-        >
-          <Plus size={14} />
-        </div>
+        {canEdit && (
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowAddChannelModal(true);
+            }}
+            className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
+          >
+            <Plus size={14} />
+          </div>
+        )}
       </div>
 
       {/* Expanded Sections */}
@@ -143,6 +148,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
               id: 'edit',
               icon: <Edit size={14} className="w-5 h-5 mr-2" />,
               label: '編輯',
+              disabled: !canEdit,
               onClick: () => {
                 setShowContextMenu(false);
                 setShowEditChannelModal(true);
@@ -152,6 +158,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
               id: 'delete',
               icon: <Trash size={14} className="w-5 h-5 mr-2" />,
               label: '刪除',
+              disabled: !canEdit,
               onClick: () => {
                 setShowContextMenu(false);
                 setShowDeleteChannelModal(true);
@@ -195,6 +202,7 @@ interface ChannelTabProps {
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
+  const server = useSelector((state: { server: Server }) => state.server);
   const sessionId = useSelector(
     (state: { sessionToken: string }) => state.sessionToken,
   );
@@ -227,6 +235,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   const channelVisibility = channel.settings.visibility ?? 'public';
   const channelName = channel.name ?? '';
   const channelUsers = channel.users ?? [];
+  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+  const canEdit = userPermission >= 5;
 
   return (
     <div key={channel.id}>
@@ -299,6 +309,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
               id: 'edit',
               icon: <Edit size={14} className="w-5 h-5 mr-2" />,
               label: '編輯',
+              disabled: !canEdit,
               onClick: () => {
                 setShowContextMenu(false);
                 setShowEditChannelModal(true);
@@ -308,7 +319,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
               id: 'delete',
               icon: <Trash size={14} className="w-5 h-5 mr-2" />,
               label: '刪除',
-              disabled: channel.isLobby,
+              disabled: channel.isLobby || !canEdit,
               onClick: () => {
                 setShowContextMenu(false);
                 setShowDeleteChannelModal(true);
@@ -475,6 +486,7 @@ interface ChannelViewerProps {
 const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
+  const server = useSelector((state: { server: Server }) => state.server);
 
   const [contentMenuPos, setContentMenuPos] = useState<ContextMenuPosState>({
     x: 0,
@@ -490,6 +502,8 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
     (_) => _.id == user.presence?.currentChannelId,
   );
   const userCurrentChannelName = userCurrentChannel?.name ?? '';
+  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+  const canEdit = userPermission >= 5;
 
   return (
     <>
@@ -504,6 +518,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
               id: 'addChannel',
               icon: <Plus size={14} className="w-5 h-5 mr-2" />,
               label: '新增',
+              disabled: !canEdit,
               onClick: () => {
                 setShowContextMenu(false);
                 setShowAddChannelModal(true);
