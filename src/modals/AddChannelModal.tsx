@@ -65,7 +65,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
         title={`新增頻道`}
         onSubmit={handleSubmit}
         width="300px"
-        height="300px"
+        height="auto"
         buttons={[
           {
             label: '取消',
@@ -80,46 +80,48 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
           },
         ]}
       >
-        <input
-          type="text"
-          value={newChannel.name}
-          onChange={(e) =>
-            setNewChannel((prev) => ({
-              ...prev,
-              name: e.target.value,
-            }))
-          }
-          className="w-full p-2 border rounded mb-4"
-          placeholder={`頻道名稱`}
-          required
-        />
-        <select
-          value={newChannel.settings.visibility}
-          onChange={(e) =>
-            setNewChannel((prev) => ({
-              ...prev,
-              visibility: e.target.value as Visibility,
-            }))
-          }
-          className="w-full p-2 border rounded mb-4"
-        >
-          <option value="public">公開</option>
-          <option value="private">會員</option>
-          <option value="readonly">唯讀</option>
-        </select>
-        <select
-          value={newChannel.isCategory.toString()}
-          onChange={(e) =>
-            setNewChannel((prev) => ({
-              ...prev,
-              isCategory: e.target.value === 'true',
-            }))
-          }
-          className="w-full p-2 border rounded mb-4"
-        >
-          <option value="false">頻道</option>
-          <option value="true">類別</option>
-        </select>
+        <div className="p-4 space-y-4">
+          <input
+            type="text"
+            value={newChannel.name}
+            onChange={(e) =>
+              setNewChannel((prev) => ({
+                ...prev,
+                name: e.target.value,
+              }))
+            }
+            className="w-full p-2 border rounded"
+            placeholder={`頻道名稱`}
+            required
+          />
+          <select
+            value={newChannel.settings.visibility}
+            onChange={(e) =>
+              setNewChannel((prev) => ({
+                ...prev,
+                visibility: e.target.value as Visibility,
+              }))
+            }
+            className="w-full p-2 border rounded"
+          >
+            <option value="public">公開</option>
+            <option value="private">會員</option>
+            <option value="readonly">唯讀</option>
+          </select>
+          <select
+            value={newChannel.isCategory.toString()}
+            onChange={(e) =>
+              setNewChannel((prev) => ({
+                ...prev,
+                isCategory: e.target.value === 'true',
+              }))
+            }
+            className="w-full p-2 border rounded"
+          >
+            <option value="false">頻道</option>
+            <option value="true">類別</option>
+          </select>
+        </div>
       </Modal>
     );
   },

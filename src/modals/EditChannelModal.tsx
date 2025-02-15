@@ -54,7 +54,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
         onClose={onClose}
         onSubmit={handleSubmit}
         width="300px"
-        height="300px"
+        height="auto"
         buttons={[
           {
             label: '取消',
@@ -69,33 +69,35 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
           },
         ]}
       >
-        <input
-          type="text"
-          value={editedChannel.name}
-          onChange={(e) =>
-            setEditedChannel((prev) => ({
-              ...prev,
-              name: e.target.value,
-            }))
-          }
-          className="w-full p-2 border rounded mb-4"
-          placeholder={`${channel.isCategory ? '類別' : '頻道'}名稱`}
-          required
-        />
-        <select
-          value={editedChannel.settings?.visibility}
-          onChange={(e) =>
-            setEditedChannel((prev) => ({
-              ...prev,
-              visibility: e.target.value as Visibility,
-            }))
-          }
-          className="w-full p-2 border rounded mb-4"
-        >
-          <option value="public">公開</option>
-          <option value="private">會員</option>
-          <option value="readonly">唯讀</option>
-        </select>
+        <div className="p-4 space-y-4">
+          <input
+            type="text"
+            value={editedChannel.name}
+            onChange={(e) =>
+              setEditedChannel((prev) => ({
+                ...prev,
+                name: e.target.value,
+              }))
+            }
+            className="w-full p-2 border rounded"
+            placeholder={`${channel.isCategory ? '類別' : '頻道'}名稱`}
+            required
+          />
+          <select
+            value={editedChannel.settings?.visibility}
+            onChange={(e) =>
+              setEditedChannel((prev) => ({
+                ...prev,
+                visibility: e.target.value as Visibility,
+              }))
+            }
+            className="w-full p-2 border rounded"
+          >
+            <option value="public">公開</option>
+            <option value="private">會員</option>
+            <option value="readonly">唯讀</option>
+          </select>
+        </div>
       </Modal>
     );
   },

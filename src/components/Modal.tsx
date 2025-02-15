@@ -2,6 +2,8 @@ import React, { memo, useState, FormEvent } from 'react';
 
 // Types
 import type { ModalButton, ModalTabItem } from '@/types';
+import { X } from 'lucide-react';
+import Header from './common/Header';
 
 const getButtonStyle = (button: ModalButton, disabled: boolean) => {
   switch (button.style) {
@@ -55,12 +57,12 @@ const Modal = memo(
           className={`flex flex-col bg-white rounded shadow-lg overflow-hidden transform outline-g`}
         >
           {/* Top Nevigation */}
-          <div className="bg-blue-600 p-2 text-white flex items-center justify-between select-none">
-            <div className="flex items-center space-x-2">
-              <img src="/rc_logo_small.png" alt="Logo" className="w-5 h-5" />
+          <Header onClose={onClose}>
+            <div className="flex items-center space-x-2 min-w-max m-2">
+              <img src="/rc_logo_small.png" alt="Logo" className="w-6 h-6" />
               <span>{title}</span>
             </div>
-          </div>
+          </Header>
           {/* Mid Part */}
           <div className="flex flex-1 min-h-0">
             {/* Side Menu */}
@@ -69,9 +71,9 @@ const Modal = memo(
                 {tabs.map((tab) => (
                   <div
                     key={tab.id}
-                    className={`cursor-pointer rounded transition-colors select-none px-4 py-1 text-black ${
+                    className={`cursor-pointer transition-colors select-none px-4 py-1 text-black ${
                       activeTab === tab.id
-                        ? 'bg-blue-100 font-bold'
+                        ? 'bg-white font-bold'
                         : 'hover:bg-blue-100/50'
                     }`}
                     onClick={() => {
@@ -86,7 +88,7 @@ const Modal = memo(
               </div>
             )}
             {/* Main Content */}
-            <div className="flex-1 p-6 overflow-y-auto">{children}</div>
+            <div className="flex-1 overflow-y-auto">{children}</div>
           </div>
 
           {/* Bottom */}
@@ -108,7 +110,7 @@ const Modal = memo(
                 {buttons.map((button, i) => (
                   <button
                     key={i}
-                    type="button"
+                    type={button.type}
                     onClick={button.onClick}
                     className={`px-4 py-2 rounded ${getButtonStyle(
                       button,

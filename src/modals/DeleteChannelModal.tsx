@@ -44,8 +44,8 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = React.memo(
       <Modal
         title={`刪除頻道`}
         onSubmit={handleSubmit}
-        width="300px"
-        height="200px"
+        width="auto"
+        height="auto"
         buttons={[
           {
             label: '取消',
@@ -60,9 +60,11 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = React.memo(
           },
         ]}
       >
-        <span className="text-red-500">
-          {'確定要刪除頻道 ' + channel.name + ' 嗎？\n此操作無法撤銷。'}
-        </span>
+        <div className="p-4">
+          <span className="text-red-500">
+            {'確定要刪除頻道 ' + channel.name + ' 嗎？此操作無法撤銷。'}
+          </span>
+        </div>
       </Modal>
     );
   },

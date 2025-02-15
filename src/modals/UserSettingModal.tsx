@@ -28,7 +28,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
   const userCreatedAt = new Date(user?.createdAt ?? 0).toLocaleString();
 
   return (
-    <div className="flex mt-8">
+    <div className="flex flex-1 p-4">
       <div className="flex-1">
         <div className="mb-4">
           <div className="flex items-center gap-4 mb-2 select-none">

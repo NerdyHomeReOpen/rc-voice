@@ -120,7 +120,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
         title="創建語音群"
         onSubmit={handleSubmit}
         width="760px"
-        height="80vh"
+        height="auto"
         buttons={[
           {
             label: '取消',
@@ -135,7 +135,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
           },
         ]}
       >
-        <div className="flex mb-4 gap-8">
+        <div className="flex p-4 gap-8">
           <div className="flex-1">
             <div className="space-y-6">
               <div
