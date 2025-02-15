@@ -225,41 +225,46 @@ const Home = () => {
             alt="RiceCall"
             className="w-6 h-6 select-none"
           />
-          <button
-            onClick={() => toggleUserSetting()}
-            className="p-1 hover:bg-gray-100 rounded"
-          >
+          {user && (
+            <><button
+              onClick={() => toggleUserSetting()}
+              className="p-1 hover:bg-gray-100 rounded"
+            >
+              <span className="text-xs font-bold select-none">
+                {userName}
+              </span>
+            </button><div className="flex items-center">
+                <img
+                  src={STATE_ICON[userPresenceStatus]}
+                  alt="User State"
+                  className="w-5 h-5 p-1 select-none" />
+                <select
+                  value={userPresenceStatus}
+                  onChange={(e) => {
+                    handleUpdateStatus(e.target.value as Presence['status']);
+                  } }
+                  className="bg-transparent text-white text-xs appearance-none hover:bg-blue-700 p-1 rounded cursor-pointer focus:outline-none select-none"
+                >
+                  <option value="online" className="bg-blue-600">
+                    線上
+                  </option>
+                  <option value="dnd" className="bg-blue-600">
+                    勿擾
+                  </option>
+                  <option value="idle" className="bg-blue-600">
+                    暫離
+                  </option>
+                  <option value="gn" className="bg-blue-600">
+                    離線
+                  </option>
+                </select>
+              </div></>
+          )}
+          {!user && (
             <span className="text-xs font-bold select-none">
               {userName}
             </span>
-          </button>
-          <div className="flex items-center">
-            <img
-              src={STATE_ICON[userPresenceStatus]}
-              alt="User State"
-              className="w-5 h-5 p-1 select-none"
-            />
-            <select
-              value={userPresenceStatus}
-              onChange={(e) => {
-                handleUpdateStatus(e.target.value as Presence['status']);
-              }}
-              className="bg-transparent text-white text-xs appearance-none hover:bg-blue-700 p-1 rounded cursor-pointer focus:outline-none select-none"
-            >
-              <option value="online" className="bg-blue-600">
-                線上
-              </option>
-              <option value="dnd" className="bg-blue-600">
-                勿擾
-              </option>
-              <option value="idle" className="bg-blue-600">
-                暫離
-              </option>
-              <option value="gn" className="bg-blue-600">
-                離線
-              </option>
-            </select>
-          </div>
+          )}
           <div className="px-3 py-1 bg-gray-100 text-xs text-gray-600 select-none">
             {latency} ms
           </div>
