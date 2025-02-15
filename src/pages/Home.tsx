@@ -220,19 +220,17 @@ const Home = () => {
       <div className="bg-blue-600 flex items-center justify-between text-white text-sm flex-none h-12 gap-3 min-w-max">
         {/* User State Display */}
         <div className="flex items-center space-x-2 min-w-max m-2">
-          <img
-            src="/rc_logo_small.png"
-            alt="RiceCall"
-            className="w-6 h-6 select-none"
-          />
           <button
             onClick={() => toggleUserSetting()}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1 hover:bg-blue-700 rounded"
           >
-            <span className="text-xs font-bold select-none">
-              {userName}
-            </span>
+            <img
+              src="/rc_logo_small.png"
+              alt="RiceCall"
+              className="w-6 h-6 select-none"
+            />
           </button>
+          <span className="text-xs font-bold select-none">{userName}</span>
           <div className="flex items-center">
             <img
               src={STATE_ICON[userPresenceStatus]}
