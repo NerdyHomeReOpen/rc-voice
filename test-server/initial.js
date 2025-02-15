@@ -182,22 +182,12 @@ const badgeList = {
     name: '超級書呆子',
     description: '官方認證的超級書呆子',
     order: 99999, // 越高越前面
-    ownedBy: [
-      '612a7797-f970-4f23-9983-f08d863d9552',
-      'a73af1d2-689e-4d7d-9426-3421cce3ade4',
-      'a66af1d2-689e-4d7d-9426-3421cce3ada5',
-    ],
   },
   mygo: {
     id: 'mygo',
     name: '又在夠',
     description: '歐內該 如果沒有買夠的話 瓦塔西',
     order: 0,
-    ownedBy: [
-      '612a7797-f970-4f23-9983-f08d863d9552',
-      'a73af1d2-689e-4d7d-9426-3421cce3ade4',
-      'a66af1d2-689e-4d7d-9426-3421cce3ada5',
-    ],
   },
 };
 const voiceStates = {
