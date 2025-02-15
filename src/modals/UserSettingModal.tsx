@@ -69,6 +69,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
                 })
               }
               className="p-1 border rounded text-black text-sm"
+              disabled
             >
               <option value="Male">男性</option>
               <option value="Female">女性</option>
