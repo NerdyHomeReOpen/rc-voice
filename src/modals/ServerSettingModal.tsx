@@ -262,7 +262,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                     <label className="w-20 text-right text-sm">創建時間</label>
                     <input
                       type="text"
-                      value={server.createdAt}
+                      value={new Date(server.createdAt).toLocaleString()}
                       className="w-48 p-1 border rounded text-sm"
                       disabled
                     />
