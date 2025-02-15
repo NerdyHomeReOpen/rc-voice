@@ -220,44 +220,60 @@ const Home = () => {
       <div className="bg-blue-600 flex items-center justify-between text-white text-sm flex-none h-12 gap-3 min-w-max">
         {/* User State Display */}
         <div className="flex items-center space-x-2 min-w-max m-2">
-          <button
-            onClick={() => toggleUserSetting()}
-            className="p-1 hover:bg-blue-700 rounded"
-          >
-            <img
-              src="/rc_logo_small.png"
-              alt="RiceCall"
-              className="w-6 h-6 select-none"
-            />
-          </button>
-          <span className="text-xs font-bold select-none">{userName}</span>
-          <div className="flex items-center">
-            <img
-              src={STATE_ICON[userPresenceStatus]}
-              alt="User State"
-              className="w-5 h-5 p-1 select-none"
-            />
-            <select
-              value={userPresenceStatus}
-              onChange={(e) => {
-                handleUpdateStatus(e.target.value as Presence['status']);
-              }}
-              className="bg-transparent text-white text-xs appearance-none hover:bg-blue-700 p-1 rounded cursor-pointer focus:outline-none select-none"
-            >
-              <option value="online" className="bg-blue-600">
-                線上
-              </option>
-              <option value="dnd" className="bg-blue-600">
-                勿擾
-              </option>
-              <option value="idle" className="bg-blue-600">
-                暫離
-              </option>
-              <option value="gn" className="bg-blue-600">
-                離線
-              </option>
-            </select>
-          </div>
+          {user && (
+            <>
+              <button
+                onClick={() => toggleUserSetting()}
+                className="p-1 hover:bg-blue-700 rounded"
+              >
+                <img
+                  src="/rc_logo_small.png"
+                  alt="RiceCall"
+                  className="w-6 h-6 select-none"
+                />
+              </button>
+              <span className="text-xs font-bold select-none">{userName}</span>
+              <div className="flex items-center">
+                <img
+                  src={STATE_ICON[userPresenceStatus]}
+                  alt="User State"
+                  className="w-5 h-5 p-1 select-none"
+                />
+                <select
+                  value={userPresenceStatus}
+                  onChange={(e) => {
+                    handleUpdateStatus(e.target.value as Presence['status']);
+                  }}
+                  className="bg-transparent text-white text-xs appearance-none hover:bg-blue-700 p-1 rounded cursor-pointer focus:outline-none select-none"
+                >
+                  <option value="online" className="bg-blue-600">
+                    線上
+                  </option>
+                  <option value="dnd" className="bg-blue-600">
+                    勿擾
+                  </option>
+                  <option value="idle" className="bg-blue-600">
+                    暫離
+                  </option>
+                  <option value="gn" className="bg-blue-600">
+                    離線
+                  </option>
+                </select>
+              </div>
+            </>
+          )}
+          {!user && (
+            <>
+              <div className="p-1">
+                <img
+                  src="/rc_logo_small.png"
+                  alt="RiceCall"
+                  className="w-6 h-6 select-none"
+                />
+              </div>
+              <span className="text-xs font-bold select-none">RiceCall</span>
+            </>
+          )}
           <div className="px-3 py-1 bg-gray-100 text-xs text-gray-600 select-none">
             {latency} ms
           </div>
