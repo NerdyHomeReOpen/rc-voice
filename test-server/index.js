@@ -579,13 +579,13 @@ io.on('connection', async (socket) => {
       }
       const channel = channels[presence.currentChannelId];
       if (!channel) {
-        throw new Error(
+        new Logger('WebSocket').warn(
           `Channel(${presence.currentChannelId}) not found. Won't disconnect channel.`,
         );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(
+        new Logger('WebSocket').warn(
           `Server(${presence.currentServerId}) not found. Won't disconnect server.`,
         );
       }
@@ -733,11 +733,15 @@ io.on('connection', async (socket) => {
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(`Server(${presence.currentServerId}) not found`);
+        new Logger('WebSocket').warn(
+          `Server(${presence.currentServerId}) not found. Won't disconnect server.`,
+        );
       }
       const channel = channels[presence.currentChannelId];
       if (!channel) {
-        throw new Error(`Channel(${presence.currentChannelId}) not found`);
+        new Logger('WebSocket').warn(
+          `Channel(${presence.currentChannelId}) not found. Won't disconnect channel.`,
+        );
       }
 
       // Remove user socket connection
@@ -1059,7 +1063,9 @@ io.on('connection', async (socket) => {
       }
       const channel = channels[presence.currentChannelId];
       if (!channel) {
-        throw new Error(`Channel(${presence.currentChannelId}) not found`);
+        new Logger('WebSocket').warn(
+          `Channel(${presence.currentChannelId}) not found. Won't disconnect channel.`,
+        );
       }
 
       // Update user presence
@@ -1266,13 +1272,13 @@ io.on('connection', async (socket) => {
       if (!presence) {
         throw new Error(`Presence(${`presence_${userId}`}) not found`);
       }
-      const channel = channels[presence.currentChannelId];
-      if (!channel) {
-        throw new Error(`Channel(${presence.currentChannelId}) not found`);
-      }
       const server = servers[presence.currentServerId];
       if (!server) {
         throw new Error(`Server(${presence.currentServerId}) not found`);
+      }
+      const channel = channels[presence.currentChannelId];
+      if (!channel) {
+        throw new Error(`Channel(${presence.currentChannelId}) not found`);
       }
 
       // Clear user contribution interval

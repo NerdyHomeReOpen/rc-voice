@@ -213,6 +213,9 @@ const Home = () => {
 
   return (
     <div className="h-screen flex flex-col bg-background font-['SimSun'] overflow-hidden">
+      {user && showUserSetting && (
+        <UserSettingModal onClose={() => toggleUserSetting(false)} />
+      )}
       {/* Top Navigation */}
       <div className="bg-blue-600 flex items-center justify-between text-white text-sm flex-none h-12 gap-3 min-w-max">
         {/* User State Display */}
@@ -223,8 +226,8 @@ const Home = () => {
             className="w-6 h-6 select-none"
           />
           <button
-                onClick={() => toggleUserSetting()}
-                className="p-1 hover:bg-gray-100 rounded"
+            onClick={() => toggleUserSetting()}
+            className="p-1 hover:bg-gray-100 rounded"
           >
             <span className="text-xs font-bold text-black select-none">
               {userName}
@@ -262,9 +265,6 @@ const Home = () => {
           </div>
         </div>
         {/* Switch page */}
-        {showUserSetting && (
-          <UserSettingModal onClose={() => toggleUserSetting(false)} />
-        )}
         {user && (
           <Tabs
             selectedId={selectedTabId}
@@ -275,7 +275,7 @@ const Home = () => {
           <button className="hover:bg-blue-700 p-2 rounded">
             <Minus size={16} />
           </button>
-          <FullscreenSquare className="hover:bg-blue-700 p-2 rounded"></FullscreenSquare>
+          <FullscreenSquare className="hover:bg-blue-700 p-2 rounded" />
           <button className="hover:bg-blue-700 p-2 rounded">
             <X size={16} />
           </button>
