@@ -229,7 +229,7 @@ const Home = () => {
             onClick={() => toggleUserSetting()}
             className="p-1 hover:bg-gray-100 rounded"
           >
-            <span className="text-xs font-bold text-black select-none">
+            <span className="text-xs font-bold select-none">
               {userName}
             </span>
           </button>
