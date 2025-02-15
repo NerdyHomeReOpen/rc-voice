@@ -53,7 +53,7 @@ const Modal = memo(
                 {tabs.map((tab) => (
                   <div
                     key={tab.id}
-                    className={`cursor-pointer rounded transition-colors select-none px-4 py-1 ${
+                    className={`cursor-pointer rounded transition-colors select-none px-4 py-1 text-black ${
                       activeTab === tab.id
                         ? 'bg-blue-100 font-bold'
                         : 'hover:bg-blue-100/50'
@@ -95,7 +95,7 @@ const Modal = memo(
                 {submitText}
               </button>
               <button
-                className="px-6 py-1 bg-white rounded hover:bg-gray-300 border border-black-200"
+                className="px-6 py-1 bg-white rounded hover:bg-gray-300 border border-black-200 text-black"
                 onClick={onClose}
               >
                 取消

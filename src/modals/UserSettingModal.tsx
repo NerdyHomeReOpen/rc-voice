@@ -40,20 +40,20 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ user, setUser }) => {
       <div className="flex-1">
         <div className="mb-4">
           <div className="flex items-center gap-4 mb-2 select-none">
-            <label className="w-20 text-right text-sm">顯示名稱</label>
+            <label className="w-20 text-right text-black text-sm">顯示名稱</label>
             <input
               type="text"
               value={userName}
               onChange={(e) => setUser({ ...user, name: e.target.value })}
-              className="flex-1 p-1 border rounded text-sm"
+              className="flex-1 p-1 border rounded text-black text-sm"
             />
           </div>
           <div className="flex items-center gap-4 mb-2">
-            <label className="w-20 text-right text-sm select-none">ID</label>
+            <label className="w-20 text-right text-sm text-black select-none">ID</label>
             <input
               type="text"
               value="27054971"
-              className="w-32 p-1 border rounded text-sm"
+              className="w-32 p-1 border rounded text-black text-sm"
               disabled
             />
           </div>
@@ -61,7 +61,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ user, setUser }) => {
 
         <div className="space-y-2">
           <div className="flex items-center gap-4 select-none">
-            <label className="w-20 text-right text-sm select-none">性別</label>
+            <label className="w-20 text-right text-sm text-black select-none">性別</label>
             <select
               value={userGender}
               onChange={(e) =>
@@ -70,15 +70,15 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ user, setUser }) => {
                   gender: e.target.value as 'Male' | 'Female',
                 })
               }
-              className="p-1 border rounded text-sm"
+              className="p-1 border rounded text-black text-sm"
             >
               <option value="Male">男性</option>
               <option value="Female">女性</option>
             </select>
           </div>
           <div className="flex items-center gap-4 select-none">
-            <label className="w-20 text-right text-sm">創建時間</label>
-            <label className="w-48 p-1 rounded text-sm">{userCreatedAt}</label>
+            <label className="w-20 text-right text-black text-sm">創建時間</label>
+            <label className="w-48 p-1 rounded text-black text-sm">{userCreatedAt}</label>
           </div>
 
           <div className="flex justify-center select-none">
@@ -113,7 +113,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ user, setUser }) => {
         />
         <label
           htmlFor="avatar-upload"
-          className="px-4 py-1 bg-blue-50 hover:bg-blue-100 rounded text-sm cursor-pointer transition-colors"
+          className="px-4 py-1 bg-blue-50 hover:bg-blue-100 rounded text-sm cursor-pointer transition-colors text-black"
         >
           更換頭像
         </label>
