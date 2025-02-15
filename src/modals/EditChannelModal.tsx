@@ -54,7 +54,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
         submitText="確定"
         onClose={onClose}
         onSubmit={handleSubmit}
-        width="400px"
+        width="300px"
         height="300px"
       >
         <input
