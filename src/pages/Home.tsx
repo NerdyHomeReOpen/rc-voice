@@ -30,6 +30,9 @@ import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser, updateUser } from '@/redux/userSlice';
 import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
 
+// Modals
+import UserSettingModal from '@/modals/UserSettingModal';
+
 const STATE_ICON = {
   online: '/online.png',
   dnd: '/dnd.png',
@@ -202,6 +205,12 @@ const Home = () => {
   const userName = user?.name ?? 'RiceCall';
   const userPresenceStatus = user?.presence?.status ?? 'online';
 
+  // User Setting Control
+  const [showUserSetting, setShowUserSetting] = useState<boolean>(false);
+
+  const toggleUserSetting = (state?: boolean) =>
+    setShowUserSetting(state ?? !showUserSetting);
+
   return (
     <div className="h-screen flex flex-col bg-background font-['SimSun'] overflow-hidden">
       {/* Top Navigation */}
@@ -213,9 +222,14 @@ const Home = () => {
             alt="RiceCall"
             className="w-6 h-6 select-none"
           />
-          <span className="text-xs font-bold text-black select-none">
-            {userName}
-          </span>
+          <button
+                onClick={() => toggleUserSetting()}
+                className="p-1 hover:bg-gray-100 rounded"
+          >
+            <span className="text-xs font-bold text-black select-none">
+              {userName}
+            </span>
+          </button>
           <div className="flex items-center">
             <img
               src={STATE_ICON[userPresenceStatus]}
@@ -248,6 +262,9 @@ const Home = () => {
           </div>
         </div>
         {/* Switch page */}
+        {showUserSetting && (
+          <UserSettingModal onClose={() => toggleUserSetting(false)} />
+        )}
         {user && (
           <Tabs
             selectedId={selectedTabId}

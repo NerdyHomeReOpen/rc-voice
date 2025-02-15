@@ -151,7 +151,7 @@ const ServerPage: React.FC = () => {
   const [showServerSetting, setShowServerSetting] = useState<boolean>(false);
 
   const toggleServerSetting = (state?: boolean) =>
-    setShowServerSetting(state ?? !showUserSetting);
+    setShowServerSetting(state ?? !showServerSetting);
 
   const userPermission = server.members?.[user.id].permissionLevel ?? 1;
   const userCurrentChannelId = user.presence?.currentChannelId ?? '';
