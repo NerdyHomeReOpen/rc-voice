@@ -27,6 +27,7 @@ import UserInfoBlock from '@/components/UserInfoBlock';
 // Modals
 import AddChannelModal from '@/modals/AddChannelModal';
 import EditChannelModal from '@/modals/EditChannelModal';
+import DeleteChannelModal from '@/modals/DeleteChannelModal';
 
 const getVisibilityStyle = (visibility: Visibility): string => {
   switch (visibility) {
@@ -66,6 +67,8 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
   const [showAddChannelModal, setShowAddChannelModal] =
     useState<boolean>(false);
   const [showEditChannelModal, setShowEditChannelModal] =
+    useState<boolean>(false);
+  const [showDeleteChannelModal, setShowDeleteChannelModal] =
     useState<boolean>(false);
 
   const categoryVisibility = category.settings.visibility ?? 'public';
@@ -151,7 +154,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
               label: '刪除',
               onClick: () => {
                 setShowContextMenu(false);
-                // Open Delete Channel Modal
+                setShowDeleteChannelModal(true);
               },
             },
           ]}
@@ -170,6 +173,14 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(({ category }) => {
       {showEditChannelModal && (
         <EditChannelModal
           onClose={() => setShowEditChannelModal(false)}
+          channel={category}
+        />
+      )}
+
+      {/* Delete Channel Modal */}
+      {showDeleteChannelModal && (
+        <DeleteChannelModal
+          onClose={() => setShowDeleteChannelModal(false)}
           channel={category}
         />
       )}
@@ -204,6 +215,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   // Modal Control
   const [showEditChannelModal, setShowEditChannelModal] =
     useState<boolean>(false);
+  const [showDeleteChannelModal, setShowDeleteChannelModal] =
+    useState<boolean>(false);
 
   const handleJoinChannel = (channelId: string) => {
     if (user.presence?.currentChannelId !== channelId) {
@@ -218,76 +231,53 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   return (
     <div key={channel.id}>
       {/* Channel View */}
-      {channel.isLobby ? (
-        <div
-          className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
-          onDoubleClick={() => {
-            channelVisibility !== 'readonly' && handleJoinChannel(channel.id);
-          }}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setContentMenuPos({ x: e.pageX, y: e.pageY });
-            setShowContextMenu(true);
-          }}
-        >
-          <div className="flex items-center flex-1 min-w-0">
-            <div className="min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1">
-              <House size={12} />
-            </div>
-            <span className={'text-[#ff0000]'}>{channelName}</span>
-            <span className="ml-1 text-gray-500 text-sm">
-              {`(${channelUsers.length})`}
-            </span>
-          </div>
-        </div>
-      ) : (
-        <div
-          className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
-          onDoubleClick={() => {
-            channelVisibility !== 'readonly' && handleJoinChannel(channel.id);
-          }}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setContentMenuPos({ x: e.pageX, y: e.pageY });
-            setShowContextMenu(true);
-          }}
-        >
-          <div className="flex items-center flex-1 min-w-0">
-            <div
-              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 cursor-pointer 
+      <div
+        className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
+        onDoubleClick={() => {
+          channelVisibility !== 'readonly' && handleJoinChannel(channel.id);
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setContentMenuPos({ x: e.pageX, y: e.pageY });
+          setShowContextMenu(true);
+        }}
+      >
+        <div className="flex items-center flex-1 min-w-0">
+          <div
+            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 cursor-pointer 
                 ${getVisibilityStyle(channelVisibility)}`}
-              onClick={() =>
-                setExpanded(channelVisibility != 'readonly' ? !expanded : false)
-              }
-            >
-              {channelVisibility === 'readonly' ? (
-                <Dot size={12} />
-              ) : expanded ? (
-                <Minus size={12} />
-              ) : (
-                <Plus size={12} />
-              )}
-            </div>
-            <span className={`truncate`}>{channelName}</span>
-            <span className="ml-1 text-gray-500 text-sm">
-              {channelVisibility !== 'readonly' && `(${channelUsers.length})`}
-            </span>
-          </div>
-          <button
-            className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setContentMenuPos({ x: e.pageX, y: e.pageY });
-              setShowContextMenu(true);
-            }}
+            onClick={() =>
+              setExpanded(channelVisibility != 'readonly' ? !expanded : false)
+            }
           >
-            <MoreVertical size={14} />
-          </button>
+            {channel.isLobby ? (
+              <House size={12} />
+            ) : channelVisibility === 'readonly' ? (
+              <Dot size={12} />
+            ) : expanded ? (
+              <Minus size={12} />
+            ) : (
+              <Plus size={12} />
+            )}
+          </div>
+          <span className={`truncate`}>{channelName}</span>
+          <span className="ml-1 text-gray-500 text-sm">
+            {channelVisibility !== 'readonly' && `(${channelUsers.length})`}
+          </span>
         </div>
-      )}
+        <button
+          className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setContentMenuPos({ x: e.pageX, y: e.pageY });
+            setShowContextMenu(true);
+          }}
+        >
+          <MoreVertical size={14} />
+        </button>
+      </div>
 
       {/* Expanded Sections */}
       {(channel.isLobby || expanded) && channelUsers.length > 0 && (
@@ -321,7 +311,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
               disabled: channel.isLobby,
               onClick: () => {
                 setShowContextMenu(false);
-                // Open Delete Channel Modal
+                setShowDeleteChannelModal(true);
               },
             },
           ]}
@@ -337,6 +327,12 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
       )}
 
       {/* Delete Channel Modal */}
+      {showDeleteChannelModal && (
+        <DeleteChannelModal
+          onClose={() => setShowDeleteChannelModal(false)}
+          channel={channel}
+        />
+      )}
     </div>
   );
 });
@@ -457,7 +453,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
         />
       )}
 
-      {/* 使用者資訊 block */}
+      {/* User Info Block */}
       {showInfoBlock && (
         <UserInfoBlock
           onClose={() => setShowInfoBlock(false)}
@@ -466,6 +462,8 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
           user={user}
         />
       )}
+
+      {/* Kick User Modal */}
     </div>
   );
 });

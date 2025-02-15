@@ -10,18 +10,6 @@ import { Channel, Server, Visibility } from '@/types';
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 
-// Validation
-const validateName = (name: string): string => {
-  if (!name.trim()) return '請輸入頻道名稱';
-  if (name.length > 30) return '頻道名稱不能超過30個字符';
-  return '';
-};
-
-interface FormErrors {
-  general?: string;
-  name?: string;
-}
-
 interface AddChannelModalProps {
   onClose: () => void;
   parentChannel: Channel | null;
@@ -58,26 +46,18 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     });
 
     // Error Control
-    const [errors, setErrors] = useState<FormErrors>({});
+    const [error, setError] = useState<string>('');
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const nameError = validateName(newChannel.name);
-
-      setErrors({
-        name: nameError,
+      socket?.emit('addChannel', {
+        sessionId: sessionId,
+        channel: newChannel,
       });
-
-      if (!nameError) {
-        socket?.emit('addChannel', {
-          sessionId: sessionId,
-          channel: newChannel,
-        });
-        socket?.on('error', (error: { message: string }) => {
-          setErrors({ general: error.message });
-        });
-        onClose();
-      }
+      socket?.on('error', (error: { message: string }) => {
+        setError(error.message);
+      });
+      onClose();
     };
 
     return (
