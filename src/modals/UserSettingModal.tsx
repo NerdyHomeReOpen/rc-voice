@@ -146,6 +146,7 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
     name: user.name,
     gender: user.gender,
     avatarUrl: user.avatarUrl,
+    createdAt: user.createdAt,
   });
 
   // Error Control
