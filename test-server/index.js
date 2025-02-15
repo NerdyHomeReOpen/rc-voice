@@ -524,7 +524,7 @@ const server = http.createServer((req, res) => {
           userId: userId,
           currentServerId: null,
           currentChannelId: null,
-          status: 'offline',
+          status: 'gn',
           customStatus: '',
           lastActiveAt: Date.now(),
           updatedAt: Date.now(),
@@ -601,7 +601,7 @@ io.on('connection', async (socket) => {
         ...presence,
         currentServerId: null,
         currentChannelId: null,
-        status: 'offline',
+        status: 'gn',
         lastActiveAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -752,7 +752,7 @@ io.on('connection', async (socket) => {
         ...presence,
         currentServerId: null,
         currentChannelId: null,
-        status: 'offline',
+        status: 'gn',
         lastActiveAt: Date.now(),
         updatedAt: Date.now(),
       };
