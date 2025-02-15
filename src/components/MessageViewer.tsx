@@ -112,11 +112,13 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
 });
 
 interface MessageViewerProps {
-  messages: Message[];
+  messages: Message[] | null;
 }
 
 const MessageViewer: React.FC<MessageViewerProps> = React.memo(
   ({ messages }) => {
+    if (!messages) return null;
+
     const groupMessages = getGroupMessages(messages);
 
     // Auto Scroll Control
@@ -131,7 +133,7 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
 
     return (
       <div
-        className="flex flex-[5] flex-col overflow-y-auto p-3 min-w-0 max-w-full 
+        className="flex flex-1 flex-col overflow-y-auto min-w-0 max-w-full 
         [&::-webkit-scrollbar]:w-2 
         [&::-webkit-scrollbar]:h-2 
         [&::-webkit-scrollbar-thumb]:bg-gray-300 

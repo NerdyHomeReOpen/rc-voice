@@ -21,15 +21,15 @@ const getButtonStyle = (button: ModalButton, disabled: boolean) => {
 };
 
 interface ModalProps {
-  title: string;
+  title?: string;
   buttons?: ModalButton[];
   tabs?: ModalTabItem[];
   width?: string;
   height?: string;
   changeContent?: string[];
+  children?: React.ReactNode;
   onClose?: () => void;
   onSubmit?: (e: FormEvent) => void;
-  children: React.ReactNode;
 }
 
 const Modal = memo(
@@ -40,9 +40,9 @@ const Modal = memo(
     width = '800px',
     height = '700px',
     changeContent = [],
+    children,
     onClose = () => {},
     onSubmit = (e) => e.preventDefault(),
-    children,
   }: ModalProps) => {
     const [activeTab, setActiveTab] = useState<string>(tabs?.[0].id ?? '');
 

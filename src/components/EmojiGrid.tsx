@@ -1,23 +1,16 @@
 import React from 'react';
 
 // Components
-import emojis from '@/components/emojis';
-
-interface Emoji {
-  id: number;
-  path: string;
-  alt: string;
-}
+import emojis, { Emoji } from '@/components/emojis';
 
 interface EmojiGridProps {
   onEmojiSelect?: (emoji: string) => void;
-  isOpen: boolean;
 }
 
-const EmojiGrid: React.FC<EmojiGridProps> = ({ onEmojiSelect, isOpen }) => {
+const EmojiGrid: React.FC<EmojiGridProps> = ({ onEmojiSelect }) => {
   return (
     <div className="relative">
-      <div className={`absolute bottom-10 ${isOpen ? 'block' : 'hidden'}`}>
+      <div className={`absolute bottom-10`}>
         <div className="grid grid-cols-8 w-48 gap-1 p-2 bg-white border border-gray-200 rounded shadow-md">
           {emojis.map((emoji: Emoji) => (
             <span

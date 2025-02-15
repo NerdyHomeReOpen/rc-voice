@@ -31,6 +31,7 @@ import { useSocket } from '@/hooks/SocketProvider';
 
 // Services
 import { API_URL } from '@/services/api.service';
+import MessageInputBox from '@/components/MessageInputBox';
 
 const getStoredBoolean = (key: string, defaultValue: boolean): boolean => {
   const stored = localStorage.getItem(key);
@@ -52,10 +53,6 @@ const ServerPage: React.FC = () => {
   const handleSendMessage = (message: Message): void => {
     socket?.emit('chatMessage', { sessionId, message });
   };
-
-  // Input Control
-  const [messageInput, setMessageInput] = useState<string>('');
-  const maxContentLength = 2000;
 
   // Volume Control
   const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
@@ -134,12 +131,6 @@ const ServerPage: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('mic', isMicOn.toString());
   }, [isMicOn]);
-
-  // Emoji Picker Control
-  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
-
-  const toggleEmojiPicker = (state?: boolean) =>
-    setShowEmojiPicker(state ?? !showEmojiPicker);
 
   // User Setting Control
   const [showUserSetting, setShowUserSetting] = useState<boolean>(false);
@@ -231,76 +222,23 @@ const ServerPage: React.FC = () => {
           <MarkdownViewer markdownText={serverAnnouncement} />
         </div>
         {/* Messages Area */}
-        <MessageViewer messages={messages} />
+        <div className="flex flex-[5] p-3">
+          <MessageViewer messages={messages} />
+        </div>
         {/* Input Area */}
         <div className="flex flex-[1] p-3">
-          <div
-            className={`flex flex-1 flex-row justify-flex-start p-1 border rounded-lg ${
-              messageInput.length >= maxContentLength ? 'border-red-500' : ''
-            }`}
-          >
-            <button
-              onClick={() => toggleEmojiPicker()}
-              className="w-7 h-7 p-1 hover:bg-gray-100 rounded transition-colors z-10"
-            >
-              <img src="/channel/FaceButton_5_18x18.png" alt="Emoji" />
-              <EmojiGrid
-                isOpen={showEmojiPicker}
-                onEmojiSelect={(emojiTag) => {
-                  const content = messageInput + emojiTag;
-                  if (content.length > maxContentLength) return;
-                  setMessageInput(content);
-                  toggleEmojiPicker(false);
-                  const input = document.querySelector('textarea');
-                  if (input) input.focus();
-                }}
-              />
-            </button>
-            <textarea
-              className="w-full p-1 resize-none focus:outline-none 
-                [&::-webkit-scrollbar]:w-2 
-                [&::-webkit-scrollbar]:h-2 
-                [&::-webkit-scrollbar-thumb]:bg-gray-300 
-                [&::-webkit-scrollbar-thumb]:rounded-lg 
-                [&::-webkit-scrollbar-thumb]:hover:bg-gray-400"
-              rows={2}
-              placeholder={'輸入訊息...'}
-              value={messageInput}
-              onChange={(e) => {
-                const input = e.target.value;
-                setMessageInput(input);
-              }}
-              onKeyDown={(e) => {
-                if (
-                  e.key != 'Enter' ||
-                  e.shiftKey ||
-                  !messageInput.trim() ||
-                  messageInput.length >= maxContentLength
-                )
-                  return;
-                e.preventDefault();
-                handleSendMessage({
-                  id: '',
-                  content: messageInput,
-                  type: 'general',
-                  channelId: user.presence?.currentChannelId ?? '',
-                  senderId: user.id,
-                  timestamp: 0,
-                });
-                setMessageInput('');
-              }}
-              onPaste={(e) => {
-                e.preventDefault();
-                const text = e.clipboardData.getData('text');
-                setMessageInput((prev) => prev + text);
-              }}
-              maxLength={maxContentLength}
-              aria-label="訊息輸入框"
-            />
-            <div className="text-xs text-gray-400 self-end ml-2">
-              {messageInput.length}/{maxContentLength}
-            </div>
-          </div>
+          <MessageInputBox
+            onSendMessage={(msg) => {
+              handleSendMessage({
+                id: '',
+                type: 'general',
+                content: msg,
+                senderId: user.id,
+                channelId: userCurrentChannelId,
+                timestamp: 0,
+              });
+            }}
+          />
         </div>
         {/* Bottom Controls */}
         <div className="flex-none bg-background border-t text-sm border-foreground/10 bg-linear-to-b from-violet-500 to-fuchsia-500">

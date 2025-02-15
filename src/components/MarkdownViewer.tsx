@@ -17,6 +17,7 @@ interface PurifyConfig {
 interface MarkdownProps {
   markdownText: string;
 }
+
 const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
   const safeMarkdownText = typeof markdownText === 'string' ? markdownText : '';
 
@@ -133,10 +134,12 @@ const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
 });
 
 interface MarkdownViewerProps {
-  markdownText: string;
+  markdownText: string | null;
 }
+
 const MarkdownViewer: React.FC<MarkdownViewerProps> = React.memo(
   ({ markdownText }) => {
+    if (!markdownText) return null;
     return (
       <div className="flex-1 overflow-x-hidden">
         <div className="max-w-full overflow-x-auto">
@@ -146,6 +149,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = React.memo(
     );
   },
 );
+
 MarkdownViewer.displayName = 'MarkdownViewer';
 
 export default MarkdownViewer;

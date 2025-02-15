@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Minus, X, Minimize, Square } from 'lucide-react';
 
 interface HeaderProps {
-  onClose?: () => void;
   children?: React.ReactNode;
+  onClose?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = React.memo(({ onClose, children }) => {

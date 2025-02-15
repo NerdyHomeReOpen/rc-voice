@@ -21,7 +21,9 @@ interface UserStatusDisplayProps {
   user: User | null;
 }
 
-const UserStatusDisplay: React.FC<UserStatusDisplayProps> = ({ user }) => {
+const UserStatusDisplay: React.FC<UserStatusDisplayProps> = ({
+  user = null,
+}) => {
   // Redux
   const sessionId = useSelector(
     (state: { sessionToken: string }) => state.sessionToken,

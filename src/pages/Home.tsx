@@ -28,7 +28,7 @@ import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
-import UserStatusDisplay from '@/components/userStatusDisplay';
+import UserStatusDisplay from '@/components/UserStatusDispIay';
 
 const Home = () => {
   // Socket Control

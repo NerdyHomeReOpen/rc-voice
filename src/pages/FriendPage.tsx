@@ -76,6 +76,11 @@ const FriendPage: React.FC = React.memo(() => {
   }, [resize, stopResizing]);
 
   const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
+  const userBadges = user.badges ?? [];
+  const userName = user.name;
+  const userSignature = user.signature ?? '';
+  const userAvatarUrl = user.avatarUrl ?? '/pfp/default.png';
+  const userGradeUrl = `/usergrade_${userLevel}.png`;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -84,25 +89,15 @@ const FriendPage: React.FC = React.memo(() => {
           {/* User Profile */}
           <div className="flex items-center space-x-2">
             <div className="w-14 h-14 bg-gray-200">
-              <img
-                src={`${user.avatarUrl ?? '/pfp/default.png'}`}
-                alt={`${user.name} Avatar`}
-                className="select-none"
-              />
+              <img src={userAvatarUrl} className="select-none" />
             </div>
             <div>
               <div className="flex items-center space-x-1">
-                <img src="/im/LV.png" alt="LV" className="select-none" />
-                <img
-                  src={`/usergrade_${userLevel}.png`}
-                  alt={`User Grade ${userLevel}`}
-                  className="select-none"
-                />
+                <img src="/im/LV.png" className="select-none" />
+                <img src={userGradeUrl} className="select-none" />
               </div>
               <div className="flex items-center space-x-1 mt-2 gap-1">
-                {user.badges?.length > 0 && (
-                  <BadgeViewer badges={user.badges} />
-                )}
+                {userBadges.length > 0 && <BadgeViewer badges={userBadges} />}
               </div>
             </div>
           </div>

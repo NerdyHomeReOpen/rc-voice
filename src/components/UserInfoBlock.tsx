@@ -5,14 +5,16 @@ import { useSelector } from 'react-redux';
 import type { User, Server } from '@/types';
 
 interface UserInfoBlockProps {
+  user: User | null;
+  x?: number;
+  y?: number;
   onClose: () => void;
-  x: number;
-  y: number;
-  user: User;
 }
 
 const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
   ({ onClose, x, y, user }) => {
+    if (!user) return null;
+
     // Redux
     const server = useSelector((state: { server: Server }) => state.server);
 

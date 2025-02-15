@@ -490,10 +490,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user, server }) => {
 });
 
 interface ChannelViewerProps {
-  channels: Channel[];
+  channels: Channel[] | null;
 }
 
 const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
+  if (!channels) return null;
+
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);

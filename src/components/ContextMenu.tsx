@@ -4,20 +4,22 @@ import React, { useEffect } from 'react';
 import { ContextMenuItem } from '@/types';
 
 interface ContextMenuProps {
-  items: ContextMenuItem[];
-  x: number;
-  y: number;
-  onClose: () => void;
+  items: ContextMenuItem[] | null;
+  x?: number;
+  y?: number;
+  onClose?: () => void;
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = React.memo(
   ({ onClose, x, y, items }) => {
+    if (!items) return null;
+
     // Ref
     const ref = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       const handleClick = (e: MouseEvent) => {
-        if (!ref.current?.contains(e.target as Node)) onClose();
+        if (!ref.current?.contains(e.target as Node)) onClose?.();
       };
 
       window.addEventListener('click', handleClick);

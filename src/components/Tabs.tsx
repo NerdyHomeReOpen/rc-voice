@@ -10,8 +10,8 @@ import { useSocket } from '@/hooks/SocketProvider';
 
 interface TabsProps {
   disabled?: boolean;
-  selectedId: number;
-  onSelect: (tabId: number) => void;
+  selectedId?: number;
+  onSelect?: (tabId: number) => void;
 }
 
 const Tabs: React.FC<TabsProps> = React.memo(
@@ -60,7 +60,7 @@ const Tabs: React.FC<TabsProps> = React.memo(
                     : 'bg-blue-600 hover:bg-blue-700 text-white rounded-t-xl text-center'
                 }`}
                 onClick={() => {
-                  onSelect(TabId);
+                  onSelect?.(TabId);
                   Tab.onClick && Tab.onClick();
                 }}
               >

@@ -133,12 +133,14 @@ const BadgeContainer: React.FC<BadgeContainerProps> = React.memo(
 BadgeContainer.displayName = 'BadgeContainer';
 
 interface BadgeViewerProps {
-  badges: Badge[];
+  badges: Badge[] | null;
   maxDisplay?: number;
 }
 
 const BadgeViewer: React.FC<BadgeViewerProps> = React.memo(
   ({ badges, maxDisplay = 99 }) => {
+    if (!badges) return null;
+
     const [activeTooltip, setActiveTooltip] = useState<{
       badge: Badge;
       position: { top: number; left: number; placement: 'top' | 'bottom' };
