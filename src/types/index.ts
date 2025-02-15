@@ -155,6 +155,12 @@ export interface ModalTabItem {
   label: string;
   onClick: () => void;
 }
+export interface ModalButton {
+  label: string;
+  type?: 'submit';
+  style: 'primary' | 'secondary' | 'danger';
+  onClick: () => void;
+}
 export interface ContextMenuItem {
   id: string;
   icon: React.ReactNode;

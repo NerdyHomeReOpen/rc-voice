@@ -136,10 +136,7 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
   const socket = useSocket();
 
   // Tabs Control
-  const TABS: ModalTabItem[] = [
-    { id: '基本資料', label: '基本資料', onClick: () => {} },
-  ];
-  const [activeTab, setActiveTab] = useState<ModalTabItem>(TABS[0]);
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
 
   // User data (temporary)
   const [editedUser, setEditedUser] = useState<Partial<User>>({
@@ -166,8 +163,8 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
 
   const renderContent = () => {
     if (!user) return null;
-    switch (activeTab.id) {
-      case '基本資料':
+    switch (activeTabIndex) {
+      case 0:
         return (
           <BasicInfoTab
             user={editedUser}
@@ -176,18 +173,35 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
           />
         );
       default:
-        return <div>{activeTab.label}</div>;
+        return null;
     }
   };
 
   return (
     <Modal
       title="個人資料設定"
-      submitText="保存"
-      tabs={TABS}
-      onSelectTab={(tab) => setActiveTab(tab)}
       onClose={onClose}
       onSubmit={handleSubmit}
+      tabs={[
+        {
+          id: '基本資料',
+          label: '基本資料',
+          onClick: () => setActiveTabIndex(0),
+        },
+      ]}
+      buttons={[
+        {
+          label: '取消',
+          style: 'secondary',
+          onClick: onClose,
+        },
+        {
+          label: '確認',
+          style: 'primary',
+          type: 'submit',
+          onClick: () => {},
+        },
+      ]}
     >
       {error && (
         <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm">

@@ -1,35 +1,51 @@
 import React, { memo, useState, FormEvent } from 'react';
 
 // Types
-import type { ModalTabItem } from '@/types';
+import type { ModalButton, ModalTabItem } from '@/types';
+
+const getButtonStyle = (button: ModalButton, disabled: boolean) => {
+  switch (button.style) {
+    case 'primary':
+      return `bg-blue-600 text-white hover:bg-blue-700 ${
+        disabled ? 'disabled:bg-blue-400' : ''
+      }`;
+    case 'secondary':
+      return `bg-white border border-black-200 text-black hover:bg-gray-300`;
+    case 'danger':
+      return `bg-red-600 text-white hover:bg-red-700 ${
+        disabled ? 'disabled:bg-red-400' : ''
+      }`;
+  }
+};
 
 interface ModalProps {
   title: string;
-  submitText: string;
+  buttons?: ModalButton[];
   tabs?: ModalTabItem[];
   width?: string;
   height?: string;
   changeContent?: string[];
-  onClose: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onSelectTab?: (tab: ModalTabItem) => void;
+  onClose?: () => void;
+  onSubmit?: (e: FormEvent) => void;
   children: React.ReactNode;
 }
 
 const Modal = memo(
   ({
     title,
-    submitText = '保存',
     tabs,
+    buttons,
     width = '800px',
     height = '700px',
     changeContent = [],
-    onClose,
-    onSubmit,
-    onSelectTab,
+    onClose = () => {},
+    onSubmit = (e) => e.preventDefault(),
     children,
   }: ModalProps) => {
     const [activeTab, setActiveTab] = useState<string>(tabs?.[0].id ?? '');
+
+    const hasSideMenu = tabs && tabs.length > 0;
+    const hasButtons = buttons && buttons.length > 0;
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -48,7 +64,7 @@ const Modal = memo(
           {/* Mid Part */}
           <div className="flex flex-1 min-h-0">
             {/* Side Menu */}
-            {tabs && (
+            {hasSideMenu && (
               <div className="w-40 bg-blue-50 text-sm">
                 {tabs.map((tab) => (
                   <div
@@ -60,7 +76,7 @@ const Modal = memo(
                     }`}
                     onClick={() => {
                       setActiveTab(tab.id);
-                      if (onSelectTab) onSelectTab(tab);
+                      if (tab.onClick) tab.onClick();
                       // tab.onClick(); // Can use this instead of onSelectTab
                     }}
                   >
@@ -87,20 +103,23 @@ const Modal = memo(
             )}
 
             {/* Buttons */}
-            <div className="flex justify-end gap-2 p-4 bg-gray-50">
-              <button
-                type="submit"
-                className="px-6 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400"
-              >
-                {submitText}
-              </button>
-              <button
-                className="px-6 py-1 bg-white rounded hover:bg-gray-300 border border-black-200 text-black"
-                onClick={onClose}
-              >
-                取消
-              </button>
-            </div>
+            {hasButtons && (
+              <div className="flex justify-end gap-2 p-4 bg-gray-50">
+                {buttons.map((button, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={button.onClick}
+                    className={`px-4 py-2 rounded ${getButtonStyle(
+                      button,
+                      false,
+                    )}`}
+                  >
+                    {button.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </form>
       </div>

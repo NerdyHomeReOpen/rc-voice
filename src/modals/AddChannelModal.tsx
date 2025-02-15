@@ -48,7 +48,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     // Error Control
     const [error, setError] = useState<string>('');
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
       socket?.emit('addChannel', {
         sessionId: sessionId,
@@ -63,11 +63,22 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     return (
       <Modal
         title={`新增頻道`}
-        submitText="新增"
-        onClose={onClose}
         onSubmit={handleSubmit}
         width="300px"
         height="300px"
+        buttons={[
+          {
+            label: '取消',
+            style: 'secondary',
+            onClick: onClose,
+          },
+          {
+            label: '確認',
+            style: 'primary',
+            type: 'submit',
+            onClick: () => {},
+          },
+        ]}
       >
         <input
           type="text"

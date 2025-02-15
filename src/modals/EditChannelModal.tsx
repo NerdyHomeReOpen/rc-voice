@@ -36,7 +36,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     // Error Control
     const [error, setError] = useState<string>('');
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
       socket?.emit('editChannel', {
         sessionId: sessionId,
@@ -51,11 +51,23 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     return (
       <Modal
         title={`編輯${channel.isCategory ? '類別' : '頻道'}`}
-        submitText="確定"
         onClose={onClose}
         onSubmit={handleSubmit}
         width="300px"
         height="300px"
+        buttons={[
+          {
+            label: '取消',
+            style: 'secondary',
+            onClick: onClose,
+          },
+          {
+            label: '確認',
+            style: 'primary',
+            type: 'submit',
+            onClick: () => {},
+          },
+        ]}
       >
         <input
           type="text"

@@ -28,7 +28,7 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = React.memo(
     // Error Control
     const [error, setError] = useState('');
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
       socket?.emit('deleteChannel', {
         sessionId: sessionId,
@@ -43,11 +43,22 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = React.memo(
     return (
       <Modal
         title={`刪除頻道`}
-        submitText="確認"
-        onClose={onClose}
         onSubmit={handleSubmit}
         width="300px"
         height="200px"
+        buttons={[
+          {
+            label: '取消',
+            style: 'secondary',
+            onClick: onClose,
+          },
+          {
+            label: '確認',
+            style: 'danger',
+            type: 'submit',
+            onClick: () => {},
+          },
+        ]}
       >
         <span className="text-red-500">
           {'確定要刪除頻道 ' + channel.name + ' 嗎？\n此操作無法撤銷。'}
