@@ -1,50 +1,58 @@
 import React, { useState, useRef } from 'react';
+
+// Types
 import type { Badge } from '@/types';
+
+const getInitialColor = (badge: Badge) => {
+  const colors = [
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-yellow-500',
+    'bg-red-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-indigo-500',
+  ];
+  const index =
+    Math.abs(
+      badge.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0),
+    ) % colors.length;
+  return colors[index];
+};
+
+const getDisplayText = (badge: Badge) => {
+  const name = badge.name || badge.id;
+  return name.slice(0, 1).toUpperCase();
+};
 
 const failedImageCache = new Set<string>();
 
-// BadgeImage Component
-const BadgeImage: React.FC<Badge> = React.memo((badge) => {
-  const getInitialColor = () => {
-    const colors = [
-      'bg-blue-500',
-      'bg-green-500',
-      'bg-yellow-500',
-      'bg-red-500',
-      'bg-purple-500',
-      'bg-pink-500',
-      'bg-indigo-500',
-    ];
-    const index =
-      Math.abs(
-        badge.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0),
-      ) % colors.length;
-    return colors[index];
-  };
+interface BadgeImageProps {
+  badge: Badge;
+}
 
-  const getDisplayText = () => {
-    const name = badge.name || badge.id;
-    return name.slice(0, 1).toUpperCase();
-  };
-
+const BadgeImage: React.FC<BadgeImageProps> = React.memo(({ badge }) => {
   const [showFallBack, setShowFallBack] = useState(false);
 
   const badgeUrl = `/badge/${badge.id.trim()}.png`;
+  const badgeName = badge.name || badge.id;
 
   if (failedImageCache.has(badgeUrl) || showFallBack) {
     return (
       // Fallback Badge
       <div
-        className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-medium text-white ${getInitialColor()}`}
+        className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-medium text-white ${getInitialColor(
+          badge,
+        )}`}
       >
-        {getDisplayText()}
+        {getDisplayText(badge)}
       </div>
     );
   }
   return (
     <img
       src={badgeUrl}
-      alt={`${badge.name} Badge`}
+      alt={`${badgeName} Badge`}
       className="select-none w-4 h-4 rounded-full"
       onError={() => {
         failedImageCache.add(badgeUrl);
@@ -64,18 +72,6 @@ interface TooltipProps {
 }
 
 const Tooltip: React.FC<TooltipProps> = React.memo(({ badge, position }) => {
-  const tooltipContent = (
-    <>
-      <div className="flex flex-row items-center justify-center space-x-2">
-        <BadgeImage {...badge} />
-        <div className="font-medium text-center">{badge.name}</div>
-      </div>
-      <div className="text-xs text-center text-gray-400 mt-1">
-        {badge.description}
-      </div>
-    </>
-  );
-
   const arrowClass =
     position.placement === 'top'
       ? 'top-full border-t-gray-800'
@@ -92,7 +88,13 @@ const Tooltip: React.FC<TooltipProps> = React.memo(({ badge, position }) => {
       <div
         className={`absolute -translate-x-1/2 left-1/2 border-4 border-transparent ${arrowClass}`}
       />
-      {tooltipContent}
+      <div className="flex flex-row items-center justify-center space-x-2">
+        <BadgeImage badge={badge} />
+        <div className="font-medium text-center">{badge.name}</div>
+      </div>
+      <div className="text-xs text-center text-gray-400 mt-1">
+        {badge.description}
+      </div>
     </div>
   );
 });
@@ -103,11 +105,10 @@ interface BadgeContainerProps {
   badge: Badge;
   onMouseEnter: (rect: DOMRect) => void;
   onMouseLeave: () => void;
-  showTooltip: boolean;
 }
 
 const BadgeContainer: React.FC<BadgeContainerProps> = React.memo(
-  ({ badge, onMouseEnter, onMouseLeave, showTooltip }) => {
+  ({ badge, onMouseEnter, onMouseLeave }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handleMouseEnter = () => {
@@ -123,7 +124,7 @@ const BadgeContainer: React.FC<BadgeContainerProps> = React.memo(
         onMouseEnter={handleMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        <BadgeImage {...badge} />
+        <BadgeImage badge={badge} />
       </div>
     );
   },
@@ -198,7 +199,6 @@ const BadgeViewer: React.FC<BadgeViewerProps> = React.memo(
               badge={badge}
               onMouseEnter={handleMouseEnter(badge)}
               onMouseLeave={handleMouseLeave}
-              showTooltip={activeTooltip?.badge.id === badge.id}
             />
           ))}
         </div>
