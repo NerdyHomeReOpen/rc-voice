@@ -601,7 +601,6 @@ io.on('connection', async (socket) => {
         ...presence,
         currentServerId: null,
         currentChannelId: null,
-        status: 'online',
         lastActiveAt: Date.now(),
         updatedAt: Date.now(),
       };
