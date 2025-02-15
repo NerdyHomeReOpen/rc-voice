@@ -183,7 +183,7 @@ interface ChannelTabProps {
 
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
   // Redux
-  const user = useSelector((state: { user: User }) => state.user);
+  const mainUser = useSelector((state: { user: User }) => state.user);
   const sessionId = useSelector(
     (state: { sessionToken: string }) => state.sessionToken,
   );
@@ -206,7 +206,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
     useState<boolean>(false);
 
   const handleJoinChannel = (channelId: string) => {
-    if (user.presence?.currentChannelId !== channelId) {
+    if (mainUser.presence?.currentChannelId !== channelId) {
       socket?.emit('connectChannel', { sessionId, channelId });
     }
   };
@@ -293,7 +293,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
       {(channel.isLobby || expanded) && channelUsers.length > 0 && (
         <div className="ml-6">
           {channelUsers.map((user: User) => (
-            <UserTab key={user.id} user={user} />
+            <UserTab key={user.id} user={user} mainUser={mainUser} />
           ))}
         </div>
       )}
@@ -343,9 +343,10 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(({ channel }) => {
 
 interface UserTabProps {
   user: User;
+  mainUser: User;
 }
 
-const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
+const UserTab: React.FC<UserTabProps> = React.memo(({ user, mainUser }) => {
   // Redux
   const server = useSelector((state: { server: Server }) => state.server);
 
@@ -448,6 +449,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user }) => {
               id: 'kick',
               icon: <Trash size={14} className="w-5 h-5 mr-2" />,
               label: '踢出',
+              disabled: mainUser.id == user.id ? true : false,
               onClick: () => {
                 setShowContextMenu(false);
                 // Open Kick User Modal
