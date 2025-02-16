@@ -109,6 +109,32 @@ export interface Server {
   applications?: Application[] | null;
 }
 
+export interface ServerList {
+  id: string;
+  name: string;
+  iconUrl: string | null;
+  level: number;
+  announcement: string;
+  channelIds: string[];
+  displayId: string;
+  lobbyId: string;
+  ownerId: string;
+  settings: {
+    allowDirectMessage: boolean;
+    visibility: 'public' | 'private' | 'invisible';
+    defaultChannelId: string;
+  };
+  createdAt: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  channels?: Channel[] | null;
+  lobby?: Channel | null;
+  owner?: User | null;
+  members?: {
+    [userId: string]: Member;
+  } | null;
+  applications?: Application[] | null;
+}
+
 export interface Application {
   id: string;
   status: 'pending' | 'accepted' | 'rejected';
@@ -130,6 +156,7 @@ export interface Channel {
   isCategory: boolean;
   isLobby: boolean;
   order?: number;
+  serverId: string;
   settings: {
     bitrate: number;
     slowmode: boolean;

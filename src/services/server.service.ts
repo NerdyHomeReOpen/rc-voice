@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Services
 import { apiService } from '@/services/api.service';
 

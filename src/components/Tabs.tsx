@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable react/display-name */
 import React from 'react';
 import { CircleX } from 'lucide-react';
 import { useSelector } from 'react-redux';

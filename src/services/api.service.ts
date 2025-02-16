@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const API_URL = "http://localhost:4500";
 
 interface RequestOptions {

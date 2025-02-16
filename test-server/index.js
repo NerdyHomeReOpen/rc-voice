@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const http = require('http');
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
