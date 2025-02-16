@@ -305,70 +305,62 @@
 
 .mainTab {
   display: flex;
+  align-items: flex-end;
   cursor: pointer;
   width: auto;
   height: 40px;
-  align-items: flex-end;
   margin-left: 4rem;
+  gap: 0.5rem;
 }
 
 .tabItem {
+  position: relative;
+  display: flex;
   flex: 0 0 100px;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  width: 100px;
   background-size: auto;
   background-position: 0 0;
   font-family: Arial;
   font-size: 15px;
   text-align: center;
-  white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
   border-radius: 5px 5px 0 0;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  align-items: center;
-  min-height: 30px;
-  justify-content: center;
 }
 
 .tabItem .tabBg {
-  font-family: Arial;
-  font-size: 15px;
-  text-align: center;
+  position: fixed;
   padding: 5px 0px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   overflow: hidden;
   border-radius: 5px 5px 0 0;
-  position: relative;
-  width: 80px;
-  height: 17px;
+  width: 100px;
+  height: 30px;
 }
 
 .tabItem.selected .tabBg {
-  font-family: Arial;
-  font-size: 15px;
-  color: rgb(55, 144, 206);
-  text-align: center;
-  padding: 5px 0px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  border-radius: 5px 5px 0 0;
   background-color: #fff;
-  position: relative;
-  width: 95px;
-  height: 20px;
+  color: rgb(55, 144, 206);
 }
 
 .tabItem .tabItemLable {
   z-index: 999;
+  padding: 5px;
   color: rgb(255 255 255);
-  position: fixed;
 }
 
 .tabItem.selected .tabItemLable {
   color: rgb(0 115 198);
+}
+
+.tabClose {
+  z-index: 1000;
+  margin-bottom: 0.5rem;
 }
 
 /* User Status */

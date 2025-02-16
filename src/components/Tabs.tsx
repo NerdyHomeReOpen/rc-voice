@@ -44,12 +44,12 @@ const Tabs: React.FC<TabsProps> = React.memo(
       { id: 1, label: '發現', onClick: handleRequestUserUpdate },
       { id: 2, label: '好友' },
       server && { id: 3, label: server.name },
-    ];
+    ].filter((_) => _);
 
     if (disabled) return null;
     return (
       <div className={styles['mainTab']}>
-        {TABS.filter((_) => _).map((Tab, index) => {
+        {TABS.map((Tab) => {
           const TabId = Tab.id;
           const TabLable = Tab.label;
 
@@ -65,17 +65,17 @@ const Tabs: React.FC<TabsProps> = React.memo(
               }}
             >
               <div className={styles['tabItemLable']}>{TabLable}</div>
-              {index === 2 && (
-                <CircleX
-                  onClick={() => handleLeaveServer()}
-                  size={16}
-                  className="ml-2 cursor-pointer right-0 bg-none"
-                />
-              )}
               <div className={styles['tabBg']}></div>
             </div>
           );
         })}
+        {TABS.length > 2 && (
+          <CircleX
+            onClick={() => handleLeaveServer()}
+            size={16}
+            className={styles['tabClose']}
+          />
+        )}
       </div>
     );
   },
