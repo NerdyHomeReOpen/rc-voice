@@ -196,7 +196,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
               </Droppable>
             )}
             {/* Context Menu */}
-            {showContextMenu && (
+            {showContextMenu && canEdit && (
               <ContextMenu
                 onClose={() => setShowContextMenu(false)}
                 x={contentMenuPos.x}
@@ -206,7 +206,6 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                     id: 'edit',
                     icon: <Edit size={14} className="w-5 h-5 mr-2" />,
                     label: '編輯',
-                    disabled: !canEdit,
                     onClick: () => {
                       setShowContextMenu(false);
                       setShowEditChannelModal(true);
@@ -216,7 +215,6 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                     id: 'delete',
                     icon: <Trash size={14} className="w-5 h-5 mr-2" />,
                     label: '刪除',
-                    disabled: !canEdit,
                     onClick: () => {
                       setShowContextMenu(false);
                       setShowDeleteChannelModal(true);
@@ -378,7 +376,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
               </div>
             )}
             {/* Context Menu */}
-            {showContextMenu && (
+            {showContextMenu && canEdit && (
               <ContextMenu
                 onClose={() => setShowContextMenu(false)}
                 x={contentMenuPos.x}
@@ -388,7 +386,6 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                     id: 'edit',
                     icon: <Edit size={14} className="w-5 h-5 mr-2" />,
                     label: '編輯',
-                    disabled: !canEdit,
                     onClick: () => {
                       setShowContextMenu(false);
                       setShowEditChannelModal(true);
@@ -398,7 +395,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                     id: 'delete',
                     icon: <Trash size={14} className="w-5 h-5 mr-2" />,
                     label: '刪除',
-                    disabled: channel.isLobby || !canEdit,
+                    disabled: channel.isLobby,
                     onClick: () => {
                       setShowContextMenu(false);
                       setShowDeleteChannelModal(true);
@@ -742,7 +739,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
       </DragDropContext>
 
       {/* Context Menu */}
-      {showContextMenu && (
+      {showContextMenu && canEdit && (
         <ContextMenu
           onClose={() => setShowContextMenu(false)}
           x={contentMenuPos.x}
@@ -752,7 +749,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
               id: 'addChannel',
               icon: <Plus size={14} className="w-5 h-5 mr-2" />,
               label: '新增',
-              disabled: !canEdit,
               onClick: () => {
                 setShowContextMenu(false);
                 setShowAddChannelModal(true);
