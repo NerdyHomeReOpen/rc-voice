@@ -263,6 +263,7 @@ interface ChannelTabProps {
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(
   ({ channel, server, user, index }) => {
     // Redux
+    const mainUser = useSelector((state: { user: User }) => state.user);
     const sessionId = useSelector(
       (state: { sessionToken: string }) => state.sessionToken,
     );
@@ -372,7 +373,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
             {(channel.isLobby || expanded) && channelUsers.length > 0 && (
               <div className="ml-6">
                 {channelUsers.map((user: User) => (
-                  <UserTab key={user.id} user={user} server={server} />
+                  <UserTab key={user.id} user={user} server={server} mainUser={mainUser} />
                 ))}
               </div>
             )}
@@ -430,9 +431,10 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
 interface UserTabProps {
   user: User;
   server: Server;
+  mainUser: User;
 }
 
-const UserTab: React.FC<UserTabProps> = React.memo(({ user, server }) => {
+const UserTab: React.FC<UserTabProps> = React.memo(({ user, server, mainUser }) => {
   // Context Menu Control
   const [contentMenuPos, setContentMenuPos] = useState<ContextMenuPosState>({
     x: 0,
@@ -583,7 +585,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
     useState<boolean>(false);
 
   const userCurrentChannel = channels.find(
-    (_) => _.id == mainUser.presence?.currentChannelId,
+    (_) => _.id == user.presence?.currentChannelId,
   );
   const userCurrentChannelName = userCurrentChannel?.name ?? '';
   const userPermission = server.members?.[user.id].permissionLevel ?? 1;
