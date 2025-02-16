@@ -11,6 +11,14 @@ const fs = require('fs').promises;
 
 // TODO: Separate disconnect logic to avoid code duplication (disconnectUser, disconnectServer, disconnectChannel)
 
+// XP System Constants
+const XP_SYSTEM = {
+  BASE_XP: 5, // Base XP required for level 2
+  GROWTH_RATE: 1.02, // XP requirement increases by 2% per level
+  XP_PER_HOUR: 1, // XP gained per hour in voice channel
+  INTERVAL_MS: 3600000, // 1 hour in milliseconds
+};
+
 // Logger
 class Logger {
   constructor(origin) {
@@ -559,6 +567,7 @@ const server = http.createServer((req, res) => {
           name: username,
           account: account,
           gender: data.gender || 'Male',
+          xp: 0,
           level: 1,
           signature: '',
           badgeIds: ['nerd'],
@@ -1846,25 +1855,66 @@ io.on('connection', async (socket) => {
 });
 
 // Functions
+// Check if user can level up
+const checkLevelUp = async (userId) => {
+  const user = await db.get(`users.${userId}`);
+  if (!user) return false;
+
+  const requiredXP = calculateRequiredXP(user.level);
+  if (user.xp >= requiredXP) {
+    // Level up
+    user.level += 1;
+    user.xp -= requiredXP; // Remaining XP carries over
+    await db.set(`users.${userId}`, user);
+    return true;
+  }
+  return false;
+};
+
+// Modified setupContributionInterval
 const setupContributionInterval = (socketId, userId) => {
   try {
     const interval = setInterval(async () => {
       // Get database
       const user = (await db.get(`users.${userId}`)) || {};
 
-      // Update user level per minute
-      user.level += 1;
-      await db.set(`users.${user.id}`, user);
+      // Initialize xp if it doesn't exist
+      if (user.xp === undefined) {
+        user.xp = 0;
+      }
+
+      // Add XP
+      user.xp += XP_SYSTEM.XP_PER_HOUR;
+
+      // Add contribution to current server
+      const presence = await getPresenceState(userId);
+      if (presence.currentServerId) {
+        const member = await getMember(userId, presence.currentServerId);
+        if (member) {
+          member.contribution += XP_SYSTEM.XP_PER_HOUR;
+          await db.set(`members.${member.id}`, member);
+        }
+      }
+
+      // Check for level up
+      const didLevelUp = await checkLevelUp(userId);
+
+      // Save changes
+      await db.set(`users.${userId}`, user);
 
       // Emit updated data (only to the user)
       io.to(socketId).emit('userUpdate', {
         level: user.level,
+        xp: user.xp,
+        nextLevelXP: calculateRequiredXP(user.level),
       });
 
-      new Logger('WebSocket').info(
-        `User(${user.id}) level up to ${user.level}`,
-      );
-    }, 10000);
+      if (didLevelUp) {
+        new Logger('WebSocket').info(
+          `User(${userId}) leveled up to ${user.level}`,
+        );
+      }
+    }, XP_SYSTEM.INTERVAL_MS);
     contributionInterval.set(socketId, interval);
   } catch (error) {
     clearContributionInterval(socketId);
@@ -1873,6 +1923,7 @@ const setupContributionInterval = (socketId, userId) => {
     );
   }
 };
+
 const clearContributionInterval = (socketId) => {
   clearInterval(contributionInterval.get(socketId));
   contributionInterval.delete(socketId);
@@ -1916,9 +1967,13 @@ const setupCleanupInterval = async () => {
         }
       }
 
-      new Logger('Cleanup').info(
-        `Cleanup complete. Removed ${unusedFiles.length} unused avatar files`,
-      );
+      if (!unusedFiles.length) {
+        new Logger('Cleanup').info('No unused avatars to delete');
+      } else {
+        new Logger('Cleanup').info(
+          `Deleted ${unusedFiles.length} unused avatars`,
+        );
+      }
     } catch (error) {
       new Logger('Cleanup').error(`Avatar cleanup failed: ${error.message}`);
     }
@@ -1930,6 +1985,9 @@ const setupCleanupInterval = async () => {
 
   // Run initial cleanup on setup
   cleanupUnusedAvatars().catch(console.error);
+};
+const calculateRequiredXP = (level) => {
+  return Math.floor(100 * Math.pow(1.1, level));
 };
 const createUserIdSocketIdMap = (userId, socketId) => {
   if (!socketToUser.has(socketId) && !userToSocket.has(userId)) {
@@ -2005,8 +2063,15 @@ const getUser = async (userId) => {
   const user = _users[userId];
   if (!user) return null;
   const { account, ...restUser } = user;
+  const xpInfo = {
+    currentXP: user.xp || 0,
+    requiredXP: calculateRequiredXP(user.level),
+    progress: ((user.xp || 0) / calculateRequiredXP(user.level)) * 100,
+  };
+
   return {
     ...restUser,
+    xpInfo,
     badges: await getUserBadges(userId),
     presence: await getPresenceState(userId),
   };
@@ -2029,6 +2094,14 @@ const getPresenceState = async (userId) => {
   return {
     ...userPresenceState,
   };
+};
+const getMember = async (userId, serverId) => {
+  const _members = (await db.get('members')) || {};
+  const member = Object.values(_members).find(
+    (member) => member.userId === userId && member.serverId === serverId,
+  );
+  if (!member) return null;
+  return member;
 };
 const getPermissionLevel = async (userId, serverId) => {
   const _members = (await db.get('members')) || {};

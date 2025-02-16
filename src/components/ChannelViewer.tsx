@@ -31,17 +31,6 @@ import AddChannelModal from '@/modals/AddChannelModal';
 import EditChannelModal from '@/modals/EditChannelModal';
 import DeleteChannelModal from '@/modals/DeleteChannelModal';
 
-const reorderChannels = (
-  channels: Channel[],
-  startIndex: number,
-  endIndex: number,
-): Channel[] => {
-  const result = Array.from(channels);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
-
 const getVisibilityStyle = (visibility: Visibility): string => {
   switch (visibility) {
     case 'private':

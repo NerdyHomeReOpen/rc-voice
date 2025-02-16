@@ -15,6 +15,7 @@ export interface User {
   name: string;
   avatarUrl: string | null;
   gender: 'Male' | 'Female';
+  xp: number;
   level: number;
   signature: string;
   badgeIds: string[];

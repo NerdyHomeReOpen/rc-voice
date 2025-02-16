@@ -2,11 +2,13 @@
   "name": "rc-voice-ts",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "electron-dev": "concurrently \"npm run dev\" \"electron .\""
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
@@ -38,6 +40,10 @@
     "eslint-config-next": "15.1.6",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "concurrently": "^8.2.2",
+    "electron": "^29.1.0",
+    "electron-builder": "^24.12.0",
+    "electron-is-dev": "^2.0.0"
   }
 }
