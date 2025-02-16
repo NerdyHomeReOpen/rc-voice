@@ -72,7 +72,8 @@ const CONTENT_TYPE_JSON = { 'Content-Type': 'application/json' };
 const userSessions = new Map(); // sessionToken -> userId
 
 // User Socket Connections
-const userSockets = new Map(); // socket.id -> userId
+const userToSocket = new Map(); // userId -> socket.id
+const socketToUser = new Map(); // socket.id -> userId
 
 // User Contributions Interval
 const contributionInterval = new Map(); // socket.id -> interval
@@ -239,7 +240,7 @@ const server = http.createServer((req, res) => {
           level: 0,
           announcement: description || '',
           channelIds: [channelId],
-          displayId: generateUniqueDisplayId(servers),
+          displayId: getDisplayId(servers),
           lobbyId: channelId,
           ownerId: userId,
           settings: {
@@ -346,6 +347,58 @@ const server = http.createServer((req, res) => {
       } catch (error) {
         sendError(res, 500, `獲取好友時發生錯誤: ${error.message}`);
         new Logger('Friends').error(`Fetch friends error: ${error.message}`);
+      }
+    });
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/user/directMessage') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        // data = {
+        //   "sessionId": "123456",
+        //   "friendId": "789123",
+        // }
+
+        // Get database
+        const users = (await db.get('users')) || {};
+
+        // Validate data
+        const sessionId = data.sessionId;
+        const friendId = data.friendId;
+        if (!sessionId || !friendId) {
+          throw new Error('Missing required fields');
+        }
+        const userId = userSessions.get(sessionId);
+        if (!userId) {
+          throw new Error(`Invalid session ID(${sessionId})`);
+        }
+        const user = users[userId];
+        if (!user) {
+          throw new Error(`User(${userId}) not found`);
+        }
+        const friend = users[friendId];
+        if (!friend) {
+          throw new Error(`Friend(${friendId}) not found`);
+        }
+
+        sendSuccess(res, {
+          message: '獲取私人訊息成功',
+          data: { messages: await getDirectMessages(userId, friend.id) },
+        });
+        new Logger('DirectMessage').success(
+          `User(${userId}) direct message fetched`,
+        );
+      } catch (error) {
+        sendError(res, 500, `獲取私人訊息時發生錯誤: ${error.message}`);
+        new Logger('DirectMessage').error(
+          `Fetch direct message error: ${error.message}`,
+        );
       }
     });
     return;
@@ -565,7 +618,7 @@ io.on('connection', async (socket) => {
 
     try {
       // Validate data
-      const userId = userSockets.get(socket.id);
+      const userId = socketToUser.get(socket.id);
       if (!userId) {
         throw new Error('Invalid socket ID');
       }
@@ -594,7 +647,9 @@ io.on('connection', async (socket) => {
       clearContributionInterval(socket.id);
 
       // Remove user socket connection
-      userSockets.delete(socket.id);
+      if (!deleteUserIdSocketIdMap(userId, socket.id)) {
+        throw new Error('Cannot delete user socket connection');
+      }
 
       // Update user presence
       presenceStates[presence.id] = {
@@ -660,10 +715,12 @@ io.on('connection', async (socket) => {
       }
 
       // Check if user is already connected
-      for (const [key, value] of userSockets) {
+      for (const [key, value] of socketToUser) {
         if (value === userId) {
           // Remove user socket connection
-          userSockets.delete(key);
+          if (!deleteUserIdSocketIdMap(value, key)) {
+            throw new Error('Cannot delete user socket connection');
+          }
 
           // Emit force disconnect event
           io.to(key).emit('forceDisconnect');
@@ -675,7 +732,9 @@ io.on('connection', async (socket) => {
       }
 
       // Save user socket connection
-      userSockets.set(socket.id, userId);
+      if (!createUserIdSocketIdMap(userId, socket.id)) {
+        throw new Error('Cannot create user socket connection');
+      }
 
       // Emit data (only to the user)
       io.to(socket.id).emit('userConnect', {
@@ -744,7 +803,9 @@ io.on('connection', async (socket) => {
       }
 
       // Remove user socket connection
-      userSockets.delete(socket.id);
+      if (!deleteUserIdSocketIdMap(userId, socket.id)) {
+        throw new Error('Cannot delete user socket connection');
+      }
 
       // Update user presence
       presenceStates[presence.id] = {
@@ -1332,7 +1393,7 @@ io.on('connection', async (socket) => {
     }
   });
 
-  socket.on('chatMessage', async (data) => {
+  socket.on('sendMessage', async (data) => {
     // data = {
     //   sessionId: '123456',
     //   message: {
@@ -1408,6 +1469,92 @@ io.on('connection', async (socket) => {
       });
 
       new Logger('WebSocket').error('Error sending message: ' + error.message);
+    }
+  });
+
+  socket.on('sendDirectMessage', async (data) => {
+    // data = {
+    //   sessionId: '123456',
+    //   recieverId: '123456',
+    //   message: {
+    //     senderId: "",
+    //     content: "",
+    //   }
+    // };
+
+    // Get database
+    const users = (await db.get('users')) || {};
+    const messages = (await db.get('messages')) || {};
+    const friends = (await db.get('friends')) || {};
+
+    try {
+      // Validate data
+      const sessionId = data.sessionId;
+      const recieverId = data.recieverId;
+      const newMessage = data.message;
+      if (!sessionId || !newMessage) {
+        throw new Error('Missing required fields');
+      }
+      const userId = userSessions.get(sessionId);
+      if (!userId) {
+        throw new Error(`Invalid session ID(${sessionId})`);
+      }
+      const user = users[userId];
+      if (!user) {
+        throw new Error(`User(${userId}) not found`);
+      }
+
+      // Create new message
+      const messageId = uuidv4();
+      const message = {
+        ...newMessage,
+        id: messageId,
+        timestamp: Date.now().valueOf(),
+      };
+      messages[messageId] = message;
+      await db.set(`messages.${messageId}`, message);
+
+      // Find direct message and update (if not exists, create one)
+      const friend = await getFriend(userId, recieverId);
+      if (!friend) {
+        const friendId = uuidv4();
+        friends[friendId] = {
+          id: friendId,
+          status: 'pending',
+          userIds: [userId, recieverId],
+          messageIds: [messageId],
+          createdAt: Date.now(),
+        };
+        await db.set(`friends.${friendId}`, friends[friendId]);
+      } else {
+        friend.messageIds.push(messageId);
+        await db.set(`friends.${friend.id}`, friend);
+      }
+
+      // Emit updated data (to the user and reciever)
+      const recieverSocketId = userToSocket.get(recieverId);
+      console.log(recieverSocketId, socket.id);
+      io.to(socket.id).emit('directMessage', [
+        ...(await getDirectMessages(userId, recieverId)),
+      ]);
+      io.to(recieverSocketId).emit('directMessage', [
+        ...(await getDirectMessages(userId, recieverId)),
+      ]);
+
+      new Logger('WebSocket').info(
+        `User(${userId}) sent ${message.content} to user(${recieverId})`,
+      );
+    } catch (error) {
+      io.to(socket.id).emit('error', {
+        message: `傳送私訊時發生錯誤: ${error.message}`,
+        part: 'DIRECTMESSAGE',
+        tag: 'EXCEPTION_ERROR',
+        status_code: 500,
+      });
+
+      new Logger('WebSocket').error(
+        'Error sending direct message: ' + error.message,
+      );
     }
   });
 
@@ -1716,6 +1863,27 @@ const setupCleanupInterval = async () => {
   // Run initial cleanup on setup
   cleanupUnusedAvatars().catch(console.error);
 };
+const createUserIdSocketIdMap = (userId, socketId) => {
+  if (!socketToUser.has(socketId) && !userToSocket.has(userId)) {
+    socketToUser.set(socketId, userId);
+    userToSocket.set(userId, socketId);
+    return true;
+  }
+  return false;
+};
+const deleteUserIdSocketIdMap = (userId = null, socketId = null) => {
+  if (userId && userToSocket.has(userId)) {
+    socketToUser.delete(userToSocket.get(userId));
+    userToSocket.delete(userId);
+    return true;
+  }
+  if (socketId && socketToUser.has(socketId)) {
+    userToSocket.delete(socketToUser.get(socketId));
+    socketToUser.delete(socketId);
+    return true;
+  }
+  return false;
+};
 // Get Functions
 const getServer = async (serverId) => {
   const servers = (await db.get('servers')) || {};
@@ -1844,10 +2012,44 @@ const getFriendCategory = async (categoryId) => {
     ...category,
     friends: (
       await Promise.all(
-        category.friendIds.map(async (friendId) => await getUser(friendId)),
+        category.friendIds.map(
+          async (friendId) => await getFriend(category.userId, friendId),
+        ),
       )
     ).filter((friend) => friend),
   };
+};
+const getFriends = async (userId) => {
+  const _friends = (await db.get('friends')) || {};
+  const friends = Object.values(_friends).filter((friend) =>
+    friend.userIds.includes(userId),
+  );
+  if (!friends) return null;
+  return [...friends];
+};
+const getFriend = async (userId, friendId) => {
+  const _friends = (await db.get('friends')) || {};
+  const friend = Object.values(_friends).find(
+    (friend) =>
+      friend.userIds.includes(userId) && friend.userIds.includes(friendId),
+  );
+  if (!friend) return null;
+  return {
+    ...friend,
+    user: await getUser(friend.userIds.find((id) => id !== userId)),
+    messages: (
+      await Promise.all(
+        friend.messageIds.map(
+          async (messageId) => await getMessages(messageId),
+        ),
+      )
+    ).filter((message) => message),
+  };
+};
+const getDirectMessages = async (userId, friendId) => {
+  const friend = await getFriend(userId, friendId);
+  if (!friend) return null;
+  return [...friend.messages];
 };
 const getJoinRecServers = async (userId, limit = 10) => {
   const [_servers, _members] = await Promise.all([
@@ -1874,15 +2076,15 @@ const getJoinRecServers = async (userId, limit = 10) => {
     recommendedServers,
   };
 };
-const generateUniqueDisplayId = (serverList, baseId = 20000000) => {
-  let displayId = baseId + Object.keys(serverList).length;
-
+const getDisplayId = async (baseId = 20000000) => {
+  const servers = (await db.get('servers')) || {};
+  let displayId = baseId + Object.keys(servers).length;
+  // Ensure displayId is unique
   while (
-    Object.values(serverList).some((server) => server.displayId === displayId)
+    Object.values(servers).some((server) => server.displayId === displayId)
   ) {
     displayId++;
   }
-
   return displayId;
 };
 

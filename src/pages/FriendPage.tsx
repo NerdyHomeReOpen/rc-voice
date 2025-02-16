@@ -31,7 +31,8 @@ const FriendPage: React.FC = React.memo(() => {
     const fetchFriendDatas = async () => {
       try {
         const data = await apiService.post('/user/friends', { sessionId });
-        setFriendCategories(data.friendCategories ?? []);
+        console.log('Friend data fetch:', data);
+        setFriendCategories(data?.friendCategories ?? []);
       } catch (error: Error | any) {
         console.error(error);
       }

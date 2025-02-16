@@ -113,6 +113,9 @@ const Home = () => {
       console.log('User update: ', data);
       store.dispatch(setUser({ ...user, ...data }));
     };
+    const handleDirectMessage = (data: any) => {
+      console.log('Direct message: ', data);
+    };
     const handlePlaySound = (sound: 'join' | 'leave') => {
       switch (sound) {
         case 'join':
@@ -137,6 +140,7 @@ const Home = () => {
     socket.on('userPresenceUpdate', handleUpdateUserPresence);
     socket.on('serverUpdate', handleServerUpdate);
     socket.on('userUpdate', handleUserUpdate);
+    socket.on('directMessage', handleDirectMessage);
     socket.on('playSound', handlePlaySound);
 
     return () => {
@@ -151,6 +155,7 @@ const Home = () => {
       socket.off('userPresenceUpdate', handleUpdateUserPresence);
       socket.off('serverUpdate', handleServerUpdate);
       socket.off('userUpdate', handleUserUpdate);
+      socket.off('directMessage', handleDirectMessage);
       socket.off('playSound', handlePlaySound);
     };
   }, [sessionId, server, user]);
@@ -166,13 +171,13 @@ const Home = () => {
   // Latency Control
   const [latency, setLatency] = useState<string | null>('0');
 
-  useEffect(() => {
-    const _ = setInterval(async () => {
-      const res = await measureLatency();
-      setLatency(res);
-    }, 500);
-    return () => clearInterval(_);
-  }, []);
+  // useEffect(() => {
+  //   const _ = setInterval(async () => {
+  //     const res = await measureLatency();
+  //     setLatency(res);
+  //   }, 500);
+  //   return () => clearInterval(_);
+  // }, []);
 
   const getMainContent = () => {
     if (!socket) return <LoadingSpinner />;
@@ -194,10 +199,6 @@ const Home = () => {
       <Header>
         {/* User State Display */}
         <UserStatusDisplay user={user} />
-        {/* Latency Display (Will remove in future) */}
-        <div className="px-3 py-1 bg-gray-100 text-xs text-gray-600 select-none">
-          {latency} ms
-        </div>
         {/* Switch page */}
         <Tabs
           selectedId={selectedTabId}

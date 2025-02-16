@@ -1,11 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useLayoutEffect, useRef } from 'react';
 
 // Components
 import MarkdownViewer from '@/components/MarkdownViewer';
 
 // Types
-import type { Message, Server, User, UserList } from '@/types';
+import type { Message, Server, User } from '@/types';
 
 // Util
 import { formatTimestamp } from '@/utils/formatters';
@@ -51,72 +50,75 @@ const getGroupMessages = (messages: Message[]): MessageGroup[] => {
 
 interface MessageBoxProps {
   messageGroup: MessageGroup;
+  server: Server | null;
 }
 
-const MessageBox: React.FC<MessageBoxProps> = React.memo(({ messageGroup }) => {
-  // Redux
-  const server = useSelector((state: { server: Server }) => state.server);
+const MessageBox: React.FC<MessageBoxProps> = React.memo(
+  ({ messageGroup, server }) => {
+    const senderGender = messageGroup.sender?.gender ?? 'Male';
+    const senderName = messageGroup.sender?.name ?? 'Unknown';
+    const senderPermission =
+      server?.members?.[messageGroup.senderId].permissionLevel ?? null;
+    const senderIcon = `/channel/${senderGender}_${senderPermission}.png`;
+    const messageTimestamp = formatTimestamp(parseInt(messageGroup.timestamp));
 
-  const senderGender = messageGroup.sender?.gender ?? 'Male';
-  const senderName = messageGroup.sender?.name ?? 'Unknown';
-  const senderPermission =
-    server.members?.[messageGroup.senderId].permissionLevel ?? 1;
-  const messageTimestamp = formatTimestamp(parseInt(messageGroup.timestamp));
+    return (
+      <div key={messageGroup.id} className="flex items-start space-x-1 mb-1">
+        {messageGroup.type === 'info' ? (
+          <>
+            <img
+              src={'/channel/NT_NOTIFY.png'}
+              alt={'NT_NOTIFY'}
+              className="select-none flex-shrink-0 mt-1"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="text-gray-700">
+                {messageGroup.contents.map((content, index) => (
+                  <div key={index} className="break-words">
+                    <MarkdownViewer markdownText={content} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {server && (
+              <img
+                src={senderIcon}
+                className="select-none flex-shrink-0 mt-1"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center">
+                <span className="font-bold text-gray-900">{senderName}</span>
+                <span className="text-xs text-gray-500 ml-2">
+                  {messageTimestamp}
+                </span>
+              </div>
 
-  return (
-    <div key={messageGroup.id} className="flex items-start space-x-1 mb-1">
-      {messageGroup.type === 'info' ? (
-        <>
-          <img
-            src={'/channel/NT_NOTIFY.png'}
-            alt={'NT_NOTIFY'}
-            className="select-none flex-shrink-0 mt-1"
-          />
-          <div className="flex-1 min-w-0">
-            <div className="text-gray-700">
-              {messageGroup.contents.map((content, index) => (
-                <div key={index} className="break-words">
-                  <MarkdownViewer markdownText={content} />
-                </div>
-              ))}
+              <div className="text-gray-700">
+                {messageGroup.contents.map((content, index) => (
+                  <div key={index} className="break-words">
+                    <MarkdownViewer markdownText={content} />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </>
-      ) : (
-        <>
-          <img
-            src={`/channel/${senderGender}_${senderPermission}.png`}
-            alt={`image`}
-            className="select-none flex-shrink-0 mt-1"
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center">
-              <span className="font-bold text-gray-900">{senderName}</span>
-              <span className="text-xs text-gray-500 ml-2">
-                {messageTimestamp}
-              </span>
-            </div>
-
-            <div className="text-gray-700">
-              {messageGroup.contents.map((content, index) => (
-                <div key={index} className="break-words">
-                  <MarkdownViewer markdownText={content} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-});
+          </>
+        )}
+      </div>
+    );
+  },
+);
 
 interface MessageViewerProps {
   messages: Message[] | null;
+  server?: Server | null;
 }
 
 const MessageViewer: React.FC<MessageViewerProps> = React.memo(
-  ({ messages }) => {
+  ({ messages, server = null }) => {
     if (!messages) return null;
 
     const groupMessages = getGroupMessages(messages);
@@ -141,7 +143,11 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
         [&::-webkit-scrollbar-thumb]:hover:bg-gray-400"
       >
         {groupMessages.map((groupMessage) => (
-          <MessageBox key={groupMessage.id} messageGroup={groupMessage} />
+          <MessageBox
+            key={groupMessage.id}
+            messageGroup={groupMessage}
+            server={server}
+          />
         ))}
         <div ref={messagesEndRef} />
       </div>

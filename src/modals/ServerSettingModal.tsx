@@ -9,11 +9,10 @@ import React, {
 import { ChevronDown, ChevronUp, Search } from 'lucide-react';
 
 // Components
-import MarkdownViewer from '@/components/MarkdownViewer';
 import Modal from '@/components/Modal';
 
 // Types
-import type { Server, User, UserList, ModalTabItem } from '@/types';
+import type { Server } from '@/types';
 
 // Utils
 import { getPermissionText } from '@/utils/formatters';

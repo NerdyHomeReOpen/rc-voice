@@ -51,7 +51,7 @@ const ServerPage: React.FC = () => {
   const socket = useSocket();
 
   const handleSendMessage = (message: Message): void => {
-    socket?.emit('chatMessage', { sessionId, message });
+    socket?.emit('sendMessage', { sessionId, message });
   };
 
   // Volume Control
@@ -234,7 +234,6 @@ const ServerPage: React.FC = () => {
                 type: 'general',
                 content: msg,
                 senderId: user.id,
-                channelId: userCurrentChannelId,
                 timestamp: 0,
               });
             }}

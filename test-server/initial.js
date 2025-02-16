@@ -215,22 +215,27 @@ const friendCategories = {
     id: 'cat_612a7797-f970-4f23-9983-f08d863d9552',
     userId: '612a7797-f970-4f23-9983-f08d863d9552',
     name: 'My Friends',
-    friendIds: [
-      'a73af1d2-689e-4d7d-9426-3421cce3ade4',
-      'a66af1d2-689e-4d7d-9426-3421cce3ada5',
-    ],
+    friendIds: ['a73af1d2-689e-4d7d-9426-3421cce3ade4'],
+    order: 0,
+    createdAt: 1738234723000,
+  },
+  'cat_a73af1d2-689e-4d7d-9426-3421cce3ade4': {
+    id: 'cat_a73af1d2-689e-4d7d-9426-3421cce3ade4',
+    userId: 'a73af1d2-689e-4d7d-9426-3421cce3ade4',
+    name: 'My Friends',
+    friendIds: ['612a7797-f970-4f23-9983-f08d863d9552'],
     order: 0,
     createdAt: 1738234723000,
   },
 };
-const directMessages = {
-  dm_1: {
-    id: 'dm_1',
-    senderId: '612a7797-f970-4f23-9983-f08d863d9552',
-    receiverId: 'a73af1d2-689e-4d7d-9426-3421cce3ade4',
-    content: 'Hi there!',
-    type: 'text',
-    status: 'sent',
+const friends = {
+  fd_1: {
+    id: 'fd_1',
+    userIds: [
+      '612a7797-f970-4f23-9983-f08d863d9552',
+      'a73af1d2-689e-4d7d-9426-3421cce3ade4',
+    ],
+    messageIds: [],
     createdAt: 1738234723000,
   },
 };
@@ -257,7 +262,7 @@ const init = async () => {
   await db.set('voiceStates', voiceStates);
   await db.set('posts', posts);
   await db.set('friendCategories', friendCategories);
-  await db.set('directMessages', directMessages);
+  await db.set('friends', friends);
   await db.set('blocks', blocks);
   console.log('Database initialized');
 };
