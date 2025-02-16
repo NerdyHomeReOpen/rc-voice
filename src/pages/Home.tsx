@@ -6,6 +6,9 @@ import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+// CSS
+import styles from '@/styles/home.module.css';
+
 // Types
 import type { Presence, Server, User } from '@/types';
 
@@ -197,7 +200,7 @@ const HomeComponent = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background font-['SimSun'] overflow-hidden">
+    <div className={styles['container']}>
       {/* Top Navigation */}
       <Header>
         {/* User State Display */}

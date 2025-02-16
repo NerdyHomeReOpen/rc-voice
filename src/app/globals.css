@@ -4,7 +4,7 @@
 
 :root {
   --background: 0.97 0.01 275;
-  --foreground: 0.2 0.01 275
+  --foreground: 0.2 0.01 275;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,9 +14,38 @@
   }
 }
 
+* {
+  box-sizing: unset;
+}
+
 body {
+  margin: 0;
+  padding: 0;
   color: var(--foreground);
   background: var(--background);
-  font-family: SimSun, Arial, Helvetica, sans-serif;
+  background-color: #ffffff00;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  overflow: hidden;
   font-size: 14px;
+  font-family: SimSun, Arial, Helvetica, sans-serif;
+  width: 100vw;
+  height: 99.7vh;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #6d6d6d0f;
+  border-radius: 4px;
+  border: 1px solid #6d6d6d26;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6d6d6d38;
 }

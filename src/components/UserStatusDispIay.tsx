@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+// CSS
+import styles from '@/styles/home.module.css';
+
 // Types
 import { User, Presence } from '@/types';
 
@@ -36,6 +39,9 @@ const UserStatusDisplay: React.FC<UserStatusDisplayProps> = ({
   // User Setting Control
   const [showUserSetting, setShowUserSetting] = useState<boolean>(false);
 
+  // Status Dropdown Control
+  const [showStatusDropdown, setShowStatusDropdown] = useState<boolean>(false);
+
   const handleUpdateStatus = (status: Presence['status']) => {
     socket?.emit('updatePresence', { sessionId, presence: { status } });
   };
@@ -45,47 +51,58 @@ const UserStatusDisplay: React.FC<UserStatusDisplayProps> = ({
 
   if (user)
     return (
-      <div className="flex items-center space-x-2 min-w-max m-2">
+      <div className={styles['userStatus']}>
         {showUserSetting && (
           <UserSettingModal onClose={() => setShowUserSetting(false)} />
         )}
-        <button
-          onClick={() => setShowUserSetting(true)}
-          className="p-1 hover:bg-blue-700 rounded"
+        <div className={styles['nameDisplay']}>{userName}</div>
+        <div
+          className={styles['statusBox']}
+          onClick={() => setShowStatusDropdown(!showStatusDropdown)}
         >
-          <img
-            src="/rc_logo_small.png"
-            alt="RiceCall"
-            className="w-6 h-6 select-none"
+          <div
+            className={styles['statusDisplay']}
+            datatype={userPresenceStatus}
           />
-        </button>
-        <span className="text-xs font-bold select-none">{userName}</span>
-        <div className="flex items-center">
-          <img
-            src={STATE_ICON[userPresenceStatus]}
-            alt="User State"
-            className="w-5 h-5 p-1 select-none"
-          />
-          <select
-            value={userPresenceStatus}
-            onChange={(e) => {
-              handleUpdateStatus(e.target.value as Presence['status']);
-            }}
-            className="bg-transparent text-white text-xs appearance-none hover:bg-blue-700 p-1 rounded cursor-pointer focus:outline-none select-none"
+          <div className={styles['statusTriangle']} />
+          <div
+            className={`${styles['statusDropdown']} ${
+              showStatusDropdown ? '' : styles['hidden']
+            }`}
           >
-            <option value="online" className="bg-blue-600">
-              線上
-            </option>
-            <option value="dnd" className="bg-blue-600">
-              勿擾
-            </option>
-            <option value="idle" className="bg-blue-600">
-              暫離
-            </option>
-            <option value="gn" className="bg-blue-600">
-              離線
-            </option>
-          </select>
+            <div
+              className={styles['statusOption']}
+              datatype="online"
+              onClick={() => {
+                handleUpdateStatus('online');
+                setShowStatusDropdown(false);
+              }}
+            />
+            <div
+              className={styles['statusOption']}
+              datatype="dnd"
+              onClick={() => {
+                handleUpdateStatus('dnd');
+                setShowStatusDropdown(false);
+              }}
+            />
+            <div
+              className={styles['statusOption']}
+              datatype="idle"
+              onClick={() => {
+                handleUpdateStatus('idle');
+                setShowStatusDropdown(false);
+              }}
+            />
+            <div
+              className={styles['statusOption']}
+              datatype="gn"
+              onClick={() => {
+                handleUpdateStatus('gn');
+                setShowStatusDropdown(false);
+              }}
+            />
+          </div>
         </div>
       </div>
     );
