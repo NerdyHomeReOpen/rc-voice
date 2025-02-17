@@ -20,7 +20,6 @@
   color: #ffffff;
   font-size: 16px;
   font-weight: bold;
-  width: 100%;
   align-items: center;
 }
 
@@ -45,7 +44,7 @@
   width: 270px;
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between;
 }
 
 .gift {
@@ -493,7 +492,7 @@
   flex-direction: column;
   width: 13px;
   height: 13px;
-  margin: 0.2rem;
+  padding: 0.2rem;
 }
 
 .statusDropdown .statusOption:hover {
@@ -501,7 +500,8 @@
   color: #fff;
 }
 
-.statusDropdown .statusOption {
+.statusDropdown .statusOption::before {
+  content: '';
   display: inline-block;
   width: 13px;
   height: 13px;
@@ -509,18 +509,18 @@
   background-size: auto;
 }
 
-.statusDropdown .statusOption[datatype='online'] {
+.statusDropdown .statusOption[datatype='online']::before {
   background-position: 0 0;
 }
 
-.statusDropdown .statusOption[datatype='dnd'] {
+.statusDropdown .statusOption[datatype='dnd']::before {
   background-position: -13px 0;
 }
 
-.statusDropdown .statusOption[datatype='idle'] {
+.statusDropdown .statusOption[datatype='idle']::before {
   background-position: -26px 0;
 }
 
-.statusDropdown .statusOption[datatype='gn'] {
+.statusDropdown .statusOption[datatype='gn']::before {
   background-position: -39px 0;
 }
