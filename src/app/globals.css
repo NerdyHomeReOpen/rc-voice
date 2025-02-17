@@ -49,3 +49,10 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #6d6d6d38;
 }
+
+div.resizeHandle {
+  width: 0.125rem;
+  height: 100%;
+  background: rgb(229 231 235);
+  cursor: col-resize;
+}

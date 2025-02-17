@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { CircleX } from 'lucide-react';
 
 // CSS
 import styles from '@/styles/home.module.css';
@@ -19,8 +20,8 @@ import HomePage from '@/pages/HomePage';
 import ServerPage from '@/pages/ServerPage';
 
 // Components
-import Tabs from '@/components/Tabs';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import UserSettingModal from '@/modals/UserSettingModal';
 
 // Utils
 import { measureLatency } from '@/utils/measureLatency';
@@ -33,120 +34,259 @@ import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
-import UserStatusDisplay from '@/components/UserStatusDispIay';
 
 interface HeaderProps {
+  selectedId?: number;
   children?: React.ReactNode;
+  onSelect?: (tabId: number) => void;
   onClose?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = React.memo(({ onClose, children }) => {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+const Header: React.FC<HeaderProps> = React.memo(
+  ({ children, selectedId = 1, onSelect, onClose }) => {
+    // Redux
+    const user = useSelector((state: { user: User }) => state.user);
+    const server = useSelector((state: { server: Server }) => state.server);
+    const sessionId = useSelector(
+      (state: { sessionToken: string }) => state.sessionToken,
+    );
 
-  const handleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
+    // Socket
+    const socket = useSocket();
 
-  const [showMenu, setShowMenu] = useState(false);
+    const handleLogout = () => {
+      socket?.emit('disconnectUser', { sessionId });
+    };
 
-  return (
-    <div className={styles['header']}>
-      {children}
-      <div className={styles['buttons']}>
-        <div className={styles['gift']} />
-        <div className={styles['game']} />
-        <div className={styles['notice']} />
-        <div className={styles['spliter']} />
-        <div className={styles['menu']} onClick={() => setShowMenu(!showMenu)}>
+    const handleLeaveServer = () => {
+      const serverId = user.presence?.currentServerId;
+      socket?.emit('disconnectServer', { serverId, sessionId });
+    };
+
+    const handleRequestUserUpdate = () => {
+      socket?.emit('requestUserUpdate', { sessionId });
+    };
+
+    const handleUpdateStatus = (status: Presence['status']) => {
+      socket?.emit('updatePresence', { sessionId, presence: { status } });
+    };
+
+    // Fullscreen Control
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    const handleFullscreen = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    };
+
+    // Menu Control
+    const [showMenu, setShowMenu] = useState(false);
+
+    // User Setting Control
+    const [showUserSetting, setShowUserSetting] = useState<boolean>(false);
+
+    // Status Dropdown Control
+    const [showStatusDropdown, setShowStatusDropdown] =
+      useState<boolean>(false);
+
+    // Tab Control
+    const MAIN_TABS = [
+      user && { id: 1, label: '發現', onClick: handleRequestUserUpdate },
+      user && { id: 2, label: '好友' },
+      server && { id: 3, label: server.name },
+    ].filter((_) => _);
+
+    const userName = user?.name ?? 'RiceCall';
+    const userPresenceStatus = user?.presence?.status ?? 'online';
+
+    return (
+      <div className={styles['header']}>
+        <div className={styles['userStatus']}>
+          {showUserSetting && (
+            <UserSettingModal onClose={() => setShowUserSetting(false)} />
+          )}
+          <div className={styles['nameDisplay']}>{userName}</div>
           <div
-            className={`${styles['menuDropDown']} ${
-              showMenu ? '' : styles['hidden']
-            }`}
+            className={styles['statusBox']}
+            onClick={() => setShowStatusDropdown(!showStatusDropdown)}
           >
             <div
-              className={`${styles['option']} ${styles['hasImage']}`}
-              data-type="system-setting"
-              data-key="30066"
-            >
-              系統設定
-            </div>
+              className={styles['statusDisplay']}
+              datatype={userPresenceStatus}
+            />
+            <div className={styles['statusTriangle']} />
             <div
-              className={`${styles['option']} ${styles['hasImage']}`}
-              data-type="message-history"
-              data-key="30136"
+              className={`${styles['statusDropdown']} ${
+                showStatusDropdown ? '' : styles['hidden']
+              }`}
             >
-              訊息紀錄
-            </div>
-            <div
-              className={`${styles['option']} ${styles['hasImage']}`}
-              data-type="change-theme"
-              data-key="60028"
-            >
-              更換主題
-            </div>
-            <div
-              className={styles['option']}
-              data-type="feed-back"
-              data-key="30039"
-            >
-              意見反饋
-            </div>
-            <div
-              className={`${styles['option']} ${styles['hasImage']} ${styles['hasSubmenu']}`}
-              data-type="language-select"
-            >
-              <span data-key="30374">語言選擇</span>
-              <div className={`${styles['menuDropDown']} ${styles['hidden']}`}>
-                <div className={styles['option']} data-lang="tw">
-                  繁體中文
-                </div>
-                <div className={styles['option']} data-lang="cn">
-                  简体中文
-                </div>
-                <div className={styles['option']} data-lang="en">
-                  English
-                </div>
-                <div className={styles['option']} data-lang="jp">
-                  日本語
-                </div>
-                <div className={styles['option']} data-lang="ru">
-                  русский язык
-                </div>
-              </div>
-            </div>
-            <div
-              className={styles['option']}
-              data-type="logout"
-              data-key="30060"
-            >
-              登出
-            </div>
-            <div
-              className={`${styles['option']} ${styles['hasImage']}`}
-              data-type="exit"
-              data-key="30061"
-            >
-              退出
+              <div
+                className={styles['option']}
+                datatype="online"
+                onClick={() => {
+                  handleUpdateStatus('online');
+                  setShowStatusDropdown(false);
+                }}
+              />
+              <div
+                className={styles['option']}
+                datatype="dnd"
+                onClick={() => {
+                  handleUpdateStatus('dnd');
+                  setShowStatusDropdown(false);
+                }}
+              />
+              <div
+                className={styles['option']}
+                datatype="idle"
+                onClick={() => {
+                  handleUpdateStatus('idle');
+                  setShowStatusDropdown(false);
+                }}
+              />
+              <div
+                className={styles['option']}
+                datatype="gn"
+                onClick={() => {
+                  handleUpdateStatus('gn');
+                  setShowStatusDropdown(false);
+                }}
+              />
             </div>
           </div>
         </div>
-        <div className={styles['minimize']} />
-        <div
-          className={isFullscreen ? styles['restore'] : styles['maxsize']}
-          onClick={handleFullscreen}
-          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-        />
-        <div className={styles['close']} onClick={onClose} />
+        {/* Main Tabs */}
+        <div className={styles['mainTabs']}>
+          {MAIN_TABS.map((Tab) => {
+            const TabId = Tab.id;
+            const TabLable = Tab.label;
+
+            return (
+              <div
+                key={`Tabs-${TabId}`}
+                className={`${styles['tab']} ${
+                  TabId === selectedId ? styles['selected'] : ''
+                }`}
+                onClick={() => {
+                  onSelect?.(TabId);
+                  Tab.onClick && Tab.onClick();
+                }}
+              >
+                <div className={styles['tabLable']}>{TabLable}</div>
+                <div className={styles['tabBg']}></div>
+              </div>
+            );
+          })}
+          {MAIN_TABS.length > 2 && (
+            <CircleX
+              onClick={() => handleLeaveServer()}
+              size={16}
+              className={styles['tabClose']}
+            />
+          )}
+        </div>
+        {/* Buttons */}
+        <div className={styles['buttons']}>
+          <div className={styles['gift']} />
+          <div className={styles['game']} />
+          <div className={styles['notice']} />
+          <div className={styles['spliter']} />
+          <div
+            className={styles['menu']}
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            <div
+              className={`${styles['menuDropDown']} ${
+                showMenu ? '' : styles['hidden']
+              }`}
+            >
+              <div
+                className={`${styles['option']} ${styles['hasImage']}`}
+                data-type="system-setting"
+                data-key="30066"
+              >
+                系統設定
+              </div>
+              <div
+                className={`${styles['option']} ${styles['hasImage']}`}
+                data-type="message-history"
+                data-key="30136"
+              >
+                訊息紀錄
+              </div>
+              <div
+                className={`${styles['option']} ${styles['hasImage']}`}
+                data-type="change-theme"
+                data-key="60028"
+              >
+                更換主題
+              </div>
+              <div
+                className={styles['option']}
+                data-type="feed-back"
+                data-key="30039"
+              >
+                意見反饋
+              </div>
+              <div
+                className={`${styles['option']} ${styles['hasImage']} ${styles['hasSubmenu']}`}
+                data-type="language-select"
+              >
+                <span data-key="30374">語言選擇</span>
+                <div
+                  className={`${styles['menuDropDown']} ${styles['hidden']}`}
+                >
+                  <div className={styles['option']} data-lang="tw">
+                    繁體中文
+                  </div>
+                  <div className={styles['option']} data-lang="cn">
+                    简体中文
+                  </div>
+                  <div className={styles['option']} data-lang="en">
+                    English
+                  </div>
+                  <div className={styles['option']} data-lang="jp">
+                    日本語
+                  </div>
+                  <div className={styles['option']} data-lang="ru">
+                    русский язык
+                  </div>
+                </div>
+              </div>
+              <div
+                className={styles['option']}
+                data-type="logout"
+                data-key="30060"
+                onClick={() => handleLogout()}
+              >
+                登出
+              </div>
+              <div
+                className={`${styles['option']} ${styles['hasImage']}`}
+                data-type="exit"
+                data-key="30061"
+              >
+                退出
+              </div>
+            </div>
+          </div>
+          <div className={styles['minimize']} />
+          <div
+            className={isFullscreen ? styles['restore'] : styles['maxsize']}
+            onClick={handleFullscreen}
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          />
+          <div className={styles['close']} onClick={onClose} />
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 Header.displayName = 'Header';
 
@@ -316,21 +456,16 @@ const HomeComponent = () => {
   return (
     <div className={styles['container']}>
       {/* Top Navigation */}
-      <Header>
-        {/* User State Display */}
-        <UserStatusDisplay user={user} />
-        {/* Switch page */}
-        <Tabs
-          selectedId={selectedTabId}
-          onSelect={(tabId) => setSelectedTabId(tabId)}
-          disabled={!user}
-        />
-      </Header>
+      <Header
+        selectedId={selectedTabId}
+        onSelect={(tabId) => setSelectedTabId(tabId)}
+      />
       {/* Main Content */}
-      <div className="flex flex-1 min-h-0">{getMainContent()}</div>
+      <div className={styles['contentWrapper']}>{getMainContent()}</div>
     </div>
   );
 };
+
 HomeComponent.displayName = 'HomeComponent';
 
 // use dynamic import to disable SSR

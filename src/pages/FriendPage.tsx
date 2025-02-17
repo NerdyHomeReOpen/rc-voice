@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ user }) => {
         <textarea
           className={styles['signatureInput']}
           value={userSignature}
-          placeholder="这个人很懒，什么都没留下..."
+          placeholder="點擊更改簽名"
           data-placeholder="30018"
           onChange={() => {}} // TODO: Implement signature change
         />
@@ -145,24 +145,15 @@ const FriendPageComponent: React.FC = React.memo(() => {
           className={styles['sidebar']}
           style={{ width: `${sidebarWidth}px` }}
         >
-          {/* Friend List */}
           <FriendListViewer friendCategories={friendCategories} />
         </aside>
 
         {/* Resize Handle */}
-        <div
-          className="w-0.5 cursor-col-resize bg-gray-200 transition-colors"
-          onMouseDown={startResizing}
-        />
+        <div className="resizeHandle" onMouseDown={startResizing} />
 
         {/* Main Content Area */}
         <section className={styles['mainContent']}>
           <div className={styles['header']}>好友動態</div>
-          <div className="p-2 text-center">
-            {/* <button className="text-blue-500 hover:underline">
-              {'查看更多 >'}
-            </button> */}
-          </div>
         </section>
       </main>
     </div>

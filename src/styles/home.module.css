@@ -10,6 +10,12 @@
   margin-top: 1px;
 }
 
+.contentWrapper {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
