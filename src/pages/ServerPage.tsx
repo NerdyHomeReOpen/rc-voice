@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
+import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import {
@@ -42,7 +43,7 @@ const getStoredBoolean = (key: string, defaultValue: boolean): boolean => {
   return stored === 'true';
 };
 
-const ServerPage: React.FC = () => {
+const ServerPageComponent: React.FC = () => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);
@@ -354,6 +355,11 @@ const ServerPage: React.FC = () => {
   );
 };
 
-ServerPage.displayName = 'ServerPage';
+ServerPageComponent.displayName = 'ServerPageComponent';
+
+// use dynamic import to disable SSR
+const ServerPage = dynamic(() => Promise.resolve(ServerPageComponent), {
+  ssr: false,
+});
 
 export default ServerPage;

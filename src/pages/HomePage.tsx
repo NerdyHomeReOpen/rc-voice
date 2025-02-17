@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
+import dynamic from 'next/dynamic';
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
@@ -36,10 +37,11 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   );
 
   // Socket Control
-  const sokcet = useSocket();
+  const socket = useSocket();
 
   const handleServerSelect = (serverId: string) => {
-    sokcet?.emit('connectServer', { serverId, sessionId });
+    if (typeof window === 'undefined') return;
+    socket?.emit('connectServer', { serverId, sessionId });
     errorHandler.handle = () => {
       console.log('error');
     };
@@ -134,7 +136,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
 Header.displayName = 'Header';
 
 // HomePage Component
-const HomePage: React.FC = React.memo(() => {
+const HomePageComponent: React.FC = React.memo(() => {
   // Redux
   const sessionId = useSelector(
     (state: { sessionToken: string }) => state.sessionToken,
@@ -145,6 +147,7 @@ const HomePage: React.FC = React.memo(() => {
   const [joinedServers, setJoinedServers] = useState<Server[]>([]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     if (!sessionId) return;
 
     const fetchServerDatas = async () => {
@@ -222,6 +225,11 @@ const HomePage: React.FC = React.memo(() => {
   );
 });
 
-HomePage.displayName = 'HomePage';
+HomePageComponent.displayName = 'HomePageComponent';
+
+// use dynamic import to disable SSR
+const HomePage = dynamic(() => Promise.resolve(HomePageComponent), {
+  ssr: false,
+});
 
 export default HomePage;

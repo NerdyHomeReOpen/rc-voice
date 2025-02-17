@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
+import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useCallback } from 'react';
 
 // Components
@@ -18,7 +19,7 @@ import { useSelector } from 'react-redux';
 // Services
 import { apiService } from '@/services/api.service';
 
-const FriendPage: React.FC = React.memo(() => {
+const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
   const sessionId = useSelector(
@@ -141,6 +142,11 @@ const FriendPage: React.FC = React.memo(() => {
   );
 });
 
-FriendPage.displayName = 'FriendPage';
+FriendPageComponent.displayName = 'FriendPageComponent';
+
+// use dynamic import to disable SSR
+const FriendPage = dynamic(() => Promise.resolve(FriendPageComponent), {
+  ssr: false,
+});
 
 export default FriendPage;

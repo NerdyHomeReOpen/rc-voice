@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-'use client';
+import dynamic from 'next/dynamic';
 
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -33,7 +33,7 @@ import { clearUser, setUser } from '@/redux/userSlice';
 import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
 import UserStatusDisplay from '@/components/UserStatusDispIay';
 
-const Home = () => {
+const HomeComponent = () => {
   // Socket Control
   const socket = useSocket();
 
@@ -214,6 +214,11 @@ const Home = () => {
     </div>
   );
 };
-Home.displayName = 'Home';
+HomeComponent.displayName = 'HomeComponent';
+
+// use dynamic import to disable SSR
+const Home = dynamic(() => Promise.resolve(HomeComponent), {
+  ssr: false,
+});
 
 export default Home;
