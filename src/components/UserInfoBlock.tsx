@@ -66,8 +66,8 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
                 <span className="font-medium truncate">{user.name}</span>
                 {user.level > 1 && (
                   <img
-                    src={`/usergrade_${userLevel}.png`}
-                    alt={`/usergrade_${userLevel}`}
+                    src={`/UserGrade_${userLevel}.png`}
+                    alt={`/UserGrade_${userLevel}`}
                     className="select-none"
                   />
                 )}

@@ -142,7 +142,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   const friendUser = friend.user;
   const friendLevel = Math.min(56, Math.ceil((friendUser?.level ?? 0) / 5)); // 56 is max level
   const friendAvatarUrl = friendUser?.avatarUrl ?? '/pfp/default.png';
-  const friendGradeUrl = `/usergrade_${friendLevel}.png`;
+  const friendGradeUrl = `/UserGrade_${friendLevel}.png`;
   const friendName = friendUser?.name;
   const friendBadges = friendUser?.badges ?? [];
   const friendSignature = friendUser?.signature ?? '';

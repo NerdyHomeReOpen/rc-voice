@@ -89,7 +89,7 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
     const friendAvatar = friendUser?.avatarUrl ?? '/pfp/default.png';
     const friendName = friendUser?.name;
     const friendLevel = Math.min(56, Math.ceil((friendUser?.level ?? 0) / 5)); // 56 is max level
-    const friendGradeUrl = `/usergrade_${friendLevel}.png`;
+    const friendGradeUrl = `/UserGrade_${friendLevel}.png`;
 
     return (
       <Modal title={friendName} onClose={onClose} width="600px" height="600px">

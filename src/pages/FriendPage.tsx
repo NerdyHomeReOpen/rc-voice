@@ -87,7 +87,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
   const userName = user.name;
   const userSignature = user.signature ?? '';
   const userAvatarUrl = user.avatarUrl ?? '/pfp/default.png';
-  const userGradeUrl = `/usergrade_${userLevel}.png`;
+  const userGradeUrl = `/UserGrade_${userLevel}.png`;
 
   return (
     <div className="flex flex-1 flex-col">

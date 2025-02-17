@@ -490,8 +490,8 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user, server, mainUser }) 
               className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
             >
               <img
-                src={`/usergrade_${userLevel}.png`}
-                alt={`/usergrade_${userLevel}`}
+                src={`/UserGrade_${userLevel}.png`}
+                alt={`/UserGrade_${userLevel}`}
                 className="select-none"
               />
             </div>
