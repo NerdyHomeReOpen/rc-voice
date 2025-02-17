@@ -1,4 +1,4 @@
-.container {
+.contentWrapper {
   width: 100%;
   height: 100%;
   border-radius: 5px;
@@ -10,7 +10,7 @@
   margin-top: 1px;
 }
 
-.contentWrapper {
+.contentMain {
   display: flex;
   flex: 1;
   min-height: 0;

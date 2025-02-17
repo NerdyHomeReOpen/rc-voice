@@ -37,13 +37,12 @@ import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
 
 interface HeaderProps {
   selectedId?: number;
-  children?: React.ReactNode;
   onSelect?: (tabId: number) => void;
   onClose?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = React.memo(
-  ({ children, selectedId = 1, onSelect, onClose }) => {
+  ({ selectedId = 1, onSelect, onClose }) => {
     // Redux
     const user = useSelector((state: { user: User }) => state.user);
     const server = useSelector((state: { server: Server }) => state.server);
@@ -454,14 +453,14 @@ const HomeComponent = () => {
   };
 
   return (
-    <div className={styles['container']}>
+    <div className={styles['contentWrapper']}>
       {/* Top Navigation */}
       <Header
         selectedId={selectedTabId}
         onSelect={(tabId) => setSelectedTabId(tabId)}
       />
       {/* Main Content */}
-      <div className={styles['contentWrapper']}>{getMainContent()}</div>
+      <div className={styles['contentMain']}>{getMainContent()}</div>
     </div>
   );
 };
