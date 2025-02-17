@@ -15,18 +15,24 @@ export interface User {
   name: string;
   avatarUrl: string | null;
   gender: 'Male' | 'Female';
-  xp: number;
   level: number;
   signature: string;
   badgeIds: string[];
   ownedServerIds: string[];
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
+  xpInfo?: XpInfo;
   badges?: Badge[];
   presence?: Presence | null;
   members?: {
     [serverId: string]: Member;
   } | null;
+}
+
+export interface XpInfo {
+  xp: number;
+  required: number;
+  progress: number;
 }
 
 export interface Badge {

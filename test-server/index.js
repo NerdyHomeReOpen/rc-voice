@@ -418,45 +418,6 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/user/servers') {
-    let body = '';
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
-    req.on('end', async () => {
-      try {
-        const data = JSON.parse(body);
-        // data = {
-        //   "sessionId": "123456",
-        // }
-        // console.log(data);
-
-        // Get database
-        const users = (await db.get('users')) || {};
-
-        // Validate data
-        const userId = userSessions.get(data.sessionId);
-        if (!userId) {
-          throw new Error('Invalid session ID');
-        }
-        const user = users[userId];
-        if (!user) {
-          throw new Error('User not found');
-        }
-
-        sendSuccess(res, {
-          message: '獲取伺服器成功',
-          data: { ...(await getJoinRecServers(userId)) },
-        });
-        new Logger('Servers').success(`User(${userId}) servers fetched`);
-      } catch (error) {
-        sendError(res, 500, `獲取伺服器時發生錯誤: ${error.message}`);
-        new Logger('Servers').error(`Fetch servers error: ${error.message}`);
-      }
-    });
-    return;
-  }
-
   if (req.method == 'POST' && req.url == '/login') {
     let body = '';
     req.on('data', (chunk) => {
@@ -987,9 +948,6 @@ io.on('connection', async (socket) => {
       io.to(`server_${serverId}`).emit('serverUpdate', {
         ...(await getServer(serverId)),
       });
-
-      // Send success response back to the client
-      socket.emit('serverUpdateSuccess');
 
       new Logger('Server').success(
         `Server(${serverId}) updated by user(${userId})`,
@@ -1825,6 +1783,110 @@ io.on('connection', async (socket) => {
     }
   });
 
+  socket.on('getServers', async (data) => {
+    const users = (await db.get('users')) || {};
+    const servers = (await db.get('servers')) || {};
+    const members = (await db.get('members')) || {};
+
+    try {
+      const { sessionId, searchQuery } = data;
+
+      if (!sessionId) {
+        throw new Error('Missing session ID');
+      }
+
+      const userId = userSessions.get(sessionId);
+      if (!userId) {
+        throw new Error('Invalid session ID');
+      }
+
+      const user = users[userId];
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Get user's joined server IDs
+      const userServerIds = new Set(
+        Object.values(members)
+          .filter((member) => member.userId === userId)
+          .map((member) => member.serverId),
+      );
+
+      if (searchQuery) {
+        // Get all servers for searching
+        const allServers = Object.values(servers);
+        const normalizedQuery = searchQuery.toLowerCase().trim();
+
+        // Handle search
+        let searchResults = allServers.filter((server) => {
+          // ID 完全匹配時允許看到不可見伺服器
+          if (server.displayId.toString() === normalizedQuery) {
+            return true;
+          }
+
+          // 名稱搜尋時只搜尋可見伺服器
+          if (
+            server.settings.visibility === 'invisible' &&
+            !userServerIds.has(server.id)
+          ) {
+            return false;
+          }
+
+          // 模糊名稱匹配
+          const normalizedName = server.name.toLowerCase().trim();
+          return (
+            normalizedName.includes(normalizedQuery) ||
+            calculateSimilarity(normalizedName, normalizedQuery) > 0.6
+          );
+        });
+
+        // Sort by relevance and limit to 10 results
+        searchResults = searchResults
+          .sort((a, b) => {
+            const aName = a.name.toLowerCase();
+            const bName = b.name.toLowerCase();
+            const aSimilarity = calculateSimilarity(aName, normalizedQuery);
+            const bSimilarity = calculateSimilarity(bName, normalizedQuery);
+            return bSimilarity - aSimilarity;
+          })
+          .slice(0, 10);
+
+        socket.emit('serversUpdate', {
+          recommendedServers: [],
+          joinedServers: searchResults,
+        });
+        return;
+      }
+
+      // Normal view (no search)
+      // Get all joined servers
+      const joinedServers = Object.values(servers).filter((server) =>
+        userServerIds.has(server.id),
+      );
+
+      // Get recommended servers (public servers not joined by user)
+      const availableForRecommendation = Object.values(servers).filter(
+        (server) =>
+          !userServerIds.has(server.id) &&
+          server.settings.visibility !== 'invisible',
+      );
+
+      const recommendedServers = _.sampleSize(availableForRecommendation, 10);
+
+      socket.emit('serversUpdate', {
+        recommendedServers,
+        joinedServers,
+      });
+    } catch (error) {
+      socket.emit('error', {
+        message: `搜尋伺服器時發生錯誤: ${error.message}`,
+        part: 'SEARCHSERVERS',
+        tag: 'EXCEPTION_ERROR',
+        status_code: 500,
+      });
+    }
+  });
+
   socket.on('addChannel', async (data) => {
     // d = {
     //   sessionId: '123456',
@@ -2209,6 +2271,59 @@ const deleteUserIdSocketIdMap = (userId = null, socketId = null) => {
   }
   return false;
 };
+const searchServers = (serverList, query) => {
+  if (!query) return serverList;
+
+  const normalizedQuery = query.toLowerCase().trim();
+
+  return Object.values(serverList)
+    .filter((server) => {
+      // 精確 ID 匹配
+      if (server.displayId.toString() === normalizedQuery) return true;
+
+      // 模糊名稱匹配
+      const normalizedName = server.name.toLowerCase().trim();
+      return (
+        normalizedName.includes(normalizedQuery) ||
+        calculateSimilarity(normalizedName, normalizedQuery) > 0.6
+      );
+    })
+    .reduce((acc, server) => {
+      acc[server.id] = server;
+      return acc;
+    }, {});
+};
+
+// 計算文字相似度 (0-1)
+const calculateSimilarity = (str1, str2) => {
+  const longer = str1.length > str2.length ? str1 : str2;
+  const shorter = str1.length > str2.length ? str2 : str1;
+
+  if (longer.length === 0) return 1.0;
+
+  return (longer.length - levenshteinDistance(longer, shorter)) / longer.length;
+};
+
+// Levenshtein Distance 算法
+const levenshteinDistance = (str1, str2) => {
+  const matrix = [];
+
+  for (let i = 0; i <= str1.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= str2.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= str1.length; i++) {
+    for (let j = 1; j <= str2.length; j++) {
+      const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost,
+      );
+    }
+  }
+
+  return matrix[str1.length][str2.length];
+};
 // Get Functions
 const getServer = async (serverId) => {
   const servers = (await db.get('servers')) || {};
@@ -2263,8 +2378,8 @@ const getUser = async (userId) => {
   if (!user) return null;
   const { account, ...restUser } = user;
   const xpInfo = {
-    currentXP: user.xp || 0,
-    requiredXP: calculateRequiredXP(user.level),
+    xp: user.xp || 0,
+    required: calculateRequiredXP(user.level),
     progress: ((user.xp || 0) / calculateRequiredXP(user.level)) * 100,
   };
 
@@ -2398,37 +2513,6 @@ const getDirectMessages = async (userId, friendId) => {
   const friend = await getFriend(userId, friendId);
   if (!friend) return null;
   return [...friend.messages];
-};
-const getJoinRecServers = async (userId, limit = 10) => {
-  const [_servers, _members] = await Promise.all([
-    db.get('servers') || {},
-    db.get('members') || {},
-  ]);
-
-  const userServerIds = new Set(
-    Object.values(_members)
-      .filter((member) => member.userId === userId)
-      .map((member) => member.serverId),
-  );
-
-  const { joinedServers, notJoinedServers } = Object.values(_servers).reduce(
-    (result, server) => {
-      if (userServerIds.has(server.id)) {
-        result.joinedServers.push(server);
-      } else if (server.settings.visibility !== 'invisible') {
-        result.notJoinedServers.push(server);
-      }
-      return result;
-    },
-    { joinedServers: [], notJoinedServers: [] },
-  );
-
-  const recommendedServers = _.sampleSize(notJoinedServers, limit) ?? [];
-
-  return {
-    joinedServers, // Contains all joined servers including invisible ones
-    recommendedServers, // Contains only non-invisible servers
-  };
 };
 const getDisplayId = async (baseId = 20000000) => {
   const servers = (await db.get('servers')) || {};

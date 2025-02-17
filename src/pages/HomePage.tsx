@@ -10,9 +10,6 @@ import { Search } from 'lucide-react';
 import CreateServerModal from '@/modals/CreateServerModal';
 import ServerApplicationModal from '@/modals/ServerApplicationModal';
 
-// Utils
-import { calculateSimilarity } from '@/utils/searchServers';
-
 // Type
 import type { Server, User } from '@/types';
 
@@ -163,83 +160,66 @@ const HomePageComponent: React.FC = React.memo(() => {
     (state: { sessionToken: string }) => state.sessionToken,
   );
 
-  // API
+  // Socket Control
+  const socket = useSocket();
+
+  // State
   const [recommendedServers, setRecommendedServers] = useState<Server[]>([]);
   const [joinedServers, setJoinedServers] = useState<Server[]>([]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!sessionId) return;
-
-    const fetchServerDatas = async () => {
-      try {
-        const data = await apiService.post('/user/servers', { sessionId });
-        setRecommendedServers(data.recommendedServers ?? []);
-        setJoinedServers(data.joinedServers ?? []);
-      } catch (error: Error | any) {
-        console.error(error);
-      }
-    };
-    fetchServerDatas();
-  }, []);
-
-  // Search Control
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Server[]>([]);
 
-  // REFACTOR: use websocket to get server data
   useEffect(() => {
-    if (searchQuery) {
-      const getResults = (servers: Server[]) => {
-        return servers
-          .filter(
-            (server) =>
-              server.displayId?.toString() === searchQuery.trim() ||
-              server.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              calculateSimilarity(
-                server.name.toLowerCase(),
-                searchQuery.toLowerCase(),
-              ) > 0.6,
-          )
-          .sort((a, b) => {
-            const simA = calculateSimilarity(
-              a.name.toLowerCase(),
-              searchQuery.toLowerCase(),
-            );
-            const simB = calculateSimilarity(
-              b.name.toLowerCase(),
-              searchQuery.toLowerCase(),
-            );
-            return simB - simA;
-          });
-      };
-      setSearchResults(
-        getResults([...(recommendedServers ?? []), ...(joinedServers ?? [])]),
-      );
-    } else {
-      setSearchResults([]);
-    }
-  }, [searchQuery]);
+    if (!socket || !sessionId) return;
+
+    // Fetch server data
+    const fetchServerData = () => {
+      socket.emit('getServers', { sessionId, searchQuery });
+    };
+
+    // Handle server updates
+    const handleServerUpdate = (data: {
+      recommendedServers: Server[];
+      joinedServers: Server[];
+    }) => {
+      setRecommendedServers(data.recommendedServers ?? []);
+      setJoinedServers(data.joinedServers ?? []);
+    };
+
+    // Set up event listeners
+    socket.on('serversUpdate', handleServerUpdate);
+
+    // Initial fetch
+    fetchServerData();
+
+    // Cleanup
+    return () => {
+      socket.off('serversUpdate', handleServerUpdate);
+    };
+  }, [socket, sessionId, searchQuery]);
 
   return (
     <div className="flex flex-1 flex-col">
       <Header onSearch={(query: string) => setSearchQuery(query)} />
       <main className="flex flex-1 min-h-0 bg-gray-100">
         <div className="flex flex-1 flex-col item-center space-y-6 p-8 overflow-y-auto">
-          {searchResults.length > 0 && (
+          {searchQuery && joinedServers.length > 0 && (
             <section>
               <h2 className="text-lg font-bold mb-3">搜尋結果</h2>
-              <ServerGrid servers={searchResults} />
+              <ServerGrid servers={joinedServers} />
             </section>
           )}
-          <section className="mb-6">
-            <h2 className="text-lg font-bold mb-3">推薦語音群</h2>
-            <ServerGrid servers={recommendedServers} />
-          </section>
-          <section>
-            <h2 className="text-lg font-bold mb-3">最近語音群</h2>
-            <ServerGrid servers={joinedServers} />
-          </section>
+          {!searchQuery && (
+            <>
+              <section className="mb-6">
+                <h2 className="text-lg font-bold mb-3">推薦語音群</h2>
+                <ServerGrid servers={recommendedServers} />
+              </section>
+              <section>
+                <h2 className="text-lg font-bold mb-3">最近語音群</h2>
+                <ServerGrid servers={joinedServers} />
+              </section>
+            </>
+          )}
         </div>
       </main>
     </div>
