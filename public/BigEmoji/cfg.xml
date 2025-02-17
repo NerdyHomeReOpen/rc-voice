@@ -1,0 +1,6 @@
+﻿<faces>
+  <face id="0" file="applaud.gif" title="你最棒"><![CDATA[/{v_be_applaud]]></face>
+  <face id="1" file="bigkiss.gif" title="親一個"><![CDATA[/{v_be_bigkiss]]></face>
+  <face id="2" file="claphands.gif" title="鼓掌"><![CDATA[/{v_be_claphands]]></face>
+  <face id="3" file="sendflowers.gif" title="送花"><![CDATA[/{v_be_sendflowers]]></face>
+</faces>

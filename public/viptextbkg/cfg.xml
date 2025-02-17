@@ -1,0 +1,5 @@
+<viptext>
+    <bkg id="1" file="love.png" font="{65002}" text="{66062}" free="1" font-color="#000000"/>
+    <bkg id="2" file="sun.png" font="{65002}" text="{66063}" free="0" font-color="#000000"/>
+    <bkg id="3" file="berry.png" font="{65002}" text="{66064}" free="0" font-color="#FFFFFF"/>
+</viptext>
