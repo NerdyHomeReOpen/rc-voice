@@ -4,6 +4,9 @@ import dynamic from 'next/dynamic';
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
+// CSS
+import styles from '@/styles/homePage.module.css';
+
 // Components
 import CreateServerModal from '@/modals/CreateServerModal';
 import ServerApplicationModal from '@/modals/ServerApplicationModal';
@@ -122,27 +125,51 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
       {showCreateServer && (
         <CreateServerModal onClose={() => setShowCreateServer(false)} />
       )}
-      <header className="bg-white shadow-sm">
-        <div className="flex items-center justify-between px-8 py-2">
-          <div className="flex items-center space-x-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="輸入群ID或群名稱"
-                className="w-48 h-6 px-2 pr-8 border border-gray-200 rounded text-sm focus:border-blue-500 focus:outline-none select-none"
-                onChange={(e) => onSearch(e.target.value)}
-              />
-              <Search className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
+      <header className={styles['homeHeader']}>
+        <div className={styles['left']}>
+          <div className={styles['backBtn']} />
+          <div className={styles['forwardBtn']} />
+          <div className={styles['searchBar']}>
+            <input
+              type="text"
+              placeholder="輸入群ID或群名稱"
+              data-placeholder="60021"
+              className={styles['searchInput']}
+              onChange={(e) => onSearch(e.target.value)}
+            />
+            <div className={styles['searchIcon']} />
           </div>
-          <div className="flex space-x-4 items-center">
-            <button
-              className="text-gray-600 hover:text-gray-900 text-sm select-none"
-              onClick={() => setShowCreateServer(true)}
-            >
-              創建語音群
-            </button>
-          </div>
+        </div>
+        <div className={styles['mid']}>
+          <button
+            className={`${styles['navegateItem']} ${styles['active']}`}
+            data-key="60060"
+          >
+            <div></div>
+            主頁
+          </button>
+          <button className={styles['navegateItem']} data-key="40007">
+            <div></div>
+            遊戲
+          </button>
+          <button className={styles['navegateItem']} data-key="30375">
+            <div></div>
+            秀場
+          </button>
+        </div>
+        <div className={styles['right']}>
+          <button
+            className={styles['navegateItem']}
+            data-key="30014"
+            onClick={() => setShowCreateServer(true)}
+          >
+            <div></div>
+            創建語音群
+          </button>
+          <button className={styles['navegateItem']} data-key="60004">
+            <div></div>
+            個人專屬
+          </button>
         </div>
       </header>
     </>

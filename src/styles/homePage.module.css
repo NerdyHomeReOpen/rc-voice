@@ -1,0 +1,148 @@
+.homeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 4px 8px 4px 8px;
+  border-bottom: 2px solid #ddd;
+}
+
+.homeHeader .left,
+.homeHeader .mid,
+.homeHeader .right {
+  display: flex;
+  align-items: center;
+  width: auto;
+}
+
+.backBtn {
+  background: url('../../public/homePage/icon_left_arrow.png') no-repeat center
+    center;
+  height: 15px;
+  width: 15px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 15px;
+  background-position: 0 0;
+}
+
+.forwardBtn {
+  background: url('../../public/homePage/icon_right_arrow.png') no-repeat center
+    center;
+  height: 15px;
+  width: 15px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 15px;
+  background-position: 0 0;
+}
+
+.backBtn:hover,
+.forwardBtn:hover {
+  background-position: -16px 0;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  border: 1px solid #ddd;
+  padding-top: 0;
+  padding-bottom: 0;
+  background: #fff;
+  border-radius: 5px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ffffff;
+  outline: none;
+  font-size: 12px;
+  width: auto;
+}
+
+.navegateItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-decoration: none;
+  color: #666;
+  font-size: 13px;
+  padding: 5px;
+  position: relative;
+  background: none;
+  cursor: pointer;
+  justify-content: center;
+  border-radius: 5px;
+  border: 1px solid #ffffff00;
+  width: auto;
+  margin-right: 15px;
+}
+
+.navegateItem:hover {
+  background-color: #e5e5e5;
+  border: 1px solid #bdbdbd;
+}
+
+.navegateItem.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 2px;
+  background-color: #666;
+}
+
+.navegateItem[data-key='60060']:before {
+  content: '';
+  background: url('../../public/homePage/icon_home_page.png') no-repeat center
+    center;
+  background-position: 0 0;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.navegateItem[data-key='40007']:before {
+  content: '';
+  background: url('../../public/homePage/icon_game.png') no-repeat center center;
+  background-position: 0 0;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.navegateItem[data-key='30375']:before {
+  content: '';
+  background: url('../../public/homePage/icon_amusement.png') no-repeat center
+    center;
+  background-position: 0 0;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.navegateItem[data-key='30014']:before {
+  content: '';
+  background: url('../../public/homePage/icon_create.png') no-repeat center
+    center;
+  background-position: 0 0;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+}
+
+.navegateItem[data-key='60004']:before {
+  content: '';
+  background: url('../../public/homePage/icon_person.png') no-repeat center
+    center;
+  background-position: 0 0;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+}
