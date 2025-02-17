@@ -49,7 +49,7 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(({ category }) => {
       {/* Tab View */}
       <div
         className={styles['tab']}
-        onDoubleClick={() => {}} // Open Chat Maybe?
+        onClick={() => setExpanded(!expanded)}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -61,7 +61,6 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(({ category }) => {
           className={`${styles['toggleIcon']} ${
             expanded ? styles['expanded'] : ''
           }`}
-          onClick={() => setExpanded(!expanded)}
         />
         <span className={styles['tabLable']}>{categoryName}</span>
         <span
@@ -122,8 +121,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
 
   const friendUser = friend.user;
   const friendLevel = Math.min(56, Math.ceil((friendUser?.level ?? 0) / 5)); // 56 is max level
-  const friendAvatarUrl = friendUser?.avatarUrl ?? '/pfp/default.png';
-  const friendGradeUrl = `/UserGrade_${friendLevel}.png`;
+  const friendAvatarUrl = friendUser?.avatarUrl;
   const friendName = friendUser?.name;
   const friendBadges = friendUser?.badges ?? [];
   const friendSignature = friendUser?.signature ?? '';
@@ -145,7 +143,14 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
           setShowDirectMessageModal(true);
         }}
       >
-        <div className={styles['avatarPicture']} />
+        <div
+          className={styles['avatarPicture']}
+          style={
+            friendAvatarUrl
+              ? { backgroundImage: `url(${friendAvatarUrl})` }
+              : {}
+          }
+        />
         <div className={styles['baseInfoWrapper']}>
           <div className={styles['baseInfoBox']}>
             <div className={styles['name']}>{friendName}</div>

@@ -52,18 +52,15 @@
 .searchBar {
   display: flex;
   align-items: center;
-  padding: 5px;
-  border: 1px solid #ddd;
-  padding-top: 0;
-  padding-bottom: 0;
+  margin-right: 15px;
   background: #fff;
-  border-radius: 5px;
 }
 
 .searchInput {
   flex: 1;
   padding: 5px;
-  border: 1px solid #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
   outline: none;
   font-size: 12px;
   width: auto;
@@ -83,7 +80,7 @@
   justify-content: center;
   border-radius: 5px;
   border: 1px solid #ffffff00;
-  width: auto;
+  min-width: max-content;
   margin-right: 15px;
 }
 

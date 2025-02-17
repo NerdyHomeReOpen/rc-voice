@@ -29,13 +29,18 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = React.memo(({ user }) => {
   const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
+  const userAvatarUrl = user.avatarUrl;
   const userBadges = user.badges ?? [];
   const userSignature = user.signature ?? '';
-  const userAvatarUrl = user.avatarUrl ?? '/pfp/default.png';
 
   return (
     <div className={styles['friendHeader']}>
-      <div className={styles['avatarPicture']} />
+      <div
+        className={styles['avatarPicture']}
+        style={
+          userAvatarUrl ? { backgroundImage: `url(${userAvatarUrl})` } : {}
+        }
+      />
 
       <div className={styles['baseInfoWrapper']}>
         <div className={styles['baseInfoBox']}>

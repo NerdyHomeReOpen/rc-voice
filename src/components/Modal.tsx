@@ -59,12 +59,7 @@ const Modal = memo(
           className={`flex flex-col bg-white rounded shadow-lg overflow-hidden transform outline-g`}
         >
           {/* Top Nevigation */}
-          <Header onClose={onClose}>
-            <div className="flex items-center space-x-2 min-w-max m-2">
-              <img src="/rc_logo_small.png" alt="Logo" className="w-6 h-6" />
-              <span>{title}</span>
-            </div>
-          </Header>
+          <Header title={title} onClose={onClose}></Header>
           {/* Mid Part */}
           <div className="flex flex-1 min-h-0">
             {/* Side Menu */}

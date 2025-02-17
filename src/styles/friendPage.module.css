@@ -23,8 +23,8 @@
   position: relative;
   cursor: pointer;
   object-fit: cover;
-  width: 40px;
-  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   background: url(../../public/im/SecretaryLogo.png) no-repeat center center;
   background-size: contain;
   background-position: 0 0;
@@ -99,7 +99,7 @@
 
 .signatureBox {
   display: flex;
-  width: 30%;
+  min-width: 30%;
   margin-left: 7rem;
   align-items: center;
 }

@@ -41,10 +41,11 @@
 /* Buttons */
 
 .buttons {
-  min-width: 270px;
+  min-width: fit-content;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 0.5rem;
   margin-left: 1rem;
 }
 
@@ -162,7 +163,7 @@
 .minimize:hover,
 .maxsize:hover,
 .close:hover,
-.menu:hover:not(:has(.menu-drop-down:hover)) {
+.menu:hover:not(:has(.menuDropDown:hover)) {
   background-position: -20px 0;
 }
 .restore:hover {
@@ -179,7 +180,7 @@
 .minimize:active,
 .close:active,
 .maxsize:active,
-.menu:active:not(:has(.menu-drop-down:active)) {
+.menu:active:not(:has(.menuDropDown:active)) {
   background-position: -40px 0;
 }
 .restore:active {
@@ -208,7 +209,7 @@
   display: none;
 }
 
-.menuOption {
+.menuDropDown .option {
   font-size: 13px;
   color: #333;
   cursor: pointer;
@@ -218,9 +219,10 @@
   padding-left: 7px;
   padding: 10px;
   position: relative;
+  min-width: max-content;
 }
 
-.menuOption:before {
+.menuDropDown .option.hasImage:before {
   content: '';
   width: 16px;
   height: 16px;
@@ -230,42 +232,42 @@
   background-position: center center;
 }
 
-.menuOption[data-type='system-setting']:before {
+.menuDropDown .option[data-type='system-setting']:before {
   background-image: url(../../public/set.png);
 }
 
-.menuOption[data-type='message-history']:before {
+.menuDropDown .option[data-type='message-history']:before {
   background-image: url(../../public/message.png);
 }
 
-.menuOption[data-type='change-theme']:before {
+.menuDropDown .option[data-type='change-theme']:before {
   background-image: url(../../public/skin.png);
 }
 
-.menuOption[data-type='exit']:before {
+.menuDropDown .option[data-type='exit']:before {
   background-image: url(../../public/exit.png);
 }
 
-.menuOption[data-type='language-select']:before {
+.menuDropDown .option[data-type='language-select']:before {
   background-image: url(../../public/ctrl/icon_submenu.png);
   width: 16px;
   height: 10px;
   transform: rotate(180deg);
 }
 
-.menuOption:hover {
+.menuDropDown .option:hover {
   background: #eee;
 }
 
-.menuOption.hasSubmenu {
+.menuDropDown .option.hasSubmenu {
   position: relative;
 }
 
-.menuOption.hasSubmenu:hover .submenu {
+.menuDropDown .option.hasSubmenu:hover .menuDropDown {
   display: block;
 }
 
-.submenu {
+/* .menuDropDown .option.hasSubmenu .submenu {
   width: 100%;
   position: absolute;
   top: 0;
@@ -277,7 +279,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.submenuOption {
+.menuDropDown .option.hasSubmenu .submenu .option {
   cursor: pointer;
   text-align: center;
   width: 100%;
@@ -285,9 +287,9 @@
   padding-bottom: 5px;
 }
 
-.submenuOption:hover {
+.menuDropDown .option.hasSubmenu .submenu .option:hover {
   background: #eee;
-}
+} */
 
 .selected:before {
   width: 13px;
