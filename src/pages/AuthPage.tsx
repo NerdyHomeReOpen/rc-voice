@@ -185,7 +185,7 @@ const LoginForm: React.FC = React.memo(() => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-sm">
+    <form onSubmit={handleSubmit} className="w-full max-w-sm select-none">
       {errors.general && (
         <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
           {errors.general}

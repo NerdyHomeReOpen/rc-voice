@@ -82,7 +82,7 @@ const users = {
     avatar: null,
     gender: 'Male',
     xp: 0,
-    level: 100,
+    level: 1,
     signature: 'Im yeci.',
     badgeIds: ['nerdy'],
     ownedServerIds: [],
@@ -254,6 +254,8 @@ const blocks = {
   },
 };
 
+const serverApplications = {};
+
 const init = async () => {
   await db.deleteAll();
   await db.set('account_password', account_password);
@@ -269,6 +271,7 @@ const init = async () => {
   await db.set('friendCategories', friendCategories);
   await db.set('friends', friends);
   await db.set('blocks', blocks);
+  await db.set('serverApplications', serverApplications);
   console.log('Database initialized');
 };
 

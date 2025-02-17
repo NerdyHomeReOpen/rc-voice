@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useSocket } from '@/hooks/SocketProvider';
 
@@ -14,12 +14,13 @@ import { serverService } from '@/services/server.service';
 import { User } from '@/types';
 
 // Validation
-const validateName = (name: string): string => {
+export const validateName = (name: string): string => {
   if (!name.trim()) return '請輸入群組名稱';
   if (name.length > 30) return '群組名稱不能超過30個字符';
   return '';
 };
-const validateDescription = (description: string): string => {
+export const validateDescription = (description: string): string => {
+  if (!description?.trim()) return '';
   if (description.length > 200) return '群組介紹不能超過200個字符';
   return '';
 };
@@ -113,7 +114,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       setFormData((prev) => ({ ...prev, icon: file }));
     };
 
-    const maxGroups = 0;
+    const maxGroups = 3;
     const userOwnedServerCount = user.ownedServerIds.length;
     const remainingGroups = maxGroups - userOwnedServerCount;
 

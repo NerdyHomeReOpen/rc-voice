@@ -29,22 +29,17 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     // Form Control
     const [editedChannel, setEditedChannel] = useState<Partial<Channel>>({
       name: channel.name,
+      id: channel.id,
       settings: {
         ...channel.settings,
       },
     });
-
-    // Error Control
-    const [error, setError] = useState<string>('');
 
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
       socket?.emit('editChannel', {
         sessionId: sessionId,
         channel: editedChannel,
-      });
-      socket?.on('error', (error: { message: string }) => {
-        setError(error.message);
       });
       onClose();
     };
@@ -87,10 +82,16 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
           <select
             value={editedChannel.settings?.visibility}
             onChange={(e) =>
-              setEditedChannel((prev) => ({
-                ...prev,
-                visibility: e.target.value as Visibility,
-              }))
+              setEditedChannel((prev) => {
+                const settings = prev.settings ?? channel.settings;
+                return {
+                  ...prev,
+                  settings: {
+                    ...settings,
+                    visibility: e.target.value as Visibility,
+                  },
+                };
+              })
             }
             className="w-full p-2 border rounded"
           >

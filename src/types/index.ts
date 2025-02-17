@@ -88,6 +88,9 @@ export interface Server {
   name: string;
   iconUrl: string | null;
   level: number;
+  description: string;
+  wealth: number; // 財富值，但不知道是做什麼用的
+  slogan: string;
   announcement: string;
   channelIds: string[];
   displayId: string;
@@ -137,7 +140,6 @@ export interface ServerList {
 
 export interface Application {
   id: string;
-  status: 'pending' | 'accepted' | 'rejected';
   userId: string;
   serverId: string;
   description: string;

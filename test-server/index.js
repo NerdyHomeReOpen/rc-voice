@@ -233,9 +233,7 @@ const server = http.createServer((req, res) => {
         }
 
         // 檢查用戶創建的伺服器數量
-        const userOwnedServerCount = Object.values(servers).filter(
-          (server) => server.ownerId === userId,
-        ).length;
+        const userOwnedServerCount = user.ownedServerIds.length;
         if (userOwnedServerCount >= 3) {
           throw new Error('已達到最大擁有伺服器數量限制');
         }
@@ -296,6 +294,10 @@ const server = http.createServer((req, res) => {
           joinedAt: Date.now().valueOf(),
         };
         await db.set(`members.${memberId}`, member);
+
+        // Update user data
+        user.ownedServerIds.push(serverId);
+        await db.set(`users.${userId}`, user);
 
         new Logger('Server').success(
           `New server created: ${serverId} by user ${userId}`,
@@ -621,6 +623,7 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   },
 });
+
 io.on('connection', async (socket) => {
   socket.on('disconnect', async () => {
     // Get database
@@ -880,6 +883,134 @@ io.on('connection', async (socket) => {
     }
   });
 
+  socket.on('updateServer', async (data) => {
+    let uploadedFilePath = null;
+
+    try {
+      // Get database
+      const users = (await db.get('users')) || {};
+      const servers = (await db.get('servers')) || {};
+
+      // Validate data
+      const { sessionId, serverId, updates } = data;
+      if (!sessionId || !serverId || !updates) {
+        throw new Error('Missing required fields');
+      }
+
+      const userId = userSessions.get(sessionId);
+      if (!userId) {
+        throw new Error(`Invalid session ID(${sessionId})`);
+      }
+
+      const user = users[userId];
+      if (!user) {
+        throw new Error(`User(${userId}) not found`);
+      }
+
+      const server = servers[serverId];
+      if (!server) {
+        throw new Error(`Server(${serverId}) not found`);
+      }
+
+      // Check permissions
+      const userPermission = await getPermissionLevel(userId, server.id);
+      if (userPermission < 5) {
+        throw new Error('Insufficient permissions');
+      }
+
+      if (updates.fileData && updates.fileType) {
+        // Create file with unique name
+        const ext = updates.fileType.split('/')[1];
+        const fileName = `${uuidv4()}.${ext}`;
+        uploadedFilePath = path.join(uploadDir, fileName);
+
+        // Save file
+        const buffer = Buffer.from(updates.fileData, 'base64');
+        await fs.writeFile(uploadedFilePath, buffer);
+
+        // Create icon path
+        const iconPath = `/uploads/serverAvatars/${fileName}`;
+
+        // Delete old icon if exists
+        if (server.iconUrl && !server.iconUrl.includes('logo_server_def.png')) {
+          const oldPath = path.join(
+            UPLOADS_DIR,
+            server.iconUrl.replace('/uploads/', ''),
+          );
+          try {
+            await fs.unlink(oldPath);
+          } catch (error) {
+            new Logger('Server').warn(
+              `Error deleting old icon: ${error.message}`,
+            );
+          }
+        }
+
+        // Add icon URL to updates
+        updates.iconUrl = iconPath;
+      }
+
+      // Remove file data from updates before saving
+      const { fileData, fileType, ...serverUpdates } = updates;
+
+      // Validate specific fields
+      if (
+        serverUpdates.name &&
+        (serverUpdates.name.length > 30 || !serverUpdates.name.trim())
+      ) {
+        throw new Error('Invalid server name');
+      }
+      if (serverUpdates.description && serverUpdates.description.length > 200) {
+        throw new Error('Description too long');
+      }
+
+      // Create new server object with only allowed updates
+      const updatedServer = {
+        ...server,
+        ..._.pick(serverUpdates, [
+          'name',
+          'slogan',
+          'description',
+          'iconUrl',
+          'announcement',
+        ]),
+        settings: {
+          ...server.settings,
+          ..._.pick(serverUpdates.settings || {}, ['visibility']),
+        },
+      };
+
+      // Update in database
+      await db.set(`servers.${serverId}`, updatedServer);
+
+      // Emit updated data to all users in the server
+      io.to(`server_${serverId}`).emit('serverUpdate', {
+        ...(await getServer(serverId)),
+      });
+
+      // Send success response back to the client
+      socket.emit('serverUpdateSuccess');
+
+      new Logger('Server').success(
+        `Server(${serverId}) updated by user(${userId})`,
+      );
+    } catch (error) {
+      // Delete uploaded file if error occurs
+      if (uploadedFilePath) {
+        fs.unlink(uploadedFilePath).catch(console.error);
+      }
+
+      socket.emit('error', {
+        message: `更新伺服器時發生錯誤: ${error.message}`,
+        part: 'UPDATESERVER',
+        tag: 'EXCEPTION_ERROR',
+        status_code: 500,
+      });
+
+      new Logger('Server').error(`Error updating server: ${error.message}`);
+    }
+  });
+
   socket.on('updateUser', async (data) => {
     // data = {
     //   sessionId
@@ -1058,6 +1189,8 @@ io.on('connection', async (socket) => {
         await db.set(`members.${memberId}`, member);
       }
 
+      const userPermission = await getPermissionLevel(userId, server.id);
+
       // Update user presence
       presenceStates[presence.id] = {
         ...presence,
@@ -1076,6 +1209,8 @@ io.on('connection', async (socket) => {
       // Emit data (only to the user)
       io.to(socket.id).emit('serverConnect', {
         ...(await getServer(server.id)),
+        applications:
+          userPermission >= 5 ? await getServerApplications(server.id) : [],
       });
       io.to(socket.id).emit('userPresenceUpdate', {
         ...(await getPresenceState(userId)),
@@ -1312,6 +1447,66 @@ io.on('connection', async (socket) => {
       new Logger('WebSocket').error(
         `Error connecting to channel: ${error.message}`,
       );
+    }
+  });
+
+  socket.on('applyServerMembership', async (data) => {
+    // Get database
+    const users = (await db.get('users')) || {};
+    const servers = (await db.get('servers')) || {};
+    const applications = (await db.get('serverApplications')) || {};
+
+    try {
+      // Validate data
+      const { sessionId, serverId, application } = data;
+      if (!sessionId || !serverId || !application)
+        throw new Error('Missing required fields');
+
+      const userId = userSessions.get(sessionId);
+      if (!userId) throw new Error('Invalid session ID');
+
+      const user = users[userId];
+      if (!user) throw new Error('User not found');
+
+      const server = servers[serverId];
+      if (!server) throw new Error('Server not found');
+
+      // Check if user already has a pending application
+      const existingApplication = Object.values(applications).find(
+        (app) => app.userId === userId && app.serverId === serverId,
+      );
+      if (existingApplication) throw new Error('你已經有一個待審核的申請了');
+
+      // Create new application
+      const applicationId = uuidv4();
+      const newApplication = {
+        id: applicationId,
+        userId: userId,
+        serverId: serverId,
+        description: application.description || '',
+        createdAt: Date.now().valueOf(),
+      };
+
+      // Save to database
+      applications[applicationId] = newApplication;
+      await db.set(`serverApplications.${applicationId}`, newApplication);
+
+      console.log('New application:', newApplication);
+
+      // Send success response
+      socket.emit('applicationResponse', {
+        success: true,
+        message: '申請已送出，請等待管理員審核',
+      });
+
+      new Logger('Application').success(
+        `User(${userId}) applied to server(${serverId})`,
+      );
+    } catch (error) {
+      socket.emit('applicationResponse', {
+        success: false,
+        message: `申請失敗: ${error.message}`,
+      });
     }
   });
 
@@ -1734,7 +1929,7 @@ io.on('connection', async (socket) => {
       // Validate data
       const sessionId = data.sessionId;
       const editedChannel = data.channel;
-      if (!sessionId || !channel) {
+      if (!sessionId || !editedChannel) {
         throw new Error('Missing required fields');
       }
       const userId = userSessions.get(sessionId);
@@ -1753,6 +1948,7 @@ io.on('connection', async (socket) => {
       if (!server) {
         throw new Error(`Server(${presence.currentServerId}) not found`);
       }
+      console.log(editedChannel);
       const channel = channels[editedChannel.id];
       if (!channel) {
         throw new Error(`Channel(${editedChannel.id}) not found`);
@@ -2208,29 +2404,34 @@ const getJoinRecServers = async (userId, limit = 10) => {
     db.get('servers') || {},
     db.get('members') || {},
   ]);
+
   const userServerIds = new Set(
     Object.values(_members)
       .filter((member) => member.userId === userId)
       .map((member) => member.serverId),
   );
+
   const { joinedServers, notJoinedServers } = Object.values(_servers).reduce(
     (result, server) => {
-      if (userServerIds.has(server.id)) result.joinedServers.push(server);
-      else result.notJoinedServers.push(server);
+      if (userServerIds.has(server.id)) {
+        result.joinedServers.push(server);
+      } else if (server.settings.visibility !== 'invisible') {
+        result.notJoinedServers.push(server);
+      }
       return result;
     },
     { joinedServers: [], notJoinedServers: [] },
   );
+
   const recommendedServers = _.sampleSize(notJoinedServers, limit) ?? [];
 
   return {
-    joinedServers,
-    recommendedServers,
+    joinedServers, // Contains all joined servers including invisible ones
+    recommendedServers, // Contains only non-invisible servers
   };
 };
 const getDisplayId = async (baseId = 20000000) => {
   const servers = (await db.get('servers')) || {};
-  console.log(baseId);
   let displayId = baseId + Object.keys(servers).length;
   // Ensure displayId is unique
   while (
@@ -2239,6 +2440,25 @@ const getDisplayId = async (baseId = 20000000) => {
     displayId++;
   }
   return displayId;
+};
+const getServerApplications = async (serverId) => {
+  const _serverApplications = (await db.get('serverApplications')) || {};
+  const serverApplications = Object.values(_serverApplications).filter(
+    (app) => app.serverId === serverId,
+  );
+  if (!serverApplications) return null;
+  return [
+    ...(
+      await Promise.all(
+        serverApplications.map(async (app) => {
+          return {
+            ...app,
+            user: await getUser(app.userId),
+          };
+        }),
+      )
+    ).filter((app) => app),
+  ];
 };
 
 // Error Handling

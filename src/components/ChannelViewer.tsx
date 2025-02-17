@@ -281,6 +281,16 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
 
     const handleJoinChannel = (channelId: string) => {
       if (user.presence?.currentChannelId !== channelId) {
+        if (server.settings?.visibility === 'private' && userPermission === 1) {
+          const targetChannel = server.channels?.find(
+            (c) => c.id === channelId,
+          );
+          if (!targetChannel?.isLobby) {
+            alert('在半公開伺服器中,普通用戶只能加入大廳頻道');
+            return;
+          }
+        }
+
         socket?.emit('connectChannel', { sessionId, channelId });
       }
     };
@@ -341,12 +351,6 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
               </div>
               {canEdit && (
                 <>
-                  <div
-                    {...provided.dragHandleProps}
-                    className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded cursor-grab"
-                  >
-                    <GripVertical size={14} />
-                  </div>
                   <button
                     className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
                     onClick={(e) => {
@@ -358,6 +362,12 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                   >
                     <MoreVertical size={14} />
                   </button>
+                  <div
+                    {...provided.dragHandleProps}
+                    className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded cursor-grab"
+                  >
+                    <GripVertical size={14} />
+                  </div>
                 </>
               )}
             </div>
@@ -365,7 +375,12 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
             {(channel.isLobby || expanded) && channelUsers.length > 0 && (
               <div className="ml-6">
                 {channelUsers.map((user: User) => (
-                  <UserTab key={user.id} user={user} server={server} mainUser={mainUser} />
+                  <UserTab
+                    key={user.id}
+                    user={user}
+                    server={server}
+                    mainUser={mainUser}
+                  />
                 ))}
               </div>
             )}
@@ -425,67 +440,87 @@ interface UserTabProps {
   mainUser: User;
 }
 
-const UserTab: React.FC<UserTabProps> = React.memo(({ user, server, mainUser }) => {
-  // Context Menu Control
-  const [contentMenuPos, setContentMenuPos] = useState<ContextMenuPosState>({
-    x: 0,
-    y: 0,
-  });
-  const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
+const UserTab: React.FC<UserTabProps> = React.memo(
+  ({ user, server, mainUser }) => {
+    // Context Menu Control
+    const [contentMenuPos, setContentMenuPos] = useState<ContextMenuPosState>({
+      x: 0,
+      y: 0,
+    });
+    const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
 
-  const [showInfoBlock, setShowInfoBlock] = useState<boolean>(false);
-  const floatingBlockRef = useRef<HTMLDivElement>(null);
+    const [showInfoBlock, setShowInfoBlock] = useState<boolean>(false);
+    const floatingBlockRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (floatingBlockRef.current?.contains(event.target as Node))
-        setShowInfoBlock(false);
-    };
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (floatingBlockRef.current?.contains(event.target as Node))
+          setShowInfoBlock(false);
+      };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+      document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
-  const mainUserPermission = server.members?.[mainUser.id].permissionLevel ?? 1;
-  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
-  const userNickname = server.members?.[user.id].nickname ?? user.name;
-  const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
-  const userGender = user.gender;
-  const userBadges = user.badges ?? [];
+    const mainUserPermission =
+      server.members?.[mainUser.id].permissionLevel ?? 1;
+    const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+    const userNickname = server.members?.[user.id].nickname ?? user.name;
+    const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
+    const userGender = user.gender;
+    const userBadges = user.badges ?? [];
 
-  return (
-    <div key={user.id}>
-      {/* User View */}
-      <div
-        className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
-        data-user-block
-        data-user-id={user.id}
-        onDoubleClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setContentMenuPos({ x: e.pageX, y: e.pageY });
-          setShowInfoBlock(true);
-        }}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setContentMenuPos({ x: e.pageX, y: e.pageY });
-          setShowContextMenu(true);
-        }}
-      >
-        <div className="flex items-center flex-1 min-w-0">
-          <div
-            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center mr-1`}
-          >
-            <img
-              src={`/channel/${userGender}_${userPermission}.png`}
-              alt={`${userGender}_${userPermission}`}
-              className="select-none"
-            />
+    return (
+      <div key={user.id}>
+        {/* User View */}
+        <div
+          className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
+          data-user-block
+          data-user-id={user.id}
+          onDoubleClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setContentMenuPos({ x: e.pageX, y: e.pageY });
+            setShowInfoBlock(true);
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setContentMenuPos({ x: e.pageX, y: e.pageY });
+            setShowContextMenu(true);
+          }}
+        >
+          <div className="flex items-center flex-1 min-w-0">
+            <div
+              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center mr-1`}
+            >
+              <img
+                src={`/channel/${userGender}_${userPermission}.png`}
+                alt={`${userGender}_${userPermission}`}
+                className="select-none"
+              />
+            </div>
+            <span className="truncate">{userNickname}</span>
+
+            {user.level > 1 && (
+              <div
+                className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
+              >
+                <img
+                  src={`/usergrade_${userLevel}.png`}
+                  alt={`/usergrade_${userLevel}`}
+                  className="select-none"
+                />
+              </div>
+            )}
+            <div className="flex items-center space-x-1 ml-2 gap-1">
+              {userBadges.length > 0 && (
+                <BadgeViewer badges={userBadges} maxDisplay={3} />
+              )}
+            </div>
           </div>
-          <span className="truncate">{userNickname}</span>
-
-          {user.level > 1 && (
+          {user.id == store.getState().user?.id && (
             <div
               className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
             >
@@ -496,60 +531,44 @@ const UserTab: React.FC<UserTabProps> = React.memo(({ user, server, mainUser }) 
               />
             </div>
           )}
-          <div className="flex items-center space-x-1 ml-2 gap-1">
-            {userBadges.length > 0 && (
-              <BadgeViewer badges={userBadges} maxDisplay={3} />
-            )}
-          </div>
         </div>
-        {user.id == store.getState().user?.id && (
-          <div
-            className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
-          >
-            <img
-              src={`/mylocation.png`}
-              alt={`mylocation`}
-              className="p-1 select-none"
-            />
-          </div>
-        )}
-      </div>
 
-      {/* Context Menu */}
-      {showContextMenu && mainUserPermission >= 5 && (
-        <ContextMenu
-          onClose={() => setShowContextMenu(false)}
-          x={contentMenuPos.x}
-          y={contentMenuPos.y}
-          items={[
-            {
-              id: 'kick',
-              icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-              label: '踢出',
-              disabled: mainUser.id == user.id ? true : false,
-              onClick: () => {
-                setShowContextMenu(false);
-                // Open Kick User Modal
+        {/* Context Menu */}
+        {showContextMenu && mainUserPermission >= 5 && (
+          <ContextMenu
+            onClose={() => setShowContextMenu(false)}
+            x={contentMenuPos.x}
+            y={contentMenuPos.y}
+            items={[
+              {
+                id: 'kick',
+                icon: <Trash size={14} className="w-5 h-5 mr-2" />,
+                label: '踢出',
+                disabled: mainUser.id == user.id ? true : false,
+                onClick: () => {
+                  setShowContextMenu(false);
+                  // Open Kick User Modal
+                },
               },
-            },
-          ]}
-        />
-      )}
+            ]}
+          />
+        )}
 
-      {/* User Info Block */}
-      {showInfoBlock && (
-        <UserInfoBlock
-          onClose={() => setShowInfoBlock(false)}
-          x={contentMenuPos.x}
-          y={contentMenuPos.y}
-          user={user}
-        />
-      )}
+        {/* User Info Block */}
+        {showInfoBlock && (
+          <UserInfoBlock
+            onClose={() => setShowInfoBlock(false)}
+            x={contentMenuPos.x}
+            y={contentMenuPos.y}
+            user={user}
+          />
+        )}
 
-      {/* Kick User Modal */}
-    </div>
-  );
-});
+        {/* Kick User Modal */}
+      </div>
+    );
+  },
+);
 
 interface ChannelViewerProps {
   channels: Channel[] | null;
