@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 import React, { FormEvent, useState } from 'react';
 import { useSelector } from 'react-redux';
