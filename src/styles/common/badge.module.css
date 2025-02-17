@@ -1,0 +1,8 @@
+.badgeIcon {
+  width: 16px;
+  height: 16px;
+  background: url(../../public/badge/nerdy.png) no-repeat center;
+  background-size: cover;
+  border: none;
+  cursor: pointer;
+}

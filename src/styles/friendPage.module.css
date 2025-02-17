@@ -1,0 +1,404 @@
+.friendWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.friendHeader {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  padding: 4px 10px;
+  gap: 5px;
+}
+
+.avatarBox {
+  padding: 2px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.avatarPicture {
+  position: relative;
+  cursor: pointer;
+  object-fit: cover;
+  width: 40px;
+  height: 40px;
+  background: url(../../public/im/SecretaryLogo.png) no-repeat center center;
+  background-size: contain;
+  background-position: 0 0;
+}
+
+.avatarPicture::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  z-index: 99;
+  width: 42px;
+  height: 42px;
+  background: url(../../public/win_border.png) no-repeat center center;
+  background-size: cover;
+}
+
+.baseInfoWrapper {
+  padding: 3px 2px;
+}
+
+.baseInfoBox {
+  display: flex;
+  height: 20px;
+  gap: 7px;
+  align-items: center;
+}
+
+.levelIcon {
+  width: 16px;
+  height: 16px;
+  background: url(../../public/im/LV.png) no-repeat center center;
+  background-size: auto;
+  background-position: 0 0;
+}
+
+.userGrade {
+  width: 15px;
+  height: 15px;
+  background: url(../../public/usergrade.png) no-repeat center center;
+  background-size: auto;
+  background-position: 0 0;
+  cursor: pointer;
+}
+
+.wealthIcon {
+  width: 16px;
+  height: 16px;
+  background: url(../../public/silver_pea.png) no-repeat center;
+  background-size: cover;
+  border: none;
+  cursor: pointer;
+  margin-left: 3rem;
+}
+
+.wealthValue {
+  color: #7e7c6e;
+  text-align: left;
+  font-size: 13px;
+}
+
+.vipIcon {
+  width: 14px;
+  height: 14px;
+  background: url(../../public/channel/vip_icons.png) no-repeat center;
+  background-size: cover;
+  border: none;
+  cursor: pointer;
+  background-position: 0 0;
+  margin-left: 2rem;
+}
+
+.signatureBox {
+  display: flex;
+  width: 30%;
+  margin-left: 7rem;
+  align-items: center;
+}
+
+.signatureInput {
+  z-index: 1;
+  border-color: unset;
+  border-width: unset;
+  border-style: unset;
+  padding: 5px;
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  font-size: 12px;
+  outline: unset;
+}
+
+.signatureInput:focus {
+  border: 1px solid #b4b4b4;
+  border-radius: 3px;
+}
+
+.badgeBox {
+  display: flex;
+  height: 20px;
+  gap: 1px;
+  align-items: center;
+}
+
+.friendMain {
+  display: flex;
+  flex: 1;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid #e0e0e4;
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+  background: #f4f6fa;
+}
+
+.sidebar .navigateTabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+  height: 36px;
+  cursor: pointer;
+  background: #fff;
+}
+
+.sidebar .navigateTabs .tab {
+  display: flex;
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  background: url(../../public/friend_tab_item_bg.png) no-repeat center;
+  background-size: 100% 72px;
+  background-position: 0 0;
+  height: 36px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar .navigateTabs .tab.selected {
+  background-position: 0px -36px;
+}
+
+.selected .friendListIcon,
+.selected .recentIcon {
+  background-position: -64px 0;
+}
+
+.friendListIcon {
+  width: 16px;
+  height: 16px;
+  background: url(../../public/im/friend_list_page.png) no-repeat center center;
+  background-size: auto;
+  background-position: 0 0;
+}
+
+.recentIcon {
+  width: 16px;
+  height: 16px;
+  background: url(../../public/im/recently_list_page.png) no-repeat center
+    center;
+  background-size: auto;
+  background-position: 0 0;
+}
+
+.friendList {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 0;
+  border-top: 1px solid #ddd;
+  margin-top: 5px;
+  background: #fff;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ffffff;
+  width: 125px;
+  outline: none;
+  font-size: 12px;
+}
+
+.searchIcon {
+  width: 20px;
+  height: 20px;
+  background: url(../../public/channel/channel_search.png) no-repeat center
+    center;
+  background-position: 0 0;
+}
+
+.searchBar:hover:not(:has(.prevIcon:hover, .nextIcon:hover)) .searchIcon {
+  background-position: -20px 0;
+}
+
+.prevIcon {
+  width: 30px;
+  height: 30px;
+  background: url(../../public/channel/search_pre.png) no-repeat center center;
+  background-position: 0 0;
+  cursor: pointer;
+}
+
+.nextIcon {
+  width: 30px;
+  height: 30px;
+  background: url(../../public/channel/search_next.png) no-repeat center center;
+  background-position: 0 0;
+  cursor: pointer;
+}
+
+.prevIcon:hover,
+.nextIcon:hover {
+  background-position: -29px 0;
+}
+
+.prevIcon:active,
+.nextIcon:active {
+  background-position: -58px 0;
+}
+
+.bottomButtons {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f4f4f5;
+  border-top: 1px solid #e3e3e5;
+  border-bottom-left-radius: 5px;
+}
+
+.bottomButtons .button {
+  flex: 1;
+  display: flex;
+  border: 1px solid #dbdde0;
+  border-radius: 5px;
+  background: #fff;
+  text-align: center;
+  font-size: 12px;
+  height: auto;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6e7c7e;
+  padding: 5px;
+}
+
+.bottomButtons .button[datatype='addGroup']:before {
+  content: '';
+  background: url(../../public/im/add_group.png) no-repeat center center;
+  height: 16px;
+  width: 16px;
+  margin-right: 5px;
+}
+
+.bottomButtons .button[datatype='addFriend']:before {
+  content: '';
+  background: url(../../public/im/add_friend.png) no-repeat center center;
+  height: 16px;
+  width: 16px;
+  margin-right: 5px;
+}
+
+.friendGroups {
+  flex: 1;
+  padding: 10px;
+}
+
+.friendGroups .tab {
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 5;
+  border-radius: 3px;
+}
+
+.friendGroups .tab:hover {
+  background-color: #d1d5da5c;
+}
+
+.friendGroups .tab .tabLable {
+  font-size: 12px;
+  font-family: sans-serif;
+  margin-right: 5px;
+}
+
+.friendGroups .tab .tabCount {
+  font-size: 12px;
+}
+
+.toggleIcon {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: url(../../public/channel/channelIcon.png) no-repeat center center;
+  background-size: auto;
+  background-position: 0 0;
+  margin-right: 5px;
+}
+
+.tab:hover .toggleIcon {
+  background-position: 0 -14px;
+}
+
+.toggleIcon.expanded {
+  background-position: -14px 0;
+}
+
+.tab:hover .toggleIcon.expanded {
+  background-position: -14px -14px;
+}
+
+.friendCard {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  justify-content: flex-start;
+  cursor: pointer;
+  position: relative;
+  padding: 5px;
+  border-radius: 3px;
+  gap: 5px;
+}
+
+.friendCard:hover {
+  background-color: #d1d5da5c;
+}
+
+.friendCard .name {
+  font-weight: bold;
+  font-size: 13px;
+  font-family: sans-serif;
+}
+
+.friendCard .signature {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 185px;
+}
+
+.recentList {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.mainContent {
+  flex: 1;
+  height: auto;
+  border-top: 2px solid #e0e0e4;
+}
+
+.mainContent .header {
+  font-size: 13px;
+  padding: 10px;
+  background-color: #f4f6fa;
+  font-weight: bold;
+}

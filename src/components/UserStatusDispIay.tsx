@@ -71,7 +71,7 @@ const UserStatusDisplay: React.FC<UserStatusDisplayProps> = ({
             }`}
           >
             <div
-              className={styles['statusOption']}
+              className={styles['option']}
               datatype="online"
               onClick={() => {
                 handleUpdateStatus('online');
@@ -79,7 +79,7 @@ const UserStatusDisplay: React.FC<UserStatusDisplayProps> = ({
               }}
             />
             <div
-              className={styles['statusOption']}
+              className={styles['option']}
               datatype="dnd"
               onClick={() => {
                 handleUpdateStatus('dnd');
@@ -87,7 +87,7 @@ const UserStatusDisplay: React.FC<UserStatusDisplayProps> = ({
               }}
             />
             <div
-              className={styles['statusOption']}
+              className={styles['option']}
               datatype="idle"
               onClick={() => {
                 handleUpdateStatus('idle');
@@ -95,7 +95,7 @@ const UserStatusDisplay: React.FC<UserStatusDisplayProps> = ({
               }}
             />
             <div
-              className={styles['statusOption']}
+              className={styles['option']}
               datatype="gn"
               onClick={() => {
                 handleUpdateStatus('gn');

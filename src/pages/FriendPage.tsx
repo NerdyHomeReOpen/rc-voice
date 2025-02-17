@@ -6,6 +6,10 @@
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useCallback } from 'react';
 
+// CSS
+import styles from '@/styles/friendPage.module.css';
+import lv from '@/styles/common/level.module.css';
+
 // Components
 import FriendListViewer from '@/components/FriendListViewer';
 import BadgeViewer from '@/components/BadgeViewer';
@@ -18,6 +22,44 @@ import { useSelector } from 'react-redux';
 
 // Services
 import { apiService } from '@/services/api.service';
+
+interface HeaderProps {
+  user: User;
+}
+
+const Header: React.FC<HeaderProps> = React.memo(({ user }) => {
+  const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
+  const userBadges = user.badges ?? [];
+  const userSignature = user.signature ?? '';
+  const userAvatarUrl = user.avatarUrl ?? '/pfp/default.png';
+
+  return (
+    <div className={styles['friendHeader']}>
+      <div className={styles['avatarPicture']} />
+
+      <div className={styles['baseInfoWrapper']}>
+        <div className={styles['baseInfoBox']}>
+          <div className={styles['levelIcon']} />
+          <div className={`${styles['userGrade']} ${lv[userLevel]}`} />
+          <div className={styles['wealthIcon']} />
+          <label className={styles['wealthValue']}>0</label>
+          <div className={styles['vipIcon']} />
+        </div>
+        <BadgeViewer badges={userBadges} />
+      </div>
+
+      <div className={styles['signatureBox']}>
+        <textarea
+          className={styles['signatureInput']}
+          value={userSignature}
+          placeholder="这个人很懒，什么都没留下..."
+          data-placeholder="30018"
+          onChange={() => {}} // TODO: Implement signature change
+        />
+      </div>
+    </div>
+  );
+});
 
 const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
@@ -90,38 +132,18 @@ const FriendPageComponent: React.FC = React.memo(() => {
   const userGradeUrl = `/UserGrade_${userLevel}.png`;
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="bg-white shadow-sm border-b">
-        <div className="flex items-center justify-between space-x-16 p-2 pr-[40%]">
-          {/* User Profile */}
-          <div className="flex items-center space-x-2">
-            <div className="w-14 h-14 bg-gray-200">
-              <img src={userAvatarUrl} className="select-none" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-1">
-                <img src="/im/LV.png" className="select-none" />
-                <img src={userGradeUrl} className="select-none" />
-              </div>
-              <div className="flex items-center space-x-1 mt-2 gap-1">
-                {userBadges.length > 0 && <BadgeViewer badges={userBadges} />}
-              </div>
-            </div>
-          </div>
-
-          {/* User Status */}
-          <div className="flex-1 text-center">點擊更改簽名</div>
-        </div>
-      </header>
-      <main className="flex flex-1 min-h-0">
+    <div className={styles['friendWrapper']}>
+      <Header user={user} />
+      <main className={styles['friendMain']}>
         {/* Left Sidebar */}
-        <div
-          className="flex flex-col min-h-0 min-w-0 w-64 bg-white border-r text-sm"
+        <aside
+          className={styles['sidebar']}
           style={{ width: `${sidebarWidth}px` }}
         >
           {/* Friend List */}
           <FriendListViewer friendCategories={friendCategories} />
-        </div>
+        </aside>
+
         {/* Resize Handle */}
         <div
           className="w-0.5 cursor-col-resize bg-gray-200 transition-colors"
@@ -129,14 +151,14 @@ const FriendPageComponent: React.FC = React.memo(() => {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 p-4 flex justify-center items-start"></div>
+        <section className={styles['mainContent']}>
+          <div className={styles['header']}>好友動態</div>
           <div className="p-2 text-center">
-            <button className="text-blue-500 hover:underline">
+            {/* <button className="text-blue-500 hover:underline">
               {'查看更多 >'}
-            </button>
+            </button> */}
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );

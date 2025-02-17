@@ -223,7 +223,7 @@ const HomePageComponent: React.FC = React.memo(() => {
   }, [socket, sessionId, searchQuery]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className={styles['homeWrapper']}>
       <Header onSearch={(query: string) => setSearchQuery(query)} />
       <main className="flex flex-1 min-h-0 bg-gray-100">
         <div className="flex flex-1 flex-col item-center space-y-6 p-8 overflow-y-auto">

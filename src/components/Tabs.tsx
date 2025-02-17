@@ -48,7 +48,7 @@ const Tabs: React.FC<TabsProps> = React.memo(
 
     if (disabled) return null;
     return (
-      <div className={styles['mainTab']}>
+      <div className={styles['mainTabs']}>
         {TABS.map((Tab) => {
           const TabId = Tab.id;
           const TabLable = Tab.label;
@@ -56,7 +56,7 @@ const Tabs: React.FC<TabsProps> = React.memo(
           return (
             <div
               key={`Tabs-${TabId}`}
-              className={`${styles['tabItem']} ${
+              className={`${styles['tab']} ${
                 TabId === selectedId ? styles['selected'] : ''
               }`}
               onClick={() => {
@@ -64,7 +64,7 @@ const Tabs: React.FC<TabsProps> = React.memo(
                 Tab.onClick && Tab.onClick();
               }}
             >
-              <div className={styles['tabItemLable']}>{TabLable}</div>
+              <div className={styles['tabLable']}>{TabLable}</div>
               <div className={styles['tabBg']}></div>
             </div>
           );

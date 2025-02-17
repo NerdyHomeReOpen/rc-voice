@@ -26,10 +26,10 @@
 .header:before {
   content: '';
   display: inline-block;
-  width: 18px;
-  height: 18px;
-  background: url('../../public/home/rc_logo_small.png') no-repeat center center;
-  background-size: contain;
+  min-width: 18px;
+  min-height: 18px;
+  background: url(../../public/rc_logo_small.png) no-repeat center center;
+  background-size: auto;
 }
 
 .buttons,
@@ -41,16 +41,17 @@
 /* Buttons */
 
 .buttons {
-  width: 270px;
+  min-width: 270px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-left: 1rem;
 }
 
 .gift {
   width: 28px;
   height: 28px;
-  background: url('../../public/home/gift.png') no-repeat center center;
+  background: url(../../public/gift.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -60,7 +61,7 @@
 .game {
   width: 28px;
   height: 28px;
-  background: url('../../public/home/game.png') no-repeat center center;
+  background: url(../../public/game.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -70,7 +71,7 @@
 .notice {
   width: 24px;
   height: 24px;
-  background: url('../../public/home/icon_notice.png') no-repeat center center;
+  background: url(../../public/icon_notice.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -80,8 +81,7 @@
 .overlay {
   width: 24px;
   height: 24px;
-  background: url('../../public/home/icon_notice_overlay.png') no-repeat center
-    center;
+  background: url(../../public/icon_notice_overlay.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -91,7 +91,7 @@
 .spliter {
   width: 2px;
   height: 19px;
-  background: url('../../public/home/mf_spliter.png') no-repeat center center;
+  background: url(../../public/mf_spliter.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -101,7 +101,7 @@
 .menu {
   width: 20px;
   height: 20px;
-  background: url('../../public/home/BtnMenu.png') no-repeat center center;
+  background: url(../../public/BtnMenu.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -111,8 +111,7 @@
 .minimize {
   width: 20px;
   height: 20px;
-  background: url('../../public/home/Button_Minsize.png') no-repeat center
-    center;
+  background: url(../../public/Button_Minsize.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -122,8 +121,7 @@
 .restore {
   width: 20px;
   height: 20px;
-  background: url('../../public/home/Button_Restore.png') no-repeat center
-    center !important;
+  background: url(../../public/Button_Restore.png) no-repeat center center !important;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -133,8 +131,7 @@
 .maxsize {
   width: 20px;
   height: 20px;
-  background: url('../../public/home/Button_Maxsize.png') no-repeat center
-    center;
+  background: url(../../public/Button_Maxsize.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -144,7 +141,7 @@
 .close {
   width: 20px;
   height: 20px;
-  background: url('../../public/home/Button_Close.png') no-repeat center center;
+  background: url(../../public/Button_Close.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
@@ -234,23 +231,23 @@
 }
 
 .menuOption[data-type='system-setting']:before {
-  background-image: url('../../public/home/set.png');
+  background-image: url(../../public/set.png);
 }
 
 .menuOption[data-type='message-history']:before {
-  background-image: url('../../public/home/message.png');
+  background-image: url(../../public/message.png);
 }
 
 .menuOption[data-type='change-theme']:before {
-  background-image: url('../../public/home/skin.png');
+  background-image: url(../../public/skin.png);
 }
 
 .menuOption[data-type='exit']:before {
-  background-image: url('../../public/home/exit.png');
+  background-image: url(../../public/exit.png);
 }
 
 .menuOption[data-type='language-select']:before {
-  background-image: url('../../public/home/icon_submenu.png');
+  background-image: url(../../public/ctrl/icon_submenu.png);
   width: 16px;
   height: 10px;
   transform: rotate(180deg);
@@ -295,24 +292,24 @@
 .selected:before {
   width: 13px;
   height: 13px;
-  background: url('../../public/home/user_state.png') no-repeat center center;
+  background: url(../../public/user_state.png) no-repeat center center;
   background-size: auto;
   background-position: 0 0;
 }
 
 /* Main Tab */
 
-.mainTab {
+.mainTabs {
   display: flex;
   align-items: flex-end;
   cursor: pointer;
   width: auto;
   height: 40px;
-  margin-left: 4rem;
+  margin-left: 9rem;
   gap: 0.5rem;
 }
 
-.tabItem {
+.mainTabs .tab {
   position: relative;
   display: flex;
   flex: 0 0 100px;
@@ -333,7 +330,7 @@
   border-radius: 5px 5px 0 0;
 }
 
-.tabItem .tabBg {
+.mainTabs .tab .tabBg {
   position: fixed;
   padding: 5px 0px;
   overflow: hidden;
@@ -342,31 +339,32 @@
   height: 30px;
 }
 
-.tabItem.selected .tabBg {
+.mainTabs .tab.selected .tabBg {
   background-color: #fff;
   color: rgb(55, 144, 206);
 }
 
-.tabItem .tabItemLable {
-  z-index: 999;
+.mainTabs .tab .tabLable {
+  z-index: 1;
   padding: 5px;
   color: rgb(255 255 255);
 }
 
-.tabItem.selected .tabItemLable {
+.mainTabs .tab.selected .tabLable {
   color: rgb(0 115 198);
 }
 
-.tabClose {
-  z-index: 1000;
+.mainTabs .tabClose {
+  z-index: 1;
   margin-bottom: 0.5rem;
 }
 
 /* User Status */
 
 .userStatus {
+  max-width: 7rem;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
   cursor: pointer;
   position: absolute;
@@ -421,7 +419,7 @@
   display: inline-block;
   width: 13px;
   height: 13px;
-  background: url('../../public/home/user_state.png') no-repeat center center;
+  background: url(../../public/user_state.png) no-repeat center center;
   background-size: auto;
   background-position: 0 0 !important;
 }
@@ -447,7 +445,7 @@
   width: 8px;
   height: 13px;
   margin-left: 5px;
-  background: url('../../public/state_triangle.png') no-repeat center center;
+  background: url(../../public/state_triangle.png) no-repeat center center;
   background-size: auto;
   background-position: 0px 4px;
 }
@@ -482,7 +480,7 @@
   display: none;
 }
 
-.statusDropdown .statusOption {
+.statusDropdown .option {
   color: #333;
   cursor: pointer;
   width: 100%;
@@ -495,32 +493,32 @@
   padding: 0.2rem;
 }
 
-.statusDropdown .statusOption:hover {
+.statusDropdown .option:hover {
   background-color: #0073c6;
   color: #fff;
 }
 
-.statusDropdown .statusOption::before {
+.statusDropdown .option::before {
   content: '';
   display: inline-block;
   width: 13px;
   height: 13px;
-  background: url('../../public/home/user_state.png') no-repeat center center;
+  background: url(../../public/user_state.png) no-repeat center center;
   background-size: auto;
 }
 
-.statusDropdown .statusOption[datatype='online']::before {
+.statusDropdown .option[datatype='online']::before {
   background-position: 0 0;
 }
 
-.statusDropdown .statusOption[datatype='dnd']::before {
+.statusDropdown .option[datatype='dnd']::before {
   background-position: -13px 0;
 }
 
-.statusDropdown .statusOption[datatype='idle']::before {
+.statusDropdown .option[datatype='idle']::before {
   background-position: -26px 0;
 }
 
-.statusDropdown .statusOption[datatype='gn']::before {
+.statusDropdown .option[datatype='gn']::before {
   background-position: -39px 0;
 }
