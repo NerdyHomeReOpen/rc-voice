@@ -4,6 +4,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useLayoutEffect, useRef } from 'react';
 
+// CSS
+import styles from '@/styles/messageViewer.module.css';
+import permission from '@/styles/common/permission.module.css';
+import gender from '@/styles/common/gender.module.css';
+
 // Components
 import MarkdownViewer from '@/components/MarkdownViewer';
 
@@ -62,12 +67,11 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(
     const senderGender = messageGroup.sender?.gender ?? 'Male';
     const senderName = messageGroup.sender?.name ?? 'Unknown';
     const senderPermission =
-      server?.members?.[messageGroup.senderId].permissionLevel ?? null;
-    const senderIcon = `/channel/${senderGender}_${senderPermission}.png`;
+      server?.members?.[messageGroup.senderId].permissionLevel ?? 1;
     const messageTimestamp = formatTimestamp(parseInt(messageGroup.timestamp));
 
     return (
-      <div key={messageGroup.id} className="flex items-start space-x-1 mb-1">
+      <div key={messageGroup.id} className={styles['messageWrapper']}>
         {messageGroup.type === 'info' ? (
           <>
             <img
@@ -87,27 +91,21 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(
           </>
         ) : (
           <>
-            {server && (
-              <img
-                src={senderIcon}
-                className="select-none flex-shrink-0 mt-1"
-              />
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center">
-                <span className="font-bold text-gray-900">{senderName}</span>
-                <span className="text-xs text-gray-500 ml-2">
-                  {messageTimestamp}
-                </span>
+            <div
+              className={`${styles['senderIcon']} ${gender[senderGender]} ${
+                permission[`lv-${senderPermission}`]
+              }`}
+            />
+            <div className={styles['messageBox']}>
+              <div className={styles['header']}>
+                <span className={styles['name']}>{senderName}</span>
+                <span className={styles['timestamp']}>{messageTimestamp}</span>
               </div>
-
-              <div className="text-gray-700">
-                {messageGroup.contents.map((content, index) => (
-                  <div key={index} className="break-words">
-                    <MarkdownViewer markdownText={content} />
-                  </div>
-                ))}
-              </div>
+              {messageGroup.contents.map((content, index) => (
+                <div key={index} className={styles['content']}>
+                  <MarkdownViewer markdownText={content} />
+                </div>
+              ))}
             </div>
           </>
         )}
@@ -138,14 +136,7 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
     }, [groupMessages]);
 
     return (
-      <div
-        className="flex flex-1 flex-col overflow-y-auto min-w-0 max-w-full 
-        [&::-webkit-scrollbar]:w-2 
-        [&::-webkit-scrollbar]:h-2 
-        [&::-webkit-scrollbar-thumb]:bg-gray-300 
-        [&::-webkit-scrollbar-thumb]:rounded-lg 
-        [&::-webkit-scrollbar-thumb]:hover:bg-gray-400"
-      >
+      <div className={styles['messageViewerWrapper']}>
         {groupMessages.map((groupMessage) => (
           <MessageBox
             key={groupMessage.id}
