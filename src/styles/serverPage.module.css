@@ -217,7 +217,7 @@
 .channelList .channelTab {
   display: flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.125rem 0.75rem;
   cursor: pointer;
   border-radius: 3px;
   gap: 5px;
@@ -293,7 +293,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.125rem 20px 0.125rem 0.125rem;
   cursor: pointer;
   border-radius: 3px;
   gap: 5px;
@@ -310,6 +310,10 @@
   text-overflow: ellipsis;
 }
 
+.userIcon {
+  display: flex;
+}
+
 .userGrade {
   min-width: 15px;
   min-height: 15px;
@@ -320,7 +324,6 @@
 }
 
 .userState {
-  position: absolute;
   background: url(../../public/channel/mic_queue_state.png) no-repeat center
     center;
   min-height: 12px;
@@ -348,7 +351,7 @@
   min-height: 15px;
   min-width: 15px;
   cursor: pointer;
-  right: 0;
+  right: 0.125rem;
 }
 
 /* Main Content */
