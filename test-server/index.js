@@ -1675,6 +1675,7 @@ io.on('connection', async (socket) => {
       for (const socket of sockets) {
         if (socket.id == targetSocketId){
           // Leave the server
+          socket.leave(`channel_${channel.id}`);
           socket.leave(`server_${server.id}`);
         }
       }
