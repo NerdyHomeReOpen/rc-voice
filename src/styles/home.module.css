@@ -314,37 +314,34 @@
   width: auto;
   height: 40px;
   margin-left: 9rem;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .mainTabs .tab {
   position: relative;
   display: flex;
-  flex: 0 0 100px;
+  flex: 1;
   flex-direction: column;
-  flex-wrap: wrap;
+  padding: 0.5rem 1rem 0 1rem;
+  width: max-content;
+  min-width: 120px;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  width: 100px;
-  background-size: auto;
-  background-position: 0 0;
   font-family: Arial;
   font-size: 15px;
   text-align: center;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  border-radius: 5px 5px 0 0;
 }
 
 .mainTabs .tab .tabBg {
-  position: fixed;
-  padding: 5px 0px;
+  position: absolute;
   overflow: hidden;
   border-radius: 5px 5px 0 0;
-  width: 100px;
+  width: 100%;
   height: 30px;
+  bottom: 0;
 }
 
 .mainTabs .tab.selected .tabBg {
@@ -353,8 +350,8 @@
 }
 
 .mainTabs .tab .tabLable {
+  flex: 1;
   z-index: 1;
-  padding: 5px;
   color: rgb(255 255 255);
 }
 
@@ -364,7 +361,7 @@
 
 .mainTabs .tabClose {
   z-index: 1;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 /* User Status */
