@@ -452,7 +452,9 @@ const UserTab: React.FC<UserTabProps> = React.memo(
           <div className={styles['userTabName']}>{userNickname}</div>
           <div className={`${styles['userGrade']} ${lv[`lv-${userLevel}`]}`} />
           <BadgeViewer badges={userBadges} maxDisplay={3} />
-          <div className={styles['myLocationIcon']} />
+          {user.id === mainUser.id && (
+            <div className={styles['myLocationIcon']} />
+          )}
         </div>
 
         {/* Context Menu */}
