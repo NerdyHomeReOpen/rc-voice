@@ -42,15 +42,17 @@ const Header: React.FC<HeaderProps> = React.memo(({ user }) => {
         }
       />
 
-      <div className={styles['baseInfoWrapper']}>
-        <div className={styles['baseInfoBox']}>
+      <div className={styles['baseInfoBox']}>
+        <div className={styles['container']}>
           <div className={styles['levelIcon']} />
-          <div className={`${styles['userGrade']} ${lv[userLevel]}`} />
+          <div className={`${styles['userGrade']} ${lv[`lv-${userLevel}`]}`} />
           <div className={styles['wealthIcon']} />
           <label className={styles['wealthValue']}>0</label>
           <div className={styles['vipIcon']} />
         </div>
-        <BadgeViewer badges={userBadges} />
+        <div className={styles['container']}>
+          <BadgeViewer badges={userBadges} />
+        </div>
       </div>
 
       <div className={styles['signatureBox']}>
@@ -128,13 +130,6 @@ const FriendPageComponent: React.FC = React.memo(() => {
       window.removeEventListener('mouseup', stopResizing);
     };
   }, [resize, stopResizing]);
-
-  const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
-  const userBadges = user.badges ?? [];
-  const userName = user.name;
-  const userSignature = user.signature ?? '';
-  const userAvatarUrl = user.avatarUrl ?? '/pfp/default.png';
-  const userGradeUrl = `/UserGrade_${userLevel}.png`;
 
   return (
     <div className={styles['friendWrapper']}>

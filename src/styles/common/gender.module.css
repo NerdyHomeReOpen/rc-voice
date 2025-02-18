@@ -1,0 +1,17 @@
+.Male::before {
+  content: '';
+  background: url(../../../public/channel/UserIconsMale.png) no-repeat center
+    center;
+  background-position: 0 0;
+  min-height: 15px;
+  min-width: 15px;
+}
+
+.Female::before {
+  content: '';
+  background: url(../../../public/channel/UserIconsFemale.png) no-repeat center
+    center;
+  background-position: 0 0;
+  min-height: 15px;
+  min-width: 15px;
+}

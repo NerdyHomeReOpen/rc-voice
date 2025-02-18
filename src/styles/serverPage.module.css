@@ -1,0 +1,615 @@
+/* flex flex-col min-h-0 min-w-0 w-64 bg-white border-r text-sm */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background-color: #f1f2f5;
+  border-right: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+}
+
+.sidebarHeader {
+  position: relative;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #e0e0e4;
+  padding: 4px 10px;
+  gap: 5px;
+}
+
+.avatarBox {
+  padding: 2px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.avatarPicture {
+  position: relative;
+  cursor: pointer;
+  object-fit: cover;
+  min-height: 50px;
+  min-width: 50px;
+  background: url(../../public/logo_server_def.png);
+  background-size: contain;
+  background-position: 0 0;
+}
+
+.avatarPicture::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  z-index: 99;
+  min-width: 52px;
+  min-height: 52px;
+  background: url(../../public/win_border.png) no-repeat center center;
+  background-size: cover;
+}
+
+.baseInfoBox {
+  width: 120px;
+  height: 52px;
+  display: flex;
+  right: 10px;
+  flex-direction: column;
+  justify-content: space-around;
+  color: #515151;
+  margin-left: 15px;
+}
+
+.baseInfoBox .container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  left: 7px;
+}
+
+.name {
+  font-size: 13px;
+}
+
+.idIcon {
+  background: url(../../public/channel/ID.png) no-repeat center center;
+  background-size: cover;
+  min-height: 12px;
+  min-width: 12px;
+}
+
+.memberIcon {
+  margin-left: 12px;
+  background: url(../../public/channel/member.png) no-repeat center center;
+  background-size: cover;
+  min-height: 12px;
+  min-width: 12px;
+}
+
+.idText,
+.memberText {
+  font-size: 13px;
+  margin-left: 5px;
+}
+
+.optionBox {
+  display: flex;
+  bottom: 12px;
+  right: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  position: absolute;
+  gap: 5px;
+}
+
+.invitation {
+  background: url(../../public/channel/icon_invite_friend.png) no-repeat center
+    center;
+  background-position: 0 0;
+  min-height: 20px;
+  min-width: 20px;
+  cursor: pointer;
+}
+
+.invitation:hover {
+  background-position: -20px 0;
+}
+
+.invitation:active {
+  background-position: -40px 0;
+}
+
+.setting {
+  background: url(../../public/channel/icon_group_option.png) no-repeat center
+    center;
+  background-position: 0 0;
+  min-height: 18px;
+  min-width: 24px;
+  cursor: pointer;
+}
+
+.setting:hover {
+  background-position: -24px 0;
+}
+
+.setting:active {
+  background-position: -48px 0;
+}
+
+.saperator {
+  background: url(../../public/channel/icon_v_split.png) no-repeat center center;
+  background-position: 0 0;
+  min-height: 20px;
+  min-width: 2px;
+  cursor: auto;
+}
+
+/* Channel List */
+
+.sectionTitle {
+  font-size: 13px;
+  color: #a8a8a8;
+  padding: 5px 10px;
+}
+
+.currentChannelBox {
+  height: 35px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.currentChannelIcon {
+  background: url(../../public/channel/NetworkStatus.png) no-repeat center
+    center;
+  min-height: 20px;
+  min-width: 20px;
+  background-position: 0 0;
+  margin-left: 8px;
+}
+
+.currentChannelIcon.status1 {
+  background-position: -20px 0;
+}
+
+.currentChannelIcon.status2 {
+  background-position: -40px 0;
+}
+
+.currentChannelIcon.status3 {
+  background-position: -60px 0;
+}
+
+.currentChannelText {
+  margin-left: 3px;
+  color: #555555;
+  font-size: 15px;
+}
+
+.micQueueBox {
+  display: flex;
+  flex-direction: column;
+  height: 120px;
+}
+
+.micQueueBox:after {
+  content: '';
+  background: url(../../public/channel/chn_tree_split.png) no-repeat center
+    center;
+  min-height: 6px;
+  min-width: 100%;
+  display: block;
+}
+
+.channelList {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0.75rem;
+}
+
+.channelList .channelList {
+  padding: 0 0 0 0.75rem;
+}
+
+.channelList .channelTab {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  border-radius: 3px;
+  gap: 5px;
+}
+
+.channelList .channelTab:hover {
+  background-color: #d1d5da5c;
+}
+
+.channelList .channelTab::before {
+  content: '';
+  display: inline-block;
+  background: url(../../public/channel/channelIcon.png) no-repeat center center;
+  background-size: auto;
+  min-width: 14px;
+  min-height: 14px;
+}
+
+.channelList .channelTab.public::before {
+  background-position: 0 0;
+}
+
+.channelList .channelTab.private::before {
+  background-position: -28px 0;
+}
+
+.channelList .channelTab.readonly::before {
+  background-position: -42px 0;
+}
+
+.channelList .channelTab.lobby::before {
+  background-position: -56px 0;
+}
+
+.channelList .channelTab.public::before {
+  background-position: 0 0;
+}
+
+.channelList .channelTab.public:hover::before {
+  background-position: 0 -14px;
+}
+
+.channelList .channelTab.public.expanded::before {
+  background-position: -14px 0;
+}
+
+.channelList .channelTab.public.expanded:hover::before {
+  background-position: -14px -14px;
+}
+
+.channelList .channelTab .channelTabLable {
+  font-size: 14px;
+}
+
+.channelList .channelTab .channelTabCount {
+  color: #555555;
+  font-size: 14px;
+}
+
+.userList {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0.75rem;
+}
+
+.channelList .userList {
+  padding: 0 0 0 0.75rem;
+}
+
+.userList .userTab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  border-radius: 3px;
+  gap: 5px;
+}
+
+.userList .userTab:hover {
+  background-color: #d1d5da5c;
+}
+
+.userList .userTab .userTabName {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userGrade {
+  min-width: 15px;
+  min-height: 15px;
+  background: url(../../public/usergrade.png) no-repeat center center;
+  background-size: auto;
+  background-position: 0 0;
+  cursor: pointer;
+}
+
+.userState {
+  position: absolute;
+  background: url(../../public/channel/mic_queue_state.png) no-repeat center
+    center;
+  min-height: 12px;
+  min-width: 12px;
+  background-position: 0 0;
+  left: 0;
+}
+
+.userState.play {
+  background-position: 0 0;
+}
+
+.userState.unplay {
+  background-position: -12px 0;
+}
+
+.userState.muted {
+  background-position: -24px 0;
+}
+
+.myLocationIcon {
+  position: absolute;
+  background: url(../../public/mylocation.png) no-repeat center center;
+  background-size: cover;
+  min-height: 15px;
+  min-width: 15px;
+  cursor: pointer;
+  right: 0;
+}
+
+/* Main Content */
+
+.mainContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.announcementArea {
+  display: flex;
+  flex: 2;
+  overflow-y: auto;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.messageArea {
+  display: flex;
+  flex: 5;
+  padding: 0.75rem;
+  overflow-y: auto;
+}
+
+/* Input Area */
+
+.inputArea {
+  display: flex;
+  flex: 1;
+  padding: 0.75rem;
+}
+
+.emojiIcon {
+  padding: 0.25rem;
+  width: 18px;
+  height: 18px;
+}
+
+.emojiIcon::before {
+  content: '';
+  min-width: 18px;
+  min-height: 18px;
+  background: url(../../public/channel/FaceButton.png) no-repeat center center;
+  background-size: auto;
+  background-position: 0 0;
+  cursor: pointer;
+  display: block;
+}
+
+.emojiIcon:hover::before {
+  background-position: -18px 0;
+}
+
+.emojiIcon:active::before {
+  background-position: -36px 0;
+}
+
+/* Button Area */
+
+.buttonArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  padding: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+  background: url(../../public/channel/chn_toolbar_bg.png) no-repeat center
+    center;
+  background-size: 100% 100%;
+  background-color: #dddddf;
+  z-index: 10;
+}
+
+.micButton {
+  min-width: 154px;
+  min-height: 50px;
+  background: url(../../public/channel/mic_state_menu.png) no-repeat center
+    center;
+  background-size: auto;
+  background-position: 0px 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.micButton:hover {
+  background-position: -154px 2px;
+}
+
+.micButton:active {
+  background-position: -308px 2px;
+}
+
+.micIcon {
+  min-width: 26px;
+  min-height: 30px;
+  background: url(../../public/channel/icon_mic_state.png) no-repeat center
+    center;
+  background-size: cover;
+}
+
+.micButton.active .micIcon {
+  background: url(../../public/channel/icon_speaking_vol.png) no-repeat center
+    center;
+  background-position: 0 0;
+  background-size: cover;
+}
+
+.micButton.active .micIcon.level1 {
+  background-position: -24px 0;
+}
+
+.micButton.active .micIcon.level2 {
+  background-position: -48px 0;
+}
+
+.micButton.active .micIcon.level3 {
+  background-position: -72px 0;
+}
+
+.micButton.active .micIcon.level4 {
+  background-position: -96px 0;
+}
+
+.micButton.active .micIcon.level5 {
+  background-position: -120px 0;
+}
+
+.micButton.active .micIcon.level6 {
+  background-position: -144px 0;
+}
+
+.micButton.active .micIcon.level7 {
+  background-position: -168px 0;
+}
+
+.micButton.active .micIcon.level8 {
+  background-position: -192px 0;
+}
+
+.micButton.active .micIcon.level9 {
+  background-position: -216px 0;
+}
+
+.micText {
+  margin-left: 5px;
+  width: auto;
+  font-size: 18px;
+  max-width: 107px;
+  color: #28a0da;
+  font-family: 'Noto Sans TC', '微軟正黑體', sans-serif;
+}
+
+.micButton.active .micText {
+  color: #b9ceb7;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.voiceModeButton {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #777777;
+  gap: 5px;
+}
+
+.voiceModeButton:after {
+  content: '';
+  background: url(../../public/channel/triangle.png) no-repeat center center;
+  min-height: 8px;
+  min-width: 8px;
+  background-position: 0 0;
+  cursor: pointer;
+  display: block;
+}
+
+.voiceModeButton:hover:after {
+  background-position: -9px 0;
+}
+
+.voiceModeButton:active:after {
+  background-position: -18px 0;
+}
+
+.bkgModeButton {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 13px;
+  color: #777777;
+  margin-right: 8px;
+}
+
+.bkgModeButton::before {
+  content: '';
+  background: url(../../public/channel/music_bkg.png) no-repeat center center;
+  min-height: 18px;
+  min-width: 18px;
+  background-position: 0 0;
+}
+
+.micModeButton {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.micModeButton::before {
+  content: '';
+  background: url(../../public/channel/Mic.png) no-repeat center center;
+  min-height: 16px;
+  min-width: 16px;
+  background-position: 0 0;
+  cursor: pointer;
+}
+
+/* .micModeButton.active {
+  background-position: -18px 0;
+} */
+
+.micModeButton:after {
+  content: '';
+  background: url(../../public/channel/triangle.png) no-repeat center center;
+  min-height: 8px;
+  min-width: 8px;
+  background-position: 0 0;
+  cursor: pointer;
+  display: block;
+}
+
+.micModeButton:hover:after {
+  background-position: -9px 0;
+}
+
+.micModeButton:active:after {
+  background-position: -18px 0;
+}
+
+.speakerButton {
+  background: url(../../public/channel/speaker.png) no-repeat center center;
+  min-height: 18px;
+  min-width: 18px;
+  background-position: 0 0;
+  cursor: pointer;
+}
+
+.recordModeButton {
+  background: url(../../public/channel/recorder.png) no-repeat center center;
+  min-height: 18px;
+  min-width: 18px;
+  background-position: 0 0;
+  cursor: pointer;
+}

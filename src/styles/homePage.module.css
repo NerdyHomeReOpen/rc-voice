@@ -24,8 +24,8 @@
 
 .backBtn {
   background: url(../../public/icon_left_arrow.png) no-repeat center center;
-  height: 15px;
-  width: 15px;
+  min-height: 15px;
+  min-width: 15px;
   border: none;
   font-size: 18px;
   cursor: pointer;
@@ -35,8 +35,8 @@
 
 .forwardBtn {
   background: url(../../public/icon_right_arrow.png) no-repeat center center;
-  height: 15px;
-  width: 15px;
+  min-height: 15px;
+  min-width: 15px;
   border: none;
   font-size: 18px;
   cursor: pointer;
@@ -104,8 +104,8 @@
   content: '';
   background: url(../../public/icon_home_page.png) no-repeat center center;
   background-position: 0 0;
-  width: 20px;
-  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   margin-right: 5px;
 }
 
@@ -113,8 +113,8 @@
   content: '';
   background: url(../../public/icon_game.png) no-repeat center center;
   background-position: 0 0;
-  width: 20px;
-  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   margin-right: 5px;
 }
 
@@ -122,8 +122,8 @@
   content: '';
   background: url(../../public/icon_amusement.png) no-repeat center center;
   background-position: 0 0;
-  width: 20px;
-  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   margin-right: 5px;
 }
 
@@ -131,8 +131,8 @@
   content: '';
   background: url(../../public/icon_create.png) no-repeat center center;
   background-position: 0 0;
-  width: 12px;
-  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
   margin-right: 5px;
 }
 
@@ -140,7 +140,7 @@
   content: '';
   background: url(../../public/icon_person.png) no-repeat center center;
   background-position: 0 0;
-  width: 12px;
-  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
   margin-right: 5px;
 }

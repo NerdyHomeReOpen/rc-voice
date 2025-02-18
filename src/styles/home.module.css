@@ -56,8 +56,8 @@
 }
 
 .gift {
-  width: 28px;
-  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   background: url(../../public/gift.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -66,8 +66,8 @@
 }
 
 .game {
-  width: 28px;
-  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   background: url(../../public/game.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -76,8 +76,8 @@
 }
 
 .notice {
-  width: 24px;
-  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
   background: url(../../public/icon_notice.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -86,8 +86,8 @@
 }
 
 .overlay {
-  width: 24px;
-  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
   background: url(../../public/icon_notice_overlay.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -96,8 +96,8 @@
 }
 
 .spliter {
-  width: 2px;
-  height: 19px;
+  min-width: 2px;
+  min-height: 19px;
   background: url(../../public/mf_spliter.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -106,8 +106,8 @@
 }
 
 .menu {
-  width: 20px;
-  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   background: url(../../public/BtnMenu.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -116,8 +116,8 @@
 }
 
 .minimize {
-  width: 20px;
-  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   background: url(../../public/Button_Minsize.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -126,8 +126,8 @@
 }
 
 .restore {
-  width: 20px;
-  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   background: url(../../public/Button_Restore.png) no-repeat center center !important;
   display: inline-block;
   cursor: pointer;
@@ -136,8 +136,8 @@
 }
 
 .maxsize {
-  width: 20px;
-  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   background: url(../../public/Button_Maxsize.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -146,8 +146,8 @@
 }
 
 .close {
-  width: 20px;
-  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   background: url(../../public/Button_Close.png) no-repeat center center;
   display: inline-block;
   cursor: pointer;
@@ -256,8 +256,8 @@
 
 .menuDropDown .option[data-type='language-select']:before {
   background-image: url(../../public/ctrl/icon_submenu.png);
-  width: 16px;
-  height: 10px;
+  min-width: 16px;
+  min-height: 10px;
   transform: rotate(180deg);
 }
 
@@ -425,8 +425,8 @@
 
 .statusDisplay {
   display: inline-block;
-  width: 13px;
-  height: 13px;
+  min-width: 13px;
+  min-height: 13px;
   background: url(../../public/user_state.png) no-repeat center center;
   background-size: auto;
   background-position: 0 0 !important;
@@ -450,8 +450,8 @@
 
 .statusTriangle {
   display: inline-block;
-  width: 8px;
-  height: 13px;
+  min-width: 8px;
+  min-height: 13px;
   margin-left: 5px;
   background: url(../../public/state_triangle.png) no-repeat center center;
   background-size: auto;
@@ -509,8 +509,8 @@
 .statusDropdown .option::before {
   content: '';
   display: inline-block;
-  width: 13px;
-  height: 13px;
+  min-width: 13px;
+  min-height: 13px;
   background: url(../../public/user_state.png) no-repeat center center;
   background-size: auto;
 }

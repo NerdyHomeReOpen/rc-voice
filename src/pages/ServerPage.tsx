@@ -17,6 +17,9 @@ import {
   BellRing,
 } from 'lucide-react';
 
+// CSS
+import styles from '@/styles/serverPage.module.css';
+
 // Components
 import EmojiGrid from '@/components/EmojiGrid';
 import MarkdownViewer from '@/components/MarkdownViewer';
@@ -171,66 +174,52 @@ const ServerPageComponent: React.FC = () => {
         <ServerSettingModal onClose={() => toggleServerSetting(false)} />
       )}
       {/* Left Sidebar */}
-      <div
-        className="flex flex-col min-h-0 min-w-0 w-64 bg-white border-r text-sm"
-        style={{ width: `${sidebarWidth}px` }}
-      >
+      <div className={styles['sidebar']} style={{ width: `${sidebarWidth}px` }}>
         {/* Server image and info */}
-        <div className="flex items-center justify-between p-2 border-b mb-4">
-          <div className="flex items-center space-x-3">
-            <img src={serverIcon} alt="Server Icon" className="w-14 h-14" />
-            <div>
-              <div className="text-gray-700">{serverName} </div>
-              <div className="flex flex-row items-center gap-1">
-                <img
-                  src="/channel/ID.png"
-                  alt="User Profile"
-                  className="w-3.5 h-3.5 select-none"
-                />
-                <div className="text-xs text-gray-500">{serverDisplayId}</div>
-                <img
-                  src="/channel/member.png"
-                  alt="User Profile"
-                  className="w-3.5 h-3.5 select-none"
-                />
-                <div className="text-xs text-gray-500 select-none">
-                  {serverChannels.reduce((acc, channel) => {
-                    return acc + channel.userIds.length;
-                  }, 0)}
-                </div>
+        <div className={styles['sidebarHeader']}>
+          <div className={styles['avatarPicture']} />
 
-                {userPermission >= 5 && (
-                  <button
-                    className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-                    onClick={() => toggleServerSetting()}
-                  >
-                    <Settings size={16} className="text-gray-500" />
-                  </button>
-                )}
+          <div className={styles['baseInfoBox']}>
+            <div className={styles['container']}>
+              <div className={styles['name']}>{serverName} </div>
+            </div>
+            <div className={styles['container']}>
+              <div className={styles['idIcon']} />
+              <div className={styles['idText']}>{serverDisplayId}</div>
+              <div className={styles['memberIcon']} />
+              <div className={styles['memberText']}>
+                {serverChannels.reduce((acc, channel) => {
+                  return acc + channel.userIds.length;
+                }, 0)}
               </div>
             </div>
+          </div>
+          <div className={styles['optionBox']}>
+            <div className={styles['invitation']} />
+            <div className={styles['saperator']} />
+            <div
+              className={styles['setting']}
+              onClick={() => setShowServerSetting(true)}
+            />
           </div>
         </div>
         {/* Channel List */}
         <ChannelViewer channels={serverChannels} />
       </div>
       {/* Resize Handle */}
-      <div
-        className="w-0.5 cursor-col-resize bg-gray-200 transition-colors"
-        onMouseDown={startResizing}
-      />
+      <div className="resizeHandle" onMouseDown={startResizing} />
       {/* Right Content */}
-      <div className="flex flex-1 flex-col min-h-0 min-w-0">
+      <div className={styles['mainContent']}>
         {/* Announcement Area */}
-        <div className="flex flex-[2] overflow-y-auto border-b bg-gray-50 p-3 mb-1">
+        <div className={styles['announcementArea']}>
           <MarkdownViewer markdownText={serverAnnouncement} />
         </div>
         {/* Messages Area */}
-        <div className="flex flex-[5] p-3">
+        <div className={styles['messageArea']}>
           <MessageViewer messages={messages} server={server} />
         </div>
         {/* Input Area */}
-        <div className="flex flex-[1] p-3">
+        <div className={styles['inputArea']}>
           <MessageInputBox
             onSendMessage={(msg) => {
               handleSendMessage({
@@ -244,73 +233,71 @@ const ServerPageComponent: React.FC = () => {
           />
         </div>
         {/* Bottom Controls */}
-        <div className="flex-none bg-background border-t text-sm border-foreground/10 bg-linear-to-b from-violet-500 to-fuchsia-500">
-          <div className="flex items-center justify-between">
-            <div className="flex space-x-1 p-5">
-              <span>自由發言</span>
-              <button className="p-1 hover:bg-gray-100 rounded">
-                <ArrowBigDown size={16} className="text-foreground" />
-              </button>
+        <div className={styles['buttonArea']}>
+          <div className={styles['buttons']}>
+            <div className={styles['voiceModeButton']}>自由發言</div>
+          </div>
+          <div
+            className={`${styles['micButton']} ${
+              isMicOn ? styles['active'] : ''
+            }`}
+            onClick={() => toggleMic()}
+          >
+            <div className={styles['micIcon']} />
+            <div className={styles['micText']}>
+              {isMicOn ? '已拿麥' : '拿麥發言'}
             </div>
-            <button
+          </div>
+          <div className={styles['buttons']}>
+            <div className={styles['bkgModeButton']}>混音</div>
+            <div className={styles['saperator']} />
+            <div
+              className={`${styles['micModeButton']} ${
+                isMicOn ? styles['active'] : ''
+              }`}
               onClick={() => toggleMic()}
-              className={`outline outline-2 outline-gray-300 rounded flex items-center justify-between p-2 hover:bg-foreground/10 transition-colors w-32`}
+            />
+            <div className={styles['speakerButton']} />
+            <div className={styles['recordModeButton']} />
+
+            {/* <button
+              onClick={() => toggleNotification()}
+              className="p-1 hover:bg-gray-100 rounded"
             >
-              <img
-                src={
-                  isMicOn
-                    ? '/channel/icon_speaking_vol_5_24x30.png'
-                    : '/channel/icon_mic_state_1_24x30.png'
-                }
-                alt="Mic"
-              />
-              <span
-                className={`text-lg font-bold ${
-                  isMicOn ? 'text-[#B9CEB7]' : 'text-[#6CB0DF]'
-                }`}
-              >
-                {isMicOn ? '已拿麥' : '拿麥發言'}
-              </span>
+              {notification ? (
+                <BellRing size={16} className="text-foreground" />
+              ) : (
+                <BellOff size={16} className="text-foreground" />
+              )}
             </button>
-            <div className="flex items-center space-x-2 p-5">
+            <div className="relative" ref={volumeSliderRef}>
               <button
-                onClick={() => toggleNotification()}
                 className="p-1 hover:bg-gray-100 rounded"
+                onClick={() => toggleVolumeSlider()}
               >
-                {notification ? (
-                  <BellRing size={16} className="text-foreground" />
-                ) : (
-                  <BellOff size={16} className="text-foreground" />
+                {volume === 0 && (
+                  <VolumeX size={16} className="text-foreground" />
+                )}
+                {volume > 0 && volume <= 33 && (
+                  <Volume size={16} className="text-foreground" />
+                )}
+                {volume > 33 && volume <= 66 && (
+                  <Volume1 size={16} className="text-foreground" />
+                )}
+                {volume > 66 && (
+                  <Volume2 size={16} className="text-foreground" />
                 )}
               </button>
-              <div className="relative" ref={volumeSliderRef}>
-                <button
-                  className="p-1 hover:bg-gray-100 rounded"
-                  onClick={() => toggleVolumeSlider()}
-                >
-                  {volume === 0 && (
-                    <VolumeX size={16} className="text-foreground" />
-                  )}
-                  {volume > 0 && volume <= 33 && (
-                    <Volume size={16} className="text-foreground" />
-                  )}
-                  {volume > 33 && volume <= 66 && (
-                    <Volume1 size={16} className="text-foreground" />
-                  )}
-                  {volume > 66 && (
-                    <Volume2 size={16} className="text-foreground" />
-                  )}
-                </button>
-                {showVolumeSlider && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-lg shadow-lg p-2 w-[40px]">
-                    <div className="h-32 flex items-center justify-center">
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={volume}
-                        onChange={(e) => setVolume(parseInt(e.target.value))}
-                        className="h-24 -rotate-90 transform origin-center
+              {showVolumeSlider && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-lg shadow-lg p-2 w-[40px]">
+                  <div className="h-32 flex items-center justify-center">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={volume}
+                      onChange={(e) => setVolume(parseInt(e.target.value))}
+                      className="h-24 -rotate-90 transform origin-center
                           appearance-none bg-transparent cursor-pointer
                           [&::-webkit-slider-runnable-track]:rounded-full
                           [&::-webkit-slider-runnable-track]:bg-gray-200
@@ -323,31 +310,30 @@ const ServerPageComponent: React.FC = () => {
                           [&::-webkit-slider-thumb]:border-0
                           [&::-webkit-slider-thumb]:transition-all
                           [&::-webkit-slider-thumb]:hover:bg-blue-700"
-                      />
-                    </div>
-                    <div className="text-center text-xs text-gray-500">
-                      {volume}%
-                    </div>
+                    />
                   </div>
-                )}
-              </div>
-              <button
-                onClick={() => toggleMic()}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                {isMicOn ? (
-                  <Mic size={16} className="text-foreground" />
-                ) : (
-                  <MicOff size={16} className="text-foreground" />
-                )}
-              </button>
-              <button
-                onClick={() => toggleUserSetting()}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <Settings size={16} className="text-foreground" />
-              </button>
+                  <div className="text-center text-xs text-gray-500">
+                    {volume}%
+                  </div>
+                </div>
+              )}
             </div>
+            <button
+              onClick={() => toggleMic()}
+              className="p-1 hover:bg-gray-100 rounded"
+            >
+              {isMicOn ? (
+                <Mic size={16} className="text-foreground" />
+              ) : (
+                <MicOff size={16} className="text-foreground" />
+              )}
+            </button>
+            <button
+              onClick={() => toggleUserSetting()}
+              className="p-1 hover:bg-gray-100 rounded"
+            >
+              <Settings size={16} className="text-foreground" />
+            </button> */}
           </div>
         </div>
       </div>

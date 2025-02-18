@@ -151,10 +151,12 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
               : {}
           }
         />
-        <div className={styles['baseInfoWrapper']}>
-          <div className={styles['baseInfoBox']}>
+        <div className={styles['baseInfoBox']}>
+          <div className={styles['container']}>
             <div className={styles['name']}>{friendName}</div>
-            <div className={`${styles['userGrade']} ${lv[friendLevel]}`} />
+            <div
+              className={`${styles['userGrade']} ${lv[`lv-${friendLevel}`]}`}
+            />
             <BadgeViewer badges={friendBadges} />
           </div>
           <div className={styles['signature']}>{friendSignature}</div>

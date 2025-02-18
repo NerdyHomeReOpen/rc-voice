@@ -1,6 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useState } from 'react';
 
+// CSS
+import styles from '@/styles/serverPage.module.css';
+
 // Components
 import EmojiGrid from './EmojiGrid';
 
@@ -23,24 +26,23 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
           messageInput.length >= MAXLENGTH ? 'border-red-500' : ''
         }`}
       >
-        <button
+        <div
+          className={styles['emojiIcon']}
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="w-7 h-7 p-1 hover:bg-gray-100 rounded transition-colors z-10"
-        >
-          <img src="/channel/FaceButton_5_18x18.png" alt="Emoji" />
-          {showEmojiPicker && (
-            <EmojiGrid
-              onEmojiSelect={(emojiTag) => {
-                const content = messageInput + emojiTag;
-                if (content.length > MAXLENGTH) return;
-                setMessageInput(content);
-                setShowEmojiPicker(false);
-                const input = document.querySelector('textarea');
-                if (input) input.focus();
-              }}
-            />
-          )}
-        </button>
+        />
+
+        {showEmojiPicker && (
+          <EmojiGrid
+            onEmojiSelect={(emojiTag) => {
+              const content = messageInput + emojiTag;
+              if (content.length > MAXLENGTH) return;
+              setMessageInput(content);
+              setShowEmojiPicker(false);
+              const input = document.querySelector('textarea');
+              if (input) input.focus();
+            }}
+          />
+        )}
         <textarea
           className="w-full p-1 resize-none focus:outline-none 
                 [&::-webkit-scrollbar]:w-2 

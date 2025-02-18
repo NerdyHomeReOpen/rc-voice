@@ -5,17 +5,14 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import {
-  Dot,
-  Edit,
-  House,
-  Minus,
-  MoreVertical,
-  Plus,
-  Trash,
-  GripVertical,
-} from 'lucide-react';
+import { Edit, Plus, Trash } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+
+// CSS
+import styles from '@/styles/serverPage.module.css';
+import lv from '@/styles/common/level.module.css';
+import gender from '@/styles/common/gender.module.css';
+import permission from '@/styles/common/permission.module.css';
 
 // Types
 import type { Channel, Server, User, Visibility } from '@/types';
@@ -95,8 +92,14 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
           <div ref={provided.innerRef} {...provided.draggableProps}>
             {/* Category View */}
             <div
-              className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
               {...provided.dragHandleProps}
+              className={`${styles['channelTab']} ${
+                expanded ? styles['expanded'] : ''
+              } ${
+                category.isLobby
+                  ? styles['lobby']
+                  : styles[category.settings.visibility]
+              }`}
               onClick={() =>
                 setExpanded(
                   categoryVisibility != 'readonly' ? !expanded : false,
@@ -109,43 +112,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                 setShowContextMenu(true);
               }}
             >
-              <div className="flex items-center flex-1 min-w-0">
-                <div
-                  className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 
-              ${getVisibilityStyle(categoryVisibility)}`}
-                >
-                  {categoryVisibility === 'readonly' ? (
-                    <Dot size={12} />
-                  ) : expanded ? (
-                    <Minus size={12} />
-                  ) : (
-                    <Plus size={12} />
-                  )}
-                </div>
-                <span className="truncate">{categoryName}</span>
-              </div>
-              <div className="flex items-center">
-                {canEdit && (
-                  <>
-                    <div
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setShowAddChannelModal(true);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
-                    >
-                      <Plus size={14} />
-                    </div>
-                    <div
-                      {...provided.dragHandleProps}
-                      className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded cursor-grab"
-                    >
-                      <GripVertical size={14} />
-                    </div>
-                  </>
-                )}
-              </div>
+              <div className={styles['channelTabLable']}>{categoryName}</div>
             </div>
 
             {/* Expanded Sections */}
@@ -161,7 +128,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="ml-6"
+                    className={styles['channelList']}
                   >
                     {serverChannels
                       .filter((c) => c.parentId === category.id)
@@ -212,6 +179,15 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                     onClick: () => {
                       setShowContextMenu(false);
                       setShowDeleteChannelModal(true);
+                    },
+                  },
+                  {
+                    id: 'add',
+                    icon: <Plus size={14} className="w-5 h-5 mr-2" />,
+                    label: '新增',
+                    onClick: () => {
+                      setShowContextMenu(false);
+                      setShowAddChannelModal(true);
                     },
                   },
                 ]}
@@ -311,7 +287,15 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
           <div ref={provided.innerRef} {...provided.draggableProps}>
             {/* Channel View */}
             <div
-              className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
+              {...provided.dragHandleProps}
+              className={`${styles['channelTab']} ${
+                channel.isLobby
+                  ? styles['lobby']
+                  : styles[channel.settings.visibility]
+              } ${expanded ? styles['expanded'] : ''}`}
+              onClick={() =>
+                setExpanded(channelVisibility != 'readonly' ? !expanded : false)
+              }
               onDoubleClick={() => {
                 channelVisibility !== 'readonly' &&
                   handleJoinChannel(channel.id);
@@ -323,57 +307,14 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                 setShowContextMenu(true);
               }}
             >
-              <div className="flex items-center flex-1 min-w-0">
-                <div
-                  className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center outline outline-1 outline-gray-200 mr-1 cursor-pointer 
-                ${getVisibilityStyle(channelVisibility)}`}
-                  onClick={() =>
-                    setExpanded(
-                      channelVisibility != 'readonly' ? !expanded : false,
-                    )
-                  }
-                >
-                  {channel.isLobby ? (
-                    <House size={12} />
-                  ) : channelVisibility === 'readonly' ? (
-                    <Dot size={12} />
-                  ) : expanded ? (
-                    <Minus size={12} />
-                  ) : (
-                    <Plus size={12} />
-                  )}
-                </div>
-                <span className={`truncate`}>{channelName}</span>
-                <span className="ml-1 text-gray-500 text-sm">
-                  {channelVisibility !== 'readonly' &&
-                    `(${channelUsers.length})`}
-                </span>
+              <div className={styles['channelTabLable']}>{channelName}</div>
+              <div className={styles['channelTabCount']}>
+                {`(${channelUsers.length})`}
               </div>
-              {canEdit && (
-                <>
-                  <button
-                    className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setContentMenuPos({ x: e.pageX, y: e.pageY });
-                      setShowContextMenu(true);
-                    }}
-                  >
-                    <MoreVertical size={14} />
-                  </button>
-                  <div
-                    {...provided.dragHandleProps}
-                    className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 p-1 rounded cursor-grab"
-                  >
-                    <GripVertical size={14} />
-                  </div>
-                </>
-              )}
             </div>
             {/* Expanded Sections */}
             {(channel.isLobby || expanded) && channelUsers.length > 0 && (
-              <div className="ml-6">
+              <div className={styles['userList']}>
                 {channelUsers.map((user: User) => (
                   <UserTab
                     key={user.id}
@@ -467,9 +408,9 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     }, []);
 
     const mainUserPermission =
-      server.members?.[mainUser.id].permissionLevel ?? 1;
-    const userPermission = server.members?.[user.id].permissionLevel ?? 1;
-    const userNickname = server.members?.[user.id].nickname ?? user.name;
+      server.members?.[mainUser.id]?.permissionLevel ?? 1;
+    const userPermission = server.members?.[user.id]?.permissionLevel ?? 1;
+    const userNickname = server.members?.[user.id]?.nickname ?? user.name;
     const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
     const userGender = user.gender;
     const userBadges = user.badges ?? [];
@@ -486,10 +427,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     };
 
     return (
-      <div key={user.id}>
+      <div key={user.id} ref={floatingBlockRef}>
         {/* User View */}
         <div
-          className="flex p-1 pl-3 items-center justify-between hover:bg-gray-100 group select-none"
+          className={`${styles['userTab']} ${gender[userGender]} ${
+            permission[`lv-${userPermission}`]
+          }`}
           data-user-block
           data-user-id={user.id}
           onDoubleClick={(e) => {
@@ -505,46 +448,11 @@ const UserTab: React.FC<UserTabProps> = React.memo(
             setShowContextMenu(true);
           }}
         >
-          <div className="flex items-center flex-1 min-w-0">
-            <div
-              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center mr-1`}
-            >
-              <img
-                src={`/channel/${userGender}_${userPermission}.png`}
-                alt={`${userGender}_${userPermission}`}
-                className="select-none"
-              />
-            </div>
-            <span className="truncate">{userNickname}</span>
-
-            {user.level > 1 && (
-              <div
-                className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
-              >
-                <img
-                  src={`/UserGrade_${userLevel}.png`}
-                  alt={`/UserGrade_${userLevel}`}
-                  className="select-none"
-                />
-              </div>
-            )}
-            <div className="flex items-center space-x-1 ml-2 gap-1">
-              {userBadges.length > 0 && (
-                <BadgeViewer badges={userBadges} maxDisplay={3} />
-              )}
-            </div>
-          </div>
-          {user.id == store.getState().user?.id && (
-            <div
-              className={`min-w-3.5 min-h-3.5 rounded-sm flex items-center justify-center ml-1`}
-            >
-              <img
-                src={`/mylocation.png`}
-                alt={`mylocation`}
-                className="p-1 select-none"
-              />
-            </div>
-          )}
+          <div className={styles['userState']} />
+          <div className={styles['userTabName']}>{userNickname}</div>
+          <div className={`${styles['userGrade']} ${lv[`lv-${userLevel}`]}`} />
+          <BadgeViewer badges={userBadges} maxDisplay={3} />
+          <div className={styles['myLocationIcon']} />
         </div>
 
         {/* Context Menu */}
@@ -608,11 +516,12 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
   const [showAddChannelModal, setShowAddChannelModal] =
     useState<boolean>(false);
 
+  const connectStatus = 3;
   const userCurrentChannel = channels.find(
     (_) => _.id == user.presence?.currentChannelId,
   );
   const userCurrentChannelName = userCurrentChannel?.name ?? '';
-  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+  const userPermission = server.members?.[user.id]?.permissionLevel ?? 1;
   const canEdit = userPermission >= 5;
 
   const handleDragEnd = (result: any) => {
@@ -698,20 +607,63 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
     }
   };
 
+  // FOR TESTING
+  const micQueueUsers: User[] = [
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+  ];
+
   return (
     <>
       {/* Current Channel */}
-      <div className="flex flex-row p-2 items-center gap-1">
-        <img
-          src="/channel/NetworkStatus_5.png" // TODO: Change base on connection status
-          alt="User Profile"
-          className="w-6 h-6 select-none"
+      <div className={styles['currentChannelBox']}>
+        <div
+          className={`${styles['currentChannelIcon']} ${
+            styles[`status${connectStatus}`]
+          }`}
         />
-        <div className="text-gray-500">{userCurrentChannelName}</div>
+        <div className={styles['currentChannelText']}>
+          {userCurrentChannelName}
+        </div>
       </div>
 
+      {/* Mic Queue */}
+      <div className={styles['sectionTitle']}>麥序</div>
+      <div className={styles['micQueueBox']}>
+        <div className={styles['userList']}>
+          {micQueueUsers.map((user) => (
+            <UserTab
+              key={user.id}
+              user={user}
+              server={server}
+              mainUser={user}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* All Channels */}
       <div
-        className="p-2 flex items-center justify-between text-gray-400 text-xs select-none"
+        className={styles['sectionTitle']}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -735,7 +687,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-thumb]:bg-transparent scrollbar-none"
+              className={styles['channelList']}
             >
               {channels
                 ?.filter((c) => !c.parentId)
