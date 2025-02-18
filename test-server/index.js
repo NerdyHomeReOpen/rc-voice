@@ -1670,18 +1670,21 @@ io.on('connection', async (socket) => {
         presenceStates[presence.id],
       );
 
-      // TODO: Let target user leave the channel
+      const sockets = await io.fetchSockets();
+
+      for (const socket of sockets) {
+        if (socket.id == targetSocketId){
+          // Leave the server
+          socket.leave(`server_${server.id}`);
+        }
+      }
 
       // 向被踢用戶發送事件，讓客戶端處理 UI 變更
       io.to(targetSocketId).emit('channelDisconnect');
+      io.to(targetSocketId).emit('serverDisconnect');
       io.to(targetSocketId).emit('userPresenceUpdate', {
         ...(await getPresenceState(targetId)),
       });
-
-      // 0.5 秒後強制斷開連線
-      setTimeout(() => {
-        io.sockets.sockets.get(targetSocketId)?.disconnect(true);
-      }, 500);
 
       // 發送通知給所有用戶
       io.to(`server_${server.id}`).emit('serverUpdate', {
@@ -1690,6 +1693,9 @@ io.on('connection', async (socket) => {
 
       new Logger('WebSocket').success(
         `User(${targetId}) kicked from channel(${channel.id}) by user(${userId})`,
+      );
+      new Logger('WebSocket').success(
+        `User(${targetId}) kicked from server(${server.id}) by user(${userId})`,
       );
     } catch (error) {
       io.to(socket.id).emit('error', {
