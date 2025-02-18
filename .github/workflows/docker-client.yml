@@ -43,7 +43,13 @@ jobs:
 
       - name: Run the image
         run: |
-          docker run -d --name rc-client rc-client:latest
+          docker run -d -p 3000:3000 --name rc-client rc-client:latest
           docker ps -a
           docker inspect rc-client
           docker logs rc-client
+
+      - name: Check port mapping
+        run: |
+          docker port rc-client
+          sleep 5
+          curl http://localhost:3000
