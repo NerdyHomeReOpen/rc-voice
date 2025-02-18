@@ -45,11 +45,10 @@ jobs:
         run: |
           docker run -d -p 3000:3000 --name rc-client rc-client:latest
           docker ps -a
-          docker inspect rc-client
-          docker logs rc-client
 
       - name: Check port mapping
         run: |
           docker port rc-client
           sleep 5
+          docker logs rc-client
           curl http://localhost:3000
