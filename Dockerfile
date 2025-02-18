@@ -12,5 +12,5 @@ COPY --from=builder /app/yarn.lock ./
 COPY --from=builder /app/node_modules ./
 COPY --from=builder /app/public ./
 COPY --from=builder /app/.next ./
-RUN ll
+RUN ls -l
 CMD ["npm", "run", "start"]
