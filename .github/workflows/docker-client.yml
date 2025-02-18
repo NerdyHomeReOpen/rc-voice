@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [ts-refactor]
+    branches: [ts-refactor,feat-docker]
   workflow_dispatch:
 
 jobs:
