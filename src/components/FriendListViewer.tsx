@@ -8,7 +8,7 @@ import { Trash } from 'lucide-react';
 
 // CSS
 import styles from '@/styles/friendPage.module.css';
-import lv from '@/styles/common/level.module.css';
+import grade from '@/styles/common/grade.module.css';
 
 // Types
 import type { Friend, FriendCategory } from '@/types';
@@ -155,7 +155,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
           <div className={styles['container']}>
             <div className={styles['name']}>{friendName}</div>
             <div
-              className={`${styles['userGrade']} ${lv[`lv-${friendLevel}`]}`}
+              className={`${styles['userGrade']} ${grade[`lv-${friendLevel}`]}`}
             />
             <BadgeViewer badges={friendBadges} />
           </div>

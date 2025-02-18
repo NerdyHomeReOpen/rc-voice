@@ -7,7 +7,6 @@ import React, { useLayoutEffect, useRef } from 'react';
 // CSS
 import styles from '@/styles/messageViewer.module.css';
 import permission from '@/styles/common/permission.module.css';
-import gender from '@/styles/common/gender.module.css';
 
 // Components
 import MarkdownViewer from '@/components/MarkdownViewer';
@@ -92,7 +91,7 @@ const MessageBox: React.FC<MessageBoxProps> = React.memo(
         ) : (
           <>
             <div
-              className={`${styles['senderIcon']} ${gender[senderGender]} ${
+              className={`${styles['senderIcon']} ${permission[senderGender]} ${
                 permission[`lv-${senderPermission}`]
               }`}
             />

@@ -10,8 +10,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 // CSS
 import styles from '@/styles/serverPage.module.css';
-import lv from '@/styles/common/level.module.css';
-import gender from '@/styles/common/gender.module.css';
+import grade from '@/styles/common/grade.module.css';
 import permission from '@/styles/common/permission.module.css';
 
 // Types
@@ -430,9 +429,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       <div key={user.id} ref={floatingBlockRef}>
         {/* User View */}
         <div
-          className={`${styles['userTab']} ${gender[userGender]} ${
-            permission[`lv-${userPermission}`]
-          }`}
+          className={`${styles['userTab']}`}
           data-user-block
           data-user-id={user.id}
           onDoubleClick={(e) => {
@@ -449,8 +446,15 @@ const UserTab: React.FC<UserTabProps> = React.memo(
           }}
         >
           <div className={styles['userState']} />
+          <div
+            className={`${styles['userIcon']} ${permission[userGender]} ${
+              permission[`lv-${userPermission}`]
+            }`}
+          />
           <div className={styles['userTabName']}>{userNickname}</div>
-          <div className={`${styles['userGrade']} ${lv[`lv-${userLevel}`]}`} />
+          <div
+            className={`${styles['userGrade']} ${grade[`lv-${userLevel}`]}`}
+          />
           <BadgeViewer badges={userBadges} maxDisplay={3} />
           {user.id === mainUser.id && (
             <div className={styles['myLocationIcon']} />

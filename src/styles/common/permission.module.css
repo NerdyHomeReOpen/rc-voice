@@ -1,3 +1,21 @@
+.Male {
+  content: '';
+  background: url(../../../public/channel/UserIconsMale.png) no-repeat center
+    center;
+  background-position: 0 0;
+  min-height: 15px;
+  min-width: 15px;
+}
+
+.Female {
+  content: '';
+  background: url(../../../public/channel/UserIconsFemale.png) no-repeat center
+    center;
+  background-position: 0 0;
+  min-height: 15px;
+  min-width: 15px;
+}
+
 .lv-1 {
   background-position: 0px 0;
 }

@@ -8,7 +8,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 // CSS
 import styles from '@/styles/friendPage.module.css';
-import lv from '@/styles/common/level.module.css';
+import grade from '@/styles/common/grade.module.css';
 
 // Components
 import FriendListViewer from '@/components/FriendListViewer';
@@ -45,7 +45,9 @@ const Header: React.FC<HeaderProps> = React.memo(({ user }) => {
       <div className={styles['baseInfoBox']}>
         <div className={styles['container']}>
           <div className={styles['levelIcon']} />
-          <div className={`${styles['userGrade']} ${lv[`lv-${userLevel}`]}`} />
+          <div
+            className={`${styles['userGrade']} ${grade[`lv-${userLevel}`]}`}
+          />
           <div className={styles['wealthIcon']} />
           <label className={styles['wealthValue']}>0</label>
           <div className={styles['vipIcon']} />
