@@ -43,6 +43,6 @@ jobs:
 
       - name: Run the image
         run: |
-          docker run rc-server:latest
+          docker run -d --name rc-server rc-server:latest
           docker ps -a
           docker logs rc-server

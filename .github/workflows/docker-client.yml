@@ -43,6 +43,6 @@ jobs:
 
       - name: Run the image
         run: |
-          docker run rc-client:latest
+          docker run -d --name rc-client rc-client:latest
           docker ps -a
           docker logs rc-client
