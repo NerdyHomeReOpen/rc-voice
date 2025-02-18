@@ -4,8 +4,6 @@ COPY package*.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY . .
 RUN npm run build
-RUN stat /app/.next
-RUN ls -l
 
 FROM node:20
 WORKDIR /app
@@ -14,6 +12,4 @@ COPY --from=builder /app/yarn.lock ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
-RUN stat /app/.next
-RUN ls -l
 CMD ["npm", "run", "start"]
