@@ -45,4 +45,5 @@ jobs:
         run: |
           docker run -d --name rc-server rc-server:latest
           docker ps -a
+          docker inspect rc-server
           docker logs rc-server

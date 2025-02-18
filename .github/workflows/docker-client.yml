@@ -45,4 +45,5 @@ jobs:
         run: |
           docker run -d --name rc-client rc-client:latest
           docker ps -a
+          docker inspect rc-client
           docker logs rc-client
