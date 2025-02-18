@@ -413,16 +413,24 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
     const userGender = user.gender;
     const userBadges = user.badges ?? [];
+    const canEdit = mainUserPermission >= 5;
 
     const handleKickUser = (targetId: string) => {
-      if (mainUserPermission >= 5) {
-        socket?.emit('userKicked', {
-          sessionId: store.getState().sessionToken,
-          serverId: server.id,
-          userId: mainUser.id,
-          targetId: targetId,
-        });
-      }
+      socket?.emit('userKicked', {
+        sessionId: store.getState().sessionToken,
+        serverId: server.id,
+        userId: mainUser.id,
+        targetId: targetId,
+      });
+    };
+
+    const handleaddFriend = (targetId: string) => {
+      socket?.emit('userAddFriend', {
+        sessionId: store.getState().sessionToken,
+        serverId: server.id,
+        userId: mainUser.id,
+        targetId: targetId,
+      });
     };
 
     return (
@@ -462,12 +470,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         </div>
 
         {/* Context Menu */}
-        {showContextMenu && mainUserPermission >= 5 && (
+        {showContextMenu && (
           <ContextMenu
             onClose={() => setShowContextMenu(false)}
             x={contentMenuPos.x}
             y={contentMenuPos.y}
-            items={[
+            items={canEdit ? [
               {
                 id: 'kick',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
@@ -476,6 +484,27 @@ const UserTab: React.FC<UserTabProps> = React.memo(
                 onClick: () => {
                   setShowContextMenu(false);
                   handleKickUser(user.id);
+                },
+              },
+              {
+                id: 'addFriend',
+                icon: <Plus size={14} className="w-5 h-5 mr-2" />,
+                label: '新增好友',
+                disabled: mainUser.id == user.id ? true : false,
+                onClick: () => {
+                  setShowContextMenu(false);
+                  handleaddFriend(user.id);
+                },
+              },
+            ] : [
+              {
+                id: 'addFriend',
+                icon: <Plus size={14} className="w-5 h-5 mr-2" />,
+                label: '新增好友',
+                disabled: mainUser.id == user.id ? true : false,
+                onClick: () => {
+                  setShowContextMenu(false);
+                  handleaddFriend(user.id);
                 },
               },
             ]}
@@ -656,14 +685,14 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
       <div className={styles['sectionTitle']}>麥序</div>
       <div className={styles['micQueueBox']}>
         <div className={styles['userList']}>
-          {micQueueUsers.map((user) => (
+          {/* {micQueueUsers.map((user) => (
             <UserTab
               key={user.id}
               user={user}
               server={server}
               mainUser={user}
             />
-          ))}
+          ))} */}
         </div>
       </div>
 
