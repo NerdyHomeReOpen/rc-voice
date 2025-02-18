@@ -98,10 +98,16 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
           <select
             value={newChannel.settings.visibility}
             onChange={(e) =>
-              setNewChannel((prev) => ({
-                ...prev,
-                visibility: e.target.value as Visibility,
-              }))
+              setNewChannel((prev) => {
+                const settings = prev.settings;
+                return {
+                  ...prev,
+                  settings: {
+                    ...settings,
+                    visibility: e.target.value as Visibility,
+                  },
+                };
+              })
             }
             className="w-full p-2 border rounded"
           >
