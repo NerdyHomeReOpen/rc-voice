@@ -65,6 +65,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
       <Modal
         title={`新增頻道`}
         onSubmit={handleSubmit}
+        onClose={onClose}
         width="300px"
         height="auto"
         buttons={[
@@ -91,7 +92,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
                 name: e.target.value,
               }))
             }
-            className="w-full p-2 border rounded"
+            className="w-full p-1 border rounded"
             placeholder={`頻道名稱`}
             required
           />
@@ -109,7 +110,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
                 };
               })
             }
-            className="w-full p-2 border rounded"
+            className="w-full p-1 border rounded"
           >
             <option value="public">公開</option>
             <option value="private">會員</option>
@@ -123,7 +124,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
                 isCategory: e.target.value === 'true',
               }))
             }
-            className="w-full p-2 border rounded"
+            className="w-full p-1 border rounded"
           >
             <option value="false">頻道</option>
             <option value="true">類別</option>

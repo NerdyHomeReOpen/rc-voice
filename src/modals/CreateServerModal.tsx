@@ -121,6 +121,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       <Modal
         title="創建語音群"
         onSubmit={handleSubmit}
+        onClose={onClose}
         width="760px"
         height="auto"
         buttons={[

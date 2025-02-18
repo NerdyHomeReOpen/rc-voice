@@ -453,12 +453,17 @@ const HomeComponent = () => {
     }
   };
 
+  const onClose = () => {
+    alert("這裡是關不掉的喔");
+  };
+
   return (
     <div className={styles['contentWrapper']}>
       {/* Top Navigation */}
       <Header
         selectedId={selectedTabId}
         onSelect={(tabId) => setSelectedTabId(tabId)}
+        onClose={onClose}
       />
       {/* Main Content */}
       <div className={styles['contentMain']}>{getMainContent()}</div>

@@ -45,6 +45,7 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = React.memo(
       <Modal
         title={`刪除頻道`}
         onSubmit={handleSubmit}
+        onClose={onClose}
         width="auto"
         height="auto"
         buttons={[
