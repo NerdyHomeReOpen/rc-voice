@@ -9,8 +9,8 @@ FROM node:20
 WORKDIR /app
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/yarn.lock ./
-COPY --from=builder /app/node_modules ./
-COPY --from=builder /app/public ./
-COPY --from=builder /app/.next ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
 RUN ls -l
 CMD ["npm", "run", "start"]
