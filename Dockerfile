@@ -4,6 +4,7 @@ COPY package*.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY . .
 RUN npm run build
+RUN stat /app/.next
 RUN ls -l
 
 FROM node:20
