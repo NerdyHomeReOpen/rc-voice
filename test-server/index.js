@@ -1735,37 +1735,32 @@ io.on('connection', async (socket) => {
         throw new Error(`Server(${serverId}) not found`);
       }
 
-      const message = await getmessage(userId, targetId);
-      if (!message) {
+      // Find direct message and update (if not exists, create one)
+      const friend = await getFriend(userId, targetId);
+      if (!friend) {
         // Create new message
         const messageId = uuidv4();
         const messageTemp = {
-          ...newMessage,
           id: messageId,
           timestamp: Date.now().valueOf(),
         };
         messages[messageId] = messageTemp;
         await db.set(`messages.${messageId}`, messageTemp);
 
-        // Find direct message and update (if not exists, create one)
-        const friend = await getFriend(userId, targetId);
-        if (!friend) {
-          const friendId = uuidv4();
-          friends[friendId] = {
-            id: friendId,
-            status: 'pending',
-            userIds: [userId, targetId],
-            messageIds: [messageId],
-            createdAt: Date.now(),
-          };
-          await db.set(`friends.${friendId}`, friends[friendId]);
-        } else {
-          friend.messageIds.push(messageId);
-          await db.set(`friends.${friend.id}`, friend);
-        }
-      } else if (message) {
+        const friendId = uuidv4();
+        friends[friendId] = {
+          id: friendId,
+          status: 'pending',
+          userIds: [userId, targetId],
+          messageIds: [messageId],
+          createdAt: Date.now(),
+        };
+        await db.set(`friends.${friendId}`, friends[friendId]);
+      } else if (friend) {
         throw new Error(`target message(${targetId}) is found`);
       }
+
+      a
 
       //TODO: 加好友邏輯
 
