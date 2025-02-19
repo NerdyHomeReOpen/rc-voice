@@ -1715,6 +1715,8 @@ io.on('connection', async (socket) => {
   socket.on('userAddFriend', async (data) => {
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
+    const messages = (await db.get('messages')) || {};
+    const friends = (await db.get('friends')) || {};
 
     try {
       const { sessionId, serverId, userId, targetId } = data;
@@ -1733,10 +1735,36 @@ io.on('connection', async (socket) => {
         throw new Error(`Server(${serverId}) not found`);
       }
 
-      const friend = await getFriend(userId, recieverId);
+      const message = await getmessage(userId, targetId);
+      if (!message) {
+        // Create new message
+        const messageId = uuidv4();
+        const messageTemp = {
+          ...newMessage,
+          id: messageId,
+          timestamp: Date.now().valueOf(),
+        };
+        messages[messageId] = messageTemp;
+        await db.set(`messages.${messageId}`, messageTemp);
 
-      if (friend) {
-        throw new Error(`friend(${targetId}) is found`);
+        // Find direct message and update (if not exists, create one)
+        const friend = await getFriend(userId, targetId);
+        if (!friend) {
+          const friendId = uuidv4();
+          friends[friendId] = {
+            id: friendId,
+            status: 'pending',
+            userIds: [userId, targetId],
+            messageIds: [messageId],
+            createdAt: Date.now(),
+          };
+          await db.set(`friends.${friendId}`, friends[friendId]);
+        } else {
+          friend.messageIds.push(messageId);
+          await db.set(`friends.${friend.id}`, friend);
+        }
+      } else if (message) {
+        throw new Error(`target message(${targetId}) is found`);
       }
 
       //TODO: 加好友邏輯
@@ -1747,13 +1775,13 @@ io.on('connection', async (socket) => {
     } catch (error) {
       io.to(socket.id).emit('error', {
         message: `新增好友時發生錯誤: ${error.message}`,
-        part: 'KICKUSERFROMCHANNEL',
+        part: 'ADDFRIENDFROMCHANNEL',
         tag: 'EXCEPTION_ERROR',
         status_code: 500,
       });
 
       new Logger('WebSocket').error(
-        `Error kicking user from channel: ${error.message}`,
+        `Error add friend from channel: ${error.message}`,
       );
     }
   });
