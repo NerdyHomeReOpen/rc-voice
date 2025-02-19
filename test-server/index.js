@@ -1733,6 +1733,12 @@ io.on('connection', async (socket) => {
         throw new Error(`Server(${serverId}) not found`);
       }
 
+      const friend = await getFriend(userId, recieverId);
+
+      if (friend) {
+        throw new Error(`friend(${targetId}) is found`);
+      }
+
       //TODO: 加好友邏輯
 
       new Logger('WebSocket').success(
