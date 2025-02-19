@@ -2,6 +2,9 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useRef } from 'react';
 
+// CSS
+import styles from '@/styles/badgeViewer.module.css';
+
 // Types
 import type { Badge } from '@/types';
 
@@ -42,66 +45,52 @@ const BadgeImage: React.FC<BadgeImageProps> = React.memo(({ badge }) => {
   if (failedImageCache.has(badgeUrl) || showFallBack) {
     return (
       // Fallback Badge
-      <div
-        className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-medium text-white ${getInitialColor(
-          badge,
-        )}`}
-      >
-        {getDisplayText(badge)}
-      </div>
+      <div className={styles['badgeImage']}>{getDisplayText(badge)}</div>
     );
   }
   return (
-    <img
-      src={badgeUrl}
-      alt={`${badgeName} Badge`}
-      className="select-none w-4 h-4 rounded-full"
+    <div
+      className={styles['badgeImage']}
       onError={() => {
         failedImageCache.add(badgeUrl);
         setShowFallBack(true);
       }}
-      loading="lazy"
-      referrerPolicy="no-referrer"
     />
   );
 });
 
 BadgeImage.displayName = 'BadgeImage';
 
-interface TooltipProps {
+interface BadgeInfoViewerProps {
   badge: Badge;
   position: { top: number; left: number; placement: 'top' | 'bottom' };
 }
 
-const Tooltip: React.FC<TooltipProps> = React.memo(({ badge, position }) => {
-  const arrowClass =
-    position.placement === 'top'
-      ? 'top-full border-t-gray-800'
-      : 'bottom-full border-b-gray-800';
-
-  return (
-    <div
-      className="fixed z-50 w-36 px-2 py-1 text-sm bg-gray-800 text-white rounded-md shadow-lg pointer-events-none"
-      style={{
-        top: position.top,
-        left: position.left,
-      }}
-    >
+const BadgeInfoViewer: React.FC<BadgeInfoViewerProps> = React.memo(
+  ({ badge, position }) => {
+    return (
       <div
-        className={`absolute -translate-x-1/2 left-1/2 border-4 border-transparent ${arrowClass}`}
-      />
-      <div className="flex flex-row items-center justify-center space-x-2">
-        <BadgeImage badge={badge} />
-        <div className="font-medium text-center">{badge.name}</div>
+        className={`${styles['badgeInfoViewerWrapper']} ${
+          styles[position.placement]
+        }`}
+        style={{
+          top: position.top,
+          left: position.left,
+        }}
+      >
+        <div className={styles['badgeInfoBox']}>
+          <BadgeImage badge={badge} />
+          <div className={styles['name']}>{badge.name}</div>
+        </div>
+        <div className={styles['badgeDescriptionBox']}>
+          <div className={styles['description']}>{badge.description}</div>
+        </div>
       </div>
-      <div className="text-xs text-center text-gray-400 mt-1">
-        {badge.description}
-      </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
-Tooltip.displayName = 'Tooltip';
+BadgeInfoViewer.displayName = 'BadgeInfoViewer';
 
 interface BadgeContainerProps {
   badge: Badge;
@@ -122,7 +111,7 @@ const BadgeContainer: React.FC<BadgeContainerProps> = React.memo(
     return (
       <div
         ref={containerRef}
-        className="relative inline-block select-none"
+        className={styles['badgeContainer']}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={onMouseLeave}
       >
@@ -143,7 +132,7 @@ const BadgeViewer: React.FC<BadgeViewerProps> = React.memo(
   ({ badges, maxDisplay = 99 }) => {
     if (!badges) return null;
 
-    const [activeTooltip, setActiveTooltip] = useState<{
+    const [expanded, setExpended] = useState<{
       badge: Badge;
       position: { top: number; left: number; placement: 'top' | 'bottom' };
     } | null>(null);
@@ -151,43 +140,41 @@ const BadgeViewer: React.FC<BadgeViewerProps> = React.memo(
     const calculateTooltipPosition = (
       rect: DOMRect,
     ): { top: number; left: number; placement: 'top' | 'bottom' } => {
-      const TOOLTIP_WIDTH = 144; // w-36 = 9rem = 144px
-      const TOOLTIP_HEIGHT = 76; // 預估高度
-      const SPACING = 8; // 間距
+      const INFOVIEWER_WIDTH = 144;
+      const INFOVIEWER_HEIGHT = 76;
+      const SPACING = 8;
 
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
 
-      // 計算水平位置
-      let left = rect.left + rect.width / 2 - TOOLTIP_WIDTH / 2;
+      let left = rect.left - INFOVIEWER_WIDTH / 2;
       left = Math.max(
         SPACING,
-        Math.min(left, windowWidth - TOOLTIP_WIDTH - SPACING),
+        Math.min(left, windowWidth - INFOVIEWER_WIDTH - SPACING),
       );
 
-      // 決定是否顯示在上方或下方
       const spaceBelow = windowHeight - rect.bottom;
       const spaceAbove = rect.top;
       const placement =
-        spaceBelow >= TOOLTIP_HEIGHT + SPACING || spaceBelow >= spaceAbove
+        spaceBelow >= INFOVIEWER_HEIGHT + SPACING || spaceBelow >= spaceAbove
           ? 'bottom'
           : 'top';
 
       const top =
         placement === 'bottom'
           ? rect.bottom + SPACING
-          : rect.top - TOOLTIP_HEIGHT - SPACING;
+          : rect.top - INFOVIEWER_HEIGHT - SPACING;
 
       return { top, left, placement };
     };
 
     const handleMouseEnter = (badge: Badge) => (rect: DOMRect) => {
       const position = calculateTooltipPosition(rect);
-      setActiveTooltip({ badge, position });
+      setExpended({ badge, position });
     };
 
     const handleMouseLeave = () => {
-      setActiveTooltip(null);
+      setExpended(null);
     };
 
     const sortedBadges = [...badges]
@@ -196,7 +183,7 @@ const BadgeViewer: React.FC<BadgeViewerProps> = React.memo(
 
     return (
       <>
-        <div className="flex space-x-1">
+        <div className={styles['badgeViewerWrapper']}>
           {sortedBadges.map((badge) => (
             <BadgeContainer
               key={badge.id}
@@ -206,10 +193,10 @@ const BadgeViewer: React.FC<BadgeViewerProps> = React.memo(
             />
           ))}
         </div>
-        {activeTooltip && (
-          <Tooltip
-            badge={activeTooltip.badge}
-            position={activeTooltip.position}
+        {expanded && (
+          <BadgeInfoViewer
+            badge={expanded.badge}
+            position={expanded.position}
           />
         )}
       </>
