@@ -9,8 +9,8 @@ import styles from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
 
 // Components
-import FriendListViewer from '@/components/FriendListViewer';
-import BadgeViewer from '@/components/BadgeViewer';
+import FriendListViewer from '@/components/viewers/FriendListViewer';
+import BadgeViewer from '@/components/viewers/BadgeViewer';
 
 // Types
 import type { User, FriendCategory } from '@/types';

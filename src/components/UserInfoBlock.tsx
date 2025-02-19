@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { ArrowUp } from 'lucide-react';
 
 // Components
-import BadgeViewer from './BadgeViewer';
+import BadgeViewer from '@/components/viewers/BadgeViewer';
 
 // Types
 import type { User, Server } from '@/types';

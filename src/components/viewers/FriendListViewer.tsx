@@ -12,11 +12,11 @@ import grade from '@/styles/common/grade.module.css';
 import type { Friend, FriendCategory } from '@/types';
 
 // Components
-import BadgeViewer from '@/components/BadgeViewer';
+import BadgeViewer from '@/components/viewers/BadgeViewer';
 import ContextMenu from '@/components/ContextMenu';
 
 // Modal
-import DirectMessageModal from '@/modals/DirectMessageModal';
+import DirectMessageModal from '@/components/modals/DirectMessageModal';
 
 interface ContextMenuPosState {
   x: number;

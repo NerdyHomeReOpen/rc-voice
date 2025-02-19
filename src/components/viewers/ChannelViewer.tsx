@@ -23,14 +23,14 @@ import store from '@/redux/store';
 import { useSocket } from '@/hooks/SocketProvider';
 
 // Components
-import BadgeViewer from '@/components/BadgeViewer';
+import BadgeViewer from '@/components/viewers/BadgeViewer';
 import ContextMenu from '@/components/ContextMenu';
 import UserInfoBlock from '@/components/UserInfoBlock';
 
 // Modals
-import AddChannelModal from '@/modals/AddChannelModal';
-import EditChannelModal from '@/modals/EditChannelModal';
-import DeleteChannelModal from '@/modals/DeleteChannelModal';
+import AddChannelModal from '@/components/modals/AddChannelModal';
+import EditChannelModal from '@/components/modals/EditChannelModal';
+import DeleteChannelModal from '@/components/modals/DeleteChannelModal';
 
 const getVisibilityStyle = (visibility: Visibility): string => {
   switch (visibility) {

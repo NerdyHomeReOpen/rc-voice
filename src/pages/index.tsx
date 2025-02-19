@@ -15,14 +15,14 @@ import styles from '@/styles/home.module.css';
 import type { Presence, Server, User } from '@/types';
 
 // Pages
-import AuthPage from '@/pages/AuthPage';
-import FriendPage from '@/pages/FriendPage';
-import HomePage from '@/pages/HomePage';
-import ServerPage from '@/pages/ServerPage';
+import AuthPage from '@/components/pages/AuthPage';
+import FriendPage from '@/components/pages/FriendPage';
+import HomePage from '@/components/pages/HomePage';
+import ServerPage from '@/components/pages/ServerPage';
 
 // Components
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import UserSettingModal from '@/modals/UserSettingModal';
+import UserSettingModal from '@/components/modals/UserSettingModal';
 
 // Utils
 import { measureLatency } from '@/utils/measureLatency';
