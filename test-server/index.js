@@ -1757,7 +1757,7 @@ io.on('connection', async (socket) => {
         };
         await db.set(`friends.${friendId}`, friends[friendId]);
       } else if (friend) {
-        throw new Error(`target message(${targetId}) is found`);
+        throw new Error(`target friend(${targetId}) is found`);
       }
 
       new Logger('WebSocket').success(
