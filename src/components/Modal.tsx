@@ -4,7 +4,7 @@ import React, { memo, useState, FormEvent } from 'react';
 // Types
 import type { ModalButton, ModalTabItem } from '@/types';
 import { X } from 'lucide-react';
-import Header from './common/Header';
+import Header from './Header';
 
 const getButtonStyle = (button: ModalButton, disabled: boolean) => {
   switch (button.style) {

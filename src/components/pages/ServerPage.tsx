@@ -3,31 +3,18 @@
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import {
-  Volume2,
-  Volume1,
-  Volume,
-  VolumeX,
-  Mic,
-  MicOff,
-  Settings,
-  ArrowBigDown,
-  BellOff,
-  BellRing,
-} from 'lucide-react';
 
 // CSS
 import styles from '@/styles/serverPage.module.css';
 
 // Components
-import EmojiGrid from '@/components/EmojiGrid';
-import MarkdownViewer from '@/components/MarkdownViewer';
-import MessageViewer from '@/components/MessageViewer';
-import ChannelViewer from '@/components/ChannelViewer';
+import MarkdownViewer from '@/components/viewers/MarkdownViewer';
+import MessageViewer from '@/components/viewers/MessageViewer';
+import ChannelViewer from '@/components/viewers/ChannelViewer';
 
 // Modals
-import ServerSettingModal from '@/modals/ServerSettingModal';
-import UserSettingModal from '@/modals/UserSettingModal';
+import ServerSettingModal from '@/components/modals/ServerSettingModal';
+import UserSettingModal from '@/components/modals/UserSettingModal';
 
 // Types
 import type { User, Server, Message } from '@/types';

@@ -8,7 +8,7 @@ import styles from '@/styles/messageViewer.module.css';
 import permission from '@/styles/common/permission.module.css';
 
 // Components
-import MarkdownViewer from '@/components/MarkdownViewer';
+import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 
 // Types
 import type { Message, Server, User } from '@/types';

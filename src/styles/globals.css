@@ -15,24 +15,26 @@
 }
 
 * {
-  box-sizing: unset;
+  box-sizing: border-box;
 }
 
-body {
+html,
+body,
+#__next,
+.wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
-  color: var(--foreground);
-  background: var(--background);
-  background-color: #ffffff00;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
+  box-sizing: border-box;
   overflow: hidden;
+  border-radius: 5px;
   font-size: 14px;
   font-family: SimSun, Arial, Helvetica, sans-serif;
-  width: 100vw;
-  height: 99.7vh;
+  color: var(--foreground);
+  background: none;
 }
 
 ::-webkit-scrollbar {

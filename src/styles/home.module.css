@@ -1,19 +1,8 @@
-.contentWrapper {
-  width: 100%;
-  height: 100%;
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid #858585;
-  background: #ffffff00;
-  margin-top: 1px;
-}
-
-.contentMain {
+.content {
   display: flex;
   flex: 1;
   min-height: 0;
+  background-color: #ffffff;
 }
 
 .header {
@@ -39,7 +28,7 @@
 }
 
 .buttons,
-.mainTab,
+.mainTabs,
 .userStatus {
   -webkit-app-region: no-drag;
 }

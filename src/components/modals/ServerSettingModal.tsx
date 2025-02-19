@@ -14,7 +14,7 @@ import { ChevronDown, ChevronUp, Search, Check, X } from 'lucide-react';
 
 // Components
 import Modal from '@/components/Modal';
-import MarkdownViewer from '@/components/MarkdownViewer';
+import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 import ContextMenu from '@/components/ContextMenu';
 
 // Types

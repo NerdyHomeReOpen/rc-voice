@@ -19,7 +19,7 @@ import { useSocket } from '@/hooks/SocketProvider';
 import { apiService } from '@/services/api.service';
 
 // Components
-import MessageViewer from '@/components/MessageViewer';
+import MessageViewer from '@/components/viewers/MessageViewer';
 import MessageInputBox from '@/components/MessageInputBox';
 
 interface DirectMessageModalProps {

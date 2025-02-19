@@ -8,8 +8,8 @@ import { Search } from 'lucide-react';
 import styles from '@/styles/homePage.module.css';
 
 // Components
-import CreateServerModal from '@/modals/CreateServerModal';
-import ServerApplicationModal from '@/modals/ServerApplicationModal';
+import CreateServerModal from '@/components/modals/CreateServerModal';
+import ServerApplicationModal from '@/components/modals/ServerApplicationModal';
 
 // Type
 import type { Server, User } from '@/types';
