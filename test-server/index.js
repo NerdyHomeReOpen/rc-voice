@@ -1760,10 +1760,6 @@ io.on('connection', async (socket) => {
         throw new Error(`target message(${targetId}) is found`);
       }
 
-      a
-
-      //TODO: 加好友邏輯
-
       new Logger('WebSocket').success(
         `User(${targetId}) add friend from server(${server.id}) by user(${userId})`,
       );
