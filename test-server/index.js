@@ -1715,8 +1715,6 @@ io.on('connection', async (socket) => {
   socket.on('userAddFriend', async (data) => {
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
-    // const channels = (await db.get('channels')) || {};
-    // const presenceStates = (await db.get('presenceStates')) || {};
 
     try {
       const { sessionId, serverId, userId, targetId } = data;
