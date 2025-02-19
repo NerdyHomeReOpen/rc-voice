@@ -134,7 +134,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
   return (
     <div className={styles['friendWrapper']}>
       <Header user={user} />
-      <main className={styles['friendMain']}>
+      <main className={styles['friendContent']}>
         {/* Left Sidebar */}
         <aside
           className={styles['sidebar']}

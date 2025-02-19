@@ -1,0 +1,96 @@
+.loginWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: url(../../public/dialog_body_bg.png) no-repeat center center;
+  background-size: cover;
+}
+
+.loginContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 60%;
+  height: 100%;
+  gap: 1rem;
+}
+
+.formWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  gap: 2rem;
+}
+
+.errorBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0.25rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.inputWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inputBox {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.inputBox label {
+  font-size: 13px;
+  color: #333;
+  display: inline-block;
+  width: 80px;
+  text-align: right;
+}
+
+.inputBox label::after {
+  content: '：';
+}
+
+.warning {
+  margin-left: 80px;
+  color: red;
+  font-size: 12px;
+}
+
+.hint {
+  margin-left: 80px;
+  font-size: 13px;
+  color: #777777;
+}
+
+.button {
+  width: 200px;
+  height: 42px;
+  background-color: #1680ce;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'SimSun', sans-serif;
+}
+
+.button {
+  background-color: #419ddd;
+}
+
+.button {
+  background-color: #1680ce;
+}

@@ -9,7 +9,7 @@ export const LoadingSpinner = ({
   className = 'w-16 h-16',
 }: LoadingSpinnerProps) => {
   return (
-    <div className={`items-center justify-center w-full h-full`}>
+    <div className={`flex items-center justify-center w-full h-full`}>
       <img src="/loading.gif" className={className} alt="Loading..." />
     </div>
   );

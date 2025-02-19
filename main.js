@@ -10,8 +10,8 @@ const baseUri = isDev
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
-    minminWidth: 1200,
-    minminHeight: 800,
+    minWidth: 1200,
+    minHeight: 800,
     frame: false,
     transparent: true,
     webPreferences: {
@@ -27,8 +27,9 @@ function createMainWindow() {
 
 function createAuthWindow() {
   const authWindow = new BrowserWindow({
-    minWidth: 800,
-    minHeight: 600,
+    width: 600,
+    height: 450,
+    resizable: false,
     frame: false,
     transparent: true,
     webPreferences: {
@@ -60,7 +61,8 @@ function createCreateServerPopup() {
 }
 
 app.whenReady().then(() => {
-  createMainWindow();
+  createAuthWindow();
+  // createMainWindow();
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -82,5 +84,19 @@ ipcMain.on('open-popup', (popup) => {
       break;
     default:
       break;
+  }
+});
+
+ipcMain.on('close-popup', () => {
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  if (currentWindow) {
+    currentWindow.close();
+  }
+});
+
+ipcMain.on('close-window', () => {
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  if (currentWindow) {
+    currentWindow.close();
   }
 });

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 // CSS
-import styles from '@/styles/home.module.css';
+import styles from '@/styles/common/header.module.css';
 
 interface HeaderProps {
   title?: string;
