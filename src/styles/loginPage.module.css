@@ -1,0 +1,162 @@
+.loginWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.loginContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 226px;
+  height: 100%;
+  gap: 1rem;
+}
+
+.appLogo {
+  display: block;
+  min-width: 226px;
+  min-height: 54px;
+  background: url(../../public/login_logo.png) no-repeat center center;
+  background-size: contain;
+}
+
+.formWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.errorBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0.25rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.inputBox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+}
+
+.inputBox label {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 5px;
+  display: block;
+  width: auto;
+  text-align: left;
+}
+
+.inputBox label::after {
+  content: '*';
+  color: red;
+}
+
+.inputBox .warning {
+  color: red;
+  font-size: 12px;
+}
+
+.checkWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  font-size: 12px;
+  color: #777777;
+}
+
+.checkWrapper .checkBox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkWrapper .check {
+  min-width: 12px;
+  min-height: 12px;
+  margin-right: 0.5rem;
+}
+
+.button {
+  width: 200px;
+  height: 42px;
+  background-color: #1680ce;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'SimSun', sans-serif;
+}
+
+.button {
+  background-color: #419ddd;
+}
+
+.button {
+  background-color: #1680ce;
+}
+
+/* Footer */
+
+.loginFooter {
+  width: 100%;
+  padding: 10px 15px;
+  background-color: #f4f4f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e3e3e5;
+}
+
+.createAccount,
+.forgetPassword {
+  text-decoration: none;
+  font-size: 12px;
+  color: #838383;
+  display: flex;
+  align-items: flex-end;
+}
+
+.createAccount:hover,
+.forgetPassword:hover {
+  color: #0073c6;
+}
+
+.createAccount:before {
+  content: '';
+  min-width: 14px;
+  min-height: 14px;
+  background: url('../../public/icon_createaccount.png') no-repeat center center;
+  background-size: contain;
+  background-size: cover;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.forgetPassword:before {
+  content: '';
+  min-width: 14px;
+  min-height: 14px;
+  background: url('../../public/icon_getpass.png') no-repeat center center;
+  background-size: contain;
+  background-size: cover;
+  margin-right: 5px;
+  vertical-align: middle;
+}

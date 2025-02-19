@@ -335,7 +335,6 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   };
 
   const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
-  const togglePreview = (): void => setIsPreviewMode(!isPreviewMode);
 
   // const usersList = useCallback((): UserList => {
   //   if (!server?.members || !users) return {};
@@ -619,7 +618,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  togglePreview();
+                  setIsPreviewMode(!isPreviewMode);
                 }}
                 className="px-3 py-1 text-sm bg-blue-50 hover:bg-blue-100 rounded select-none"
               >

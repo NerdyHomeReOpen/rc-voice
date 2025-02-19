@@ -5,6 +5,8 @@
   height: 100%;
 }
 
+/* Header */
+
 .homeHeader {
   display: flex;
   justify-content: space-between;
@@ -144,3 +146,5 @@
   min-height: 12px;
   margin-right: 5px;
 }
+
+/* Content */

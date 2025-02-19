@@ -5,6 +5,8 @@
   height: 100%;
 }
 
+/* Header */
+
 .friendHeader {
   display: flex;
   align-items: center;
@@ -129,9 +131,12 @@
   align-items: center;
 }
 
-.friendMain {
+/* Content */
+
+.friendContent {
   display: flex;
   flex: 1;
+  min-height: 0;
 }
 
 .sidebar {

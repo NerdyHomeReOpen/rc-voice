@@ -65,9 +65,6 @@ const InputField: React.FC<InputFieldProps> = React.memo(
   }) => {
     const [showPassword, setShowPassword] = useState(false);
 
-    const toggleShowPassword = (state?: boolean) =>
-      setShowPassword(state ?? !showPassword);
-
     const isPasswordField = name === 'password'; // 確認是否為密碼欄位
 
     return (
@@ -100,7 +97,7 @@ const InputField: React.FC<InputFieldProps> = React.memo(
             <button
               type="button"
               className="absolute right-3 text-gray-500 hover:text-gray-700"
-              onClick={() => toggleShowPassword()}
+              onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <Eye size={20} /> : <EyeClosed size={20} />}
             </button>

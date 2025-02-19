@@ -1,4 +1,17 @@
-/* flex flex-col min-h-0 min-w-0 w-64 bg-white border-r text-sm */
+.serverWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/* Content */
+
+.serverContent {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
 
 .sidebar {
   display: flex;

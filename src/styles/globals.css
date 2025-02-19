@@ -35,6 +35,14 @@ body,
   font-family: SimSun, Arial, Helvetica, sans-serif;
   color: var(--foreground);
   background: none;
+  user-select: none;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  background-color: #ffffff;
 }
 
 ::-webkit-scrollbar {

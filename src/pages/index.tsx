@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { CircleX } from 'lucide-react';
 
 // CSS
-import styles from '@/styles/home.module.css';
+import header from '@/styles/common/header.module.css';
 
 // Types
 import type { Presence, Server, User } from '@/types';
@@ -105,28 +105,28 @@ const Header: React.FC<HeaderProps> = React.memo(
     const userPresenceStatus = user?.presence?.status ?? 'online';
 
     return (
-      <div className={styles['header']}>
-        <div className={styles['userStatus']}>
+      <div className={header['header']}>
+        <div className={header['userStatus']}>
           {showUserSetting && (
             <UserSettingModal onClose={() => setShowUserSetting(false)} />
           )}
-          <div className={styles['nameDisplay']}>{userName}</div>
+          <div className={header['nameDisplay']}>{userName}</div>
           <div
-            className={styles['statusBox']}
+            className={header['statusBox']}
             onClick={() => setShowStatusDropdown(!showStatusDropdown)}
           >
             <div
-              className={styles['statusDisplay']}
+              className={header['statusDisplay']}
               datatype={userPresenceStatus}
             />
-            <div className={styles['statusTriangle']} />
+            <div className={header['statusTriangle']} />
             <div
-              className={`${styles['statusDropdown']} ${
-                showStatusDropdown ? '' : styles['hidden']
+              className={`${header['statusDropdown']} ${
+                showStatusDropdown ? '' : header['hidden']
               }`}
             >
               <div
-                className={styles['option']}
+                className={header['option']}
                 datatype="online"
                 onClick={() => {
                   handleUpdateStatus('online');
@@ -134,7 +134,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 }}
               />
               <div
-                className={styles['option']}
+                className={header['option']}
                 datatype="dnd"
                 onClick={() => {
                   handleUpdateStatus('dnd');
@@ -142,7 +142,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 }}
               />
               <div
-                className={styles['option']}
+                className={header['option']}
                 datatype="idle"
                 onClick={() => {
                   handleUpdateStatus('idle');
@@ -150,7 +150,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 }}
               />
               <div
-                className={styles['option']}
+                className={header['option']}
                 datatype="gn"
                 onClick={() => {
                   handleUpdateStatus('gn');
@@ -161,7 +161,7 @@ const Header: React.FC<HeaderProps> = React.memo(
           </div>
         </div>
         {/* Main Tabs */}
-        <div className={styles['mainTabs']}>
+        <div className={header['mainTabs']}>
           {MAIN_TABS.map((Tab) => {
             const TabId = Tab.id;
             const TabLable = Tab.label;
@@ -169,16 +169,16 @@ const Header: React.FC<HeaderProps> = React.memo(
             return (
               <div
                 key={`Tabs-${TabId}`}
-                className={`${styles['tab']} ${
-                  TabId === selectedId ? styles['selected'] : ''
+                className={`${header['tab']} ${
+                  TabId === selectedId ? header['selected'] : ''
                 }`}
                 onClick={() => {
                   onSelect?.(TabId);
                   Tab.onClick && Tab.onClick();
                 }}
               >
-                <div className={styles['tabLable']}>{TabLable}</div>
-                <div className={styles['tabBg']}></div>
+                <div className={header['tabLable']}>{TabLable}</div>
+                <div className={header['tabBg']}></div>
               </div>
             );
           })}
@@ -186,80 +186,80 @@ const Header: React.FC<HeaderProps> = React.memo(
             <CircleX
               onClick={() => handleLeaveServer()}
               size={16}
-              className={styles['tabClose']}
+              className={header['tabClose']}
             />
           )}
         </div>
         {/* Buttons */}
-        <div className={styles['buttons']}>
-          <div className={styles['gift']} />
-          <div className={styles['game']} />
-          <div className={styles['notice']} />
-          <div className={styles['spliter']} />
+        <div className={header['buttons']}>
+          <div className={header['gift']} />
+          <div className={header['game']} />
+          <div className={header['notice']} />
+          <div className={header['spliter']} />
           <div
-            className={styles['menu']}
+            className={header['menu']}
             onClick={() => setShowMenu(!showMenu)}
           >
             <div
-              className={`${styles['menuDropDown']} ${
-                showMenu ? '' : styles['hidden']
+              className={`${header['menuDropDown']} ${
+                showMenu ? '' : header['hidden']
               }`}
             >
               <div
-                className={`${styles['option']} ${styles['hasImage']}`}
+                className={`${header['option']} ${header['hasImage']}`}
                 data-type="system-setting"
                 data-key="30066"
               >
                 系統設定
               </div>
               <div
-                className={`${styles['option']} ${styles['hasImage']}`}
+                className={`${header['option']} ${header['hasImage']}`}
                 data-type="message-history"
                 data-key="30136"
               >
                 訊息紀錄
               </div>
               <div
-                className={`${styles['option']} ${styles['hasImage']}`}
+                className={`${header['option']} ${header['hasImage']}`}
                 data-type="change-theme"
                 data-key="60028"
               >
                 更換主題
               </div>
               <div
-                className={styles['option']}
+                className={header['option']}
                 data-type="feed-back"
                 data-key="30039"
               >
                 意見反饋
               </div>
               <div
-                className={`${styles['option']} ${styles['hasImage']} ${styles['hasSubmenu']}`}
+                className={`${header['option']} ${header['hasImage']} ${header['hasSubmenu']}`}
                 data-type="language-select"
               >
                 <span data-key="30374">語言選擇</span>
                 <div
-                  className={`${styles['menuDropDown']} ${styles['hidden']}`}
+                  className={`${header['menuDropDown']} ${header['hidden']}`}
                 >
-                  <div className={styles['option']} data-lang="tw">
+                  <div className={header['option']} data-lang="tw">
                     繁體中文
                   </div>
-                  <div className={styles['option']} data-lang="cn">
+                  <div className={header['option']} data-lang="cn">
                     简体中文
                   </div>
-                  <div className={styles['option']} data-lang="en">
+                  <div className={header['option']} data-lang="en">
                     English
                   </div>
-                  <div className={styles['option']} data-lang="jp">
+                  <div className={header['option']} data-lang="jp">
                     日本語
                   </div>
-                  <div className={styles['option']} data-lang="ru">
+                  <div className={header['option']} data-lang="ru">
                     русский язык
                   </div>
                 </div>
               </div>
               <div
-                className={styles['option']}
+                className={header['option']}
                 data-type="logout"
                 data-key="30060"
                 onClick={() => handleLogout()}
@@ -267,7 +267,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 登出
               </div>
               <div
-                className={`${styles['option']} ${styles['hasImage']}`}
+                className={`${header['option']} ${header['hasImage']}`}
                 data-type="exit"
                 data-key="30061"
               >
@@ -275,13 +275,13 @@ const Header: React.FC<HeaderProps> = React.memo(
               </div>
             </div>
           </div>
-          <div className={styles['minimize']} />
+          <div className={header['minimize']} />
           <div
-            className={isFullscreen ? styles['restore'] : styles['maxsize']}
+            className={isFullscreen ? header['restore'] : header['maxsize']}
             onClick={handleFullscreen}
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           />
-          <div className={styles['close']} onClick={onClose} />
+          <div className={header['close']} onClick={onClose} />
         </div>
       </div>
     );
@@ -313,7 +313,10 @@ const HomeComponent = () => {
   useEffect(() => {
     const token =
       store.getState().sessionToken ?? localStorage.getItem('sessionToken');
-    if (!token) return;
+    if (!token) {
+      window.location.href = '/auth';
+      return;
+    }
     store.dispatch(setSessionToken(token));
     localStorage.setItem('sessionToken', token);
   }, [sessionId]);
@@ -440,16 +443,17 @@ const HomeComponent = () => {
   // }, []);
 
   const getMainContent = () => {
-    if (!socket) return <LoadingSpinner />;
-    if (!user) return <AuthPage />;
-    switch (selectedTabId) {
-      case 1:
-        return <HomePage />;
-      case 2:
-        return <FriendPage />;
-      case 3:
-        if (!server) return;
-        return <ServerPage />;
+    if (!socket || !user) return <LoadingSpinner />;
+    else {
+      switch (selectedTabId) {
+        case 1:
+          return <HomePage />;
+        case 2:
+          return <FriendPage />;
+        case 3:
+          if (!server) return;
+          return <ServerPage />;
+      }
     }
   };
 
@@ -461,7 +465,7 @@ const HomeComponent = () => {
         onSelect={(tabId) => setSelectedTabId(tabId)}
       />
       {/* Main Content */}
-      <div className={styles['content']}>{getMainContent()}</div>
+      <div className="content">{getMainContent()}</div>
     </>
   );
 };
