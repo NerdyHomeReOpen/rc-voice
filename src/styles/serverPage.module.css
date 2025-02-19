@@ -145,6 +145,15 @@
 
 /* Channel List */
 
+.saperator-2 {
+  background: url(../../public/channel/chn_tree_split.png) no-repeat center
+    center;
+  min-height: 6px;
+  min-width: 100%;
+  display: block;
+  margin: 0.5rem 0;
+}
+
 .sectionTitle {
   font-size: 13px;
   color: #a8a8a8;
@@ -190,15 +199,6 @@
   display: flex;
   flex-direction: column;
   height: 120px;
-}
-
-.micQueueBox:after {
-  content: '';
-  background: url(../../public/channel/chn_tree_split.png) no-repeat center
-    center;
-  min-height: 6px;
-  min-width: 100%;
-  display: block;
 }
 
 .channelList {
@@ -552,7 +552,6 @@
   cursor: pointer;
   font-size: 13px;
   color: #777777;
-  margin-right: 8px;
 }
 
 .bkgModeButton::before {

@@ -454,15 +454,15 @@ const HomeComponent = () => {
   };
 
   return (
-    <div className={styles['contentWrapper']}>
+    <>
       {/* Top Navigation */}
       <Header
         selectedId={selectedTabId}
         onSelect={(tabId) => setSelectedTabId(tabId)}
       />
       {/* Main Content */}
-      <div className={styles['contentMain']}>{getMainContent()}</div>
-    </div>
+      <div className={styles['content']}>{getMainContent()}</div>
+    </>
   );
 };
 

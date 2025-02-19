@@ -651,7 +651,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
           {userCurrentChannelName}
         </div>
       </div>
-
       {/* Mic Queue */}
       <div className={styles['sectionTitle']}>麥序</div>
       <div className={styles['micQueueBox']}>
@@ -666,7 +665,8 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
           ))}
         </div>
       </div>
-
+      {/* Saperator */}
+      <div className={styles['saperator-2']} />
       {/* All Channels */}
       <div
         className={styles['sectionTitle']}
@@ -679,7 +679,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
       >
         所有頻道
       </div>
-
       {/* Channel List */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable
@@ -722,7 +721,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
           )}
         </Droppable>
       </DragDropContext>
-
       {/* Context Menu */}
       {showContextMenu && canEdit && (
         <ContextMenu
@@ -742,7 +740,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
           ]}
         />
       )}
-
       {/* Add Channel Modal */}
       {showAddChannelModal && (
         <AddChannelModal

@@ -24,14 +24,17 @@ body,
 .wrapper {
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   overflow: hidden;
+  border-radius: 5px;
   font-size: 14px;
   font-family: SimSun, Arial, Helvetica, sans-serif;
   color: var(--foreground);
-  background: var(--background);
+  background: none;
 }
 
 ::-webkit-scrollbar {
