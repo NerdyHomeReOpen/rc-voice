@@ -1712,6 +1712,48 @@ io.on('connection', async (socket) => {
     }
   });
 
+  socket.on('userAddFriend', async (data) => {
+    const users = (await db.get('users')) || {};
+    const servers = (await db.get('servers')) || {};
+    // const channels = (await db.get('channels')) || {};
+    // const presenceStates = (await db.get('presenceStates')) || {};
+
+    try {
+      const { sessionId, serverId, userId, targetId } = data;
+      if (!sessionId || !serverId || !userId || !targetId) {
+        throw new Error('Missing required fields');
+      }
+
+      const user = users[userId];
+      const target = users[targetId];
+      if (!user || !target) {
+        throw new Error(`User(${userId} or ${targetId}) not found`);
+      }
+
+      const server = servers[serverId];
+      if (!server) {
+        throw new Error(`Server(${serverId}) not found`);
+      }
+
+      //TODO: 加好友邏輯
+
+      new Logger('WebSocket').success(
+        `User(${targetId}) add friend from server(${server.id}) by user(${userId})`,
+      );
+    } catch (error) {
+      io.to(socket.id).emit('error', {
+        message: `新增好友時發生錯誤: ${error.message}`,
+        part: 'KICKUSERFROMCHANNEL',
+        tag: 'EXCEPTION_ERROR',
+        status_code: 500,
+      });
+
+      new Logger('WebSocket').error(
+        `Error kicking user from channel: ${error.message}`,
+      );
+    }
+  });
+
   socket.on('disconnectChannel', async (data) => {
     // data = {
     //   sessionId: '123456',
