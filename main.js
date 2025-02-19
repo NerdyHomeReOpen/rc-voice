@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const path = require('path');
-const {
-  app,
-  BrowserWindow,
-  ipcMain,
-  ipcRenderer,
-  contextBridge,
-} = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const isDev = require('electron-is-dev');
 
 const baseUri = isDev
@@ -15,8 +9,10 @@ const baseUri = isDev
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    minminWidth: 1200,
+    minminHeight: 800,
+    frame: false,
+    transparent: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -30,8 +26,10 @@ function createMainWindow() {
 
 function createAuthWindow() {
   const authWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    minWidth: 800,
+    minHeight: 600,
+    frame: false,
+    transparent: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -45,8 +43,10 @@ function createAuthWindow() {
 
 function createCreateServerPopup() {
   const createServerPopup = new BrowserWindow({
-    width: 800,
-    height: 600,
+    minWidth: 800,
+    minHeight: 600,
+    frame: false,
+    transparent: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -82,8 +82,4 @@ ipcMain.on('open-popup', (popup) => {
     default:
       break;
   }
-});
-
-contextBridge.exposeInMainWorld('electron', {
-  openPopup: () => ipcRenderer.send('open-popup'),
 });
