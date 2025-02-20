@@ -1,4 +1,4 @@
-export class AppError extends Error {
+export class SocketError extends Error {
   constructor(
     message: string,
     public part: string = 'UNKNOWN_PART',
@@ -15,20 +15,20 @@ export const standardizedError = (
   error: unknown,
   part?: string,
   tag?: string,
-): AppError => {
-  if (error instanceof AppError) {
+): SocketError => {
+  if (error instanceof SocketError) {
     return error;
   }
 
   if (error instanceof Error) {
-    return new AppError(error.message, part, tag);
+    return new SocketError(error.message, part, tag);
   }
 
-  return new AppError('未知錯誤', 'UNKNOWN_ERROR');
+  return new SocketError('未知錯誤', 'UNKNOWN_ERROR');
 };
 
 export class errorHandler {
-  private static logError(error: AppError): void {
+  private static logError(error: SocketError): void {
     alert(error.message);
     const situation = (() => {
       switch (error.status_code) {
@@ -46,7 +46,7 @@ export class errorHandler {
       `${error.message}:The error at ${error.part} with tag ${error.tag} is ${situation}`,
     );
   }
-  public static ResponseError(error: AppError): void {
+  public static ResponseError(error: SocketError): void {
     this.logError(error);
     errorHandler.handle();
     errorHandler.handle = () => {};

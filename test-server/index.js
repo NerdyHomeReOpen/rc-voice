@@ -98,6 +98,22 @@ const sendError = (res, statusCode, message) => {
   res.end(JSON.stringify({ error: message }));
 };
 
+//socket error
+class SocketError extends Error {
+  constructor(
+    message = 'unknown error',
+    part = 'UNKNOWN_PART',
+    tag = 'UNKNOWN_ERROR',
+    status_code = 500,
+  ) {
+    super(message);
+    this.name = 'SocketError';
+    this.part = part;
+    this.tag = tag;
+    this.status_code = status_code;
+  }
+}
+
 const sendSuccess = (res, data) => {
   res.writeHead(200, CONTENT_TYPE_JSON);
   res.end(JSON.stringify(data));
@@ -597,15 +613,30 @@ io.on('connection', async (socket) => {
       // Validate data
       const userId = socketToUser.get(socket.id);
       if (!userId) {
-        throw new Error('Invalid socket ID');
+        throw new SocketError(
+          'Invalid socket ID',
+          'DISCONNECT',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'DISCONNECT',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'DISCONNECT',
+          'PRESENCE',
+          404,
+        );
       }
       const channel = channels[presence.currentChannelId];
       if (!channel) {
@@ -625,7 +656,12 @@ io.on('connection', async (socket) => {
 
       // Remove user socket connection
       if (!deleteUserIdSocketIdMap(userId, socket.id)) {
-        throw new Error('Cannot delete user socket connection');
+        throw new SocketError(
+          'Cannot delete user socket connection',
+          'DISCONNECT',
+          'DELETE_ID_FUNCTION',
+          500,
+        );
       }
 
       // Update user presence
@@ -654,12 +690,21 @@ io.on('connection', async (socket) => {
 
       new Logger('WebSocket').success(`User(${userId}) disconnected`);
     } catch (error) {
-      socket.emit('error', {
-        message: `斷線時發生錯誤: ${error.message}`,
-        part: 'DISCONNECTUSER',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `斷線時發生無法預期的錯誤: ${error.message}`,
+          part: 'DISCONNECT',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
 
       new Logger('WebSocket').error(
         `Error disconnecting user: ${error.message}`,
@@ -680,15 +725,30 @@ io.on('connection', async (socket) => {
       // Validate data
       const sessionId = data.sessionId;
       if (!sessionId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'CONNECTUSER',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error('Invalid session ID');
+        throw new SocketError(
+          'Invalid session ID(${sessionId})',
+          'CONNECTUSER',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'CONNECTUSER',
+          'USER',
+          404,
+        );
       }
 
       // Check if user is already connected
@@ -696,7 +756,12 @@ io.on('connection', async (socket) => {
         if (value === userId) {
           // Remove user socket connection
           if (!deleteUserIdSocketIdMap(value, key)) {
-            throw new Error('Cannot delete user socket connection');
+            throw new SocketError(
+              'Cannot delete user socket connection',
+              'CONNECTUSER',
+              'DELETE_ID_FUNCTION',
+              500,
+            );
           }
 
           // Emit force disconnect event
@@ -710,7 +775,12 @@ io.on('connection', async (socket) => {
 
       // Save user socket connection
       if (!createUserIdSocketIdMap(userId, socket.id)) {
-        throw new Error('Cannot create user socket connection');
+        throw new SocketError(
+          'Cannot create user socket connection',
+          'CONNECTUSER',
+          'CREATE_ID_FUNCTION',
+          500,
+        );
       }
 
       // Emit data (only to the user)
@@ -723,13 +793,21 @@ io.on('connection', async (socket) => {
     } catch (error) {
       // Emit error data (only to the user)
       io.to(socket.id).emit('userDisconnect', null);
-      io.to(socket.id).emit('error', {
-        message: `取得使用者時發生錯誤: ${error.message}`,
-        part: 'CONNECTUSER',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `取得使用者時發生無法預期的錯誤: ${error.message}`,
+          part: 'CONNECTUSER',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(
         `Error getting user data: ${error.message}`,
       );
@@ -752,19 +830,39 @@ io.on('connection', async (socket) => {
       // Validate data
       const sessionId = data.sessionId;
       if (!sessionId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'DISCONNECTUSER',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error('Invalid session ID');
+        throw new SocketError(
+          'Invalid session ID(${sessionId})',
+          'DISCONNECTUSER',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'DISCONNECTUSER',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'DISCONNECTUSER',
+          'PRESENCE',
+          404,
+        );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
@@ -781,7 +879,12 @@ io.on('connection', async (socket) => {
 
       // Remove user socket connection
       if (!deleteUserIdSocketIdMap(userId, socket.id)) {
-        throw new Error('Cannot delete user socket connection');
+        throw new SocketError(
+          'Cannot delete user socket connection',
+          'DISCONNECTUSER',
+          'DELETE_ID_FUNCTION',
+          500,
+        );
       }
 
       // Update user presence
@@ -831,12 +934,21 @@ io.on('connection', async (socket) => {
 
       new Logger('WebSocket').success(`User(${userId}) disconnected`);
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `登出時發生錯誤: ${error.message}`,
-        part: 'DISCONNECTUSER',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `登出時發生無法預期的錯誤: ${error.message}`,
+          part: 'DISCONNECTUSER',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
 
       new Logger('WebSocket').error(
         `Error disconnecting user: ${error.message}`,
@@ -855,28 +967,53 @@ io.on('connection', async (socket) => {
       // Validate data
       const { sessionId, serverId, updates } = data;
       if (!sessionId || !serverId || !updates) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'UPDATESERVER',
+          'DATA',
+          400,
+        );
       }
 
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          'Invalid session ID(${sessionId})',
+          'UPDATESERVER',
+          'USER_ID',
+          400,
+        );
       }
 
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'UPDATESERVER',
+          'USER',
+          404,
+        );
       }
 
       const server = servers[serverId];
       if (!server) {
-        throw new Error(`Server(${serverId}) not found`);
+        throw new SocketError(
+          `Server(${serverId}) not found`,
+          'UPDATESERVER',
+          'SERVER',
+          404,
+        );
       }
 
       // Check permissions
       const userPermission = await getPermissionLevel(userId, server.id);
       if (userPermission < 5) {
-        throw new Error('Insufficient permissions');
+        throw new SocketError(
+          'Insufficient permissions',
+          'UPDATESERVER',
+          'PERMISSION',
+          403,
+        );
       }
 
       if (updates.fileData && updates.fileType) {
@@ -919,10 +1056,20 @@ io.on('connection', async (socket) => {
         serverUpdates.name &&
         (serverUpdates.name.length > 30 || !serverUpdates.name.trim())
       ) {
-        throw new Error('Invalid server name');
+        throw new SocketError(
+          'Invalid server name',
+          'UPDATESERVER',
+          'NAME',
+          400,
+        );
       }
       if (serverUpdates.description && serverUpdates.description.length > 200) {
-        throw new Error('Description too long');
+        throw new SocketError(
+          'Invalid server description',
+          'UPDATESERVER',
+          'DESCRIPTION',
+          400,
+        );
       }
 
       // Create new server object with only allowed updates
@@ -957,14 +1104,21 @@ io.on('connection', async (socket) => {
       if (uploadedFilePath) {
         fs.unlink(uploadedFilePath).catch(console.error);
       }
-
-      socket.emit('error', {
-        message: `更新伺服器時發生錯誤: ${error.message}`,
-        part: 'UPDATESERVER',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `更新伺服器時發生無法預期的錯誤: ${error.message}`,
+          part: 'UPDATESERVER',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('Server').error(`Error updating server: ${error.message}`);
     }
   });
@@ -988,15 +1142,30 @@ io.on('connection', async (socket) => {
       const sessionId = data.sessionId;
       const editedUser = data.user;
       if (!sessionId || !editedUser) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'UPDATEUSER',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          'Invalid session ID(${sessionId})',
+          'UPDATEUSER',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'UPDATEUSER',
+          'USER',
+          404,
+        );
       }
 
       // Update user data
@@ -1013,13 +1182,21 @@ io.on('connection', async (socket) => {
 
       new Logger('WebSocket').success(`User(${userId}) updated`);
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `更新使用者時發生錯誤: ${error.message}`,
-        part: 'UPDATEUSER',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `更新使用者時發生無法預期的錯誤: ${error.message}`,
+          part: 'UPDATEUSER',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(`Error updating user: ${error.message}`);
     }
   });
@@ -1043,19 +1220,39 @@ io.on('connection', async (socket) => {
       const sessionId = data.sessionId;
       const editedPresence = data.presence;
       if (!sessionId || !editedPresence) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'UPDATEPRESENCE',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          'Invalid session ID(${sessionId})',
+          'UPDATEPRESENCE',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'UPDATEPRESENCE',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'UPDATEPRESENCE',
+          'PRESENCE',
+          404,
+        );
       }
 
       // Update user presence
@@ -1076,13 +1273,22 @@ io.on('connection', async (socket) => {
 
       new Logger('WebSocket').success(`User(${userId}) presence updated`);
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `更新狀態時發生錯誤: ${error.message}`,
-        part: 'UPDATEPRESENCE',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
 
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `更新狀態時發生無法預期的錯誤: ${error.message}`,
+          part: 'UPDATEPRESENCE',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(
         `Error updating presence: ${error.message}`,
       );
@@ -1107,23 +1313,48 @@ io.on('connection', async (socket) => {
       const sessionId = data.sessionId;
       const serverId = data.serverId;
       if (!sessionId || !serverId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'CONNECTSERVER',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'CONNECTSERVER',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'CONNECTSERVER',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'CONNECTSERVER',
+          'PRESENCE',
+          404,
+        );
       }
       const server = servers[serverId];
       if (!server) {
-        throw new Error(`Server(${serverId}) not found`);
+        throw new SocketError(
+          `Server(${serverId}) not found`,
+          'CONNECTSERVER',
+          'SERVER',
+          404,
+        );
       }
 
       // Check if user is already exists in the server
@@ -1180,13 +1411,23 @@ io.on('connection', async (socket) => {
     } catch (error) {
       // Emit error data (only to the user)
       io.to(socket.id).emit('serverDisconnect');
-      io.to(socket.id).emit('error', {
-        message: `加入伺服器時發生錯誤: ${error.message}`,
-        part: 'CONNECTSERVER',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
 
+          part: error.part,
+
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `加入伺服器時發生無法預期的錯誤: ${error.message}`,
+          part: 'CONNECTSERVER',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(
         `Error getting server data: ${error.message}`,
       );
@@ -1209,23 +1450,48 @@ io.on('connection', async (socket) => {
       // Validate data
       const sessionId = data.sessionId;
       if (!sessionId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'DISCONNECTSERVER',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'DISCONNECTSERVER',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'DISCONNECTSERVER',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'DISCONNECTSERVER',
+          'PRESENCE',
+          404,
+        );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(`Server(${presence.currentServerId}) not found`);
+        throw new SocketError(
+          `Server(${presence.currentServerId}) not found`,
+          'DISCONNECTSERVER',
+          'SERVER',
+          404,
+        );
       }
       const channel = channels[presence.currentChannelId];
       if (!channel) {
@@ -1280,13 +1546,21 @@ io.on('connection', async (socket) => {
         `User(${userId}) disconnected from server(${server.id})`,
       );
     } catch (error) {
-      socket.emit('error', {
-        message: `離開伺服器時發生錯誤: ${error.message}`,
-        part: 'DISCONNECTSERVER',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `離開伺服器時發生無法預期的錯誤: ${error.message}`,
+          part: 'DISCONNECTSERVER',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(
         `Error disconnecting from server: ${error.message}`,
       );
@@ -1311,30 +1585,65 @@ io.on('connection', async (socket) => {
       const sessionId = data.sessionId;
       const channelId = data.channelId;
       if (!sessionId || !channelId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'CONNECTCHANNEL',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'CONNECTCHANNEL',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'CONNECTCHANNEL',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'CONNECTCHANNEL',
+          'PRESENCE',
+          404,
+        );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(`Server(${presence.currentServerId}) not found`);
+        throw new SocketError(
+          `Server(${presence.currentServerId}) not found`,
+          'CONNECTCHANNEL',
+          'SERVER',
+          404,
+        );
       }
       const channel = channels[channelId];
       if (!channel && channelId) {
-        throw new Error(`Channel(${channelId}) not found`);
+        throw new SocketError(
+          `Channel(${channelId}) not found`,
+          'CONNECTCHANNEL',
+          'CHANNEL',
+          404,
+        );
       }
       if (channel.permission === 'private') {
-        throw new Error(`Permission denied`);
+        throw new SocketError(
+          'Insufficient permissions',
+          'CONNECTCHANNEL',
+          'CHANNEL_PERMISSION',
+          403,
+        );
       }
       const prevChannel = channels[presence.currentChannelId];
 
@@ -1395,13 +1704,21 @@ io.on('connection', async (socket) => {
     } catch (error) {
       // Emit error data (only to the user)
       io.to(socket.id).emit('channelDisconnect');
-      io.to(socket.id).emit('error', {
-        message: `加入頻道時失敗: ${error.message}`,
-        part: 'JOINCHANNEL',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `加入頻道時發生無法預期的錯誤: ${error.message}`,
+          part: 'JOINCHANNEL',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(
         `Error connecting to channel: ${error.message}`,
       );
@@ -1418,21 +1735,54 @@ io.on('connection', async (socket) => {
     try {
       const { sessionId, serverId } = data;
       if (!sessionId || !serverId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'GETAPPLICATIONS',
+          'DATA',
+          400,
+        );
       }
 
       const userId = userSessions.get(sessionId);
-      if (!userId) throw new Error('Invalid session ID');
+      if (!userId) {
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'GETAPPLICATIONS',
+          'USER_ID',
+          400,
+        );
+      }
 
       const user = users[userId];
-      if (!user) throw new Error('User not found');
+      if (!user) {
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'GETAPPLICATIONS',
+          'USER',
+          404,
+        );
+      }
 
       const server = servers[serverId];
-      if (!server) throw new Error('Server not found');
+      if (!server) {
+        throw new SocketError(
+          `Server(${serverId}) not found`,
+          'GETAPPLICATIONS',
+          'SERVER',
+          404,
+        );
+      }
 
       // Check if user has permission to view applications
       const userPermission = await getPermissionLevel(userId, server.id);
-      if (userPermission < 5) throw new Error('Insufficient permissions');
+      if (userPermission < 5) {
+        throw new SocketError(
+          'Insufficient permissions',
+          'GETAPPLICATIONS',
+          'USER_PERMISSION',
+          403,
+        );
+      }
 
       // Get all applications for this server
       const serverApplications = Object.values(applications)
@@ -1450,12 +1800,21 @@ io.on('connection', async (socket) => {
         `Applications fetched for server(${serverId})`,
       );
     } catch (error) {
-      socket.emit('error', {
-        message: `獲取申請列表時發生錯誤: ${error.message}`,
-        part: 'GETAPPLICATIONS',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `獲取申請列表時發生無法預期的錯誤: ${error.message}`,
+          part: 'GETAPPLICATIONS',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('Applications').error(
         `Error getting applications: ${error.message}`,
       );
@@ -1471,24 +1830,64 @@ io.on('connection', async (socket) => {
     try {
       const { sessionId, serverId, applicationId, action } = data;
       if (!sessionId || !serverId || !applicationId || !action) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'HANDLEAPPLICATION',
+          'DATA',
+          400,
+        );
       }
 
       const userId = userSessions.get(sessionId);
-      if (!userId) throw new Error('Invalid session ID');
+      if (!userId) {
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'HANDLEAPPLICATION',
+          'USER_ID',
+          400,
+        );
+      }
 
       const user = users[userId];
-      if (!user) throw new Error('User not found');
+      if (!user) {
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'HANDLEAPPLICATION',
+          'USER',
+          404,
+        );
+      }
 
       const server = servers[serverId];
-      if (!server) throw new Error('Server not found');
+      if (!server) {
+        throw new SocketError(
+          `Server(${serverId}) not found`,
+          'HANDLEAPPLICATION',
+          'SERVER',
+          404,
+        );
+      }
 
       // Check if user has permission to handle applications
       const userPermission = await getPermissionLevel(userId, server.id);
-      if (userPermission < 5) throw new Error('Insufficient permissions');
+      if (userPermission < 5) {
+        throw new SocketError(
+          'Insufficient permissions',
+          'HANDLEAPPLICATION',
+          'USER_PERMISSION',
+          403,
+        );
+      }
 
       const application = applications[applicationId];
-      if (!application) throw new Error('Application not found');
+      if (!application) {
+        throw new SocketError(
+          `Application(${applicationId}) not found`,
+          'HANDLEAPPLICATION',
+          'APPLICATION',
+          404,
+        );
+      }
 
       if (action === 'accept') {
         // Create new membership if it doesn't exist
@@ -1537,12 +1936,21 @@ io.on('connection', async (socket) => {
         `Application(${applicationId}) ${action}ed for server(${serverId})`,
       );
     } catch (error) {
-      socket.emit('error', {
-        message: `處理申請時發生錯誤: ${error.message}`,
-        part: 'HANDLEAPPLICATION',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `處理申請時發生無法預期的錯誤: ${error.message}`,
+          part: 'HANDLEAPPLICATION',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('Applications').error(
         `Error handling application: ${error.message}`,
       );
@@ -1558,23 +1966,57 @@ io.on('connection', async (socket) => {
     try {
       // Validate data
       const { sessionId, serverId, application } = data;
-      if (!sessionId || !serverId || !application)
-        throw new Error('Missing required fields');
+      if (!sessionId || !serverId || !application) {
+        throw new SocketError(
+          'Missing required fields',
+          'APPLYSERVERMEMBERSHIP',
+          'DATA',
+          400,
+        );
+      }
 
       const userId = userSessions.get(sessionId);
-      if (!userId) throw new Error('Invalid session ID');
+      if (!userId) {
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'APPLYSERVERMEMBERSHIP',
+          'USER_ID',
+          400,
+        );
+      }
 
       const user = users[userId];
-      if (!user) throw new Error('User not found');
+      if (!user) {
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'APPLYSERVERMEMBERSHIP',
+          'USER',
+          404,
+        );
+      }
 
       const server = servers[serverId];
-      if (!server) throw new Error('Server not found');
+      if (!server) {
+        throw new SocketError(
+          `Server(${serverId}) not found`,
+          'APPLYSERVERMEMBERSHIP',
+          'SERVER',
+          404,
+        );
+      }
 
       // Check if user already has a pending application
       const existingApplication = Object.values(applications).find(
         (app) => app.userId === userId && app.serverId === serverId,
       );
-      if (existingApplication) throw new Error('你已經有一個待審核的申請了');
+      if (existingApplication) {
+        throw new SocketError(
+          'You already have a pending application',
+          'APPLYSERVERMEMBERSHIP',
+          'APPLICATION',
+          400,
+        );
+      }
 
       // Create new application
       const applicationId = uuidv4();
@@ -1602,7 +2044,7 @@ io.on('connection', async (socket) => {
         `User(${userId}) applied to server(${serverId})`,
       );
     } catch (error) {
-      socket.emit('applicationResponse', {
+      io.to(socket.id).emit('applicationResponse', {
         success: false,
         message: `申請失敗: ${error.message}`,
       });
@@ -1618,40 +2060,75 @@ io.on('connection', async (socket) => {
     try {
       const { sessionId, serverId, userId, targetId } = data;
       if (!sessionId || !serverId || !userId || !targetId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'USERKICKED',
+          'DATA',
+          400,
+        );
       }
 
       const user = users[userId];
       const target = users[targetId];
       if (!user || !target) {
-        throw new Error(`User(${userId} or ${targetId}) not found`);
+        throw new SocketError(
+          `User(${userId} or ${targetId}) not found`,
+          'USERKICKED',
+          'USER',
+          404,
+        );
       }
 
       const presence = presenceStates[`presence_${targetId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${targetId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${targetId}`}) not found`,
+          'USERKICKED',
+          'PRESENCE',
+          404,
+        );
       }
 
       const server = servers[serverId];
       if (!server) {
-        throw new Error(`Server(${serverId}) not found`);
+        throw new SocketError(
+          `Server(${serverId}) not found`,
+          'USERKICKED',
+          'SERVER',
+          404,
+        );
       }
 
       const channel = channels[presence.currentChannelId];
       if (!channel) {
-        throw new Error(`Channel(${presence.currentChannelId}) not found`);
+        throw new SocketError(
+          `Channel(${presence.currentChannelId}) not found`,
+          'USERKICKED',
+          'CHANNEL',
+          404,
+        );
       }
 
       // 檢查權限
       const userPermission = await getPermissionLevel(userId, server.id);
       if (userPermission < 3) {
-        throw new Error('Insufficient permissions');
+        throw new SocketError(
+          'Insufficient permissions',
+          'USERKICKED',
+          'USER_PERMISSION',
+          403,
+        );
       }
 
       // 獲取被踢用戶的 socket.id
       const targetSocketId = userToSocket.get(targetId);
       if (!targetSocketId) {
-        throw new Error(`User(${targetId}) is not connected`);
+        throw new SocketError(
+          `User(${targetId}) is not connected`,
+          'USERKICKED',
+          'USER',
+          404,
+        );
       }
 
       // 從頻道移除
@@ -1673,7 +2150,7 @@ io.on('connection', async (socket) => {
       const sockets = await io.fetchSockets();
 
       for (const socket of sockets) {
-        if (socket.id == targetSocketId){
+        if (socket.id == targetSocketId) {
           // Leave the server
           socket.leave(`channel_${channel.id}`);
           socket.leave(`server_${server.id}`);
@@ -1699,13 +2176,21 @@ io.on('connection', async (socket) => {
         `User(${targetId}) kicked from server(${server.id}) by user(${userId})`,
       );
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `踢出使用者時發生錯誤: ${error.message}`,
-        part: 'KICKUSERFROMCHANNEL',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `踢出使用者時發生無法預期的錯誤: ${error.message}`,
+          part: 'USERKICKED',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(
         `Error kicking user from channel: ${error.message}`,
       );
@@ -1793,27 +2278,57 @@ io.on('connection', async (socket) => {
       // Validate data
       const sessionId = data.sessionId;
       if (!sessionId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'DISCONNECTCHANNEL',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'DISCONNECTCHANNEL',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'DISCONNECTCHANNEL',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'DISCONNECTCHANNEL',
+          'PRESENCE',
+          404,
+        );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(`Server(${presence.currentServerId}) not found`);
+        throw new SocketError(
+          `Server(${presence.currentServerId}) not found`,
+          'DISCONNECTCHANNEL',
+          'SERVER',
+          404,
+        );
       }
       const channel = channels[presence.currentChannelId];
       if (!channel) {
-        throw new Error(`Channel(${presence.currentChannelId}) not found`);
+        throw new SocketError(
+          `Channel(${presence.currentChannelId}) not found`,
+          'DISCONNECTCHANNEL',
+          'CHANNEL',
+          404,
+        );
       }
 
       // Clear user contribution interval
@@ -1855,13 +2370,21 @@ io.on('connection', async (socket) => {
         `User(${user.id}) disconnected from channel(${channel.id})`,
       );
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `離開頻道時發生錯誤: ${error.message}`,
-        part: 'DISCONNECTCHANNEL',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `離開頻道時發生無法預期的錯誤: ${error.message}`,
+          part: 'DISCONNECTCHANNEL',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(
         `Error disconnecting from channel: ${error.message}`,
       );
@@ -1890,27 +2413,57 @@ io.on('connection', async (socket) => {
       const sessionId = data.sessionId;
       const newMessage = data.message;
       if (!sessionId || !newMessage) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'SENDMESSAGE',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'SENDMESSAGE',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'SENDMESSAGE',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'SENDMESSAGE',
+          'PRESENCE',
+          404,
+        );
       }
       const channel = channels[presence.currentChannelId];
       if (!channel) {
-        throw new Error(`Channel(${presence.currentChannelId}) not found`);
+        throw new SocketError(
+          `Channel(${presence.currentChannelId}) not found`,
+          'SENDMESSAGE',
+          'CHANNEL',
+          404,
+        );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(`Server(${presence.currentServerId}) not found`);
+        throw new SocketError(
+          `Server(${presence.currentServerId}) not found`,
+          'SENDMESSAGE',
+          'SERVER',
+          404,
+        );
       }
 
       // Create new message
@@ -1936,13 +2489,21 @@ io.on('connection', async (socket) => {
         `User(${user.id}) sent ${message.content} to channel(${channel.id})`,
       );
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `傳送訊息時發生錯誤: ${error.message}`,
-        part: 'CHATMESSAGE',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `傳送訊息時發生無法預期的錯誤: ${error.message}`,
+          part: 'CHATMESSAGE',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error('Error sending message: ' + error.message);
     }
   });
@@ -1968,15 +2529,30 @@ io.on('connection', async (socket) => {
       const recieverId = data.recieverId;
       const newMessage = data.message;
       if (!sessionId || !newMessage) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'SENDDIRECTMESSAGE',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'SENDDIRECTMESSAGE',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'SENDDIRECTMESSAGE',
+          'USER',
+          404,
+        );
       }
 
       // Create new message
@@ -2020,12 +2596,21 @@ io.on('connection', async (socket) => {
         `User(${userId}) sent ${message.content} to user(${recieverId})`,
       );
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `傳送私訊時發生錯誤: ${error.message}`,
-        part: 'DIRECTMESSAGE',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `傳送私訊時發生無法預期的錯誤: ${error.message}`,
+          part: 'DIRECTMESSAGE',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
 
       new Logger('WebSocket').error(
         'Error sending direct message: ' + error.message,
@@ -2040,17 +2625,45 @@ io.on('connection', async (socket) => {
 
     try {
       const userId = userSessions.get(data.sessionId);
-      if (!userId) throw new Error('Invalid session ID');
+      if (!userId) {
+        throw new SocketError(
+          `Invalid session ID(${data.sessionId})`,
+          'UPDATECHANNELORDER',
+          'USER_ID',
+          400,
+        );
+      }
 
       const user = users[userId];
-      if (!user) throw new Error('User not found');
+      if (!user) {
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'UPDATECHANNELORDER',
+          'USER',
+          404,
+        );
+      }
 
       const server = servers[data.serverId];
-      if (!server) throw new Error('Server not found');
+      if (!server) {
+        throw new SocketError(
+          `Server(${data.serverId}) not found`,
+          'UPDATECHANNELORDER',
+          'SERVER',
+          404,
+        );
+      }
 
       // Check permissions
       const userPermission = await getPermissionLevel(userId, server.id);
-      if (userPermission < 5) throw new Error('Insufficient permissions');
+      if (userPermission < 5) {
+        throw new SocketError(
+          'Insufficient permissions',
+          'UPDATECHANNELORDER',
+          'USER_PERMISSION',
+          403,
+        );
+      }
 
       // Update channels with new order values
       for (const updatedChannel of data.updatedChannels) {
@@ -2080,12 +2693,21 @@ io.on('connection', async (socket) => {
         `Channels reordered in server(${server.id})`,
       );
     } catch (error) {
-      socket.emit('error', {
-        message: `更新頻道順序時發生錯誤: ${error.message}`,
-        part: 'UPDATECHANNELORDER',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `更新頻道順序時發生無法預期的錯誤: ${error.message}`,
+          part: 'UPDATECHANNELORDER',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error(
         `Error updating channel order: ${error.message}`,
       );
@@ -2101,17 +2723,32 @@ io.on('connection', async (socket) => {
       const { sessionId, searchQuery } = data;
 
       if (!sessionId) {
-        throw new Error('Missing session ID');
+        throw new SocketError(
+          'Missing required fields',
+          'GETSERVERS',
+          'DATA',
+          400,
+        );
       }
 
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error('Invalid session ID');
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'GETSERVERS',
+          'USER_ID',
+          400,
+        );
       }
 
       const user = users[userId];
       if (!user) {
-        throw new Error('User not found');
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'GETSERVERS',
+          'USER',
+          404,
+        );
       }
 
       // Get user's joined server IDs
@@ -2187,12 +2824,21 @@ io.on('connection', async (socket) => {
         joinedServers,
       });
     } catch (error) {
-      socket.emit('error', {
-        message: `搜尋伺服器時發生錯誤: ${error.message}`,
-        part: 'SEARCHSERVERS',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `搜尋伺服器時發生無法預期的錯誤: ${error.message}`,
+          part: 'SEARCHSERVERS',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
     }
   });
 
@@ -2220,28 +2866,60 @@ io.on('connection', async (socket) => {
       const sessionId = data.sessionId;
       const newChannel = data.channel;
       if (!sessionId || !newChannel) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'ADDCHANNEL',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'ADDCHANNEL',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'ADDCHANNEL',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'ADDCHANNEL',
+          'PRESENCE',
+          404,
+        );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(`Server(${presence.currentServerId}) not found`);
+        throw new SocketError(
+          `Server(${presence.currentServerId}) not found`,
+          'ADDCHANNEL',
+          'SERVER',
+          404,
+        );
       }
 
       // Check permissions
       const userPermission = await getPermissionLevel(userId, server.id);
-      if (userPermission < 5) throw new Error('Insufficient permissions');
+      if (userPermission < 5) {
+        throw new SocketError(
+          'Insufficient permissions',
+          'ADDCHANNEL',
+          'USER_PERMISSION',
+          403,
+        );
+      }
 
       // Create new channel
       const channelId = uuidv4();
@@ -2266,13 +2944,21 @@ io.on('connection', async (socket) => {
         `Adding new channel(${channel.id}) to server(${server.id})`,
       );
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `新增頻道時發生錯誤: ${error.message}`,
-        part: 'ADDCHANNEL',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `新增頻道時發生無法預期的錯誤: ${error.message}`,
+          part: 'ADDCHANNEL',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error('Error adding channel: ' + error.message);
     }
   });
@@ -2301,33 +2987,70 @@ io.on('connection', async (socket) => {
       const sessionId = data.sessionId;
       const editedChannel = data.channel;
       if (!sessionId || !editedChannel) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'EDITCHANNEL',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'EDITCHANNEL',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'EDITCHANNEL',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'EDITCHANNEL',
+          'PRESENCE',
+          404,
+        );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(`Server(${presence.currentServerId}) not found`);
+        throw new SocketError(
+          `Server(${presence.currentServerId}) not found`,
+          'EDITCHANNEL',
+          'SERVER',
+          404,
+        );
       }
       console.log(editedChannel);
       const channel = channels[editedChannel.id];
       if (!channel) {
-        throw new Error(`Channel(${editedChannel.id}) not found`);
+        throw new SocketError(
+          `Channel(${editedChannel.id}) not found`,
+          'EDITCHANNEL',
+          'CHANNEL',
+          404,
+        );
       }
 
       // Check permissions
       const userPermission = await getPermissionLevel(userId, server.id);
-      if (userPermission < 4) throw new Error('Insufficient permissions');
+      if (userPermission < 4) {
+        throw new SocketError(
+          'Insufficient permissions',
+          'EDITCHANNEL',
+          'USER_PERMISSION',
+          403,
+        );
+      }
 
       // Update channel
       channels[channel.id] = {
@@ -2345,13 +3068,21 @@ io.on('connection', async (socket) => {
         `Edit channel(${channel.id}) in server(${server.id})`,
       );
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `編輯頻道時發生錯誤: ${error.message}`,
-        part: 'EDITCHANNEL',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `編輯頻道時發生無法預期的錯誤: ${error.message}`,
+          part: 'EDITCHANNEL',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error('Error editing channel: ' + error.message);
     }
   });
@@ -2374,27 +3105,57 @@ io.on('connection', async (socket) => {
       const sessionId = data.sessionId;
       const channelId = data.channelId;
       if (!sessionId || !channelId) {
-        throw new Error('Missing required fields');
+        throw new SocketError(
+          'Missing required fields',
+          'DELETECHANNEL',
+          'DATA',
+          400,
+        );
       }
       const userId = userSessions.get(sessionId);
       if (!userId) {
-        throw new Error(`Invalid session ID(${sessionId})`);
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'DELETECHANNEL',
+          'USER_ID',
+          400,
+        );
       }
       const user = users[userId];
       if (!user) {
-        throw new Error(`User(${userId}) not found`);
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'DELETECHANNEL',
+          'USER',
+          404,
+        );
       }
       const presence = presenceStates[`presence_${userId}`];
       if (!presence) {
-        throw new Error(`Presence(${`presence_${userId}`}) not found`);
+        throw new SocketError(
+          `Presence(${`presence_${userId}`}) not found`,
+          'DELETECHANNEL',
+          'PRESENCE',
+          404,
+        );
       }
       const server = servers[presence.currentServerId];
       if (!server) {
-        throw new Error(`Server(${presence.currentServerId}) not found`);
+        throw new SocketError(
+          `Server(${presence.currentServerId}) not found`,
+          'DELETECHANNEL',
+          'SERVER',
+          404,
+        );
       }
       const channel = channels[channelId];
       if (!channel) {
-        throw new Error(`Channel(${channelId}) not found`);
+        throw new SocketError(
+          `Channel(${channelId}) not found`,
+          'DELETECHANNEL',
+          'CHANNEL',
+          404,
+        );
       }
 
       // Delete channel
@@ -2412,13 +3173,21 @@ io.on('connection', async (socket) => {
         `Remove channel(${channel.id}) from server(${server.id})`,
       );
     } catch (error) {
-      io.to(socket.id).emit('error', {
-        message: `刪除頻道時發生錯誤: ${error.message}`,
-        part: 'DELETECHANNEL',
-        tag: 'EXCEPTION_ERROR',
-        status_code: 500,
-      });
-
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', {
+          message: error.message,
+          part: error.part,
+          tag: error.tag,
+          status_code: error.status_code,
+        });
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `刪除頻道時發生無法預期的錯誤: ${error.message}`,
+          part: 'DELETECHANNEL',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
       new Logger('WebSocket').error('Error deleting channel: ' + error.message);
     }
   });
