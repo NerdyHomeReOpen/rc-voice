@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
 import { Html, Head, Main, NextScript } from 'next/document';
 
-// .css
-import '@/styles/globals.css';
-
 export const metadata: Metadata = {
   title: 'RiceCall',
   description:
