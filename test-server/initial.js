@@ -254,6 +254,7 @@ const db = new QuickDB();
 //   },
 // };
 
+const account_password = {};
 const users = {};
 const friends = {};
 const friendGroups = {};
