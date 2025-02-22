@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 import dynamic from 'next/dynamic';
-import React, { useState, useEffect } from 'react';
-import { ipcRenderer } from 'electron';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 // CSS
 import styles from '@/styles/homePage.module.css';
@@ -14,15 +14,12 @@ import ServerApplicationModal from '@/components/modals/ServerApplicationModal';
 // Type
 import type { Server, User } from '@/types';
 
-// Redux
-import { useSelector } from 'react-redux';
-
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 import { errorHandler } from '@/utils/errorHandler';
 
 // Services
-import { API_URL, apiService } from '@/services/api.service';
+import { API_URL } from '@/services/api.service';
 
 // ServerCard Component
 interface ServerCardProps {
@@ -155,8 +152,9 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
             className={styles['navegateItem']}
             data-key="30014"
             onClick={() => {
+              // @ts-ignore
+              window.electron?.send('open-popup', 'create-server');
               window.location.href = '/popup?page=create-server';
-              ipcRenderer.send('open-popup', 'create-server');
             }}
           >
             <div></div>
@@ -186,38 +184,7 @@ const HomePageComponent: React.FC = React.memo(() => {
   const socket = useSocket();
 
   // State
-  const [recommendedServers, setRecommendedServers] = useState<Server[]>([]);
-  const [joinedServers, setJoinedServers] = useState<Server[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    if (!socket || !sessionId) return;
-
-    // Fetch server data
-    const fetchServerData = () => {
-      socket.emit('getServers', { sessionId, searchQuery });
-    };
-
-    // Handle server updates
-    const handleServerUpdate = (data: {
-      recommendedServers: Server[];
-      joinedServers: Server[];
-    }) => {
-      setRecommendedServers(data.recommendedServers ?? []);
-      setJoinedServers(data.joinedServers ?? []);
-    };
-
-    // Set up event listeners
-    socket.on('serversUpdate', handleServerUpdate);
-
-    // Initial fetch
-    fetchServerData();
-
-    // Cleanup
-    return () => {
-      socket.off('serversUpdate', handleServerUpdate);
-    };
-  }, [socket, sessionId, searchQuery]);
 
   // Test
   const userServers = user.servers ?? [];
@@ -227,16 +194,16 @@ const HomePageComponent: React.FC = React.memo(() => {
       <Header onSearch={(query: string) => setSearchQuery(query)} />
       <main className="flex flex-1 min-h-0 bg-gray-100">
         <div className="flex flex-1 flex-col item-center space-y-6 p-8 overflow-y-auto">
-          {searchQuery && joinedServers.length > 0 && (
+          {/* {searchQuery && joinedServers.length > 0 && (
             <section>
               <h2 className="text-lg font-bold mb-3">搜尋結果</h2>
               <ServerGrid servers={joinedServers} />
             </section>
-          )}
+          )} */}
           {!searchQuery && (
             <>
               <section className="mb-6">
-                <h2 className="text-lg font-bold mb-3">推薦語音群</h2>
+                <h2 className="text-lg font-bold mb-3">最近語音群</h2>
                 <ServerGrid servers={userServers} />
               </section>
               <section>

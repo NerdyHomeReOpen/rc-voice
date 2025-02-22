@@ -245,11 +245,10 @@ const channelHandler = {
 
       // Create new channel
       const channelId = uuidv4();
-      Set.channel(channelId, {
-        ...channel,
-        id: channelId,
+      await Set.channel(channelId, {
+        name: channel.name,
         serverId: server.id,
-        order: server.channelIds.length,
+        order: await Get.serverChannels(server.id).length,
         createdAt: Date.now().valueOf(),
       });
 
@@ -259,7 +258,7 @@ const channelHandler = {
       });
 
       new Logger('WebSocket').info(
-        `Adding new channel(${channel.id}) to server(${server.id})`,
+        `Adding new channel(${channelId}) to server(${server.id})`,
       );
     } catch (error) {
       // Emit error data (only to the user)

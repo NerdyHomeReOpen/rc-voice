@@ -108,7 +108,6 @@ const get = {
   },
   serverUsers: async (serverId) => {
     const users = (await db.get('users')) || {};
-
     return [
       ...Object.values(users).filter(
         (user) => user.currentServerId === serverId,
@@ -154,10 +153,16 @@ const get = {
   },
   channelMessage: async (channelId) => {
     const messages = (await db.get('messages')) || {};
+    const users = (await db.get('users')) || {};
     return [
-      ...Object.values(messages).filter(
-        (message) => message.channelId === channelId,
-      ),
+      ...Object.values(messages)
+        .filter((message) => message.channelId === channelId)
+        .map((message) => {
+          return {
+            ...message,
+            sender: users[message.senderId],
+          };
+        }),
     ];
   },
   channelChildren: async (channelId) => {
@@ -168,6 +173,33 @@ const get = {
         .filter((relation) => relation.parentId === channelId)
         .map((relation) => channels[relation.childId])
         .filter((channel) => channel),
+    ];
+  },
+  // Friend
+  friend: async (friendId) => {
+    const friends = (await db.get('friends')) || {};
+    const users = (await db.get('users')) || {};
+    const friend = friends[friendId];
+    if (!friend) return null;
+    return {
+      ...friend,
+      user: users[
+        friend.user1Id === friendId ? friend.user2Id : friend.user1Id
+      ],
+      directMessages: await get.friendDriectMessages(friendId),
+    };
+  },
+  friendDriectMessages: async (friendId) => {
+    const directMessages = (await db.get('directMessages')) || {};
+    return [
+      ...Object.values(directMessages)
+        .filter((directMessage) => directMessage.friendId === friendId)
+        .map((directMessage) => {
+          return {
+            ...directMessage,
+            sender: users[directMessage.senderId],
+          };
+        }),
     ];
   },
   // Message
@@ -191,26 +223,6 @@ const get = {
       ...directMessage,
       sender: users[message.senderId],
     };
-  },
-  // Friend
-  friend: async (friendId) => {
-    const friends = (await db.get('friends')) || {};
-    const users = (await db.get('users')) || {};
-    const friend = friends[friendId];
-    if (!friend) return null;
-    return {
-      ...friend,
-      users: [users[friend.user1Id], users[friend.user2Id]],
-      directMessages: await get.friendDriectMessages(friendId),
-    };
-  },
-  friendDriectMessages: async (friendId) => {
-    const directMessages = (await db.get('directMessages')) || {};
-    return [
-      ...Object.values(directMessages).filter(
-        (directMessage) => directMessage.friendId === friendId,
-      ),
-    ];
   },
 };
 
