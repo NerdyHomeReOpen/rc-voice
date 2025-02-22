@@ -2,7 +2,9 @@ const map = {
   userSessions: new Map(), // sessionToken -> userId
   userToSocket: new Map(), // userId -> socket.id
   socketToUser: new Map(), // socket.id -> userId
-  contributionInterval: new Map(), // socket.id -> interval
+  contributionIntervalMap: new Map(), // socket.id -> interval
+  userLastXpAwardedAt: new Map(),
+  userElapsedTime: new Map(),
   createUserIdSessionIdMap: (userId, sessionId) => {
     if (!map.userSessions.has(sessionId)) {
       map.userSessions.set(sessionId, userId);
@@ -41,15 +43,15 @@ const map = {
     return false;
   },
   createContributionIntervalMap: (socketId, intervalId) => {
-    if (!map.contributionInterval.has(socketId)) {
-      map.contributionInterval.set(socketId, intervalId);
+    if (!map.contributionIntervalMap.has(socketId)) {
+      map.contributionIntervalMap.set(socketId, intervalId);
       return true;
     }
     return false;
   },
   deleteContributionIntervalMap: (socketId) => {
-    if (map.contributionInterval.has(socketId)) {
-      map.contributionInterval.delete(socketId);
+    if (map.contributionIntervalMap.has(socketId)) {
+      map.contributionIntervalMap.delete(socketId);
       return true;
     }
     return false;

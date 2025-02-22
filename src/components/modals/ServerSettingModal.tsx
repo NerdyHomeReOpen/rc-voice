@@ -313,10 +313,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
       if (Object.values(newErrors).some((error) => error)) return;
 
       // Prepare updates object
-      const updates: Partial<Server> & {
-        fileData?: string;
-        fileType?: string;
-      } = {};
+      const updates: Partial<Server> = {};
 
       // Add all field updates
       if (editingServerData.name !== originalServerData.name) {
@@ -342,8 +339,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
 
       // Add icon update if needed
       if (pendingIconFile) {
-        updates.fileData = pendingIconFile.data;
-        updates.fileType = pendingIconFile.type;
+        updates.avatar = `data:${pendingIconFile.type};base64,${pendingIconFile.data}`;
       }
 
       // Check if there are any updates
@@ -445,7 +441,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
 
     if (markdownContent.trim() !== (server.announcement || '').trim())
       dif.push('announcement');
-    if (pendingIconFile) dif.push('icon');
+    if (pendingIconFile) dif.push('avatar');
 
     setChangeState(
       dif
@@ -461,7 +457,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
               return '介紹';
             case 'settings.visibility':
               return '訪問許可權';
-            case 'icon':
+            case 'avatar':
               return '頭像';
             case 'announcement':
               return '公告';
@@ -604,8 +600,8 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                   src={
                     pendingIconFile
                       ? `data:${pendingIconFile.type};base64,${pendingIconFile.data}`
-                      : server.iconUrl
-                      ? API_URL + server.iconUrl
+                      : server.avatarUrl
+                      ? API_URL + server.avatarUrl
                       : '/logo_server_def.png'
                   }
                   alt="Icon"
@@ -727,8 +723,8 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
             return direction * (contribA - contribB);
           },
           joinDate: (a: Member, b: Member, direction: number): number => {
-            const dateA = a.joinedAt ?? 0;
-            const dateB = b.joinedAt ?? 0;
+            const dateA = a.createdAt ?? 0;
+            const dateB = b.createdAt ?? 0;
             return direction * (dateA - dateB);
           },
         };
@@ -966,7 +962,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
                         const userPermission = member.permissionLevel ?? 1;
                         const userContributions = member.contribution ?? 0;
                         const userJoinDate = new Date(
-                          member.joinedAt || 0,
+                          member.createdAt || 0,
                         ).toLocaleString();
 
                         return (

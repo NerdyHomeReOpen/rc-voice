@@ -18,13 +18,13 @@ interface DeleteChannelModalProps {
 
 const DeleteChannelModal: React.FC<DeleteChannelModalProps> = React.memo(
   ({ onClose, channel }) => {
-    // Socket
-    const socket = useSocket();
-
     // Redux
     const sessionId = useSelector(
       (state: { sessionToken: string }) => state.sessionToken,
     );
+
+    // Socket
+    const socket = useSocket();
 
     // Error Control
     const [error, setError] = useState('');

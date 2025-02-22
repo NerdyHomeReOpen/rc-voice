@@ -42,10 +42,18 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
     }, [onClose]);
 
     const userGender = user.gender;
-    const userPermission = server.members?.[user.id].permissionLevel ?? 1;
+    const userMember = server.members?.find(
+      (member) => member.userId === user.id,
+    );
+    const userPermission = userMember?.permissionLevel ?? 1;
+    const userContributions = userMember?.contribution ?? 0;
     const userLevel = Math.min(56, Math.ceil(user.level / 5));
-    const userXpProgress = user.xpInfo?.progress ?? 0;
+    const userXp = user.xp ?? 0;
+    const userXpProgress = user.progress ?? 0;
+    const userRequiredXp = user.requiredXp ?? 0;
     const userBadges = user.badges ?? [];
+    const userName = user.name;
+    const userAvatar = user.avatarUrl ?? '/pfp/default.png';
 
     return (
       <div
@@ -62,8 +70,7 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
             {/* Left Avatar */}
             <div className="w-[60px] h-[60px] flex items-center justify-center">
               <img
-                src={`${user.avatarUrl ?? '/pfp/default.png'}`}
-                alt={`${user.name} Avatar`}
+                src={userAvatar}
                 className="select-none w-full h-full object-contain"
               />
             </div>
@@ -71,7 +78,7 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
             <div className="flex-1 ml-3 relative">
               <div className="flex justify-between items-start">
                 <div className="flex items-center min-w-0 mr-2">
-                  <span className="truncate">{user.name}</span>
+                  <span className="truncate">{userName}</span>
                   {user.level && (
                     <img
                       src={`/UserGrade_${userLevel}.png`}
@@ -108,9 +115,9 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
                     className="flex flex-col items-center"
                   >
                     <ArrowUp size={12} className="text-blue-500" />
-                    <span>{user.xpInfo?.xp}</span>
+                    <span>{userXp}</span>
                   </div>
-                  <div>{user.xpInfo?.required}</div>
+                  <div>{userRequiredXp}</div>
                 </div>
               </div>
             </div>
@@ -130,9 +137,7 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
                   {getPermissionText(userPermission)}
                 </div>
               </div>
-              <div className="mt-1">
-                貢獻：{server.members?.[user.id].contribution}
-              </div>
+              <div className="mt-1">貢獻：{userContributions}</div>
             </div>
           </div>
         </div>

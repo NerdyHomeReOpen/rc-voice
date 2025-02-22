@@ -13,13 +13,10 @@ import FriendListViewer from '@/components/viewers/FriendListViewer';
 import BadgeViewer from '@/components/viewers/BadgeViewer';
 
 // Types
-import type { User, FriendCategory } from '@/types';
+import type { User } from '@/types';
 
 // Redux
 import { useSelector } from 'react-redux';
-
-// Services
-import { apiService } from '@/services/api.service';
 
 interface HeaderProps {
   user: User;
@@ -71,29 +68,6 @@ const Header: React.FC<HeaderProps> = React.memo(({ user }) => {
 const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
-  const sessionId = useSelector(
-    (state: { sessionToken: string }) => state.sessionToken,
-  );
-
-  // API
-  const [friendCategories, setFriendCategories] = useState<FriendCategory[]>(
-    [],
-  );
-
-  useEffect(() => {
-    if (!sessionId) return;
-
-    const fetchFriendDatas = async () => {
-      try {
-        const data = await apiService.post('/user/friends', { sessionId });
-        console.log('Friend data fetch:', data);
-        setFriendCategories(data?.friendCategories ?? []);
-      } catch (error: Error | any) {
-        console.error(error);
-      }
-    };
-    fetchFriendDatas();
-  }, []);
 
   // Sidebar Control
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
@@ -140,7 +114,10 @@ const FriendPageComponent: React.FC = React.memo(() => {
           className={styles['sidebar']}
           style={{ width: `${sidebarWidth}px` }}
         >
-          <FriendListViewer friendCategories={friendCategories} />
+          <FriendListViewer
+            friends={user.friends ?? []}
+            friendGroups={user.friendGroups ?? []}
+          />
         </aside>
 
         {/* Resize Handle */}

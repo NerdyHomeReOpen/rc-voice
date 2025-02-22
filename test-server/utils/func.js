@@ -1,4 +1,8 @@
-module.exports = {
+const { QuickDB } = require('quick.db');
+const db = new QuickDB();
+const { XP_SYSTEM } = require('../constant');
+
+const func = {
   calculateRequiredXP: (level) => {
     return Math.ceil(
       XP_SYSTEM.BASE_XP * Math.pow(XP_SYSTEM.GROWTH_RATE, level),
@@ -44,3 +48,5 @@ module.exports = {
     return displayId;
   },
 };
+
+module.exports = { ...func };

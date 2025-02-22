@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { Theme } from '@radix-ui/themes';
 
 // .css
 import '@/styles/globals.css';
 import '@radix-ui/themes/styles.css';
+
+// providers
+import Providers from './provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,7 +35,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

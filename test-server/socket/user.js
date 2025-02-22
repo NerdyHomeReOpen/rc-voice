@@ -1,32 +1,26 @@
+const { v4: uuidv4 } = require('uuid');
+const { QuickDB } = require('quick.db');
+const db = new QuickDB();
+// Utils
 const utils = require('../utils');
 const Logger = utils.logger;
 const Map = utils.map;
 const Get = utils.get;
+const Interval = utils.interval;
+const Func = utils.func;
+const Set = utils.set;
+// Socket error
 const SocketError = require('./socketError');
+const serverHandler = require('./server');
+const channelHandler = require('./channel');
 
-module.exports = (io, socket, db) => {
-  socket.on('connectUser', async (data) => {
-    // data = {
-    //   sessionId: '123456',
-    // }
-    // console.log(data);
-
+const userHandler = {
+  connectUser: async (io, socket, sessionId) => {
     // Get database
     const users = (await db.get('users')) || {};
 
-    console.log(Map);
-
     try {
       // Validate data
-      const { sessionId } = data;
-      if (!sessionId) {
-        throw new SocketError(
-          'Missing required fields',
-          'CONNECTUSER',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -103,14 +97,8 @@ module.exports = (io, socket, db) => {
 
       new Logger('WebSocket').error(`Error connecting user: ${error.message}`);
     }
-  });
-
-  socket.on('disconnectUser', async (data) => {
-    // data = {
-    //   sessionId: '123456',
-    // }
-    // console.log(data);
-
+  },
+  disconnectUser: async (io, socket, sessionId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -118,15 +106,6 @@ module.exports = (io, socket, db) => {
 
     try {
       // Validate data
-      const { sessionId } = data;
-      if (!sessionId) {
-        throw new SocketError(
-          'Missing required fields',
-          'DISCONNECTUSER',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -158,6 +137,12 @@ module.exports = (io, socket, db) => {
         );
       }
 
+      if (server) {
+        serverHandler.disconnectServer(io, socket, sessionId, server.id);
+      } else if (channel) {
+        channelHandler.disconnectChannel(io, socket, sessionId, channel.id);
+      }
+
       // Remove user socket connection
       if (!Map.deleteUserIdSocketIdMap(userId, socket.id)) {
         throw new SocketError(
@@ -169,39 +154,11 @@ module.exports = (io, socket, db) => {
       }
 
       // Update user
-      users[user.id] = {
+      await Set.user(userId, {
         ...user,
-        currentServerId: null,
-        currentChannelId: null,
         status: 'gn',
         lastActiveAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-      await db.set(`users.${user.id}`, users[user.id]);
-
-      if (channel) {
-        // Clear user contribution interval
-        utils.interval.clearContributionInterval(socket.id);
-
-        // leave the channel
-        socket.leave(`channel_${channel.id}`);
-
-        // Emit data (only to the user)
-        io.to(socket.id).emit('channelDisconnect', null);
-
-        // Emit data (to all users in the channel)
-        io.to(`server_${channel.serverId}`).emit('serverUpdate', {
-          channels: (await Get.server(channel.serverId)).channels,
-        });
-      }
-
-      if (server) {
-        // leave the server
-        socket.leave(`server_${server.id}`);
-
-        // Emit data (only to the user)
-        io.to(socket.id).emit('serverDisconnect', null);
-      }
+      });
 
       // Emit data (only to the user)
       io.to(socket.id).emit('userDisconnect', null);
@@ -224,30 +181,13 @@ module.exports = (io, socket, db) => {
         `Error disconnecting user: ${error.message}`,
       );
     }
-  });
-
-  socket.on('updateUser', async (data) => {
-    // data = {
-    //   sessionId
-    //   user: {
-    //     ...
-    //   }
-    // }
-
+  },
+  updateUser: async (io, socket, sessionId, editedUser) => {
     // Get database
     const users = (await db.get('users')) || {};
 
     try {
       // Validate data
-      const { sessionId, user: editedUser } = data;
-      if (!sessionId || !editedUser) {
-        throw new SocketError(
-          'Missing required fields',
-          'UPDATEUSER',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -268,16 +208,10 @@ module.exports = (io, socket, db) => {
       }
 
       // Update user data
-      users[userId] = {
-        ...user,
-        ...editedUser,
-      };
-      await db.set(`users.${userId}`, users[userId]);
+      await Set.user(userId, { ...user, ...editedUser });
 
       // Emit data (only to the user)
-      io.to(socket.id).emit('userUpdate', {
-        ...editedUser,
-      });
+      io.to(socket.id).emit('userUpdate', editedUser);
 
       new Logger('WebSocket').success(`User(${userId}) updated`);
     } catch (error) {
@@ -295,5 +229,7 @@ module.exports = (io, socket, db) => {
 
       new Logger('WebSocket').error(`Error updating user: ${error.message}`);
     }
-  });
+  },
 };
+
+module.exports = { ...userHandler };

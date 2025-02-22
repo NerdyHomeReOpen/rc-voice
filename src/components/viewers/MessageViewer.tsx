@@ -11,7 +11,7 @@ import permission from '@/styles/common/permission.module.css';
 import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 
 // Types
-import type { Message, Server, User } from '@/types';
+import type { DirectMessage, Message, User } from '@/types';
 
 // Util
 import { formatTimestamp } from '@/utils/formatters';
@@ -20,12 +20,15 @@ interface MessageGroup {
   id: string;
   type: 'general' | 'info';
   contents: string[];
+  permissionLevel: number | null;
   senderId: string;
-  timestamp: string;
-  sender: User | null;
+  timestamp: number;
+  sender?: User | null;
 }
 
-const getGroupMessages = (messages: Message[]): MessageGroup[] => {
+const getGroupMessages = (
+  messages: Message[] | DirectMessage[],
+): MessageGroup[] => {
   const sorted = [...messages].sort(
     (a, b) => Number(a.timestamp) - Number(b.timestamp),
   );
@@ -43,11 +46,13 @@ const getGroupMessages = (messages: Message[]): MessageGroup[] => {
     } else {
       acc.push({
         id: message.id,
-        senderId: message.senderId,
-        sender: message.sender ?? null,
-        timestamp: message.timestamp.toString(),
-        contents: [message.content],
         type: message.type,
+        contents: [message.content],
+        permissionLevel:
+          'permissionLevel' in message ? message.permissionLevel : null,
+        senderId: message.senderId,
+        timestamp: message.timestamp,
+        sender: message.sender,
       });
     }
     return acc;
@@ -55,73 +60,15 @@ const getGroupMessages = (messages: Message[]): MessageGroup[] => {
   return grouped;
 };
 
-interface MessageBoxProps {
-  messageGroup: MessageGroup;
-  server: Server | null;
-}
-
-const MessageBox: React.FC<MessageBoxProps> = React.memo(
-  ({ messageGroup, server }) => {
-    const senderGender = messageGroup.sender?.gender ?? 'Male';
-    const senderName = messageGroup.sender?.name ?? 'Unknown';
-    const senderPermission =
-      server?.members?.[messageGroup.senderId].permissionLevel ?? 1;
-    const messageTimestamp = formatTimestamp(parseInt(messageGroup.timestamp));
-
-    return (
-      <div key={messageGroup.id} className={styles['messageWrapper']}>
-        {messageGroup.type === 'info' ? (
-          <>
-            <img
-              src={'/channel/NT_NOTIFY.png'}
-              alt={'NT_NOTIFY'}
-              className="select-none flex-shrink-0 mt-1"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="text-gray-700">
-                {messageGroup.contents.map((content, index) => (
-                  <div key={index} className="break-words">
-                    <MarkdownViewer markdownText={content} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div
-              className={`${styles['senderIcon']} ${permission[senderGender]} ${
-                permission[`lv-${senderPermission}`]
-              }`}
-            />
-            <div className={styles['messageBox']}>
-              <div className={styles['header']}>
-                <span className={styles['name']}>{senderName}</span>
-                <span className={styles['timestamp']}>{messageTimestamp}</span>
-              </div>
-              {messageGroup.contents.map((content, index) => (
-                <div key={index} className={styles['content']}>
-                  <MarkdownViewer markdownText={content} />
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  },
-);
-
 interface MessageViewerProps {
-  messages: Message[] | null;
-  server?: Server | null;
+  messages: Message[] | DirectMessage[] | null;
 }
 
 const MessageViewer: React.FC<MessageViewerProps> = React.memo(
-  ({ messages, server = null }) => {
+  ({ messages }) => {
     if (!messages) return null;
 
-    const groupMessages = getGroupMessages(messages);
+    const messageGroups = getGroupMessages(messages);
 
     // Auto Scroll Control
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -131,17 +78,60 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
         behavior: 'auto',
         block: 'end',
       });
-    }, [groupMessages]);
+    }, [messageGroups]);
 
     return (
       <div className={styles['messageViewerWrapper']}>
-        {groupMessages.map((groupMessage) => (
-          <MessageBox
-            key={groupMessage.id}
-            messageGroup={groupMessage}
-            server={server}
-          />
-        ))}
+        {messageGroups.map((messageGroup) => {
+          const senderGender = messageGroup.sender?.gender ?? 'Male';
+          const senderName = messageGroup.sender?.name ?? 'Unknown';
+          const messagePermission = messageGroup.permissionLevel ?? 0;
+          const messageTimestamp = formatTimestamp(messageGroup.timestamp);
+
+          return (
+            <div key={messageGroup.id} className={styles['messageWrapper']}>
+              {messageGroup.type === 'info' ? (
+                <>
+                  <img
+                    src={'/channel/NT_NOTIFY.png'}
+                    alt={'NT_NOTIFY'}
+                    className="select-none flex-shrink-0 mt-1"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-gray-700">
+                      {messageGroup.contents.map((content, index) => (
+                        <div key={index} className="break-words">
+                          <MarkdownViewer markdownText={content} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className={`${styles['senderIcon']} ${
+                      permission[senderGender]
+                    } ${permission[`lv-${messagePermission}`]}`}
+                  />
+                  <div className={styles['messageBox']}>
+                    <div className={styles['header']}>
+                      <span className={styles['name']}>{senderName}</span>
+                      <span className={styles['timestamp']}>
+                        {messageTimestamp}
+                      </span>
+                    </div>
+                    {messageGroup.contents.map((content, index) => (
+                      <div key={index} className={styles['content']}>
+                        <MarkdownViewer markdownText={content} />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
     );

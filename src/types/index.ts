@@ -13,22 +13,27 @@ export const enum Permission {
 export interface User {
   id: string;
   name: string;
+  avatar: string | null;
   avatarUrl: string | null;
-  gender: 'Male' | 'Female';
   signature: string;
+  status: 'online' | 'dnd' | 'idle' | 'gn';
+  gender: 'Male' | 'Female';
   level: number;
   xp: number;
   requiredXp: number;
   progress: number;
-  status: 'online' | 'dnd' | 'idle' | 'gn';
   currentChannelId: string;
   currentServerId: string;
   lastActiveAt: number;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  badges: Badge[];
-  members: Members | null;
-  friendGroups: FriendGroup[] | null;
+  members?: Member[];
+  badges?: Badge[];
+  friends?: Friend[];
+  friendGroups?: FriendGroup[];
+  friendApplications?: FriendApplication[];
+  servers?: Server[];
+  ownedServers?: Server[];
 }
 
 export interface Badge {
@@ -40,17 +45,14 @@ export interface Badge {
 
 export interface Friend {
   id: string;
-  status: 'accepted' | 'pending' | 'blocked';
+  isBlocked: boolean;
   groupId: string;
   user1Id: string;
   user2Id: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  users: User[] | null;
-}
-
-export interface Friends {
-  [id: string]: Friend | null;
+  user?: User;
+  directMessages?: DirectMessage[];
 }
 
 export interface FriendGroup {
@@ -60,7 +62,7 @@ export interface FriendGroup {
   userId: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  friends: Friend[] | null;
+  friends?: Friend[];
 }
 
 export interface FriendApplication {
@@ -74,27 +76,27 @@ export interface FriendApplication {
 
 export interface Member {
   id: string;
+  isBlocked: boolean;
   nickname: string;
   contribution: number;
   permissionLevel: Permission;
+  userId: string;
+  serverId: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-}
-
-export interface Members {
-  [id: string]: Member | null;
 }
 
 export interface Server {
   id: string;
   name: string;
-  iconUrl: string | null;
-  level: number;
-  description: string;
-  wealth: number; // 財富值，但不知道是做什麼用的
-  slogan: string;
+  avatar: string | null;
+  avatarUrl: string | null;
   announcement: string;
+  description: string;
   displayId: string;
+  slogan: string;
+  level: number;
+  wealth: number; // 財富值，但不知道是做什麼用的
   lobbyId: string;
   ownerId: string;
   settings: {
@@ -104,18 +106,19 @@ export interface Server {
   };
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  channels: Channel[] | null;
-  applications: ServerApplication[] | null;
-  lobby: Channel | null;
-  members: Members | null;
-  owner: User | null;
+  lobby?: Channel;
+  owner?: User;
+  users?: User[];
+  channels?: Channel[];
+  applications?: ServerApplication[];
+  members?: Member[];
 }
 
 export interface ServerApplication {
   id: string;
+  description: string;
   userId: string;
   serverId: string;
-  description: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
 }
@@ -123,8 +126,11 @@ export interface ServerApplication {
 export interface Channel {
   id: string;
   name: string;
+  isRoot: boolean;
   isCategory: boolean;
   isLobby: boolean;
+  voiceMode: "free" | "queue" | "forbidden";
+  chatMode: "free" | "forbidden";
   order: number;
   serverId: string;
   settings: {
@@ -135,19 +141,32 @@ export interface Channel {
   };
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  subChannels: Channel[] | null;
-  messages: Message[] | null;
-  users: User[] | null;
+  subChannels?: Channel[];
+  messages?: Message[];
+  users?: User[];
 }
 
 export interface Message {
   id: string;
   content: string;
   type: 'general' | 'info';
+  permissionLevel: Permission;
   senderId: string;
+  channelId: string;
   timestamp: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  sender: User | null;
+  sender?: User | null;
+}
+
+export interface DirectMessage {
+  id: string;
+  content: string;
+  type: 'general' | 'info';
+  senderId: string;
+  friendId: string;
+  timestamp: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  sender?: User | null;
 }
 
 export interface ModalTabItem {

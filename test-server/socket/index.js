@@ -1,113 +1,327 @@
 const utils = require('../utils');
 const Logger = utils.logger;
-const SocketError = require('./socketError');
+const Map = utils.map;
+const Get = utils.get;
+const Interval = utils.interval;
 
+const SocketError = require('./socketError');
 const userHandler = require('./user');
 const serverHandler = require('./server');
 const channelHandler = require('./channel');
+const messageHandler = require('./message');
 
 module.exports = (io, db) => {
   io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.id}`);
+    // User
+    socket.on('connectUser', async (data) => {
+      // data = {
+      //   sessionId:
+      // }
+      // console.log(data);
 
-    // Handlers
-    userHandler(io, socket, db);
-    serverHandler(io, socket, db);
-    channelHandler(io, socket, db);
-
-    socket.on('disconnect', async () => {
-      // Get database
-      const users = (await db.get('users')) || {};
-      const servers = (await db.get('servers')) || {};
-      const channels = (await db.get('channels')) || {};
-
-      try {
-        // Validate data
-        const userId = socketToUser.get(socket.id);
-        if (!userId) {
-          throw new SocketError(
-            'Invalid socket ID',
-            'DISCONNECT',
-            'USER_ID',
-            400,
-          );
-        }
-        const user = users[userId];
-        if (!user) {
-          throw new SocketError(
-            `User(${userId}) not found`,
-            'DISCONNECT',
-            'USER',
-            404,
-          );
-        }
-        const channel = channels[user.currentChannelId];
-        if (!channel) {
-          new Logger('WebSocket').warn(
-            `Channel(${user.currentChannelId}) not found. Won't disconnect channel.`,
-          );
-        }
-        const server = servers[user.currentServerId];
-        if (!server) {
-          new Logger('WebSocket').warn(
-            `Server(${user.currentServerId}) not found. Won't disconnect server.`,
-          );
-        }
-
-        // Clear user contribution interval
-        utils.interval.clearContributionInterval(socket.id);
-
-        // Remove user socket connection
-        if (!utils.map.deleteUserIdSocketIdMap(userId, socket.id)) {
-          throw new SocketError(
-            'Cannot delete user socket connection',
-            'DISCONNECT',
-            'DELETE_ID_FUNCTION',
-            500,
-          );
-        }
-
-        // Update user
-        user[user.id] = {
-          ...user,
-          currentServerId: null,
-          currentChannelId: null,
-          lastActiveAt: Date.now(),
-          updatedAt: Date.now(),
-        };
-        await db.set(`users.${user.id}`, users[user.id]);
-
-        if (channel) {
-          const server = await getServer(server.id);
-
-          // Emit data (to all users in the channel)
-          io.to(`server_${server.id}`).emit('serverUpdate', {
-            channels: server.channels,
-          });
-        }
-
-        new Logger('WebSocket').success(`User(${userId}) disconnected`);
-      } catch (error) {
-        if (error instanceof SocketError) {
-          io.to(socket.id).emit('error', {
-            message: error.message,
-            part: error.part,
-            tag: error.tag,
-            status_code: error.status_code,
-          });
-        } else {
-          io.to(socket.id).emit('error', {
-            message: `斷線時發生無法預期的錯誤: ${error.message}`,
-            part: 'DISCONNECT',
-            tag: 'EXCEPTION_ERROR',
-            status_code: 500,
-          });
-        }
-
-        new Logger('WebSocket').error(
-          `Error disconnecting user: ${error.message}`,
+      // Validate data
+      const { sessionId } = data;
+      if (!sessionId) {
+        throw new SocketError(
+          'Missing required fields',
+          'CONNECTUSER',
+          'DATA',
+          400,
         );
       }
+      userHandler.connectUser(io, socket, sessionId);
+    });
+    socket.on('disconnectUser', async (data) => {
+      // data = {
+      //   sessionId:
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId } = data;
+      if (!sessionId) {
+        throw new SocketError(
+          'Missing required fields',
+          'DISCONNECTUSER',
+          'DATA',
+          400,
+        );
+      }
+      userHandler.disconnectUser(io, socket, sessionId);
+    });
+    socket.on('updateUser', async (data) => {
+      // data = {
+      //   sessionId:
+      //   user: {
+      //     ...
+      //   }
+      // }
+
+      // Validate data
+      const { sessionId, user: editedUser } = data;
+      if (!sessionId || !editedUser) {
+        throw new SocketError(
+          'Missing required fields',
+          'UPDATEUSER',
+          'DATA',
+          400,
+        );
+      }
+      userHandler.updateUser(io, socket, sessionId, editedUser);
+    });
+    // Server
+    socket.on('connectServer', async (data) => {
+      // data = {
+      //   sessionId:
+      //   serverId:
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, serverId } = data;
+      if (!sessionId || !serverId) {
+        throw new SocketError(
+          'Missing required fields',
+          'CONNECTSERVER',
+          'DATA',
+          400,
+        );
+      }
+      serverHandler.connectServer(io, socket, sessionId, serverId);
+    });
+    socket.on('disconnectServer', async (data) => {
+      // data = {
+      //   sessionId:
+      //   serverId:
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, serverId } = data;
+      if (!sessionId || !serverId) {
+        throw new SocketError(
+          'Missing required fields',
+          'DISCONNECTSERVER',
+          'DATA',
+          400,
+        );
+      }
+      serverHandler.disconnectServer(io, socket, sessionId, serverId);
+    });
+    socket.on('createServer', async (data) => {
+      // data = {
+      //   sessionId:
+      //   server: {
+      //     ...
+      //   }
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, server } = data;
+      if (!sessionId || !server) {
+        throw new SocketError(
+          'Missing required fields',
+          'CREATESERVER',
+          'DATA',
+          400,
+        );
+      }
+      serverHandler.createServer(io, socket, sessionId, server);
+    });
+    socket.on('updateServer', async (data) => {
+      // data = {
+      //   sessionId:
+      //   serverId:
+      //   server: {
+      //     ...
+      //   }
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, serverId, server: editedServer } = data;
+      if (!sessionId || !serverId || !editedServer) {
+        throw new SocketError(
+          'Missing required fields',
+          'UPDATESERVER',
+          'DATA',
+          400,
+        );
+      }
+      serverHandler.updateServer(io, socket, sessionId, serverId, editedServer);
+    });
+    // Channel
+    socket.on('connectChannel', async (data) => {
+      // data = {
+      //   sessionId:
+      //   channelId:
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, channelId } = data;
+      if (!sessionId || !channelId) {
+        throw new SocketError(
+          'Missing required fields',
+          'CONNECTCHANNEL',
+          'DATA',
+          400,
+        );
+      }
+      channelHandler.connectChannel(io, socket, sessionId, channelId);
+    });
+    socket.on('disconnectChannel', async (data) => {
+      // data = {
+      //   sessionId:
+      //   channelId:
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, channelId } = data;
+      if (!sessionId || !channelId) {
+        throw new SocketError(
+          'Missing required fields',
+          'DISCONNECTCHANNEL',
+          'DATA',
+          400,
+        );
+      }
+      channelHandler.disconnectChannel(io, socket, sessionId, channelId);
+    });
+    socket.on('createChannel', async (data) => {
+      // data = {
+      //   sessionId:
+      //   serverId:
+      //   channel: {
+      //     ...
+      //   },
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, serverId, channel } = data;
+      if (!sessionId || !serverId || !channel) {
+        throw new SocketError(
+          'Missing required fields',
+          'CREATECHANNEL',
+          'DATA',
+          400,
+        );
+      }
+      channelHandler.createChannel(io, socket, sessionId, serverId, channel);
+    });
+    socket.on('updateChannel', async (data) => {
+      // data = {
+      //   sessionId:
+      //   channelId:
+      //   channel: {
+      //     ...
+      //   },
+      // };
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, channelId, channel: editedChannel } = data;
+      if (!sessionId || !channelId || !editedChannel) {
+        throw new SocketError(
+          'Missing required fields',
+          'UPDATECHANNEL',
+          'DATA',
+          400,
+        );
+      }
+      channelHandler.updateChannel(
+        io,
+        socket,
+        sessionId,
+        channelId,
+        editedChannel,
+      );
+    });
+    socket.on('deleteChannel', async (data) => {
+      // data = {
+      //   sessionId:
+      //   channelId:
+      // }
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, channelId } = data;
+      if (!sessionId || !channelId) {
+        throw new SocketError(
+          'Missing required fields',
+          'DELETECHANNEL',
+          'DATA',
+          400,
+        );
+      }
+      channelHandler.deleteChannel(io, socket, sessionId, channelId);
+    });
+    // Message
+    socket.on('sendMessage', async (data) => {
+      // data = {
+      //   sessionId:
+      //   channelId:
+      //   message: {
+      //     ...
+      //   }
+      // };
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, channelId, message } = data;
+      if (!sessionId || !channelId || !message) {
+        throw new SocketError(
+          'Missing required fields',
+          'SENDMESSAGE',
+          'DATA',
+          400,
+        );
+      }
+      messageHandler.sendMessage(io, socket, sessionId, channelId, message);
+    });
+    socket.on('sendDirectMessage', async (data) => {
+      // data = {
+      //   sessionId:
+      //   friendId:
+      //   message: {
+      //     ...
+      //   }
+      // };
+      // console.log(data);
+
+      // Validate data
+      const { sessionId, friendId, message } = data;
+      if (!sessionId || !friendId || !message) {
+        throw new SocketError(
+          'Missing required fields',
+          'SENDDIRECTMESSAGE',
+          'DATA',
+          400,
+        );
+      }
+      messageHandler.sendDirectMessage(
+        io,
+        socket,
+        sessionId,
+        friendId,
+        message,
+      );
+    });
+    // Disconnect
+    socket.on('disconnect', async () => {
+      const sessionId = Map.socketIdSessionIdMap.get(socket.id);
+      if (!sessionId) {
+        throw new SocketError(
+          'Missing required fields',
+          'DISCONNECTUSER',
+          'DATA',
+          400,
+        );
+      }
+      userHandler.disconnectUser(io, socket, sessionId);
     });
   });
 };

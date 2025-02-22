@@ -14,6 +14,8 @@ const get = {
       friends: await get.userFriends(userId),
       friendGroups: await get.userFriendGroups(userId),
       friendApplications: await get.userFriendApplications(userId),
+      servers: await get.userServers(userId),
+      ownedServers: await get.userOwnedServers(userId),
     };
   },
   userBadges: async (userId) => {
@@ -31,6 +33,13 @@ const get = {
     return [
       ...Object.values(members).filter((member) => member.userId === userId),
     ];
+  },
+  userPermissionInServer: async (userId, serverId) => {
+    const members = (await db.get('members')) || {};
+    const member = Object.values(members).find(
+      (member) => member.userId === userId && member.serverId === serverId,
+    );
+    return member ? member.permissionLevel : null;
   },
   userFriends: async (userId) => {
     const friends = (await db.get('friends')) || {};
@@ -54,6 +63,23 @@ const get = {
       ),
     ];
   },
+  userServers: async (userId) => {
+    const servers = (await db.get('servers')) || {};
+    const members = (await db.get('members')) || {};
+
+    return [
+      ...Object.values(members)
+        .filter((member) => member.userId === userId)
+        .map((member) => servers[member.serverId])
+        .filter((server) => server),
+    ];
+  },
+  userOwnedServers: async (userId) => {
+    const servers = (await db.get('servers')) || {};
+    return [
+      ...Object.values(servers).filter((server) => server.ownerId === userId),
+    ];
+  },
   // Server
   server: async (serverId) => {
     const servers = (await db.get('servers')) || {};
@@ -61,10 +87,12 @@ const get = {
     const users = (await db.get('users')) || {};
     const server = servers[serverId];
     if (!server) return null;
+
     return {
       ...server,
       lobby: channels[server.lobbyId],
       owner: users[server.ownerId],
+      users: await get.serverUsers(serverId),
       channels: await get.serverChannels(serverId),
       members: await get.serverMembers(serverId),
       applications: await get.serverApplications(serverId),
@@ -75,6 +103,15 @@ const get = {
     return [
       ...Object.values(channels).filter(
         (channel) => channel.serverId === serverId,
+      ),
+    ];
+  },
+  serverUsers: async (serverId) => {
+    const users = (await db.get('users')) || {};
+
+    return [
+      ...Object.values(users).filter(
+        (user) => user.currentServerId === serverId,
       ),
     ];
   },
@@ -99,6 +136,7 @@ const get = {
     const channels = (await db.get('channels')) || {};
     const channel = channels[channelId];
     if (!channel) return null;
+
     return {
       ...channel,
       users: await get.channelUsers(channelId),

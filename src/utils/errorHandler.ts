@@ -29,7 +29,7 @@ export const standardizedError = (
 
 export class errorHandler {
   private static logError(error: SocketError): void {
-    alert(error.message);
+    alert(`${error.message}\n\nThe error at ${error.part} with tag ${error.tag}`);
     const situation = (() => {
       switch (error.status_code) {
         case 400:

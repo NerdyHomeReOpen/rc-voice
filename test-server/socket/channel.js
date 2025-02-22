@@ -1,32 +1,24 @@
+const { v4: uuidv4 } = require('uuid');
+const { QuickDB } = require('quick.db');
+const db = new QuickDB();
+// Utils
 const utils = require('../utils');
 const Logger = utils.logger;
 const Map = utils.map;
 const Get = utils.get;
+const Interval = utils.interval;
+const Set = utils.set;
+// Socket error
 const SocketError = require('./socketError');
 
-module.exports = (io, socket, db) => {
-  socket.on('connectChannel', async (data) => {
-    // data = {
-    //   sessionId: '123456',
-    //   channelId: '123456',
-    // }
-    // console.log(data);
-
+const channelHandler = {
+  connectChannel: async (io, socket, sessionId, channelId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const channels = (await db.get('channels')) || {};
 
     try {
       // validate data
-      const { sessionId, channelId } = data;
-      if (!sessionId || !channelId) {
-        throw new SocketError(
-          'Missing required fields',
-          'CONNECTCHANNEL',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -73,16 +65,15 @@ module.exports = (io, socket, db) => {
         io.to(`channel_${prevChannel.id}`).emit('playSound', 'leave');
       } else {
         // Setup user interval for accumulate contribution
-        utils.interval.setupContributionInterval(socket.id, userId);
+        Interval.setupObtainXpInterval(socket.id, userId);
       }
 
       // Update user presence
-      user[user.id] = {
-        ...user,
+      const update = {
         currentChannelId: channel.id,
-        updatedAt: Date.now(),
+        lastActiveAt: Date.now(),
       };
-      await db.set(`users.${user.id}`, users[user.id]);
+      await Set.user(userId, { ...user, ...update });
 
       // Play sound
       io.to(`channel_${channel.id}`).emit('playSound', 'join');
@@ -91,16 +82,14 @@ module.exports = (io, socket, db) => {
       socket.join(`channel_${channel.id}`);
 
       // Emit updated data (only to the user)
+      io.to(socket.id).emit('userUpdate', update);
       io.to(socket.id).emit('channelConnect', {
         ...(await Get.channel(channel.id)),
-      });
-      io.to(socket.id).emit('userUpdate', {
-        ...(await Get.user(user.id)),
       });
 
       // Emit updated data (to all users in the server)
       io.to(`server_${channel.serverId}`).emit('serverUpdate', {
-        channels: (await Get.server(channel.serverId)).channels,
+        users: await Get.serverUsers(channel.serverId),
       });
 
       new Logger('WebSocket').success(
@@ -122,34 +111,19 @@ module.exports = (io, socket, db) => {
         });
       }
 
+      console.log(error);
       new Logger('WebSocket').error(
         `Error connecting to channel: ${error.message}`,
       );
     }
-  });
-
-  socket.on('disconnectChannel', async (data) => {
-    // data = {
-    //   sessionId: '123456',
-    //   channelId: '123456',
-    // }
-    // console.log(data);
-
+  },
+  disconnectChannel: async (io, socket, sessionId, channelId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const channels = (await db.get('channels')) || {};
 
     try {
       // Validate data
-      const { sessionId, channelId } = data;
-      if (!sessionId) {
-        throw new SocketError(
-          'Missing required fields',
-          'DISCONNECTCHANNEL',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -179,15 +153,14 @@ module.exports = (io, socket, db) => {
       }
 
       // Update user presence
-      users[user.id] = {
-        ...user,
+      const update = {
         currentChannelId: null,
-        updatedAt: Date.now(),
+        lastActiveAt: Date.now(),
       };
-      await db.set(`users.${user.id}`, users[user.id]);
+      await Set.user(userId, { ...user, ...update });
 
       // Clear user contribution interval
-      utils.interval.clearContributionInterval(socket.id);
+      Interval.clearObtainXpInterval(socket.id);
 
       // Leave the channel
       socket.leave(`channel_${channel.id}`);
@@ -196,14 +169,12 @@ module.exports = (io, socket, db) => {
       io.to(`channel_${channel.id}`).emit('playSound', 'leave');
 
       // Emit updated data (only to the user)
+      io.to(socket.id).emit('userUpdate', update);
       io.to(socket.id).emit('channelDisconnect', null);
-      io.to(socket.id).emit('userUpdate', {
-        ...(await Get.user(user.id)),
-      });
 
       // Emit updated data (to all users in the server)
       io.to(`server_${channel.serverId}`).emit('serverUpdate', {
-        channels: (await Get.server(channel.serverId)).channels,
+        users: await Get.serverUsers(channel.serverId),
       });
 
       new Logger('WebSocket').success(
@@ -226,34 +197,14 @@ module.exports = (io, socket, db) => {
         `Error disconnecting from channel: ${error.message}`,
       );
     }
-  });
-
-  socket.on('createChannel', async (data) => {
-    // data = {
-    //   sessionId: '123456',
-    //   serverId: '123456',
-    //   channel: {
-    //     ...
-    //   },
-    // }
-    // console.log(data);
-
+  },
+  createChannel: async (io, socket, sessionId, serverId, channel) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
-    const channels = (await db.get('channels')) || {};
 
     try {
       // Validate data
-      const { sessionId, serverId, channel } = data;
-      if (!sessionId || !channel) {
-        throw new SocketError(
-          'Missing required fields',
-          'CREATECHANNEL',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -282,7 +233,7 @@ module.exports = (io, socket, db) => {
         );
       }
       // Check permissions
-      const userPermission = await getPermissionLevel(userId, serverId);
+      const userPermission = Get.userPermissionInServer(userId, serverId);
       if (userPermission < 5) {
         throw new SocketError(
           'Insufficient permissions',
@@ -294,18 +245,17 @@ module.exports = (io, socket, db) => {
 
       // Create new channel
       const channelId = uuidv4();
-      channels[channelId] = {
+      Set.channel(channelId, {
         ...channel,
         id: channelId,
         serverId: server.id,
-        createdAt: Date.now().valueOf(),
         order: server.channelIds.length,
-      };
-      await db.set(`channels.${channelId}`, channels[channelId]);
+        createdAt: Date.now().valueOf(),
+      });
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        channels: (await Get.server(server.id)).channels,
+        channels: await Get.serverChannels(server.id),
       });
 
       new Logger('WebSocket').info(
@@ -326,33 +276,14 @@ module.exports = (io, socket, db) => {
 
       new Logger('WebSocket').error('Error adding channel: ' + error.message);
     }
-  });
-
-  socket.on('updateChannel', async (data) => {
-    // data = {
-    //   sessionId: '123456',
-    //   channelId: '123456',
-    //   channel: {
-    //     ...
-    //   },
-    // };
-    // console.log(data);
-
+  },
+  updateChannel: async (io, socket, sessionId, channelId, editedChannel) => {
     // Get database
     const users = (await db.get('users')) || {};
     const channels = (await db.get('channels')) || {};
 
     try {
       // Validate data
-      const { sessionId, channelId, channel: editedChannel } = data;
-      if (!sessionId || !channelId || !editedChannel) {
-        throw new SocketError(
-          'Missing required fields',
-          'UPDATECHANNEL',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -382,7 +313,10 @@ module.exports = (io, socket, db) => {
       }
 
       // Check permissions
-      const userPermission = await getPermissionLevel(userId, channel.serverId);
+      const userPermission = await Get.userPermissionInServer(
+        user.id,
+        channel.serverId,
+      );
       if (userPermission < 4) {
         throw new SocketError(
           'Insufficient permissions',
@@ -393,11 +327,10 @@ module.exports = (io, socket, db) => {
       }
 
       // Update channel
-      channels[channel.id] = {
+      await Set.channel(channelId, {
         ...channel,
         ...editedChannel,
-      };
-      await db.set(`channels.${channel.id}`, channels[channel.id]);
+      });
 
       // Emit updated data (to all users in the Channel)
       io.to(`channel_${channelId}`).emit('channelUpdate', {
@@ -406,7 +339,7 @@ module.exports = (io, socket, db) => {
 
       // Emit updated data (to all users in the server)
       io.to(`server_${channel.serverId}`).emit('serverUpdate', {
-        channels: (await Get.server(channel.serverId)).channels,
+        channels: await Get.serverChannels(channel.serverId),
       });
 
       new Logger('WebSocket').info(
@@ -427,30 +360,14 @@ module.exports = (io, socket, db) => {
 
       new Logger('WebSocket').error('Error updating channel: ' + error.message);
     }
-  });
-
-  socket.on('deleteChannel', async (data) => {
-    // data = {
-    //   sessionId: '123456',
-    //   channelId: '123456',
-    // }
-    // console.log(data);
-
+  },
+  deleteChannel: async (io, socket, sessionId, channelId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const channels = (await db.get('channels')) || {};
 
     try {
       // Validate data
-      const { sessionId, channelId } = data;
-      if (!sessionId || !channelId) {
-        throw new SocketError(
-          'Missing required fields',
-          'DELETECHANNEL',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -480,14 +397,14 @@ module.exports = (io, socket, db) => {
       }
 
       // Update channel
-      channels[channelId] = {
+      await Set.channel(channelId, {
         ...channel,
         serverId: null,
-      };
+      });
 
       // Emit updated data (to all users in the server)
       io.to(`server_${channel.serverId}`).emit('serverUpdate', {
-        channels: (await Get.server(channel.serverId)).channels,
+        channels: await Get.serverChannels(channel.serverId),
       });
 
       new Logger('WebSocket').info(
@@ -508,5 +425,7 @@ module.exports = (io, socket, db) => {
 
       new Logger('WebSocket').error('Error deleting channel: ' + error.message);
     }
-  });
+  },
 };
+
+module.exports = { ...channelHandler };

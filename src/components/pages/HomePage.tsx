@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { ipcRenderer } from 'electron';
 
 // CSS
 import styles from '@/styles/homePage.module.css';
@@ -34,26 +34,14 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   const sessionId = useSelector(
     (state: { sessionToken: string }) => state.sessionToken,
   );
-  const user = useSelector((state: { user: User }) => state.user);
 
   // Socket Control
   const socket = useSocket();
 
   const [showPrivateModal, setShowPrivateModal] = useState(false);
-  const userPermission = user.members?.[server.id]?.permissionLevel ?? 0;
 
   const handleServerSelect = (serverId: string) => {
     if (typeof window === 'undefined') return;
-
-    if (user.members?.[serverId]?.isBlocked) {
-      alert(`您已被「${server.name}」封鎖`);
-      return;
-    }
-
-    if (server.settings.visibility === 'invisible' && userPermission < 2) {
-      setShowPrivateModal(true);
-      return;
-    }
 
     socket?.emit('connectServer', { serverId, sessionId });
     errorHandler.handle = () => {
@@ -61,8 +49,8 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
     };
   };
 
-  const serverIcon = server.iconUrl
-    ? API_URL + server.iconUrl
+  const serverIcon = server.avatarUrl
+    ? API_URL + server.avatarUrl
     : '/logo_server_def.png';
   const serverName = server.name ?? '';
   const serverDisplayId = server.displayId ?? '';
@@ -166,7 +154,10 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
           <button
             className={styles['navegateItem']}
             data-key="30014"
-            onClick={() => setShowCreateServer(true)}
+            onClick={() => {
+              window.location.href = '/popup?page=create-server';
+              ipcRenderer.send('open-popup', 'create-server');
+            }}
           >
             <div></div>
             創建語音群
@@ -186,6 +177,7 @@ Header.displayName = 'Header';
 // HomePage Component
 const HomePageComponent: React.FC = React.memo(() => {
   // Redux
+  const user = useSelector((state: { user: User }) => state.user);
   const sessionId = useSelector(
     (state: { sessionToken: string }) => state.sessionToken,
   );
@@ -227,6 +219,9 @@ const HomePageComponent: React.FC = React.memo(() => {
     };
   }, [socket, sessionId, searchQuery]);
 
+  // Test
+  const userServers = user.servers ?? [];
+
   return (
     <div className={styles['homeWrapper']}>
       <Header onSearch={(query: string) => setSearchQuery(query)} />
@@ -242,11 +237,11 @@ const HomePageComponent: React.FC = React.memo(() => {
             <>
               <section className="mb-6">
                 <h2 className="text-lg font-bold mb-3">推薦語音群</h2>
-                <ServerGrid servers={recommendedServers} />
+                <ServerGrid servers={userServers} />
               </section>
               <section>
                 <h2 className="text-lg font-bold mb-3">最近語音群</h2>
-                <ServerGrid servers={joinedServers} />
+                <ServerGrid servers={userServers} />
               </section>
             </>
           )}

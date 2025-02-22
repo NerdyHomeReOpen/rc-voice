@@ -40,7 +40,7 @@ const BadgeImage: React.FC<BadgeImageProps> = React.memo(({ badge }) => {
   const [showFallBack, setShowFallBack] = useState(false);
 
   const badgeUrl = `/badge/${badge.id.trim()}.png`;
-  const badgeName = badge.name || badge.id;
+  // const badgeName = badge.name || badge.id;
 
   if (failedImageCache.has(badgeUrl) || showFallBack) {
     return (

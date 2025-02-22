@@ -1,16 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { FormEvent, useState } from 'react';
 import { useSelector } from 'react-redux';
+
+// Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 
 // Components
 import Modal from '@/components/Modal';
 
-// Services
-import { serverService } from '@/services/server.service';
-
 // Types
-import { User } from '@/types';
+import { User, Server } from '@/types';
 
 // Validation
 export const validateName = (name: string): string => {
@@ -23,13 +22,6 @@ export const validateDescription = (description: string): string => {
   if (description.length > 200) return '群組介紹不能超過200個字符';
   return '';
 };
-
-interface ServerFormData {
-  userId: string;
-  name: string;
-  description: string;
-  icon: File | null;
-}
 
 interface FormErrors {
   general?: string;
@@ -53,11 +45,25 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const socket = useSocket();
 
     // Form Control
-    const [formData, setFormData] = useState<ServerFormData>({
-      userId: user.id,
+    const [newServer, setNewSever] = useState<Server>({
+      id: '',
       name: '',
+      avatar: null,
+      avatarUrl: null,
+      level: 0,
       description: '',
-      icon: null,
+      wealth: 0,
+      slogan: '',
+      announcement: '',
+      displayId: '',
+      lobbyId: '',
+      ownerId: '',
+      settings: {
+        allowDirectMessage: true,
+        visibility: 'public',
+        defaultChannelId: '',
+      },
+      createdAt: 0,
     });
 
     // Error Control
@@ -66,29 +72,15 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
 
-      const nameError = validateName(formData.name);
-      const descriptionError = validateDescription(formData.description);
-
-      setErrors({
-        name: nameError,
-        description: descriptionError,
+      console.log('Create Server:', newServer);
+      socket?.emit('createServer', {
+        sessionId: sessionId,
+        server: newServer,
       });
-
-      if (!nameError && !descriptionError) {
-        try {
-          const data = await serverService.createServer(formData);
-          onClose();
-          // Connect to the server
-          socket?.emit('connectServer', {
-            sessionId: sessionId,
-            serverId: data.serverId,
-          });
-        } catch (error) {
-          setErrors({
-            general: error instanceof Error ? error.message : '創建群組失敗',
-          });
-        }
-      }
+      socket?.on('error', (error: { message: string }) => {
+        setErrors({ general: error.message });
+      });
+      onClose();
     };
 
     // Image Preview
@@ -108,13 +100,15 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       }
 
       const reader = new FileReader();
-      reader.onloadend = () => setPreviewImage(reader.result as string);
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+        setNewSever((prev) => ({ ...prev, avatar: reader.result as string }));
+      };
       reader.readAsDataURL(file);
-      setFormData((prev) => ({ ...prev, icon: file }));
     };
 
     const maxGroups = 3;
-    const userOwnedServerCount = user.ownedServerIds.length;
+    const userOwnedServerCount = user.ownedServers?.length ?? 0;
     const remainingGroups = maxGroups - userOwnedServerCount;
 
     return (
@@ -162,9 +156,9 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                   <div className="flex-1">
                     <input
                       type="text"
-                      value={formData.name}
+                      value={newServer.name}
                       onChange={(e) =>
-                        setFormData((prev) => ({
+                        setNewSever((prev) => ({
                           ...prev,
                           name: e.target.value,
                         }))
@@ -188,9 +182,9 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                   </label>
                   <div className="flex-1">
                     <textarea
-                      value={formData.description}
+                      value={newServer.description}
                       onChange={(e) =>
-                        setFormData((prev) => ({
+                        setNewSever((prev) => ({
                           ...prev,
                           description: e.target.value,
                         }))
@@ -219,19 +213,19 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
             <div className="relative group">
               <img
                 src={previewImage}
-                alt="Icon"
+                alt="Avatar"
                 className="w-32 h-32 rounded-lg border-2 border-gray-300 object-cover transition-all"
               />
               <input
                 type="file"
-                id="icon-upload"
+                id="avatar-upload"
                 className="hidden"
                 accept="image/*"
                 onChange={handleImageChange}
                 // disabled={!canCreateGroup}
               />
               <label
-                htmlFor="icon-upload"
+                htmlFor="avatar-upload"
                 className={`mt-3 w-full px-4 py-2 rounded-lg text-sm font-medium transition-all border text-center block bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 hover:border-blue-300 cursor-pointer`}
                 // ${canCreateGroup ? '' : 'bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed'}
               >

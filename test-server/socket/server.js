@@ -1,17 +1,30 @@
+const { v4: uuidv4 } = require('uuid');
+const { QuickDB } = require('quick.db');
+const db = new QuickDB();
+const fs = require('fs').promises;
+const path = require('path');
+const _ = require('lodash');
+const {
+  UPLOADS_PATH,
+  SERVER_AVATAR_PATH,
+  UPLOADS_DIR,
+  SERVER_AVATAR_DIR,
+} = require('../constant');
+const formidable = require('formidable');
+// Utils
 const utils = require('../utils');
 const Logger = utils.logger;
 const Map = utils.map;
 const Get = utils.get;
+const Interval = utils.interval;
+const Func = utils.func;
+const Set = utils.set;
+// Socket error
 const SocketError = require('./socketError');
+const channelHandler = require('./channel');
 
-module.exports = (io, socket, db) => {
-  socket.on('connectServer', async (data) => {
-    // data = {
-    //   sessionId:
-    //   serverId:
-    // }
-    // console.log(data);
-
+const serverHandler = {
+  connectServer: async (io, socket, sessionId, serverId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -19,15 +32,6 @@ module.exports = (io, socket, db) => {
 
     try {
       // Validate data
-      const { sessionId, serverId } = data;
-      if (!sessionId || !serverId) {
-        throw new SocketError(
-          'Missing required fields',
-          'CONNECTSERVER',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -55,42 +59,21 @@ module.exports = (io, socket, db) => {
           404,
         );
       }
-
-      // Check if user is already exists in the server
       const member = Object.values(members).find(
         (member) => member.serverId === server.id && member.userId === user.id,
       );
-      if (!member) {
-        // Create new membership
-        const memberId = uuidv4();
-        members[memberId] = {
-          id: memberId,
-          isBlocked: false,
-          nickname: user.name,
-          serverId: server.id,
-          userId: user.id,
-          contribution: 0,
-          permissionLevel: 1,
-          createdAt: Date.now(),
-        };
-        await db.set(`members.${memberId}`, members[memberId]);
-      }
-
-      // Check if server is invisible and user is not a member
       if (
-        member &&
         server.settings.visibility === 'invisible' &&
-        member.permissionLevel < 2
+        !(member?.permissionLevel > 1)
       ) {
         throw new SocketError(
-          'Server is invisible or you are not a member',
+          'Server is invisible and you are not a member',
           'CONNECTSERVER',
           'VISIBILITY',
           403,
         );
       }
-      // Check user is blocked from the server
-      if (member && member.isBlocked) {
+      if (member?.isBlocked) {
         throw new SocketError(
           'You are blocked from the server',
           'CONNECTSERVER',
@@ -99,24 +82,32 @@ module.exports = (io, socket, db) => {
         );
       }
 
+      // Create new membership if there isn't one
+      if (!member) {
+        const memberId = uuidv4();
+        await Set.member(memberId, {
+          id: memberId,
+          nickname: user.name,
+          serverId: server.id,
+          userId: user.id,
+          createdAt: Date.now(),
+        });
+      }
+
       // Update user presence
-      users[user.id] = {
-        ...user,
+      const update = {
         currentServerId: server.id,
         lastActiveAt: Date.now(),
-        updatedAt: Date.now(),
       };
-      await db.set(`users.${user.id}`, users[user.id]);
+      await Set.user(user.id, { ...user, ...update });
 
       // Join the server
       socket.join(`server_${server.id}`);
 
       // Emit data (only to the user)
+      io.to(socket.id).emit('userUpdate', update);
       io.to(socket.id).emit('serverConnect', {
         ...(await Get.server(server.id)),
-      });
-      io.to(socket.id).emit('userUpdate', {
-        ...(await Get.user(user.id)),
       });
 
       new Logger('WebSocket').success(
@@ -142,15 +133,8 @@ module.exports = (io, socket, db) => {
         `Error connecting server: ${error.message}`,
       );
     }
-  });
-
-  socket.on('disconnectServer', async (data) => {
-    // data = {
-    //   sessionId: '123456',
-    //   serverId: '{serverId}',
-    // }
-    // console.log(data);
-
+  },
+  disconnectServer: async (io, socket, sessionId, serverId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -158,15 +142,6 @@ module.exports = (io, socket, db) => {
 
     try {
       // Validate data
-      const { sessionId, serverId } = data;
-      if (!sessionId) {
-        throw new SocketError(
-          'Missing required fields',
-          'DISCONNECTSERVER',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -202,39 +177,22 @@ module.exports = (io, socket, db) => {
       }
 
       // Update user presence
-      users[user.id] = {
-        ...user,
+      const update = {
         currentServerId: null,
-        currentChannelId: null,
         lastActiveAt: Date.now(),
-        updatedAt: Date.now(),
       };
-      await db.set(`users.${user.id}`, users[user.id]);
+      await Set.user(user.id, { ...user, ...update });
 
       if (channel) {
-        // Clear user contribution interval
-        utils.interval.clearContributionInterval(socket.id);
-
-        // leave the channel
-        socket.leave(`channel_${channel.id}`);
-
-        // Emit data (only to the user)
-        io.to(socket.id).emit('channelDisconnect', null);
-
-        // Emit data (to all users in the channel)
-        io.to(`server_${server.id}`).emit('serverUpdate', {
-          channels: (await Get.server(server.id)).channels,
-        });
+        channelHandler.disconnectChannel(io, socket, sessionId, channel.id);
       }
 
       // Leave the server
       socket.leave(`server_${server.id}`);
 
       // Emit data (only to the user)
+      io.to(socket.id).emit('userUpdate', update);
       io.to(socket.id).emit('serverDisconnect', null);
-      io.to(socket.id).emit('userUpdate', {
-        ...(await Get.user(user.id)),
-      });
 
       new Logger('WebSocket').success(
         `User(${user.id}) disconnected from server(${server.id})`,
@@ -256,16 +214,155 @@ module.exports = (io, socket, db) => {
         `Error disconnecting from server: ${error.message}`,
       );
     }
-  });
+  },
+  createServer: async (io, socket, sessionId, server) => {
+    // Get database
+    const users = (await db.get('users')) || {};
+    let uploadedFilePath = null;
 
-  socket.on('updateServer', async (data) => {
-    // data = {
-    //   sessionId
-    //   serverId
-    //   server: {
-    //     ...
-    //   }
+    try {
+      // Validate data
+      const userId = Map.userSessions.get(sessionId);
+      if (!userId) {
+        throw new SocketError(
+          `Invalid session ID(${sessionId})`,
+          'CREATESERVER',
+          'SESSION_EXPIRED',
+          401,
+        );
+      }
+      const user = users[userId];
+      if (!user) {
+        throw new SocketError(
+          `User(${userId}) not found`,
+          'CREATESERVER',
+          'USER',
+          404,
+        );
+      }
+      if (!server.name || server.name.length > 30 || !server.name.trim()) {
+        throw new SocketError(
+          'Invalid server name',
+          'CREATESERVER',
+          'NAME',
+          400,
+        );
+      }
+      // const userOwnedServers = await Get.userOwnedServers(userId);
+      // if (userOwnedServers.length >= 3) {
+      //   throw new SocketError(
+      //     'You have reached the maximum number of servers you can own',
+      //     'CREATESERVER',
+      //     'LIMIT',
+      //     403,
+      //   );
+      // }
 
+      // Handle avatar upload if provided
+      let avatarPath = null;
+      if (server.avatar) {
+        const matches = server.avatar.match(/^data:image\/(.*?);base64,/);
+        if (!matches) {
+          throw new Error('無效的圖片格式');
+        }
+
+        const imageType = matches[1];
+        if (!['png', 'jpeg', 'gif', 'webp'].includes(imageType)) {
+          throw new Error('無效的圖片格式');
+        }
+        const base64Data = server.avatar.replace(
+          /^data:image\/\w+;base64,/,
+          '',
+        );
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        // Check file size (5MB limit)
+        if (buffer.length > 5 * 1024 * 1024) {
+          throw new Error('圖片大小超過限制');
+        }
+
+        // Create file with unique name
+        const fileName = `${uuidv4()}.${imageType}`;
+        uploadedFilePath = path.join(SERVER_AVATAR_DIR, fileName);
+
+        // Save file
+        await fs.writeFile(uploadedFilePath, buffer);
+        avatarPath = `/${SERVER_AVATAR_PATH}/${fileName}`;
+      }
+
+      // Create server / main channel (lobby) / member (owner)
+      const name = server.name
+        ? server.name.toString().trim().substring(0, 30)
+        : 'Untitled Server';
+      const description = server.description
+        ? server.description.toString().substring(0, 200)
+        : '';
+      const serverId = uuidv4();
+      const channelId = uuidv4();
+      const memberId = uuidv4();
+      await Set.server(serverId, {
+        name,
+        description,
+        avatarUrl: avatarPath,
+        displayId: await Func.generateUniqueDisplayId(),
+        lobbyId: channelId,
+        ownerId: userId,
+        settings: {
+          visibility: server.settings.visibility || 'public',
+          defaultChannelId: channelId,
+        },
+        createdAt: Date.now(),
+      });
+      await Set.channel(channelId, {
+        name: '大廳',
+        isLobby: true,
+        isMain: true,
+        serverId: serverId,
+        settings: {
+          visibility: 'public',
+          slowmode: false,
+          userLimit: -1,
+        },
+        createdAt: Date.now(),
+      });
+      await Set.member(memberId, {
+        permissionLevel: 6,
+        nickname: user.name,
+        serverId: serverId,
+        userId: userId,
+        createdAt: Date.now(),
+      });
+
+      // Join the server
+      serverHandler.connectServer(io, socket, sessionId, serverId);
+
+      new Logger('Server').success(
+        `New server(${serverId}) created by user(${userId})`,
+      );
+    } catch (error) {
+      // Clean up uploaded file if error
+      if (uploadedFilePath) {
+        fs.unlink(uploadedFilePath).catch((err) => {
+          new Logger('Server').error(`Error deleting file: ${err.message}`);
+        });
+      }
+
+      // Error response
+      if (error instanceof SocketError) {
+        io.to(socket.id).emit('error', error);
+      } else {
+        io.to(socket.id).emit('error', {
+          message: `建立伺服器時發生無法預期的錯誤: ${error.message}`,
+          part: 'CREATESERVER',
+          tag: 'EXCEPTION_ERROR',
+          status_code: 500,
+        });
+      }
+
+      new Logger('Server').error(`Error creating server: ${error.message}`);
+    }
+  },
+  updateServer: async (io, socket, sessionId, serverId, editedServer) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -274,15 +371,6 @@ module.exports = (io, socket, db) => {
 
     try {
       // Validate data
-      const { sessionId, serverId, server: editedServer } = data;
-      if (!sessionId || !serverId || !editedServer) {
-        throw new SocketError(
-          'Missing required fields',
-          'UPDATESERVER',
-          'DATA',
-          400,
-        );
-      }
       const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
@@ -310,7 +398,7 @@ module.exports = (io, socket, db) => {
           404,
         );
       }
-      const userPermission = await getPermissionLevel(userId, server.id);
+      const userPermission = await Get.userPermissionInServer(userId, serverId);
       if (userPermission < 5) {
         throw new SocketError(
           'Insufficient permissions',
@@ -320,47 +408,57 @@ module.exports = (io, socket, db) => {
         );
       }
 
-      // FIX ME: Update server data
+      // FIXME: Unable change server avatar
+      let avatarPath = null;
+      if (editedServer.avatar) {
+        const matches = editedServer.avatar.match(/^data:image\/(.*?);base64,/);
+        if (!matches) {
+          throw new Error('無效的圖片格式');
+        }
 
-      if (editedServer.fileData && editedServer.fileType) {
+        const imageType = matches[1];
+        if (!['png', 'jpeg', 'gif', 'webp'].includes(imageType)) {
+          throw new Error('無效的圖片格式');
+        }
+        const base64Data = editedServer.avatar.replace(
+          /^data:image\/\w+;base64,/,
+          '',
+        );
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        // Check file size (5MB limit)
+        if (buffer.length > 5 * 1024 * 1024) {
+          throw new Error('圖片大小超過限制');
+        }
+
         // Create file with unique name
-        const ext = updates.fileType.split('/')[1];
-        const fileName = `${uuidv4()}.${ext}`;
-        uploadedFilePath = path.join(uploadDir, fileName);
+        const fileName = `${uuidv4()}.${imageType}`;
+        uploadedFilePath = path.join(SERVER_AVATAR_DIR, fileName);
+        avatarPath = `/${SERVER_AVATAR_PATH}/${fileName}`;
 
-        // Save file
-        const buffer = Buffer.from(updates.fileData, 'base64');
-        await fs.writeFile(uploadedFilePath, buffer);
-
-        // Create icon path
-        const iconPath = `/uploads/serverAvatars/${fileName}`;
-
-        // Delete old icon if exists
-        if (server.iconUrl && !server.iconUrl.includes('logo_server_def.png')) {
-          const oldPath = path.join(
-            UPLOADS_DIR,
-            server.iconUrl.replace('/uploads/', ''),
-          );
+        // Delete old avatar if exists and is not default
+        if (
+          server.avatarUrl &&
+          !server.avatarUrl.includes('logo_server_def.png')
+        ) {
           try {
+            const oldFileName = server.avatarUrl.split('/').pop();
+            const oldPath = path.join(SERVER_AVATAR_DIR, oldFileName);
             await fs.unlink(oldPath);
           } catch (error) {
-            new Logger('Server').warn(
-              `Error deleting old icon: ${error.message}`,
-            );
+            new Logger('Server').warn(`無法刪除舊頭像: ${error.message}`);
           }
         }
 
-        // Add icon URL to updates
-        updates.iconUrl = iconPath;
+        // Save new file
+        await fs.writeFile(uploadedFilePath, buffer);
+        editedServer.avatarUrl = avatarPath;
       }
-
-      // Remove file data from updates before saving
-      const { fileData, fileType, ...serverUpdates } = updates;
 
       // Validate specific fields
       if (
-        serverUpdates.name &&
-        (serverUpdates.name.length > 30 || !serverUpdates.name.trim())
+        editedServer.name &&
+        (editedServer.name.length > 30 || !editedServer.name.trim())
       ) {
         throw new SocketError(
           'Invalid server name',
@@ -369,7 +467,7 @@ module.exports = (io, socket, db) => {
           400,
         );
       }
-      if (serverUpdates.description && serverUpdates.description.length > 200) {
+      if (editedServer.description && editedServer.description.length > 200) {
         throw new SocketError(
           'Invalid server description',
           'UPDATESERVER',
@@ -379,9 +477,9 @@ module.exports = (io, socket, db) => {
       }
 
       // Create new server object with only allowed updates
-      const updatedServer = {
+      servers[serverId] = {
         ...server,
-        ..._.pick(serverUpdates, [
+        ..._.pick(editedServer, [
           'name',
           'slogan',
           'description',
@@ -390,7 +488,7 @@ module.exports = (io, socket, db) => {
         ]),
         settings: {
           ...server.settings,
-          ..._.pick(serverUpdates.settings || {}, ['visibility']),
+          ..._.pick(editedServer.settings || {}, ['visibility']),
         },
       };
 
@@ -424,5 +522,7 @@ module.exports = (io, socket, db) => {
 
       new Logger('Server').error(`Error updating server: ${error.message}`);
     }
-  });
+  },
 };
+
+module.exports = { ...serverHandler };

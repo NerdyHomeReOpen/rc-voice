@@ -16,7 +16,7 @@ import ServerSettingModal from '@/components/modals/ServerSettingModal';
 import UserSettingModal from '@/components/modals/UserSettingModal';
 
 // Types
-import type { User, Server, Message } from '@/types';
+import type { User, Server, Message, Permission, Channel } from '@/types';
 
 // Socket
 import { useSocket } from '@/hooks/SocketProvider';
@@ -33,8 +33,13 @@ const getStoredBoolean = (key: string, defaultValue: boolean): boolean => {
 
 const ServerPageComponent: React.FC = () => {
   // Redux
-  const user = useSelector((state: { user: User }) => state.user);
-  const server = useSelector((state: { server: Server }) => state.server);
+  const user = useSelector((state: { user: User | null }) => state.user);
+  const server = useSelector(
+    (state: { server: Server | null }) => state.server,
+  );
+  const channel = useSelector(
+    (state: { channel: Channel | null }) => state.channel,
+  );
   const sessionId = useSelector(
     (state: { sessionToken: string }) => state.sessionToken,
   );
@@ -43,7 +48,11 @@ const ServerPageComponent: React.FC = () => {
   const socket = useSocket();
 
   const handleSendMessage = (message: Message): void => {
-    socket?.emit('sendMessage', { sessionId, message });
+    socket?.emit('sendMessage', {
+      sessionId,
+      channelId: message.channelId,
+      message,
+    });
   };
 
   // Volume Control
@@ -122,19 +131,17 @@ const ServerPageComponent: React.FC = () => {
   // Server Setting Control
   const [showServerSetting, setShowServerSetting] = useState<boolean>(false);
 
-  const userPermission = server.members?.[user.id].permissionLevel ?? 1;
-  const userCurrentChannelId = user.presence?.currentChannelId ?? '';
-  const userCurrentChannel = server.channels?.find(
-    (channel) => channel.id === userCurrentChannelId,
+  const userMember = user?.members?.find(
+    (member) => member.serverId === server?.id,
   );
-  const serverChannels = server.channels ?? [];
-  const serverIcon = server.iconUrl
-    ? API_URL + server.iconUrl
+  const serverChannels = server?.channels ?? [];
+  const serverAvatar = server?.avatarUrl
+    ? API_URL + server.avatarUrl
     : '/logo_server_def.png';
-  const serverName = server.name ?? '';
-  const serverDisplayId = server.displayId ?? '';
-  const serverAnnouncement = server.announcement ?? '';
-  const messages = userCurrentChannel?.messages ?? [];
+  const serverName = server?.name ?? '';
+  const serverDisplayId = server?.displayId ?? '';
+  const serverAnnouncement = server?.announcement ?? '';
+  const channelMessages = channel?.messages ?? [];
 
   return (
     <div className={styles['serverWrapper']}>
@@ -155,7 +162,7 @@ const ServerPageComponent: React.FC = () => {
             <div
               className={styles['avatarPicture']}
               style={{
-                background: `url(${serverIcon})`,
+                background: `url(${serverAvatar})`,
                 backgroundSize: 'contain',
                 backgroundPosition: '0 0',
               }}
@@ -170,9 +177,7 @@ const ServerPageComponent: React.FC = () => {
                 <div className={styles['idText']}>{serverDisplayId}</div>
                 <div className={styles['memberIcon']} />
                 <div className={styles['memberText']}>
-                  {serverChannels.reduce((acc, channel) => {
-                    return acc + channel.userIds.length;
-                  }, 0)}
+                  {server?.users?.length ?? 0}
                 </div>
               </div>
             </div>
@@ -198,17 +203,21 @@ const ServerPageComponent: React.FC = () => {
           </div>
           {/* Messages Area */}
           <div className={styles['messageArea']}>
-            <MessageViewer messages={messages} server={server} />
+            <MessageViewer messages={channelMessages} />
           </div>
           {/* Input Area */}
           <div className={styles['inputArea']}>
             <MessageInputBox
               onSendMessage={(msg) => {
+                if (!user) return;
                 handleSendMessage({
                   id: '',
                   type: 'general',
                   content: msg,
                   senderId: user.id,
+                  channelId: user.currentChannelId,
+                  permissionLevel:
+                    userMember?.permissionLevel ?? (0 as Permission),
                   timestamp: 0,
                 });
               }}

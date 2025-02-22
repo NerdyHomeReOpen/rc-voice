@@ -13,19 +13,19 @@ import { useSocket } from '@/hooks/SocketProvider';
 
 interface AddChannelModalProps {
   onClose: () => void;
-  parentChannel: Channel | null;
+  isRoot: boolean;
 }
 
 const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
-  ({ onClose, parentChannel }) => {
-    // Socket
-    const socket = useSocket();
-
+  ({ onClose, isRoot }) => {
     // Redux
     const server = useSelector((state: { server: Server }) => state.server);
     const sessionId = useSelector(
       (state: { sessionToken: string }) => state.sessionToken,
     );
+
+    // Socket
+    const socket = useSocket();
 
     // Form Control
     const [newChannel, setNewChannel] = useState<Channel>({
@@ -33,17 +33,18 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
       name: '',
       isLobby: false,
       isCategory: false,
+      isRoot: isRoot,
       serverId: server.id,
-      userIds: [],
-      messageIds: [],
-      parentId: parentChannel?.isLobby ? null : parentChannel?.id ?? null,
-      createdAt: 0,
+      voiceMode: 'free' as Channel['voiceMode'],
+      chatMode: 'free' as Channel['chatMode'],
+      order: 0,
       settings: {
         bitrate: 0,
         visibility: 'public',
         slowmode: false,
         userLimit: 0,
       },
+      createdAt: 0,
     });
 
     // Error Control
@@ -51,8 +52,9 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
 
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
-      socket?.emit('addChannel', {
+      socket?.emit('createChannel', {
         sessionId: sessionId,
+        serverId: server.id,
         channel: newChannel,
       });
       socket?.on('error', (error: { message: string }) => {

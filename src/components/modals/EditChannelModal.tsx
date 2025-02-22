@@ -17,18 +17,17 @@ interface EditChannelModalProps {
 
 const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
   ({ onClose, channel }) => {
-    // Socket
-    const socket = useSocket();
-
     // Redux
     const sessionId = useSelector(
       (state: { sessionToken: string }) => state.sessionToken,
     );
 
+    // Socket
+    const socket = useSocket();
+
     // Form Control
     const [editedChannel, setEditedChannel] = useState<Partial<Channel>>({
       name: channel.name,
-      id: channel.id,
       settings: {
         ...channel.settings,
       },
@@ -36,8 +35,9 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
 
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
-      socket?.emit('editChannel', {
+      socket?.emit('updateChannel', {
         sessionId: sessionId,
+        channelId: channel.id,
         channel: editedChannel,
       });
       onClose();

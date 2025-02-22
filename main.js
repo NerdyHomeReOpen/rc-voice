@@ -43,8 +43,8 @@ function createAuthWindow() {
   if (isDev) authWindow.webContents.openDevTools();
 }
 
-function createCreateServerPopup() {
-  const createServerPopup = new BrowserWindow({
+function createPopup(page) {
+  const popup = new BrowserWindow({
     minWidth: 800,
     minHeight: 600,
     frame: false,
@@ -54,7 +54,7 @@ function createCreateServerPopup() {
       contextIsolation: false,
     },
   });
-  createServerPopup.loadURL(`${baseUri}/popups/create-server`);
+  popup.loadURL(`${baseUri}/popup?page=${page}`); // Add page query parameter
 
   // Open DevTools in development mode
   if (isDev) createServerPopup.webContents.openDevTools();
@@ -73,14 +73,15 @@ app.whenReady().then(() => {
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    createMainWindow();
+    createAuthWindow();
+    // createMainWindow();
   }
 });
 
 ipcMain.on('open-popup', (popup) => {
   switch (popup) {
     case 'create-server':
-      createCreateServerPopup();
+      createPopup('create-server');
       break;
     default:
       break;

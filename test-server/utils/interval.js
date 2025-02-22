@@ -1,8 +1,13 @@
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
-const Logger = require('./logger');
 const fs = require('fs').promises;
 const path = require('path');
+
+const { XP_SYSTEM } = require('../constant');
+const Logger = require('./logger');
+const Map = require('./map');
+const Get = require('./get');
+const Func = require('./func');
 
 const UPLOADS_DIR = path.join(__dirname, '../uploads');
 const MIME_TYPES = {
@@ -14,141 +19,86 @@ const MIME_TYPES = {
 };
 const CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-module.exports = {
-  setupContributionInterval: async (socketId, userId) => {
+const interval = {
+  setupObtainXpInterval: async (socketId, userId = null) => {
     try {
-      // Get user data
-      const user = (await db.get(`users.${userId}`)) || {};
-
-      // Initialize xp if it doesn't exist
-      if (user.xp === undefined) {
-        user.xp = 0;
+      // Validate inputs
+      if (!socketId) {
+        throw new Error('Socket ID is required');
       }
 
-      // Calculate catch-up XP if needed
-      if (user.lastXpAwardedAt) {
-        const timeSinceLastAward = Date.now() - user.lastXpAwardedAt;
-        const hoursSinceLastAward = Math.floor(
-          timeSinceLastAward / XP_SYSTEM.INTERVAL_MS,
+      userId = userId ?? Map.socketToUser.get(socketId);
+      if (!userId) {
+        throw new Error('User ID not found for socket');
+      }
+
+      const leftTime = restoreTimer(userId);
+
+      // Ensure leftTime is valid
+      if (leftTime < 0) {
+        initializeTimer(userId);
+      }
+
+      setTimeout(() => {
+        // Set up interval
+        obtainXp(socketId, userId);
+
+        // Run interval every hour
+        const intervalId = setInterval(
+          () => obtainXp(socketId, userId),
+          XP_SYSTEM.INTERVAL_MS,
         );
 
-        if (hoursSinceLastAward > 0) {
-          // Award catch-up XP
-          const catchUpXp = hoursSinceLastAward * XP_SYSTEM.XP_PER_HOUR;
-          user.xp += catchUpXp;
-
-          // Add catch-up contribution to current server
-          const presence = await getPresenceState(userId);
-          if (presence.currentServerId) {
-            const member = await getMember(userId, presence.currentServerId);
-            if (member) {
-              member.contribution += catchUpXp;
-              await db.set(`members.${member.id}`, member);
-            }
-          }
-
-          // Process any level ups
-          while (user.xp >= calculateRequiredXP(user.level)) {
-            const requiredXP = calculateRequiredXP(user.level);
-            user.level += 1;
-            user.xp -= requiredXP;
-            new Logger('WebSocket').info(
-              `User(${userId}) leveled up to ${user.level}`,
-            );
-          }
-
-          // Update lastXpAwardedAt to align with hourly intervals
-          user.lastXpAwardedAt += hoursSinceLastAward * XP_SYSTEM.INTERVAL_MS;
-        }
-      } else {
-        // First time setup
-        user.lastXpAwardedAt = Date.now();
-      }
-
-      // Save user changes
-      await db.set(`users.${userId}`, user);
-
-      // Calculate delay to align with next hour interval
-      const timeUntilNextAward =
-        XP_SYSTEM.INTERVAL_MS -
-        ((Date.now() - user.lastXpAwardedAt) % XP_SYSTEM.INTERVAL_MS);
-
-      // Setup initial timeout to align with hour intervals
-      setTimeout(() => {
-        // Start regular interval once aligned
-        const interval = setInterval(async () => {
-          try {
-            const user = (await db.get(`users.${userId}`)) || {};
-
-            // Add XP
-            user.xp += XP_SYSTEM.XP_PER_HOUR;
-            user.lastXpAwardedAt = Date.now();
-
-            // Add contribution to current server
-            const presence = await getPresenceState(userId);
-            if (presence.currentServerId) {
-              const member = await getMember(userId, presence.currentServerId);
-              if (member) {
-                member.contribution += XP_SYSTEM.XP_PER_HOUR;
-                await db.set(`members.${member.id}`, member);
-              }
-            }
-
-            // Check for level up
-            const requiredXP = calculateRequiredXP(user.level);
-            if (user.xp >= requiredXP) {
-              user.level += 1;
-              user.xp -= requiredXP;
-              new Logger('WebSocket').info(
-                `User(${userId}) leveled up to ${user.level}`,
-              );
-            }
-
-            // Save changes
-            await db.set(`users.${userId}`, user);
-
-            // Emit updated data
-            io.to(socketId).emit('userUpdate', {
-              level: user.level,
-              xp: user.xp,
-              requiredXP: calculateRequiredXP(user.level),
-            });
-          } catch (error) {
-            new Logger('WebSocket').error(
-              `Error in XP interval: ${error.message}`,
-            );
-          }
-        }, XP_SYSTEM.INTERVAL_MS);
-
-        contributionInterval.set(socketId, interval);
-      }, timeUntilNextAward);
-
-      // Emit initial XP state
-      io.to(socketId).emit('userUpdate', {
-        level: user.level,
-        xp: user.xp,
-        requiredXP: calculateRequiredXP(user.level),
-      });
+        Map.createContributionIntervalMap(socketId, intervalId);
+      }, Math.max(0, leftTime));
     } catch (error) {
-      clearContributionInterval(socketId);
       new Logger('WebSocket').error(
         'Error setting up contribution interval: ' + error.message,
       );
     }
   },
-  clearContributionInterval: (socketId) => {
-    clearInterval(contributionInterval.get(socketId));
-    contributionInterval.delete(socketId);
+
+  clearObtainXpInterval: (socketId, userId = null) => {
+    try {
+      if (!socketId) {
+        throw new Error('Socket ID is required');
+      }
+
+      userId = userId ?? Map.socketToUser.get(socketId);
+      if (!userId) {
+        throw new Error('User ID not found for socket');
+      }
+
+      initializeTimer(userId);
+
+      // Clear interval if exists
+      const intervalId = Map.contributionIntervalMap.get(socketId);
+      if (intervalId) {
+        clearInterval(intervalId);
+        Map.deleteContributionIntervalMap(socketId);
+      }
+    } catch (error) {
+      new Logger('WebSocket').error(
+        'Error clearing contribution interval: ' + error.message,
+      );
+    }
   },
+
   setupCleanupInterval: async () => {
-    // Ensure uploads directory exists
-    fs.mkdir(UPLOADS_DIR, { recursive: true }).catch(console.error);
+    try {
+      // Ensure uploads directory exists
+      await fs.mkdir(UPLOADS_DIR, { recursive: true });
 
-    // Run cleanup
-    setInterval(cleanupUnusedAvatars, CLEANUP_INTERVAL);
+      // Run cleanup
+      setInterval(cleanupUnusedAvatars, CLEANUP_INTERVAL);
 
-    // Run initial cleanup on setup
-    cleanupUnusedAvatars().catch(console.error);
+      // Run initial cleanup
+      await cleanupUnusedAvatars();
+    } catch (error) {
+      new Logger('Cleanup').error(
+        `Error setting up cleanup interval: ${error.message}`,
+      );
+    }
   },
 };
 
@@ -163,7 +113,7 @@ const cleanupUnusedAvatars = async () => {
     // Get list of active avatar URLs
     const activeAvatars = new Set(
       Object.values(servers)
-        .map((server) => server.iconUrl)
+        .map((server) => server.avatarUrl)
         .filter((url) => url && !url.includes('logo_server_def.png'))
         .map((url) => path.basename(url)),
     );
@@ -181,7 +131,7 @@ const cleanupUnusedAvatars = async () => {
     // Delete unused files
     for (const file of unusedFiles) {
       try {
-        await fs.unlink(path.join(uploadDir, file));
+        await fs.unlink(path.join(UPLOADS_DIR, file));
         new Logger('Cleanup').success(`Deleted unused avatar: ${file}`);
       } catch (error) {
         new Logger('Cleanup').error(
@@ -201,3 +151,77 @@ const cleanupUnusedAvatars = async () => {
     new Logger('Cleanup').error(`Avatar cleanup failed: ${error.message}`);
   }
 };
+
+const initializeTimer = (userId) => {
+  if (!userId) return;
+
+  const lastAwardedAt = Map.userLastXpAwardedAt.get(userId);
+  if (!lastAwardedAt) {
+    Map.userLastXpAwardedAt.set(userId, Date.now());
+    Map.userElapsedTime.set(userId, 0);
+    return;
+  }
+
+  const elapsedTime = Date.now() - lastAwardedAt;
+  Map.userElapsedTime.set(userId, elapsedTime);
+};
+
+const restoreTimer = (userId) => {
+  if (!userId) return XP_SYSTEM.INTERVAL_MS;
+
+  const elapsedTime = Map.userElapsedTime.get(userId) || 0;
+  return Math.max(0, XP_SYSTEM.INTERVAL_MS - elapsedTime);
+};
+
+// XP interval handler
+const obtainXp = async (socketId, userId) => {
+  try {
+    if (!socketId || !userId) {
+      throw new Error('Socket ID and User ID are required');
+    }
+
+    const user = await Get.user(userId);
+    if (!user) {
+      throw new Error(`User not found: ${userId}`);
+    }
+
+    // Update user XP and level
+    user.xp += XP_SYSTEM.XP_PER_HOUR;
+    let requiredXP = Func.calculateRequiredXP(user.level);
+
+    while (user.xp >= requiredXP) {
+      user.level += 1;
+      user.xp -= requiredXP;
+      requiredXP = Func.calculateRequiredXP(user.level);
+    }
+
+    await db.set(`users.${userId}`, user);
+
+    // Update member contribution if in a server
+    if (user.currentServerId && user.members?.[user.currentServerId]) {
+      const member = user.members[user.currentServerId];
+
+      member.contribution += XP_SYSTEM.XP_PER_HOUR;
+
+      await db.set(`members.${member.id}`, member);
+    }
+
+    // Update last XP award time
+    Map.userLastXpAwardedAt.set(userId, Date.now());
+
+    // Emit update to client
+    io.to(socketId).emit('userUpdate', {
+      level: user.level,
+      xp: user.xp,
+      requiredXP: Func.calculateRequiredXP(user.level),
+    });
+
+    new Logger('WebSocket').info(
+      `User(${user.id}) earned XP. Level: ${user.level}`,
+    );
+  } catch (error) {
+    new Logger('WebSocket').error(`Error in XP interval: ${error.message}`);
+  }
+};
+
+module.exports = { ...interval };
