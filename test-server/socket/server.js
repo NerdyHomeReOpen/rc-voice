@@ -1,5 +1,7 @@
 const utils = require('../utils');
 const Logger = utils.logger;
+const Map = utils.map;
+const Get = utils.get;
 const SocketError = require('./socketError');
 
 module.exports = (io, socket, db) => {
@@ -26,7 +28,7 @@ module.exports = (io, socket, db) => {
           400,
         );
       }
-      const userId = utils.map.userSessions.get(sessionId);
+      const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -111,11 +113,10 @@ module.exports = (io, socket, db) => {
 
       // Emit data (only to the user)
       io.to(socket.id).emit('serverConnect', {
-        ...(await utils.get.server(server.id)),
-        applications: await utils.get.serverApplications(server.id),
+        ...(await Get.server(server.id)),
       });
       io.to(socket.id).emit('userUpdate', {
-        ...(await utils.get.user(user.id)),
+        ...(await Get.user(user.id)),
       });
 
       new Logger('WebSocket').success(
@@ -166,7 +167,7 @@ module.exports = (io, socket, db) => {
           400,
         );
       }
-      const userId = utils.map.userSessions.get(sessionId);
+      const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -222,7 +223,7 @@ module.exports = (io, socket, db) => {
 
         // Emit data (to all users in the channel)
         io.to(`server_${server.id}`).emit('serverUpdate', {
-          channels: (await utils.get.server(server.id)).channels,
+          channels: (await Get.server(server.id)).channels,
         });
       }
 
@@ -232,7 +233,7 @@ module.exports = (io, socket, db) => {
       // Emit data (only to the user)
       io.to(socket.id).emit('serverDisconnect', null);
       io.to(socket.id).emit('userUpdate', {
-        ...(await utils.get.user(user.id)),
+        ...(await Get.user(user.id)),
       });
 
       new Logger('WebSocket').success(
@@ -282,7 +283,7 @@ module.exports = (io, socket, db) => {
           400,
         );
       }
-      const userId = utils.map.userSessions.get(sessionId);
+      const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,

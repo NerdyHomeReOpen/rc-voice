@@ -12,10 +12,9 @@ import { CircleX } from 'lucide-react';
 import header from '@/styles/common/header.module.css';
 
 // Types
-import type { Presence, Server, User } from '@/types';
+import type { Server, User } from '@/types';
 
 // Pages
-import AuthPage from '@/components/pages/AuthPage';
 import FriendPage from '@/components/pages/FriendPage';
 import HomePage from '@/components/pages/HomePage';
 import ServerPage from '@/components/pages/ServerPage';
@@ -62,7 +61,7 @@ const Header: React.FC<HeaderProps> = React.memo(
     };
 
     const handleLeaveServer = () => {
-      const serverId = user.presence?.currentServerId;
+      const serverId = user.currentServerId;
       socket?.emit('disconnectServer', { serverId, sessionId });
     };
 
@@ -70,8 +69,8 @@ const Header: React.FC<HeaderProps> = React.memo(
       socket?.emit('requestUserUpdate', { sessionId });
     };
 
-    const handleUpdateStatus = (status: Presence['status']) => {
-      socket?.emit('updatePresence', { sessionId, presence: { status } });
+    const handleUpdateStatus = (status: User['status']) => {
+      socket?.emit('updateUser', { sessionId, user: { status } });
     };
 
     // Fullscreen Control
@@ -105,7 +104,7 @@ const Header: React.FC<HeaderProps> = React.memo(
     ].filter((_) => _);
 
     const userName = user?.name ?? 'RiceCall';
-    const userPresenceStatus = user?.presence?.status ?? 'online';
+    const userStatus = user?.status ?? 'online';
 
     return (
       <div className={header['header']}>
@@ -118,10 +117,7 @@ const Header: React.FC<HeaderProps> = React.memo(
             className={header['statusBox']}
             onClick={() => setShowStatusDropdown(!showStatusDropdown)}
           >
-            <div
-              className={header['statusDisplay']}
-              datatype={userPresenceStatus}
-            />
+            <div className={header['statusDisplay']} datatype={userStatus} />
             <div className={header['statusTriangle']} />
             <div
               className={`${header['statusDropdown']} ${
@@ -335,11 +331,10 @@ const HomeComponent = () => {
     if (!socket || !sessionId) return;
     const handleDisconnect = () => {
       console.log('Socket disconnected, ', sessionId);
-      socket.emit('disconnectUser', { sessionId });
-    };
-    const handleForceDisconnect = () => {
-      console.log('Socket force disconnected: ', sessionId);
-      socket.emit('disconnectUser', { sessionId });
+      store.dispatch(clearServer());
+      store.dispatch(clearUser());
+      store.dispatch(clearSessionToken());
+      localStorage.removeItem('sessionToken');
     };
     const handleUserConnect = (user: any) => {
       console.log('User connected: ', user);
@@ -367,11 +362,6 @@ const HomeComponent = () => {
     const handleChannelDisconnect = () => {
       console.log('Channel disconnected');
     };
-    const handleUpdateUserPresence = (data: Partial<Presence>) => {
-      console.log('User presence update: ', data);
-      const presence = user.presence ? { ...user.presence, ...data } : null;
-      store.dispatch(setUser({ ...user, presence }));
-    };
     const handleServerUpdate = (data: Partial<Server>) => {
       console.log('Server update: ', data);
       store.dispatch(setServer({ ...server, ...data }));
@@ -397,14 +387,12 @@ const HomeComponent = () => {
     };
 
     socket.on('disconnect', handleDisconnect);
-    socket.on('forceDisconnect', handleForceDisconnect);
     socket.on('userConnect', handleUserConnect);
     socket.on('userDisconnect', handleUserDisconnect);
     socket.on('serverConnect', handleServerConnect);
     socket.on('serverDisconnect', handleServerDisconnect);
     socket.on('channelConnect', handleChannelConnect);
     socket.on('channelDisconnect', handleChannelDisconnect);
-    socket.on('userPresenceUpdate', handleUpdateUserPresence);
     socket.on('serverUpdate', handleServerUpdate);
     socket.on('userUpdate', handleUserUpdate);
     socket.on('directMessage', handleDirectMessage);
@@ -412,14 +400,12 @@ const HomeComponent = () => {
 
     return () => {
       socket.off('disconnect', handleDisconnect);
-      socket.off('forceDisconnect', handleForceDisconnect);
       socket.off('userConnect', handleUserConnect);
       socket.off('userDisconnect', handleUserDisconnect);
       socket.off('serverConnect', handleServerConnect);
       socket.off('serverDisconnect', handleServerDisconnect);
       socket.off('channelConnect', handleChannelConnect);
       socket.off('channelDisconnect', handleChannelDisconnect);
-      socket.off('userPresenceUpdate', handleUpdateUserPresence);
       socket.off('serverUpdate', handleServerUpdate);
       socket.off('userUpdate', handleUserUpdate);
       socket.off('directMessage', handleDirectMessage);

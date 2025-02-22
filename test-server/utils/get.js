@@ -1,220 +1,179 @@
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 
-module.exports = {
-  server: async (serverId) => {
-    const servers = (await db.get('servers')) || {};
-    const server = servers[serverId];
-    if (!server) return null;
-
-    // Get all channels including child channels
-    const allChannels = await Promise.all(
-      server.channelIds.map(async (channelId) => await getChannels(channelId)),
-    );
-
-    // Filter out any null channels and ensure hierarchy is preserved
-    const channels = allChannels
-      .filter((channel) => channel)
-      .map((channel) => {
-        // Preserve parent-child relationships
-        if (channel.parentId) {
-          const parent = allChannels.find((c) => c.id === channel.parentId);
-          if (parent) {
-            parent.isCategory = true;
-          }
-        }
-        return channel;
-      });
-
-    return {
-      ...server,
-      members: await getServerMembers(serverId),
-      channels: channels,
-      lobby: await getChannels(server.lobbyId),
-      owner: await getUser(server.ownerId),
-    };
-  },
-  channel: async (channelId) => {
-    const _channels = (await db.get('channels')) || {};
-    const channel = _channels[channelId];
-    if (!channel) return null;
-    return {
-      ...channel,
-      users: (
-        await Promise.all(
-          channel.userIds.map(async (userId) => await getUser(userId)),
-        )
-      ).filter((user) => user),
-      messages: (
-        await Promise.all(
-          channel.messageIds.map(
-            async (messageId) => await getMessages(messageId),
-          ),
-        )
-      ).filter((message) => message),
-    };
-  },
-  message: async (messageId) => {
-    const _messages = (await db.get('messages')) || {};
-    const message = _messages[messageId];
-    if (!message) return null;
-    return {
-      ...message,
-      sender: await getUser(message.senderId),
-    };
-  },
+const get = {
+  // User
   user: async (userId) => {
-    const _users = (await db.get('users')) || {};
-    const user = _users[userId];
+    const users = (await db.get('users')) || {};
+    const user = users[userId];
     if (!user) return null;
-    const { account, ...restUser } = user;
-    const xpInfo = {
-      xp: user.xp || 0,
-      required: calculateRequiredXP(user.level),
-      progress: ((user.xp || 0) / calculateRequiredXP(user.level)) * 100,
-    };
-
     return {
-      ...restUser,
-      xpInfo,
-      badges: await getUserBadges(userId),
-      presence: await getPresenceState(userId),
+      ...user,
+      members: await get.userMembers(userId),
+      badges: await get.userBadges(userId),
+      friends: await get.userFriends(userId),
+      friendGroups: await get.userFriendGroups(userId),
+      friendApplications: await get.userFriendApplications(userId),
     };
   },
   userBadges: async (userId) => {
-    const _users = (await db.get('users')) || {};
-    const _badges = (await db.get('badgeList')) || {};
-    const userBadges = _users[userId].badgeIds
-      .map((badgeId) => _badges[badgeId])
-      .filter((badge) => badge);
-    if (!userBadges) return null;
-    return [...userBadges];
-  },
-  member: async (userId, serverId) => {
-    const _members = (await db.get('members')) || {};
-    const member = Object.values(_members).find(
-      (member) => member.userId === userId && member.serverId === serverId,
-    );
-    if (!member) return null;
-    return member;
-  },
-  userMembers: async (userId) => {
-    const _members = (await db.get('members')) || {};
-    const members = Object.values(_members).reduce((result, member) => {
-      if (member?.userId === userId) {
-        result[member.serverId] = member;
-      }
-      return result;
-    }, {});
-    if (!members) return null;
-    return {
-      ...members,
-    };
-  },
-  serverMembers: async (serverId) => {
-    const _members = (await db.get('members')) || {};
-    const members = Object.values(_members).reduce((result, member) => {
-      if (member?.serverId === serverId) {
-        result[member.userId] = member;
-      }
-      return result;
-    }, {});
-    if (!members) return null;
-    return {
-      ...members,
-    };
-  },
-  userFriendGroups: async (userId) => {
-    const _friendCategories = (await db.get('friendCategories')) || {};
-    const userFriendCategories = Object.values(_friendCategories).filter(
-      (fs) => fs.userId === userId,
-    );
-    if (!userFriendCategories) return null;
+    const userBadges = (await db.get('userBadges')) || {};
+    const badges = (await db.get('badges')) || {};
     return [
-      ...(
-        await Promise.all(
-          userFriendCategories.map(
-            async (category) => await getFriendCategory(category.id),
-          ),
-        )
-      ).filter((category) => category),
+      ...Object.values(userBadges)
+        .filter((ub) => ub.userId === userId)
+        .map((ub) => badges[ub.badgeId])
+        .filter((badge) => badge),
     ];
   },
-  friendGroup: async (categoryId) => {
-    const _friendCategories = (await db.get('friendCategories')) || {};
-    const category = _friendCategories[categoryId];
-    if (!category) return null;
-    return {
-      ...category,
-      friends: (
-        await Promise.all(
-          category.friendIds.map(
-            async (friendId) => await getFriend(category.userId, friendId),
-          ),
-        )
-      ).filter((friend) => friend),
-    };
+  userMembers: async (userId) => {
+    const members = (await db.get('members')) || {};
+    return [
+      ...Object.values(members).filter((member) => member.userId === userId),
+    ];
   },
   userFriends: async (userId) => {
-    const _friends = (await db.get('friends')) || {};
-    const friends = Object.values(_friends).filter((friend) =>
-      friend.userIds.includes(userId),
-    );
-    if (!friends) return null;
-    return [...friends];
+    const friends = (await db.get('friends')) || {};
+    return [
+      ...Object.values(friends).filter(
+        (friend) => friend.user1Id === userId || friend.user2Id === userId,
+      ),
+    ];
   },
-  friend: async (userId, friendId) => {
-    const _friends = (await db.get('friends')) || {};
-    const friend = Object.values(_friends).find(
-      (friend) =>
-        friend.userIds.includes(userId) && friend.userIds.includes(friendId),
-    );
+  userFriendGroups: async (userId) => {
+    const friendGroups = (await db.get('friendGroups')) || {};
+    return [
+      ...Object.values(friendGroups).filter((group) => group.userId === userId),
+    ];
+  },
+  userFriendApplications: async (userId) => {
+    const friendApplications = (await db.get('friendApplications')) || {};
+    return [
+      ...Object.values(friendApplications).filter(
+        (app) => app.recieverId === userId,
+      ),
+    ];
+  },
+  // Server
+  server: async (serverId) => {
+    const servers = (await db.get('servers')) || {};
+    const channels = (await db.get('channels')) || {};
+    const users = (await db.get('users')) || {};
+    const server = servers[serverId];
+    if (!server) return null;
+    return {
+      ...server,
+      lobby: channels[server.lobbyId],
+      owner: users[server.ownerId],
+      channels: await get.serverChannels(serverId),
+      members: await get.serverMembers(serverId),
+      applications: await get.serverApplications(serverId),
+    };
+  },
+  serverChannels: async (serverId) => {
+    const channels = (await db.get('channels')) || {};
+    return [
+      ...Object.values(channels).filter(
+        (channel) => channel.serverId === serverId,
+      ),
+    ];
+  },
+  serverMembers: async (serverId) => {
+    const members = (await db.get('members')) || {};
+    return [
+      ...Object.values(members).filter(
+        (member) => member.serverId === serverId,
+      ),
+    ];
+  },
+  serverApplications: async (serverId) => {
+    const serverApplications = (await db.get('serverApplications')) || {};
+    return [
+      ...Object.values(serverApplications).filter(
+        (app) => app.serverId === serverId,
+      ),
+    ];
+  },
+  // Channel
+  channel: async (channelId) => {
+    const channels = (await db.get('channels')) || {};
+    const channel = channels[channelId];
+    if (!channel) return null;
+    return {
+      ...channel,
+      users: await get.channelUsers(channelId),
+      messages: await get.channelMessage(channelId),
+      subChannel: await get.channelChildren(channelId),
+    };
+  },
+  channelUsers: async (channelId) => {
+    const users = (await db.get('users')) || {};
+    return [
+      ...Object.values(users).filter(
+        (user) => user.currentChannelId === channelId,
+      ),
+    ];
+  },
+  channelMessage: async (channelId) => {
+    const messages = (await db.get('messages')) || {};
+    return [
+      ...Object.values(messages).filter(
+        (message) => message.channelId === channelId,
+      ),
+    ];
+  },
+  channelChildren: async (channelId) => {
+    const channelRelations = (await db.get('channelRelations')) || {};
+    const channels = (await db.get('channels')) || {};
+    return [
+      ...Object.values(channelRelations)
+        .filter((relation) => relation.parentId === channelId)
+        .map((relation) => channels[relation.childId])
+        .filter((channel) => channel),
+    ];
+  },
+  // Message
+  message: async (messageId) => {
+    const messages = (await db.get('messages')) || {};
+    const users = (await db.get('users')) || {};
+    const message = messages[messageId];
+    if (!message) return null;
+    return {
+      ...message,
+      sender: users[message.senderId],
+    };
+  },
+  // DirectMessage
+  directMessages: async (directMessageId) => {
+    const directMessages = (await db.get('directMessages')) || {};
+    const users = (await db.get('users')) || {};
+    const directMessage = directMessages[directMessageId];
+    if (!directMessage) return null;
+    return {
+      ...directMessage,
+      sender: users[message.senderId],
+    };
+  },
+  // Friend
+  friend: async (friendId) => {
+    const friends = (await db.get('friends')) || {};
+    const users = (await db.get('users')) || {};
+    const friend = friends[friendId];
     if (!friend) return null;
     return {
       ...friend,
-      user: await getUser(friend.userIds.find((id) => id !== userId)),
-      messages: (
-        await Promise.all(
-          friend.messageIds.map(
-            async (messageId) => await getMessages(messageId),
-          ),
-        )
-      ).filter((message) => message),
+      users: [users[friend.user1Id], users[friend.user2Id]],
+      directMessages: await get.friendDriectMessages(friendId),
     };
   },
-  directMessages: async (userId, friendId) => {
-    const friend = await getFriend(userId, friendId);
-    if (!friend) return null;
-    return [...friend.messages];
-  },
-  displayId: async (baseId = 20000000) => {
-    const servers = (await db.get('servers')) || {};
-    let displayId = baseId + Object.keys(servers).length;
-    // Ensure displayId is unique
-    while (
-      Object.values(servers).some((server) => server.displayId === displayId)
-    ) {
-      displayId++;
-    }
-    return displayId;
-  },
-  serverApplications: async (serverId) => {
-    const _serverApplications = (await db.get('serverApplications')) || {};
-    const serverApplications = Object.values(_serverApplications).filter(
-      (app) => app.serverId === serverId,
-    );
-    if (!serverApplications) return null;
+  friendDriectMessages: async (friendId) => {
+    const directMessages = (await db.get('directMessages')) || {};
     return [
-      ...(
-        await Promise.all(
-          serverApplications.map(async (app) => {
-            return {
-              ...app,
-              user: await getUser(app.userId),
-            };
-          }),
-        )
-      ).filter((app) => app),
+      ...Object.values(directMessages).filter(
+        (directMessage) => directMessage.friendId === friendId,
+      ),
     ];
   },
 };
+
+module.exports = { ...get };

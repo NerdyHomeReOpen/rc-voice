@@ -1,57 +1,59 @@
-module.exports = {
+const map = {
   userSessions: new Map(), // sessionToken -> userId
   userToSocket: new Map(), // userId -> socket.id
   socketToUser: new Map(), // socket.id -> userId
   contributionInterval: new Map(), // socket.id -> interval
   createUserIdSessionIdMap: (userId, sessionId) => {
-    if (!userSessions.has(sessionId)) {
-      userSessions.set(sessionId, userId);
+    if (!map.userSessions.has(sessionId)) {
+      map.userSessions.set(sessionId, userId);
       return true;
     }
     return false;
   },
   deleteUserIdSessionIdMap: (userId = null) => {
-    if (userId && userSessions.has(userId)) {
-      userSessions.delete(userId);
+    if (userId && map.userSessions.has(userId)) {
+      map.userSessions.delete(userId);
       return true;
     }
     return false;
   },
   createUserIdSocketIdMap: (userId, socketId) => {
-    if (!socketToUser.has(socketId) && !userToSocket.has(userId)) {
-      socketToUser.set(socketId, userId);
-      userToSocket.set(userId, socketId);
+    if (!map.socketToUser.has(socketId) && !map.userToSocket.has(userId)) {
+      map.socketToUser.set(socketId, userId);
+      map.userToSocket.set(userId, socketId);
       return true;
     }
     return false;
   },
   deleteUserIdSocketIdMap: (userId = null, socketId = null) => {
-    if (userId && userToSocket.has(userId)) {
-      socketId = userToSocket.get(userId);
-      socketToUser.delete(socketId);
-      userToSocket.delete(userId);
+    if (userId && map.userToSocket.has(userId)) {
+      socketId = map.userToSocket.get(userId);
+      map.socketToUser.delete(socketId);
+      map.userToSocket.delete(userId);
       return true;
     }
-    if (socketId && socketToUser.has(socketId)) {
-      userId = socketToUser.get(socketId);
-      userToSocket.delete(userId);
-      socketToUser.delete(socketId);
+    if (socketId && map.socketToUser.has(socketId)) {
+      userId = map.socketToUser.get(socketId);
+      map.userToSocket.delete(userId);
+      map.socketToUser.delete(socketId);
       return true;
     }
     return false;
   },
   createContributionIntervalMap: (socketId, intervalId) => {
-    if (!contributionInterval.has(socketId)) {
-      contributionInterval.set(socketId, intervalId);
+    if (!map.contributionInterval.has(socketId)) {
+      map.contributionInterval.set(socketId, intervalId);
       return true;
     }
     return false;
   },
   deleteContributionIntervalMap: (socketId) => {
-    if (contributionInterval.has(socketId)) {
-      contributionInterval.delete(socketId);
+    if (map.contributionInterval.has(socketId)) {
+      map.contributionInterval.delete(socketId);
       return true;
     }
     return false;
   },
 };
+
+module.exports = { ...map };

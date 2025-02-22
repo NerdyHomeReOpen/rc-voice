@@ -1,5 +1,7 @@
 const utils = require('../utils');
 const Logger = utils.logger;
+const Map = utils.map;
+const Get = utils.get;
 const SocketError = require('./socketError');
 
 module.exports = (io, socket, db) => {
@@ -29,7 +31,7 @@ module.exports = (io, socket, db) => {
           400,
         );
       }
-      const userId = utils.map.userSessions.get(sessionId);
+      const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -69,7 +71,7 @@ module.exports = (io, socket, db) => {
 
       // Emit updated data (to all users in the channel)
       io.to(`channel_${channel.id}`).emit('channelUpdate', {
-        messages: (await utils.get.channel(channelId)).messages,
+        messages: (await Get.channel(channelId)).messages,
       });
 
       new Logger('WebSocket').info(
@@ -117,7 +119,7 @@ module.exports = (io, socket, db) => {
           400,
         );
       }
-      const userId = utils.map.userSessions.get(sessionId);
+      const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
