@@ -254,7 +254,8 @@ const db = new QuickDB();
 //   },
 // };
 
-const account_password = {};
+const accountPasswords = {};
+const accountUserIds = {};
 const users = {};
 const friends = {};
 const friendGroups = {};
@@ -272,7 +273,8 @@ const directMessages = {};
 
 const init = async () => {
   await db.deleteAll();
-  await db.set('account_password', account_password);
+  await db.set('accountPasswords', accountPasswords);
+  await db.set('accountUserIds', accountUserIds);
   await db.set('users', users);
   await db.set('friends', friends);
   await db.set('friendGroups', friendGroups);
