@@ -88,12 +88,34 @@
 }
 
 .checkWrapper .check {
-  min-width: 12px;
-  min-height: 12px;
-  margin-right: 0.5rem;
+  appearance: none;
+  cursor: pointer;
 }
 
-.button {
+.checkWrapper .check:before {
+  content: '';
+  background: url('../../public/ctrl/checkbox_icon.png') no-repeat center center;
+  background-size: auto;
+  background-position: 0 0;
+  height: 18px;
+  width: 18px;
+  display: block;
+}
+
+.checkBox:hover > .check:before {
+  background-position: -18px 0;
+}
+
+.checkBox .check:checked:before {
+  background-position: 0 -18px;
+}
+
+.checkBox:hover > .check:checked:before {
+  background-position: -18px -18px;
+}
+
+.button,
+.butto {
   width: 200px;
   height: 42px;
   background-color: #1680ce;
@@ -105,11 +127,11 @@
   font-family: 'SimSun', sans-serif;
 }
 
-.button {
+.button:hover {
   background-color: #419ddd;
 }
 
-.button {
+.button:active {
   background-color: #1680ce;
 }
 
@@ -132,6 +154,7 @@
   color: #838383;
   display: flex;
   align-items: flex-end;
+  cursor: pointer;
 }
 
 .createAccount:hover,
@@ -139,24 +162,20 @@
   color: #0073c6;
 }
 
-.createAccount:before {
+.createAccount:before,
+.forgetPassword:before {
   content: '';
   min-width: 14px;
   min-height: 14px;
-  background: url('../../public/icon_createaccount.png') no-repeat center center;
   background-size: contain;
   background-size: cover;
   margin-right: 5px;
   vertical-align: middle;
 }
+.createAccount:before {
+  background: url('../../public/icon_createaccount.png') no-repeat center center;
+}
 
 .forgetPassword:before {
-  content: '';
-  min-width: 14px;
-  min-height: 14px;
   background: url('../../public/icon_getpass.png') no-repeat center center;
-  background-size: contain;
-  background-size: cover;
-  margin-right: 5px;
-  vertical-align: middle;
 }
