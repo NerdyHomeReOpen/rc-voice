@@ -263,15 +263,17 @@ const HomePageComponent: React.FC = React.memo(() => {
                   <ServerGrid servers={joinedServers} />
                 </div>
 
-                <div className={styles['myGroupsItem']}>
-                  <div className={styles['myGroupsTitle']} data-key="30283">
-                    我們為您推薦了一些群：
+                {recommendedServers.length > 0 && (
+                  <div className={styles['myGroupsItem']}>
+                    <div className={styles['myGroupsTitle']} data-key="30283">
+                      我們為您推薦了一些群：
+                    </div>
+                    <ServerGrid servers={recommendedServers} />
                   </div>
-                  <ServerGrid servers={recommendedServers} />
-                </div>
+                )}
 
                 <div className={styles['myGroupsItem']}>
-                  <div className={styles['myGroupsTitle']} data-key="60005">
+                  <div className={styles['myGroupsTitle']} data-key="60006">
                     收藏的語音群
                   </div>
                   <ServerGrid servers={joinedServers} />

@@ -295,7 +295,11 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                 channel.isLobby
                   ? styles['lobby']
                   : styles[channel.settings.visibility]
-              } ${expanded ? styles['expanded'] : ''}`}
+              } ${expanded ? styles['expanded'] : ''} ${
+                channel.userIds.some((e) => e == user.id)
+                  ? styles['userCurrentLocation']
+                  : ''
+              }`}
               onClick={() =>
                 setExpanded(channelVisibility != 'readonly' ? !expanded : false)
               }
