@@ -30,6 +30,7 @@ import { measureLatency } from '@/utils/measureLatency';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
+import Auth from './auth/page';
 
 interface HeaderProps {
   selectedId?: number;
@@ -52,7 +53,7 @@ const Header: React.FC<HeaderProps> = React.memo(
     const socket = useSocket();
 
     const handleLogout = () => {
-      socket?.emit('disconnectUser', { sessionId });
+      socket?.close();
       localStorage.removeItem('autoLogin');
       localStorage.removeItem('encryptedPassword');
       localStorage.removeItem('sessionToken');
@@ -320,17 +321,8 @@ const HomeComponent = () => {
     else setSelectedTabId(1);
   }, [server]);
 
-  useEffect(() => {
-    if (sessionId) return;
-    if (window.electron) {
-      window.electron?.openWindow('auth');
-    } else {
-      window.location.href = '/auth';
-    }
-  }, [sessionId]);
-
   const getMainContent = () => {
-    if (!socket || !user) return <LoadingSpinner />;
+    if (!socket || !sessionId) return <LoadingSpinner />;
     else {
       switch (selectedTabId) {
         case 1:
@@ -352,7 +344,9 @@ const HomeComponent = () => {
     }
   };
 
-  return (
+  return !socket || !sessionId ? (
+    <Auth />
+  ) : (
     <>
       {/* Top Navigation */}
       <Header

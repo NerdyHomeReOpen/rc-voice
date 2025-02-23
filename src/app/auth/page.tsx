@@ -53,24 +53,10 @@ const Header: React.FC<HeaderProps> = React.memo(({ onClose }) => {
 Header.displayName = 'Header';
 
 const Auth: React.FC = () => {
-  // Redux
-  const sessionId = useSelector(
-    (state: { sessionToken: string }) => state.sessionToken,
-  );
-
   // State
   const [isLogin, setIsLogin] = useState<boolean>(true);
 
   const handleLogin = () => {};
-
-  useEffect(() => {
-    if (!sessionId) return;
-    if (window.electron) {
-      window.electron.openWindow('main');
-    } else {
-      window.location.href = '/';
-    }
-  }, [sessionId]);
 
   return (
     <>

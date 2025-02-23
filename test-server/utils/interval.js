@@ -26,7 +26,6 @@ const interval = {
       if (!socketId) {
         throw new Error('Socket ID is required');
       }
-
       userId = userId ?? Map.socketToUser.get(socketId);
       if (!userId) {
         throw new Error('User ID not found for socket');
@@ -48,7 +47,6 @@ const interval = {
           () => obtainXp(socketId, userId),
           XP_SYSTEM.INTERVAL_MS,
         );
-
         Map.createContributionIntervalMap(socketId, intervalId);
       }, Math.max(0, leftTime));
     } catch (error) {
@@ -63,7 +61,6 @@ const interval = {
       if (!socketId) {
         throw new Error('Socket ID is required');
       }
-
       userId = userId ?? Map.socketToUser.get(socketId);
       if (!userId) {
         throw new Error('User ID not found for socket');

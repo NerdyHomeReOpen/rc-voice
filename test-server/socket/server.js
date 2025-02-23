@@ -94,6 +94,16 @@ const serverHandler = {
         });
       }
 
+      // Leave old server
+      if (user.currentServerId) {
+        serverHandler.disconnectServer(
+          io,
+          socket,
+          sessionId,
+          user.currentServerId,
+        );
+      }
+
       // Update user presence
       const update = {
         currentServerId: server.id,

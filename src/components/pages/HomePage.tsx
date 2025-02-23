@@ -172,19 +172,13 @@ Header.displayName = 'Header';
 // HomePage Component
 const HomePageComponent: React.FC = React.memo(() => {
   // Redux
-  const user = useSelector((state: { user: User }) => state.user);
-  const sessionId = useSelector(
-    (state: { sessionToken: string }) => state.sessionToken,
-  );
-
-  // Socket Control
-  const socket = useSocket();
+  const user = useSelector((state: { user: User | null }) => state.user);
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
 
   // Test
-  const userServers = user.servers ?? [];
+  const userServers = user?.servers ?? [];
 
   return (
     <div className={styles['homeWrapper']}>

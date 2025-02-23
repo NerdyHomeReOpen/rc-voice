@@ -54,15 +54,15 @@ const channelHandler = {
           403,
         );
       }
-      const prevChannel = channels[user.currentChannelId];
 
       // check if user is already in a channel, if so, disconnect the channel
-      if (prevChannel) {
-        // Leave the channel
-        socket.leave(`channel_${prevChannel.id}`);
-
-        // Play sound
-        io.to(`channel_${prevChannel.id}`).emit('playSound', 'leave');
+      if (user.currentChannelId) {
+        await channelHandler.disconnectChannel(
+          io,
+          socket,
+          sessionId,
+          user.currentChannelId,
+        );
       } else {
         // Setup user interval for accumulate contribution
         Interval.setupObtainXpInterval(socket.id, userId);

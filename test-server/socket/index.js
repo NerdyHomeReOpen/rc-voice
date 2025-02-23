@@ -28,10 +28,7 @@ module.exports = (io) => {
     userHandler.connectUser(io, socket, socket.sessionId);
     // Disconnect
     socket.on('disconnect', () => {
-      userHandler.disconnect(io, socket, socket.id);
-    });
-    socket.on('disconnectUser', () => {
-      userHandler.disconnect(io, socket, socket.id);
+      userHandler.disconnect(io, socket, socket.sessionId);
     });
     // User
     socket.on('updateUser', async (data) => {

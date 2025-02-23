@@ -55,7 +55,7 @@ const userHandler = {
       // Save user socket connection
       if (!Map.createUserIdSocketIdMap(user.id, socket.id)) {
         throw new SocketError(
-          'Cannot create user socket connection',
+          'Cannot create user socket map',
           'CONNECTUSER',
           'CREATE_USER_SOCKET_MAP',
           500,
@@ -87,7 +87,7 @@ const userHandler = {
       new Logger('WebSocket').error(`Error connecting user: ${error.message}`);
     }
   },
-  disconnect: async (io, socket, socketId) => {
+  disconnect: async (io, socket, sessionId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -95,10 +95,10 @@ const userHandler = {
 
     try {
       // Validate data
-      const userId = Map.socketToUser.get(socketId);
+      const userId = Map.userSessions.get(sessionId);
       if (!userId) {
         throw new SocketError(
-          `Invalid socket ID(${socketId})`,
+          `Invalid socket ID(${sessionId})`,
           'DISCONNECTUSER',
           'SOKET_ID',
           401,
@@ -133,7 +133,7 @@ const userHandler = {
       }
 
       // Remove user socket connection
-      if (!Map.deleteUserIdSocketIdMap(userId, socketId)) {
+      if (!Map.deleteUserIdSocketIdMap(userId, socket.id)) {
         throw new SocketError(
           'Cannot delete user socket connection',
           'DISCONNECTUSER',
@@ -150,7 +150,7 @@ const userHandler = {
       await Set.user(userId, { ...user, ...update });
 
       // Emit data (only to the user)
-      io.to(socketId).emit('userDisconnect', null);
+      io.to(socket.id).emit('userDisconnect', null);
 
       new Logger('WebSocket').success(`User(${userId}) disconnected`);
     } catch (error) {
