@@ -63,17 +63,17 @@ const channelHandler = {
           sessionId,
           user.currentChannelId,
         );
-      } else {
-        // Setup user interval for accumulate contribution
-        Interval.setupObtainXpInterval(socket.id, userId);
       }
 
-      // Update user presence
+      // Update user
       const update = {
         currentChannelId: channel.id,
         lastActiveAt: Date.now(),
       };
-      await Set.user(userId, { ...user, ...update });
+      await Set.user(userId, update);
+
+      // Setup user interval for accumulate contribution
+      Interval.setupObtainXpInterval(socket.id, userId);
 
       // Play sound
       io.to(`channel_${channel.id}`).emit('playSound', 'join');
@@ -83,9 +83,7 @@ const channelHandler = {
 
       // Emit updated data (only to the user)
       io.to(socket.id).emit('userUpdate', update);
-      io.to(socket.id).emit('channelConnect', {
-        ...(await Get.channel(channel.id)),
-      });
+      io.to(socket.id).emit('channelConnect', await Get.channel(channel.id));
 
       // Emit updated data (to all users in the server)
       io.to(`server_${channel.serverId}`).emit('serverUpdate', {
@@ -152,12 +150,12 @@ const channelHandler = {
         );
       }
 
-      // Update user presence
+      // Update user
       const update = {
         currentChannelId: null,
         lastActiveAt: Date.now(),
       };
-      await Set.user(userId, { ...user, ...update });
+      await Set.user(userId, update);
 
       // Clear user contribution interval
       Interval.clearObtainXpInterval(socket.id);
@@ -326,10 +324,7 @@ const channelHandler = {
       }
 
       // Update channel
-      await Set.channel(channelId, {
-        ...channel,
-        ...editedChannel,
-      });
+      await Set.channel(channelId, editedChannel);
 
       // Emit updated data (to all users in the Channel)
       io.to(`channel_${channelId}`).emit('channelUpdate', {
@@ -396,10 +391,7 @@ const channelHandler = {
       }
 
       // Update channel
-      await Set.channel(channelId, {
-        ...channel,
-        serverId: null,
-      });
+      await Set.channel(channelId, { serverId: null });
 
       // Emit updated data (to all users in the server)
       io.to(`server_${channel.serverId}`).emit('serverUpdate', {

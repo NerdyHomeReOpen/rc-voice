@@ -124,7 +124,6 @@ const server = http.createServer((req, res) => {
 
         // Update user
         await Set.user(user.id, {
-          ...user,
           status: 'online',
           lastActiveAt: Date.now(),
         });

@@ -127,9 +127,14 @@ const userHandler = {
       }
 
       if (server) {
-        serverHandler.disconnectServer(io, socket, sessionId, server.id);
+        await serverHandler.disconnectServer(io, socket, sessionId, server.id);
       } else if (channel) {
-        channelHandler.disconnectChannel(io, socket, sessionId, channel.id);
+        await channelHandler.disconnectChannel(
+          io,
+          socket,
+          sessionId,
+          channel.id,
+        );
       }
 
       // Remove user socket connection
@@ -147,7 +152,7 @@ const userHandler = {
         status: 'gn',
         lastActiveAt: Date.now(),
       };
-      await Set.user(userId, { ...user, ...update });
+      await Set.user(userId, update);
 
       // Emit data (only to the user)
       io.to(socket.id).emit('userDisconnect', null);
@@ -197,7 +202,7 @@ const userHandler = {
       }
 
       // Update user data
-      await Set.user(userId, { ...user, ...editedUser });
+      await Set.user(userId, editedUser);
 
       // Emit data (only to the user)
       io.to(socket.id).emit('userUpdate', editedUser);

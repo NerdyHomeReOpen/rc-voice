@@ -7,7 +7,6 @@ const set = {
   user: async (id, data) => {
     const users = await db.get('users');
     users[id] = {
-      id,
       name: '',
       avatar: null,
       avatarUrl: null,
@@ -22,7 +21,9 @@ const set = {
       currentServerId: null,
       lastActiveAt: Date.now(),
       createdAt: 0,
+      ...users[id],
       ...data,
+      id,
     };
     await db.set(`users.${id}`, users[id]);
     return users[id];
@@ -44,7 +45,9 @@ const set = {
       lobbyId: '',
       settings: {},
       createdAt: 0,
+      ...servers[id],
       ...data,
+      id,
     };
     await db.set(`servers.${id}`, servers[id]);
     return servers[id];
@@ -52,7 +55,6 @@ const set = {
   channel: async (id, data) => {
     const channels = await db.get('channels');
     channels[id] = {
-      id,
       name: data.name,
       isRoot: true,
       isCategory: false,
@@ -66,7 +68,9 @@ const set = {
         visibility: 'public',
       },
       createdAt: 0,
+      ...channels[id],
       ...data,
+      id,
     };
     await db.set(`channels.${id}`, channels[id]);
     return channels[id];
@@ -74,14 +78,15 @@ const set = {
   member: async (id, data) => {
     const members = await db.get('members');
     members[id] = {
-      id,
       nickname: '',
       contribution: 0,
       permissionLevel: 0,
       serverId: '',
       userId: '',
       createdAt: 0,
+      ...members[id],
       ...data,
+      id,
     };
     await db.set(`members.${id}`, members[id]);
     return members[id];
@@ -89,29 +94,31 @@ const set = {
   message: async (id, data) => {
     const messages = await db.get('messages');
     messages[id] = {
-      id,
       content: '',
       type: 'general',
       permissionLevel: 0,
       senderId: '',
       channelId: '',
       timestamp: 0,
+      ...messages[id],
       ...data,
+      id,
     };
     await db.set(`messages.${id}`, messages[id]);
     return messages;
   },
-  directMessages: async (id, data) => {
+  directMessage: async (id, data) => {
     const directMessages = await db.get('directMessages');
     directMessages[id] = {
-      id,
       content: '',
       type: 'general',
       permissionLevel: 0,
       senderId: '',
       friendId: '',
       timestamp: 0,
+      ...directMessages[id],
       ...data,
+      id,
     };
     await db.set(`directMessages.${id}`, directMessages[id]);
     return directMessages[id];

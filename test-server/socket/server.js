@@ -86,7 +86,6 @@ const serverHandler = {
       if (!member) {
         const memberId = uuidv4();
         await Set.member(memberId, {
-          id: memberId,
           nickname: user.name,
           serverId: server.id,
           userId: user.id,
@@ -94,9 +93,9 @@ const serverHandler = {
         });
       }
 
-      // Leave old server
+      // Leave prev server
       if (user.currentServerId) {
-        serverHandler.disconnectServer(
+        await serverHandler.disconnectServer(
           io,
           socket,
           sessionId,
@@ -104,15 +103,20 @@ const serverHandler = {
         );
       }
 
-      // Update user presence
+      // Connect to the server's lobby channel
+      await channelHandler.connectChannel(
+        io,
+        socket,
+        sessionId,
+        server.lobbyId,
+      );
+
+      // Update user
       const update = {
         currentServerId: server.id,
         lastActiveAt: Date.now(),
       };
-      await Set.user(user.id, { ...user, ...update });
-
-      // Connect to the server's lobby channel
-      channelHandler.connectChannel(io, socket, sessionId, server.lobbyId);
+      await Set.user(user.id, update);
 
       // Join the server
       socket.join(`server_${server.id}`);
@@ -187,16 +191,22 @@ const serverHandler = {
         );
       }
 
+      // Leave prev channel
+      if (channel) {
+        await channelHandler.disconnectChannel(
+          io,
+          socket,
+          sessionId,
+          channel.id,
+        );
+      }
+
       // Update user presence
       const update = {
         currentServerId: null,
         lastActiveAt: Date.now(),
       };
-      await Set.user(user.id, { ...user, ...update });
-
-      if (channel) {
-        channelHandler.disconnectChannel(io, socket, sessionId, channel.id);
-      }
+      await Set.user(user.id, update);
 
       // Leave the server
       socket.leave(`server_${server.id}`);
@@ -339,7 +349,7 @@ const serverHandler = {
       });
 
       // Join the server
-      serverHandler.connectServer(io, socket, sessionId, serverId);
+      await serverHandler.connectServer(io, socket, sessionId, serverId);
 
       new Logger('Server').success(
         `New server(${serverId}) created by user(${userId})`,

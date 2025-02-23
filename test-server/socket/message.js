@@ -51,7 +51,6 @@ const messageHandler = {
       // Create new message
       const messageId = uuidv4();
       await Set.message(messageId, {
-        ...message,
         id: messageId,
         channelId: channel.id,
         timestamp: Date.now().valueOf(),
@@ -119,7 +118,6 @@ const messageHandler = {
       // Create new message
       const directMessageId = uuidv4();
       await Set.directMessage(directMessageId, {
-        ...directMessage,
         id: directMessageId,
         friendId: friend.id,
         timestamp: Date.now().valueOf(),
