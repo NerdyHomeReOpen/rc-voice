@@ -290,6 +290,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
             <div
               {...provided.dragHandleProps}
               className={`${styles['channelTab']} ${
+                !channel.isLobby && channel.parentId ? styles['subChannel'] : ''
+              } ${
                 channel.isLobby
                   ? styles['lobby']
                   : styles[channel.settings.visibility]

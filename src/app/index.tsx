@@ -181,18 +181,19 @@ const Header: React.FC<HeaderProps> = React.memo(
                 }}
               >
                 <div className={header['tabLable']}>{TabLable}</div>
+                {Tab.id > 2 && (
+                  <CircleX
+                    onClick={() => handleLeaveServer()}
+                    size={16}
+                    className={header['tabClose']}
+                  />
+                )}
                 <div className={header['tabBg']}></div>
               </div>
             );
           })}
-          {MAIN_TABS.length > 2 && (
-            <CircleX
-              onClick={() => handleLeaveServer()}
-              size={16}
-              className={header['tabClose']}
-            />
-          )}
         </div>
+
         {/* Buttons */}
         <div className={header['buttons']}>
           <div className={header['gift']} />

@@ -105,13 +105,16 @@
 }
 
 .optionBox {
-  display: flex;
-  bottom: 12px;
-  right: 10px;
-  justify-content: flex-end;
-  align-items: center;
-  position: absolute;
   gap: 5px;
+  height: auto;
+  width: 23%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: flex-end;
+  margin-left: auto;
+  bottom: -20px;
+  right: -5px;
 }
 
 .invitation {
@@ -217,21 +220,14 @@
 .channelList {
   display: flex;
   flex-direction: column;
-  flex: 1;
   overflow-y: auto;
-  padding: 0 0.75rem;
-}
-
-.channelList .channelList {
-  padding: 0 0 0 0.75rem;
 }
 
 .channelList .channelTab {
+  padding: 0.125rem 20px 0.125rem 0.75rem;
   display: flex;
   align-items: center;
-  padding: 0.125rem 0.75rem;
   cursor: pointer;
-  border-radius: 3px;
   gap: 5px;
 }
 
@@ -289,23 +285,23 @@
   font-size: 14px;
 }
 
+.channelList .subChannel:not(.lobby),
+.channelList .subChannel:not(.lobby) + .userList .userTab  {
+  padding: .125rem 20px .125rem 1.7rem;
+}
+
 .userList {
   display: flex;
   flex-direction: column;
   flex: 1;
   overflow-y: auto;
-  padding: 0 0.75rem;
-}
-
-.channelList .userList {
-  padding: 0 0 0 0.75rem;
 }
 
 .userList .userTab {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 0.125rem 20px 0.125rem 0.125rem;
+  padding: 0.125rem 20px 0.125rem 0.75rem;
   cursor: pointer;
   border-radius: 3px;
   gap: 5px;
@@ -328,7 +324,7 @@
 
 .userGrade {
   min-width: 15px;
-  min-height: 15px;
+  min-height: 13px;
   background: url(../../public/usergrade.png) no-repeat center center;
   background-size: auto;
   background-position: 0 0;

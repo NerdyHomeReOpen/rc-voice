@@ -215,19 +215,19 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   padding-left: 7px;
   padding: 10px;
   position: relative;
   min-width: max-content;
 }
 
-.menuDropDown .option.hasImage:before {
+.menuDropDown .option:not([data-lang])::before {
   content: '';
   width: 16px;
   height: 16px;
   margin-right: 10px;
-  background-size: contain;
+  background-size: auto;
   background-repeat: no-repeat;
   background-position: center center;
 }
@@ -327,6 +327,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  height: 2.2rem;
 }
 
 .mainTabs .tab .tabBg {
@@ -353,9 +354,15 @@
   color: rgb(0 115 198);
 }
 
+.mainTabs .tab.selected .tabClose {
+  color:#0073c6;
+}
+
 .mainTabs .tabClose {
   z-index: 1;
-  margin-bottom: 0.25rem;
+  position: absolute;
+  top:.3rem;
+  right:.3rem;
 }
 
 /* User Status */
