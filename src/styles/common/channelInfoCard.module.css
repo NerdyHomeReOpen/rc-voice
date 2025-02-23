@@ -1,0 +1,177 @@
+.userInfoCard {
+  position: absolute;
+  background: #f4f6fa;
+  z-index: 1000;
+  height: 13.6rem;
+  width: 19.6rem;
+  border: 1px solid #e0e0e4;
+}
+
+.info-card-vip-1 {
+  background: url(../../../public/channel/ucard_vip1_bg.png) no-repeat center
+    center;
+  border: 1px solid #ffffff00;
+}
+
+.info-card-vip-2 {
+  background: url(../../../public/channel/ucard_vip2_bg.png) no-repeat center
+    center;
+  border: 1px solid #ffffff00;
+}
+
+.info-card-vip-3 {
+  background: url(../../../public/channel/ucard_vip3_bg.png) no-repeat center
+    center;
+  border: 1px solid #ffffff00;
+}
+
+.info-card-vip-4 {
+  background: url(../../../public/channel/ucard_vip4_bg.png) no-repeat center
+    center;
+  border: 1px solid #ffffff00;
+}
+
+.info-card-vip-5 {
+  background: url(../../../public/channel/ucard_vip5_bg.png) no-repeat center
+    center;
+  border: 1px solid #ffffff00;
+}
+
+.userInfoHeader,
+.userInfoRight {
+  height: 100%;
+  width: 100%;
+}
+
+.userInfoAvatarPicture {
+  height: 7rem;
+  width: 7rem;
+  position: absolute;
+  left: 0.8rem;
+  top: 0.7rem;
+  background: url(../../../public/im/IMLogo.png) no-repeat center center;
+  background-size: cover;
+}
+
+.userInfoRight {
+  height: auto;
+  width: 10rem;
+  position: absolute;
+  right: 1rem;
+  top: 0.7rem;
+}
+
+.userInfoUsername {
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+  color: #1e667c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 10rem;
+}
+
+.userInfoRight .userGrade {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.userInfoVipText {
+  color: #ff0000;
+  font-size: 0.89rem;
+  margin-top: 0.3rem;
+}
+
+.userInfoBottom {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  height: 1rem;
+  width: auto;
+  bottom: 3rem;
+}
+
+.userInfoPermission {
+  margin-left: 0.5rem;
+}
+
+.userInfoPermissionText {
+  color: #25476a;
+  font-size: 0.9rem;
+}
+
+.userInfoPermissionText:before {
+  content: '[';
+}
+
+.userInfoPermissionText:after {
+  content: ']';
+}
+
+.userInfoContributionBox {
+  display: flex;
+}
+
+.userInfoContributionText {
+  font-size: 0.9rem;
+}
+
+.userInfoContributionTextVal {
+  font-size: 0.9rem;
+  color: #777777;
+}
+
+.userInfoBadges {
+  position: absolute;
+  bottom: 0.5rem;
+  height: 1.4rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #e0e0e4;
+  padding-top: 0.4rem;
+  justify-content: center;
+}
+
+.userInfoBadges img:first-child {
+  margin-left: 0.3rem;
+}
+
+.userInfoBadges img {
+  height: 1.25rem;
+  width: 1.25rem;
+  margin-right: 0.1rem;
+  margin-left: 0.1rem;
+}
+
+.userInfoXpWrapper {
+  display: flex;
+  height: auto;
+  width: 10rem;
+}
+
+.userInfoXpBox {
+  flex: 1;
+  position: relative;
+  background-color: #e5e7eb;
+  border-radius: 1rem;
+  height: 0.5rem;
+  margin-top: 0.3rem;
+  border: 1px solid #b6b6b6;
+}
+
+.userInfoXpProgress {
+  background-color: #f6b03b;
+  border-radius: 0.125rem;
+  height: 100%;
+}
+
+.userInfoXpText {
+  display: flex;
+  position: absolute;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}

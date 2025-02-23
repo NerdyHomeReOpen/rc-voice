@@ -4,6 +4,13 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { ArrowUp } from 'lucide-react';
 
+// CSS
+import UserInfoCard from '@/styles/common/channelInfoCard.module.css';
+import styles from '@/styles/serverPage.module.css';
+import Grade from '@/styles/common/grade.module.css';
+import Vip from '@/styles/common/vip.module.css';
+import Permission from '@/styles/common/permission.module.css';
+
 // Components
 import BadgeViewer from '@/components/viewers/BadgeViewer';
 
@@ -57,53 +64,45 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
 
     return (
       <div
-        className="fixed w-[250px] h-[180px] bg-white border border-gray-200 rounded-md shadow-lg z-50"
+        className={UserInfoCard['userInfoCard']}
         style={{
           top: `${y}px`,
           left: `${x}px`,
         }}
         ref={ref}
       >
-        <div className="flex flex-col h-full">
-          {/* Top Section */}
-          <div className="flex p-3 h-[90px]">
-            {/* Left Avatar */}
-            <div className="w-[60px] h-[60px] flex items-center justify-center">
-              <img
-                src={userAvatar}
-                className="select-none w-full h-full object-contain"
-              />
+        <div
+          className={`${UserInfoCard['userInfoHeader']} ${UserInfoCard['info-card-vip-1']}}
+          `}
+        >
+          {/* Left Avatar */}
+          <div className={UserInfoCard['userInfoAvatarPicture']}></div>
+          {/* Right Info */}
+          <div className={UserInfoCard['userInfoRight']}>
+            <div className={UserInfoCard['userInfoUsername']}>{userName}</div>
+            <div
+              className={`${styles['userGrade']} ${UserInfoCard['userGrade']} ${
+                Grade[`lv-${userLevel}`]
+              }`}
+            ></div>
+            <div className={`${Vip['vipIconBig']} ${Vip['vip-big-1']}`}></div>
+            {/* VIP Info Text */}
+            <div className={UserInfoCard['userInfoVipText']}>
+              (會員%s倍升級加速中)
             </div>
-            {/* Right Info */}
-            <div className="flex-1 ml-3 relative">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center min-w-0 mr-2">
-                  <span className="truncate">{userName}</span>
-                  {user.level && (
-                    <img
-                      src={`/UserGrade_${userLevel}.png`}
-                      alt={`/UserGrade_${userLevel}`}
-                      className="select-none ml-1 mt-0.5"
-                    />
-                  )}
-                </div>
 
-                {userBadges.length > 0 && (
-                  <div className="select-none mt-0.5 flex-shrink-0">
-                    <BadgeViewer badges={userBadges} maxDisplay={3} />
-                  </div>
-                )}
-              </div>
-              {/** Show xp progress */}
-              <div className="h-[6px] bg-gray-200 rounded-sm mt-2">
+            {/* Xp Section */}
+            <div className={UserInfoCard['userInfoXpWrapper']}>
+              {/** Show Xp Progress */}
+              <div className={UserInfoCard['userInfoXpBox']}>
                 <div
-                  className="h-full bg-blue-500 rounded-sm"
+                  className={UserInfoCard['userInfoXpProgress']}
                   style={{
                     width: `${userXpProgress}%`,
                   }}
                 />
-                {/** Xp */}
-                <div className="absolute flex justify-between w-full text-xs">
+                {/** Xp Text */}
+                <div className={UserInfoCard['userInfoXpText']}>
                   <div>0</div>
                   <div
                     style={{
@@ -122,23 +121,48 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
               </div>
             </div>
           </div>
-          {/* Separator */}
-          <div className="h-[1px] bg-gray-200 mx-3" />
+
           {/* Bottom Section */}
-          <div className="h-[60px] p-3">
-            <div className="text-sm">
-              <div className="min-w-3.5 min-h-3.5 rounded-sm flex items-center mr-1">
-                <img
-                  src={`/channel/${userGender}_${userPermission}.png`}
-                  alt={`${userGender}_${userPermission}`}
-                  className="select-none"
-                />
-                <div className="text-xs ml-1 text-gray-500">
-                  {getPermissionText(userPermission)}
-                </div>
-              </div>
-              <div className="mt-1">貢獻：{userContributions}</div>
+          <div className={UserInfoCard['userInfoBottom']}>
+            <div
+              className={`${UserInfoCard['userInfoPermission']} ${
+                Permission[userGender]
+              } ${Permission[`lv-${userPermission}`]}`}
+            ></div>
+            <div className={UserInfoCard['userInfoPermissionText']}>
+              {getPermissionText(userPermission)}
             </div>
+            <div className={styles['saperator']}></div>
+            <div className={UserInfoCard['userInfoContributionBox']}>
+              <div className={UserInfoCard['userInfoContributionText']}>
+                貢獻：
+              </div>
+              <div className={UserInfoCard['userInfoContributionTextVal']}>
+                {userContributions}
+              </div>
+            </div>
+          </div>
+
+          {/* Badges Section */}
+          <div className={UserInfoCard['userInfoBadges']}>
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
+            {/* {userBadges.length > 0 && (
+              <div className="select-none mt-0.5 flex-shrink-0">
+                <BadgeViewer badges={userBadges} maxDisplay={13} />
+              </div>
+            )} */}
           </div>
         </div>
       </div>
