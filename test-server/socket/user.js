@@ -41,21 +41,10 @@ const userHandler = {
       }
 
       // Check if user is already connected
-      for (const [key, value] of Map.socketToUser) {
-        if (value === userId) {
-          // Remove user socket connection
-          if (!Map.deleteUserIdSocketIdMap(value, key)) {
-            throw new SocketError(
-              'Cannot delete user socket connection',
-              'CONNECTUSER',
-              'DELETE_USER_SOCKET_MAP',
-              500,
-            );
-          }
-
+      for (const [_socketId, _userId] of Map.socketToUser) {
+        if (_userId === userId) {
           // Emit force disconnect event
-          io.to(key).disconnectSockets(true);
-          // io.to(key).emit('forceDisconnect'); //TODO: Change to 'userDisconnect' event
+          await userHandler.disconnect(io, socket, _socketId);
 
           new Logger('WebSocket').warn(
             `User(${userId}) already connected from another socket. Force disconnecting...`,
@@ -74,11 +63,11 @@ const userHandler = {
       }
 
       // Emit data (only to the user)
-      io.to(socket.id).emit('userConnect', {
-        ...(await Get.user(user.id)),
-      });
+      io.to(socket.id).emit('userConnect', await Get.user(user.id));
 
-      new Logger('WebSocket').success(`User(${user.id}) connected`);
+      new Logger('WebSocket').success(
+        `User(${user.id}) connected with socket(${socket.id})`,
+      );
     } catch (error) {
       // Emit disconnect event (only to the user)
       io.to(socket.id).emit('userDisconnect', null);
@@ -98,7 +87,7 @@ const userHandler = {
       new Logger('WebSocket').error(`Error connecting user: ${error.message}`);
     }
   },
-  disconnectUser: async (io, socket, sessionId) => {
+  disconnect: async (io, socket, socketId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -106,12 +95,12 @@ const userHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.socketToUser.get(socketId);
       if (!userId) {
         throw new SocketError(
-          `Invalid session ID(${sessionId})`,
+          `Invalid socket ID(${socketId})`,
           'DISCONNECTUSER',
-          'SESSION_EXPIRED',
+          'SOKET_ID',
           401,
         );
       }
@@ -144,7 +133,7 @@ const userHandler = {
       }
 
       // Remove user socket connection
-      if (!Map.deleteUserIdSocketIdMap(userId, socket.id)) {
+      if (!Map.deleteUserIdSocketIdMap(userId, socketId)) {
         throw new SocketError(
           'Cannot delete user socket connection',
           'DISCONNECTUSER',
@@ -154,22 +143,22 @@ const userHandler = {
       }
 
       // Update user
-      await Set.user(userId, {
-        ...user,
+      const update = {
         status: 'gn',
         lastActiveAt: Date.now(),
-      });
+      };
+      await Set.user(userId, { ...user, ...update });
 
       // Emit data (only to the user)
-      io.to(socket.id).emit('userDisconnect', null);
+      io.to(socketId).emit('userDisconnect', null);
 
       new Logger('WebSocket').success(`User(${userId}) disconnected`);
     } catch (error) {
       // Emit error data (only to the user)
       if (error instanceof SocketError) {
-        io.to(socket.id).emit('error', error);
+        io.to(socketId).emit('error', error);
       } else {
-        io.to(socket.id).emit('error', {
+        io.to(socketId).emit('error', {
           message: `登出時發生無法預期的錯誤: ${error.message}`,
           part: 'DISCONNECTUSER',
           tag: 'EXCEPTION_ERROR',

@@ -17,6 +17,7 @@
     "better-sqlite3": "^11.8.1",
     "dompurify": "^3.2.4",
     "formidable": "^3.5.2",
+    "fs": "^0.0.1-security",
     "lucide-react": "^0.474.0",
     "next": "15.1.6",
     "quick.db": "^9.1.7",
@@ -36,14 +37,14 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^8.2.2",
+    "electron": "^29.1.0",
+    "electron-builder": "^24.12.0",
+    "electron-is-dev": "^2.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5",
-    "concurrently": "^8.2.2",
-    "electron": "^29.1.0",
-    "electron-builder": "^24.12.0",
-    "electron-is-dev": "^2.0.0"
+    "typescript": "^5"
   }
 }

@@ -10,45 +10,30 @@ const serverHandler = require('./server');
 const channelHandler = require('./channel');
 const messageHandler = require('./message');
 
-module.exports = (io, db) => {
+module.exports = (io) => {
+  io.use((socket, next) => {
+    const sessionId = socket.handshake.query.sessionId;
+    if (!sessionId) {
+      new Logger('Socket').error(`Invalid session ID: ${sessionId}`);
+      return next(
+        new SocketError('Invalid session ID', 'AUTH', 'SESSION_EXPIRED', 401),
+      );
+    }
+    socket.sessionId = sessionId;
+    return next();
+  });
+
   io.on('connection', (socket) => {
+    // Connect
+    userHandler.connectUser(io, socket, socket.sessionId);
+    // Disconnect
+    socket.on('disconnect', () => {
+      userHandler.disconnect(io, socket, socket.id);
+    });
+    socket.on('disconnectUser', () => {
+      userHandler.disconnect(io, socket, socket.id);
+    });
     // User
-    socket.on('connectUser', async (data) => {
-      // data = {
-      //   sessionId:
-      // }
-      // console.log(data);
-
-      // Validate data
-      const { sessionId } = data;
-      if (!sessionId) {
-        throw new SocketError(
-          'Missing required fields',
-          'CONNECTUSER',
-          'DATA',
-          400,
-        );
-      }
-      userHandler.connectUser(io, socket, sessionId);
-    });
-    socket.on('disconnectUser', async (data) => {
-      // data = {
-      //   sessionId:
-      // }
-      // console.log(data);
-
-      // Validate data
-      const { sessionId } = data;
-      if (!sessionId) {
-        throw new SocketError(
-          'Missing required fields',
-          'DISCONNECTUSER',
-          'DATA',
-          400,
-        );
-      }
-      userHandler.disconnectUser(io, socket, sessionId);
-    });
     socket.on('updateUser', async (data) => {
       // data = {
       //   sessionId:
@@ -115,7 +100,7 @@ module.exports = (io, db) => {
       //     ...
       //   }
       // }
-      // console.log(data);
+      console.log(data);
 
       // Validate data
       const { sessionId, server } = data;
@@ -309,19 +294,6 @@ module.exports = (io, db) => {
         friendId,
         message,
       );
-    });
-    // Disconnect
-    socket.on('disconnect', async () => {
-      const sessionId = Map.socketIdSessionIdMap.get(socket.id);
-      if (!sessionId) {
-        throw new SocketError(
-          'Missing required fields',
-          'DISCONNECTUSER',
-          'DATA',
-          400,
-        );
-      }
-      userHandler.disconnectUser(io, socket, sessionId);
     });
   });
 };

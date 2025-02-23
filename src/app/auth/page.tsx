@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 // CSS
 import header from '@/styles/common/header.module.css';
@@ -10,7 +11,8 @@ import LoginPage from '@/components/pages/LoginPage';
 import RegisterPage from '@/components/pages/RegisterPage';
 
 // Redux
-import { useSelector } from 'react-redux';
+import store from '@/redux/store';
+import { setSessionToken } from '@/redux/sessionTokenSlice';
 
 interface HeaderProps {
   onClose?: () => void;
@@ -59,12 +61,16 @@ const Auth: React.FC = () => {
   // State
   const [isLogin, setIsLogin] = useState<boolean>(true);
 
-  const handleLogin = () => {
-    if (sessionId) {
-      console.log('Login Success');
+  const handleLogin = () => {};
+
+  useEffect(() => {
+    if (!sessionId) return;
+    if (window.electron) {
+      window.electron.openWindow('main');
+    } else {
+      window.location.href = '/';
     }
-    window.location.href = '/';
-  };
+  }, [sessionId]);
 
   return (
     <>

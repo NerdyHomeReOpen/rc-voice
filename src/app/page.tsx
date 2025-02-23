@@ -31,13 +31,6 @@ import { measureLatency } from '@/utils/measureLatency';
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 
-// Redux
-import store from '@/redux/store';
-import { clearServer, setServer } from '@/redux/serverSlice';
-import { clearUser, setUser } from '@/redux/userSlice';
-import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
-import { clearChannel, setChannel } from '@/redux/channelSlice';
-
 interface HeaderProps {
   selectedId?: number;
   onSelect?: (tabId: number) => void;
@@ -69,10 +62,6 @@ const Header: React.FC<HeaderProps> = React.memo(
       if (!user) return;
       const serverId = user.currentServerId;
       socket?.emit('disconnectServer', { serverId, sessionId });
-    };
-
-    const handleRequestUserUpdate = () => {
-      socket?.emit('requestUserUpdate', { sessionId });
     };
 
     const handleUpdateStatus = (status: User['status']) => {
@@ -109,7 +98,7 @@ const Header: React.FC<HeaderProps> = React.memo(
         tabs.push({
           id: 1,
           label: '首頁',
-          onClick: handleRequestUserUpdate,
+          onClick: () => {},
         });
         tabs.push({
           id: 2,
@@ -302,6 +291,15 @@ const Header: React.FC<HeaderProps> = React.memo(
 Header.displayName = 'Header';
 
 const HomeComponent = () => {
+  // Redux
+  const user = useSelector((state: { user: User | null }) => state.user);
+  const server = useSelector(
+    (state: { server: Server | null }) => state.server,
+  );
+  const sessionId = useSelector(
+    (state: { sessionToken: string | null }) => state.sessionToken,
+  );
+
   // Socket Control
   const socket = useSocket();
 
@@ -314,132 +312,6 @@ const HomeComponent = () => {
     leaveSoundRef.current = new Audio('/sounds/leave.mp3');
   }, []);
 
-  // Redux
-  const user = useSelector((state: { user: User | null }) => state.user);
-  const server = useSelector(
-    (state: { server: Server | null }) => state.server,
-  );
-  const channel = useSelector(
-    (state: { channel: Channel | null }) => state.channel,
-  );
-  const sessionId = useSelector(
-    (state: { sessionToken: string | null }) => state.sessionToken,
-  );
-
-  useEffect(() => {
-    const token =
-      store.getState().sessionToken ?? localStorage.getItem('sessionToken');
-    if (!token) {
-      window.location.href = '/auth';
-      return;
-    }
-    store.dispatch(setSessionToken(token));
-    localStorage.setItem('sessionToken', token);
-  }, [sessionId]);
-
-  useEffect(() => {
-    if (!socket || !sessionId) return;
-    console.log('Connect to socket with session Id:', sessionId);
-    socket.emit('connectUser', { sessionId });
-  }, [sessionId]);
-
-  useEffect(() => {
-    if (!socket || !sessionId) return;
-    const handleDisconnect = () => {
-      console.log('Socket disconnected, ', sessionId);
-      store.dispatch(clearServer());
-      store.dispatch(clearUser());
-      store.dispatch(clearSessionToken());
-      localStorage.removeItem('sessionToken');
-    };
-    const handleUserConnect = (user: any) => {
-      console.log('User connected: ', user);
-      store.dispatch(setUser(user));
-    };
-    const handleUserDisconnect = () => {
-      console.log('User disconnected');
-      store.dispatch(clearServer());
-      store.dispatch(clearUser());
-      store.dispatch(clearSessionToken());
-      localStorage.removeItem('sessionToken');
-    };
-    const handleUserUpdate = (data: Partial<User>) => {
-      console.log('User update: ', data);
-      if (!user) return;
-      store.dispatch(setUser({ ...user, ...data }));
-    };
-    const handleServerConnect = (server: Server) => {
-      console.log('Server connected: ', server);
-      store.dispatch(setServer(server));
-      socket.emit('connectChannel', { sessionId, channelId: server.lobbyId });
-    };
-    const handleServerDisconnect = () => {
-      console.log('Server disconnected');
-      store.dispatch(clearServer());
-    };
-    const handleServerUpdate = (data: Partial<Server>) => {
-      console.log('Server update: ', data);
-      if (!server) return;
-      store.dispatch(setServer({ ...server, ...data }));
-    };
-    const handleChannelConnect = (channel: Channel) => {
-      store.dispatch(setChannel(channel));
-      console.log('Channel connected: ', channel);
-    };
-    const handleChannelDisconnect = () => {
-      console.log('Channel disconnected');
-      store.dispatch(clearChannel());
-    };
-    const handleChannelUpdate = (data: Partial<Channel>) => {
-      console.log('Channel update: ', data);
-      if (!channel) return;
-      store.dispatch(setChannel({ ...channel, ...data }));
-    };
-    const handleDirectMessage = (data: any) => {
-      console.log('Direct message: ', data);
-    };
-    const handlePlaySound = (sound: 'join' | 'leave') => {
-      switch (sound) {
-        case 'join':
-          console.log('Play join sound');
-          joinSoundRef.current?.play();
-          break;
-        case 'leave':
-          console.log('Play leave sound');
-          leaveSoundRef.current?.play();
-          break;
-      }
-    };
-
-    socket.on('disconnect', handleDisconnect);
-    socket.on('userConnect', handleUserConnect);
-    socket.on('userDisconnect', handleUserDisconnect);
-    socket.on('userUpdate', handleUserUpdate);
-    socket.on('serverConnect', handleServerConnect);
-    socket.on('serverDisconnect', handleServerDisconnect);
-    socket.on('serverUpdate', handleServerUpdate);
-    socket.on('channelConnect', handleChannelConnect);
-    socket.on('channelDisconnect', handleChannelDisconnect);
-    socket.on('channelUpdate', handleChannelUpdate);
-    socket.on('directMessage', handleDirectMessage);
-    socket.on('playSound', handlePlaySound);
-
-    return () => {
-      socket.off('disconnect', handleDisconnect);
-      socket.off('userConnect', handleUserConnect);
-      socket.off('userDisconnect', handleUserDisconnect);
-      socket.off('userUpdate', handleUserUpdate);
-      socket.off('serverConnect', handleServerConnect);
-      socket.off('serverDisconnect', handleServerDisconnect);
-      socket.off('serverUpdate', handleServerUpdate);
-      socket.off('channelConnect', handleChannelConnect);
-      socket.off('channelDisconnect', handleChannelDisconnect);
-      socket.off('channelUpdate', handleChannelUpdate);
-      socket.off('directMessage', handleDirectMessage);
-      socket.off('playSound', handlePlaySound);
-    };
-  }, [sessionId, server, user]);
-
   // Tab Control
   const [selectedTabId, setSelectedTabId] = useState<number>(1);
 
@@ -448,16 +320,14 @@ const HomeComponent = () => {
     else setSelectedTabId(1);
   }, [server]);
 
-  // Latency Control
-  const [latency, setLatency] = useState<string | null>('0');
-
-  // useEffect(() => {
-  //   const _ = setInterval(async () => {
-  //     const res = await measureLatency();
-  //     setLatency(res);
-  //   }, 500);
-  //   return () => clearInterval(_);
-  // }, []);
+  useEffect(() => {
+    if (sessionId) return;
+    if (window.electron) {
+      window.electron?.openWindow('auth');
+    } else {
+      window.location.href = '/auth';
+    }
+  }, [sessionId]);
 
   const getMainContent = () => {
     if (!socket || !user) return <LoadingSpinner />;
@@ -474,8 +344,12 @@ const HomeComponent = () => {
     }
   };
 
-  const onClose = () => {
-    alert('這裡是關不掉的喔');
+  const handleCloseWindow = () => {
+    if (window.electron) {
+      window.electron.close();
+    } else {
+      window.close();
+    }
   };
 
   return (
@@ -484,7 +358,7 @@ const HomeComponent = () => {
       <Header
         selectedId={selectedTabId}
         onSelect={(tabId) => setSelectedTabId(tabId)}
-        onClose={onClose}
+        onClose={handleCloseWindow}
       />
       {/* Main Content */}
       <div className="content">{getMainContent()}</div>

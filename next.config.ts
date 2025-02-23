@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
     // 如果你之後有其他網域也要加在這裡
     // 例如: 'your-production-domain.com'
   },
+  basePath: '',
+  trailingSlash: false,
 };
 
 export default nextConfig;

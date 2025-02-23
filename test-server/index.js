@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-require-imports */
 const http = require('http');
-const {
-  PORT,
-  CONTENT_TYPE_JSON,
-  UPLOADS_DIR,
-  MIME_TYPES,
-} = require('./constant');
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 const { Server } = require('socket.io');
@@ -17,23 +11,26 @@ const path = require('path');
 const utils = require('./utils');
 const Logger = utils.logger;
 const Set = utils.set;
+const Get = utils.get;
 
-// TODO: Separate disconnect logic to avoid code duplication (disconnectUser, disconnectServer, disconnectChannel)
+const {
+  PORT,
+  CONTENT_TYPE_JSON,
+  UPLOADS_DIR,
+  MIME_TYPES,
+} = require('./constant');
 
 // Send Error/Success Response
 const sendError = (res, statusCode, message) => {
   res.writeHead(statusCode, CONTENT_TYPE_JSON);
   res.end(JSON.stringify({ error: message }));
 };
-
-//socket error
-
 const sendSuccess = (res, data) => {
   res.writeHead(200, CONTENT_TYPE_JSON);
   res.end(JSON.stringify(data));
 };
 
-// HTTP Server with CORS
+// HTTP Server
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, PATCH');
@@ -140,7 +137,7 @@ const server = http.createServer((req, res) => {
           message: '登入成功',
           data: {
             sessionId: sessionId,
-            user: await utils.get.user(user.id),
+            user: await Get.user(user.id),
           },
         });
         new Logger('Auth').success(`User logged in: ${account}`);
@@ -207,6 +204,7 @@ const server = http.createServer((req, res) => {
   return;
 });
 
+// Socket Server
 const io = new Server(server, {
   cors: {
     origin: '*', // Allow all origins
@@ -214,17 +212,15 @@ const io = new Server(server, {
   },
 });
 
-require('./socket/index')(io, db);
+require('./socket/index')(io);
 
 // Error Handling
 server.on('error', (error) => {
   new Logger('Server').error(`Server error: ${error.message}`);
 });
-
 process.on('uncaughtException', (error) => {
   new Logger('Server').error(`Uncaught Exception: ${error.message}`);
 });
-
 process.on('unhandledRejection', (error) => {
   new Logger('Server').error(`Unhandled Rejection: ${error.message}`);
 });

@@ -1,8 +1,8 @@
 const map = {
-  userSessions: new Map(), // sessionToken -> userId
-  userToSocket: new Map(), // userId -> socket.id
-  socketToUser: new Map(), // socket.id -> userId
-  contributionIntervalMap: new Map(), // socket.id -> interval
+  userSessions: new Map(), // sessionId -> userId
+  userToSocket: new Map(), // userId -> socketId
+  socketToUser: new Map(), // socketId -> userId
+  contributionIntervalMap: new Map(), // socketId -> interval
   userLastXpAwardedAt: new Map(),
   userElapsedTime: new Map(),
   createUserIdSessionIdMap: (userId, sessionId) => {

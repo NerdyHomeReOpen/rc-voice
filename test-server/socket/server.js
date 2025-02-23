@@ -101,14 +101,15 @@ const serverHandler = {
       };
       await Set.user(user.id, { ...user, ...update });
 
+      // Connect to the server's lobby channel
+      channelHandler.connectChannel(io, socket, sessionId, server.lobbyId);
+
       // Join the server
       socket.join(`server_${server.id}`);
 
       // Emit data (only to the user)
       io.to(socket.id).emit('userUpdate', update);
-      io.to(socket.id).emit('serverConnect', {
-        ...(await Get.server(server.id)),
-      });
+      io.to(socket.id).emit('serverConnect', await Get.server(server.id));
 
       new Logger('WebSocket').success(
         `User(${user.id}) connected to server(${server.id})`,
@@ -248,15 +249,15 @@ const serverHandler = {
           400,
         );
       }
-      // const userOwnedServers = await Get.userOwnedServers(userId);
-      // if (userOwnedServers.length >= 3) {
-      //   throw new SocketError(
-      //     'You have reached the maximum number of servers you can own',
-      //     'CREATESERVER',
-      //     'LIMIT',
-      //     403,
-      //   );
-      // }
+      const userOwnedServers = await Get.userOwnedServers(userId);
+      if (userOwnedServers.length >= 3) {
+        throw new SocketError(
+          'You have reached the maximum number of servers you can own',
+          'CREATESERVER',
+          'LIMIT',
+          403,
+        );
+      }
 
       // Handle avatar upload if provided
       let avatarPath = null;
@@ -291,18 +292,12 @@ const serverHandler = {
       }
 
       // Create server / main channel (lobby) / member (owner)
-      const name = server.name
-        ? server.name.toString().trim().substring(0, 30)
-        : 'Untitled Server';
-      const description = server.description
-        ? server.description.toString().substring(0, 200)
-        : '';
       const serverId = uuidv4();
       const channelId = uuidv4();
       const memberId = uuidv4();
       await Set.server(serverId, {
-        name,
-        description,
+        name: server.name.toString().trim().substring(0, 30),
+        description: server.description.toString().substring(0, 200),
         avatarUrl: avatarPath,
         displayId: await Func.generateUniqueDisplayId(),
         lobbyId: channelId,

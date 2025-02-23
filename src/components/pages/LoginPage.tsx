@@ -132,7 +132,6 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
 
         if (sessionId) {
           localStorage.setItem('sessionToken', sessionId);
-          store.dispatch(setSessionToken(sessionId));
           onLoginSuccess();
         } else {
           console.error('自動登入回應格式:', response);
@@ -172,66 +171,57 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
       e: FormEvent<HTMLFormElement>,
     ): Promise<void> => {
       e.preventDefault();
-      const accountError = validateAccount(formData.account);
-      const passwordError = validatePassword(formData.password);
 
-      setErrors({
-        account: accountError,
-        password: passwordError,
-      });
+      setIsLoading(true);
+      try {
+        const response = await authService.login(formData);
 
-      if (!accountError && !passwordError) {
-        setIsLoading(true);
-        try {
-          const response = await authService.login(formData);
+        // 檢查是否直接返回 sessionId 或在 data 屬性中
+        const sessionId =
+          response.sessionId || (response.data && response.data.sessionId);
 
-          // 檢查是否直接返回 sessionId 或在 data 屬性中
-          const sessionId =
-            response.sessionId || (response.data && response.data.sessionId);
+        if (sessionId) {
+          // 儲存 session token
+          localStorage.setItem('sessionToken', sessionId);
+          store.dispatch(setSessionToken(sessionId));
 
-          if (sessionId) {
-            // 儲存 session token
-            localStorage.setItem('sessionToken', sessionId);
-            store.dispatch(setSessionToken(sessionId));
+          // 根據用戶選擇保存登入相關設置
+          localStorage.setItem(
+            STORAGE_KEYS.REMEMBER_ACCOUNT,
+            formData.rememberAccount.toString(),
+          );
+          localStorage.setItem(
+            STORAGE_KEYS.AUTO_LOGIN,
+            formData.autoLogin.toString(),
+          );
 
-            // 根據用戶選擇保存登入相關設置
-            localStorage.setItem(
-              STORAGE_KEYS.REMEMBER_ACCOUNT,
-              formData.rememberAccount.toString(),
-            );
-            localStorage.setItem(
-              STORAGE_KEYS.AUTO_LOGIN,
-              formData.autoLogin.toString(),
-            );
-
-            if (formData.rememberAccount) {
-              localStorage.setItem(STORAGE_KEYS.ACCOUNT, formData.account);
-            } else {
-              localStorage.removeItem(STORAGE_KEYS.ACCOUNT);
-            }
-
-            // TODO: 應該使用更安全的方式保存密碼
-            if (formData.autoLogin) {
-              localStorage.setItem(
-                STORAGE_KEYS.ENCRYPTED_PASSWORD,
-                encryptPassword(formData.password),
-              );
-            } else {
-              localStorage.removeItem(STORAGE_KEYS.ENCRYPTED_PASSWORD);
-            }
-
-            onLoginSuccess();
+          if (formData.rememberAccount) {
+            localStorage.setItem(STORAGE_KEYS.ACCOUNT, formData.account);
           } else {
-            console.error('登入回應格式:', response);
-            throw new Error('無法從回應中獲取 sessionId');
+            localStorage.removeItem(STORAGE_KEYS.ACCOUNT);
           }
-        } catch (error) {
-          setErrors({
-            general: error instanceof Error ? error.message : '登入失敗',
-          });
-        } finally {
-          setIsLoading(false);
+
+          // TODO: 應該使用更安全的方式保存密碼
+          if (formData.autoLogin) {
+            localStorage.setItem(
+              STORAGE_KEYS.ENCRYPTED_PASSWORD,
+              encryptPassword(formData.password),
+            );
+          } else {
+            localStorage.removeItem(STORAGE_KEYS.ENCRYPTED_PASSWORD);
+          }
+
+          onLoginSuccess();
+        } else {
+          console.error('登入回應格式:', response);
+          throw new Error('無法從回應中獲取 sessionId');
         }
+      } catch (error) {
+        setErrors({
+          general: error instanceof Error ? error.message : '登入失敗',
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -259,9 +249,6 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
                   borderColor: errors.account ? '#f87171' : '#d1d5db',
                 }}
               />
-              {errors.account && (
-                <p className={styles['warning']}>{errors.account}</p>
-              )}
             </div>
             <div className={styles['inputBox']}>
               <label className={styles['label']}>{'密碼'}</label>
@@ -277,9 +264,6 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
                   borderColor: errors.password ? '#f87171' : '#d1d5db',
                 }}
               />
-              {errors.password && (
-                <p className={styles['warning']}>{errors.password}</p>
-              )}
             </div>
             <div className={styles['checkWrapper']}>
               <label className={styles['checkBox']}>

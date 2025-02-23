@@ -38,12 +38,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   const [showPrivateModal, setShowPrivateModal] = useState(false);
 
   const handleServerSelect = (serverId: string) => {
-    if (typeof window === 'undefined') return;
-
     socket?.emit('connectServer', { serverId, sessionId });
-    errorHandler.handle = () => {
-      console.log('error');
-    };
   };
 
   const serverIcon = server.avatarUrl
@@ -152,9 +147,11 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
             className={styles['navegateItem']}
             data-key="30014"
             onClick={() => {
-              // @ts-ignore
-              window.electron?.send('open-popup', 'create-server');
-              window.location.href = '/popup?page=create-server';
+              if (window.electron) {
+                window.electron.openPopup('create-server');
+              } else {
+                window.location.href = '/popup?page=create-server';
+              }
             }}
           >
             <div></div>
