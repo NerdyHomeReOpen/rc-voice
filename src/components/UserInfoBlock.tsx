@@ -56,17 +56,14 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
 
     return (
       <div
-        className={UserInfoCard['userInfoCard']}
+        className={`${UserInfoCard['userInfoCard']} ${UserInfoCard['info-card-vip-5']}`}
         style={{
           top: `${y}px`,
           left: `${x}px`,
         }}
         ref={ref}
       >
-        <div
-          className={`${UserInfoCard['userInfoHeader']} ${UserInfoCard['info-card-vip-1']}}
-          `}
-        >
+        <div className={`${UserInfoCard['userInfoHeader']}}`}>
           {/* Left Avatar */}
           <div className={UserInfoCard['userInfoAvatarPicture']}></div>
           {/* Right Info */}
@@ -77,7 +74,7 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
                 Grade[`lv-${userLevel}`]
               }`}
             ></div>
-            <div className={`${Vip['vipIconBig']} ${Vip['vip-big-1']}`}></div>
+            <div className={`${Vip['vipIconBig']} ${Vip['vip-big-5']}`}></div>
             {/* VIP Info Text */}
             <div className={UserInfoCard['userInfoVipText']}>
               (會員%s倍升級加速中)
