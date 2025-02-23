@@ -205,6 +205,10 @@
   background-position: -60px 0;
 }
 
+.currentChannelIcon.status4 {
+  background-position: -80px 0;
+}
+
 .currentChannelText {
   margin-left: 3px;
   color: #555555;
@@ -285,9 +289,14 @@
   font-size: 14px;
 }
 
+.userCurrentLocation,
+.userCurrentLocation .channelTabCount {
+  color: #ff0000 !important;
+}
+
 .channelList .subChannel:not(.lobby),
-.channelList .subChannel:not(.lobby) + .userList .userTab  {
-  padding: .125rem 20px .125rem 1.7rem;
+.channelList .subChannel:not(.lobby) + .userList .userTab {
+  padding: 0.125rem 20px 0.125rem 1.7rem;
 }
 
 .userList {
@@ -303,7 +312,6 @@
   align-items: center;
   padding: 0.125rem 20px 0.125rem 0.75rem;
   cursor: pointer;
-  border-radius: 3px;
   gap: 5px;
 }
 
@@ -324,7 +332,7 @@
 
 .userGrade {
   min-width: 15px;
-  min-height: 13px;
+  min-height: 15px;
   background: url(../../public/usergrade.png) no-repeat center center;
   background-size: auto;
   background-position: 0 0;
