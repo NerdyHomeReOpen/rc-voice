@@ -49,8 +49,6 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   const serverDisplayId = server.displayId ?? '';
   const serverSlogan = server.slogan ?? '';
 
-  console.log(server, user);
-
   return (
     <>
       {showPrivateModal && (
