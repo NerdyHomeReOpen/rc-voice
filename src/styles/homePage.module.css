@@ -148,3 +148,123 @@
 }
 
 /* Content */
+.myGroupsWrapper {
+  height: 100%;
+  width: 100%;
+  background: #f4f6fa;
+}
+
+.myGroupsContain {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  overflow: auto;
+  max-height: calc(100vh - 1rem);
+  padding: 25px;
+}
+
+.myGroupsView {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.myGroupsTitle {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.myGroupsRoomItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.myGroupsView div:not(:last-child) .myGroupsRoomItems {
+  margin-bottom: 1rem;
+}
+
+.myGroupsRoomItemBox {
+  border: 1px solid #e0e0e4;
+  padding: 12px;
+  width: 15rem;
+  display: flex;
+  padding-bottom: 10;
+  padding-top: 10;
+  height: 5.5rem;
+  cursor: pointer;
+  background: #fff;
+  align-items: center;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.myGroupsRoomAvatarPicture {
+  width: auto;
+  height: 50px;
+  background: url(../../public/im/IMLogo.png) no-repeat center center;
+  background-size: cover;
+  background-position: 0 0;
+  min-width: 50px;
+}
+
+.myGroupsRoomInfo {
+  display: flex;
+  flex-direction: column;
+  margin-left: 7px;
+  width: 100%;
+}
+
+.myGroupsRoomName {
+  color: #10469e;
+  font-size: 14px;
+}
+
+.myGroupsRoomIDBox {
+  display: flex;
+}
+
+.myGroupsRoomIDBox,
+.myGroupsRoomSlogen {
+  font-size: 13px;
+  color: #777777;
+}
+
+.myGroupsRoomIDTitle {
+  display: flex;
+  align-items: flex-start;
+}
+
+.myGroupsRoomSlogen {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.myGroupsRoomIDTitle.IsOwner:before {
+  content: '';
+  width: 13px;
+  height: 15px;
+  background: url(../../public/icon_creator.png) no-repeat center center;
+  background-size: contain;
+  background-position: 0 0;
+  display: block;
+  margin-right: 2px;
+}
+
+@media only screen and (min-width: 500px) {
+  .myGroupsRoomItems {
+    width: 450px;
+  }
+}
+
+@media only screen and (min-width: 650px) {
+  .myGroupsRoomItems {
+    width: 650px;
+  }
+}
