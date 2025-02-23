@@ -15,7 +15,6 @@ import header from '@/styles/common/header.module.css';
 import type { Presence, Server, User } from '@/types';
 
 // Pages
-import AuthPage from '@/components/pages/AuthPage';
 import FriendPage from '@/components/pages/FriendPage';
 import HomePage from '@/components/pages/HomePage';
 import ServerPage from '@/components/pages/ServerPage';
@@ -25,7 +24,6 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import UserSettingModal from '@/components/modals/UserSettingModal';
 
 // Utils
-import { measureLatency } from '@/utils/measureLatency';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
@@ -35,6 +33,7 @@ import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearSessionToken, setSessionToken } from '@/redux/sessionTokenSlice';
+import { electronService } from '@/services/electron.service';
 
 interface HeaderProps {
   selectedId?: number;
@@ -59,6 +58,7 @@ const Header: React.FC<HeaderProps> = React.memo(
       localStorage.removeItem('autoLogin');
       localStorage.removeItem('encryptedPassword');
       localStorage.removeItem('sessionToken');
+      electronService.auth.logout();
     };
 
     const handleLeaveServer = () => {
@@ -85,6 +85,10 @@ const Header: React.FC<HeaderProps> = React.memo(
         document.exitFullscreen();
         setIsFullscreen(false);
       }
+    };
+
+    const handleMinimize = () => {
+      electronService.window.minimize();
     };
 
     // Menu Control
@@ -279,7 +283,7 @@ const Header: React.FC<HeaderProps> = React.memo(
               </div>
             </div>
           </div>
-          <div className={header['minimize']} />
+          <div className={header['minimize']} onClick={handleMinimize} />
           <div
             className={isFullscreen ? header['restore'] : header['maxsize']}
             onClick={handleFullscreen}
