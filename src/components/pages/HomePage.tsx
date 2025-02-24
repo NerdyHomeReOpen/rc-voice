@@ -159,11 +159,12 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
             className={styles['navegateItem']}
             data-key="30014"
             onClick={() => {
-              if (window.electron) {
-                window.electron.openPopup('create-server');
-              } else {
-                window.location.href = '/popup?page=create-server';
-              }
+              // if (window.electron) {
+              //   window.electron.openPopup('create-server');
+              // } else {
+              //   window.location.href = '/popup?page=create-server';
+              // }
+              setShowCreateServer(true);
             }}
           >
             <div></div>

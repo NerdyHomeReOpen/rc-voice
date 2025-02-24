@@ -90,9 +90,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
               className={`${styles['channelTab']} ${
                 expanded ? styles['expanded'] : ''
               } ${
-                category.isLobby
-                  ? styles['lobby']
-                  : styles[category.settings.visibility]
+                category.isLobby ? styles['lobby'] : styles[categoryVisibility]
               }`}
               onClick={() =>
                 setExpanded(
@@ -225,7 +223,6 @@ interface ChannelTabProps {
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(
   ({ channel, server, user, index }) => {
     // Redux
-    const mainUser = useSelector((state: { user: User }) => state.user);
     const sessionId = useSelector(
       (state: { sessionToken: string }) => state.sessionToken,
     );
@@ -273,6 +270,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
       server.users?.filter((u) => u.currentChannelId === channel.id) ?? [];
     const userMember = server.members?.find((m) => m.userId === user.id);
     const userPermission = userMember?.permissionLevel ?? 1;
+    const userInChannel = user.currentChannelId === channel.id;
     const canEdit = userPermission >= 5;
 
     return (
@@ -287,15 +285,11 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
             <div
               {...provided.dragHandleProps}
               className={`${styles['channelTab']} ${
-                !channel.isLobby && channel.parentId ? styles['subChannel'] : ''
+                expanded ? styles['expanded'] : ''
               } ${
-                channel.isLobby
-                  ? styles['lobby']
-                  : styles[channel.settings.visibility]
-              } ${expanded ? styles['expanded'] : ''} ${
-                channel.userIds.some((e) => e == user.id)
-                  ? styles['userCurrentLocation']
-                  : ''
+                channel.isLobby ? styles['lobby'] : styles[channelVisibility]
+              } ${userInChannel ? styles['userCurrentLocation'] : ''} ${
+                !channel.isRoot ? styles['subChannel'] : ''
               }`}
               onClick={() =>
                 setExpanded(channelVisibility != 'readonly' ? !expanded : false)
@@ -321,12 +315,12 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
               <div className={styles['userList']}>
                 {channelUsers
                   .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((user: User) => (
+                  .map((channelUser: User) => (
                     <UserTab
                       key={user.id}
                       user={user}
                       server={server}
-                      mainUser={mainUser}
+                      channelUser={channelUser}
                     />
                   ))}
               </div>
@@ -399,13 +393,13 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
 );
 
 interface UserTabProps {
-  user: User;
+  channelUser: User;
   server: Server;
-  mainUser: User;
+  user: User;
 }
 
 const UserTab: React.FC<UserTabProps> = React.memo(
-  ({ user, server, mainUser }) => {
+  ({ user, server, channelUser }) => {
     // Socket Control
     const socket = useSocket();
 
@@ -430,23 +424,21 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const channelUserMember = server.members?.find((m) => m.userId === user.id);
+    const channelUserPermission = channelUserMember?.permissionLevel ?? 1;
+    const channelUserNickname = channelUserMember?.nickname ?? user.name;
+    const channelUserLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
+    const channelUserGender = user.gender;
+    const channelUserBadges = user.badges ?? [];
     const userMember = server.members?.find((m) => m.userId === user.id);
     const userPermission = userMember?.permissionLevel ?? 1;
-    const userNickname = userMember?.nickname ?? user.name;
-    const userLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
-    const userGender = user.gender;
-    const userBadges = user.badges ?? [];
-    const mainUserMember = server.members?.find(
-      (m) => m.userId === mainUser.id,
-    );
-    const mainUserPermission = mainUserMember?.permissionLevel ?? 1;
-    const canEdit = mainUserPermission >= 5;
+    const canEdit = userPermission >= 5;
 
     const handleKickUser = (targetId: string) => {
       socket?.emit('userKicked', {
         sessionId: store.getState().sessionToken,
         serverId: server.id,
-        userId: mainUser.id,
+        userId: user.id,
         targetId: targetId,
       });
     };
@@ -455,7 +447,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       socket?.emit('userAddFriend', {
         sessionId: store.getState().sessionToken,
         serverId: server.id,
-        userId: mainUser.id,
+        userId: user.id,
         targetId: targetId,
       });
     };
@@ -482,16 +474,18 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         >
           <div className={styles['userState']} />
           <div
-            className={`${styles['userIcon']} ${permission[userGender]} ${
-              permission[`lv-${userPermission}`]
+            className={`${styles['userIcon']} ${
+              permission[channelUserGender]
+            } ${permission[`lv-${channelUserPermission}`]}`}
+          />
+          <div className={styles['userTabName']}>{channelUserNickname}</div>
+          <div
+            className={`${styles['userGrade']} ${
+              grade[`lv-${channelUserLevel}`]
             }`}
           />
-          <div className={styles['userTabName']}>{userNickname}</div>
-          <div
-            className={`${styles['userGrade']} ${grade[`lv-${userLevel}`]}`}
-          />
-          <BadgeViewer badges={userBadges} maxDisplay={3} />
-          {user.id === mainUser.id && (
+          <BadgeViewer badges={channelUserBadges} maxDisplay={3} />
+          {channelUser.id === user.id && (
             <div className={styles['myLocationIcon']} />
           )}
         </div>
@@ -509,7 +503,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
                       id: 'kick',
                       icon: <Trash size={14} className="w-5 h-5 mr-2" />,
                       label: '踢出',
-                      disabled: mainUser.id == user.id ? true : false,
+                      disabled: user.id == channelUser.id ? true : false,
                       onClick: () => {
                         setShowContextMenu(false);
                         handleKickUser(user.id);
@@ -519,7 +513,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
                       id: 'addFriend',
                       icon: <Plus size={14} className="w-5 h-5 mr-2" />,
                       label: '新增好友',
-                      disabled: mainUser.id == user.id ? true : false,
+                      disabled: user.id == channelUser.id ? true : false,
                       onClick: () => {
                         setShowContextMenu(false);
                         handleaddFriend(user.id);
@@ -531,7 +525,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
                       id: 'addFriend',
                       icon: <Plus size={14} className="w-5 h-5 mr-2" />,
                       label: '新增好友',
-                      disabled: mainUser.id == user.id ? true : false,
+                      disabled: user.id == channelUser.id ? true : false,
                       onClick: () => {
                         setShowContextMenu(false);
                         handleaddFriend(user.id);
