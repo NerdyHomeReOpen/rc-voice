@@ -73,7 +73,7 @@ const channelHandler = {
       await Set.user(userId, update);
 
       // Setup user interval for accumulate contribution
-      Interval.setupObtainXpInterval(socket.id, userId);
+      Interval.setupObtainXpInterval(socket);
 
       // Play sound
       io.to(`channel_${channel.id}`).emit('playSound', 'join');
@@ -158,7 +158,7 @@ const channelHandler = {
       await Set.user(userId, update);
 
       // Clear user contribution interval
-      Interval.clearObtainXpInterval(socket.id);
+      Interval.clearObtainXpInterval(socket);
 
       // Leave the channel
       socket.leave(`channel_${channel.id}`);

@@ -8,6 +8,8 @@ const XP_SYSTEM = {
   INTERVAL_MS: 60 * 60 * 1000, // 1 hour in milliseconds
 };
 
+const CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
 const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
@@ -28,6 +30,7 @@ fs.mkdir(SERVER_AVATAR_DIR, { recursive: true }).catch(console.error);
 
 module.exports = {
   XP_SYSTEM,
+  CLEANUP_INTERVAL_MS,
   PORT,
   MIME_TYPES,
   CONTENT_TYPE_JSON,

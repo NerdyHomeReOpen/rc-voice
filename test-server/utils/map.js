@@ -3,8 +3,8 @@ const map = {
   userToSocket: new Map(), // userId -> socketId
   socketToUser: new Map(), // socketId -> userId
   contributionIntervalMap: new Map(), // socketId -> interval
-  userLastXpAwardedAt: new Map(),
   userElapsedTime: new Map(),
+  userTimeFlag: new Map(),
   createUserIdSessionIdMap: (userId, sessionId) => {
     if (!map.userSessions.has(sessionId)) {
       map.userSessions.set(sessionId, userId);

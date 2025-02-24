@@ -3,79 +3,88 @@ const db = new QuickDB();
 const fs = require('fs').promises;
 const path = require('path');
 
-const { XP_SYSTEM } = require('../constant');
+const {
+  XP_SYSTEM,
+  UPLOADS_DIR,
+  MIME_TYPES,
+  CLEANUP_INTERVAL_MS,
+} = require('../constant');
+
 const Logger = require('./logger');
 const Map = require('./map');
 const Get = require('./get');
+const Set = require('./set');
 const Func = require('./func');
 
-const UPLOADS_DIR = path.join(__dirname, '../uploads');
-const MIME_TYPES = {
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-};
-const CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
 const interval = {
-  setupObtainXpInterval: async (socketId, userId = null) => {
+  setupObtainXpInterval: async (socket) => {
     try {
       // Validate inputs
-      if (!socketId) {
-        throw new Error('Socket ID is required');
+      if (!socket) {
+        throw new Error('Socket not provided');
       }
-      userId = userId ?? Map.socketToUser.get(socketId);
+      const userId = Map.socketToUser.get(socket.id);
       if (!userId) {
-        throw new Error('User ID not found for socket');
+        throw new Error(`UserId not found for socket(${socket.id})`);
       }
 
-      const leftTime = restoreTimer(userId);
+      // Restore elapsed time than calculate left time
+      const elapsedTime = restoreElapseTime(userId);
+      const leftTime = XP_SYSTEM.INTERVAL_MS - elapsedTime;
 
-      // Ensure leftTime is valid
-      if (leftTime < 0) {
-        initializeTimer(userId);
+      // Run interval every XP_SYSTEM.INTERVAL_MS
+      const timeout = setTimeout(async () => {
+        await obtainXp(socket, userId);
+
+        if (!Map.deleteContributionIntervalMap(socket.id)) {
+          throw new Error(`Interval not found for socket(${socket.id})`);
+        }
+
+        interval.setupObtainXpInterval(socket);
+      }, leftTime);
+
+      if (!Map.createContributionIntervalMap(socket.id, timeout)) {
+        throw new Error(`Interval already exists for socket(${socket.id})`);
       }
 
-      setTimeout(() => {
-        // Set up interval
-        obtainXp(socketId, userId);
-
-        // Run interval every hour
-        const intervalId = setInterval(
-          () => obtainXp(socketId, userId),
-          XP_SYSTEM.INTERVAL_MS,
-        );
-        Map.createContributionIntervalMap(socketId, intervalId);
-      }, Math.max(0, leftTime));
+      new Logger('XPSystem').info(
+        `Obtain XP interval set up for user(${userId}) with left time: ${leftTime}`,
+      );
     } catch (error) {
-      new Logger('WebSocket').error(
+      new Logger('XPSystem').error(
         'Error setting up contribution interval: ' + error.message,
       );
     }
   },
 
-  clearObtainXpInterval: (socketId, userId = null) => {
+  clearObtainXpInterval: (socket) => {
     try {
-      if (!socketId) {
-        throw new Error('Socket ID is required');
+      if (!socket) {
+        throw new Error('Socket not provided');
       }
-      userId = userId ?? Map.socketToUser.get(socketId);
+      const userId = Map.socketToUser.get(socket.id);
       if (!userId) {
-        throw new Error('User ID not found for socket');
+        throw new Error(`UserId not found for socket(${socket.id})`);
+      }
+      const interval = Map.contributionIntervalMap.get(socket.id);
+      if (!interval) {
+        throw new Error(`Interval not found for socket(${socket.id})`);
       }
 
-      initializeTimer(userId);
+      // Initial elapsed time to map
+      const elapsedTime = initialElapseTime(userId);
 
-      // Clear interval if exists
-      const intervalId = Map.contributionIntervalMap.get(socketId);
-      if (intervalId) {
-        clearInterval(intervalId);
-        Map.deleteContributionIntervalMap(socketId);
+      if (!Map.deleteContributionIntervalMap(socket.id)) {
+        throw new Error(`Interval not found for socket(${socket.id})`);
       }
+
+      clearTimeout(interval);
+
+      new Logger('XPSystem').info(
+        `Obtain XP interval cleared for user(${userId}) with elapsed time: ${elapsedTime}`,
+      );
     } catch (error) {
-      new Logger('WebSocket').error(
+      new Logger('XPSystem').error(
         'Error clearing contribution interval: ' + error.message,
       );
     }
@@ -87,7 +96,7 @@ const interval = {
       await fs.mkdir(UPLOADS_DIR, { recursive: true });
 
       // Run cleanup
-      setInterval(cleanupUnusedAvatars, CLEANUP_INTERVAL);
+      setInterval(cleanupUnusedAvatars, CLEANUP_INTERVAL_MS);
 
       // Run initial cleanup
       await cleanupUnusedAvatars();
@@ -149,34 +158,8 @@ const cleanupUnusedAvatars = async () => {
   }
 };
 
-const initializeTimer = (userId) => {
-  if (!userId) return;
-
-  const lastAwardedAt = Map.userLastXpAwardedAt.get(userId);
-  if (!lastAwardedAt) {
-    Map.userLastXpAwardedAt.set(userId, Date.now());
-    Map.userElapsedTime.set(userId, 0);
-    return;
-  }
-
-  const elapsedTime = Date.now() - lastAwardedAt;
-  Map.userElapsedTime.set(userId, elapsedTime);
-};
-
-const restoreTimer = (userId) => {
-  if (!userId) return XP_SYSTEM.INTERVAL_MS;
-
-  const elapsedTime = Map.userElapsedTime.get(userId) || 0;
-  return Math.max(0, XP_SYSTEM.INTERVAL_MS - elapsedTime);
-};
-
-// XP interval handler
-const obtainXp = async (socketId, userId) => {
+const obtainXp = async (socket, userId) => {
   try {
-    if (!socketId || !userId) {
-      throw new Error('Socket ID and User ID are required');
-    }
-
     const user = await Get.user(userId);
     if (!user) {
       throw new Error(`User not found: ${userId}`);
@@ -185,40 +168,72 @@ const obtainXp = async (socketId, userId) => {
     // Update user XP and level
     user.xp += XP_SYSTEM.XP_PER_HOUR;
     let requiredXP = Func.calculateRequiredXP(user.level);
-
     while (user.xp >= requiredXP) {
       user.level += 1;
       user.xp -= requiredXP;
       requiredXP = Func.calculateRequiredXP(user.level);
     }
 
-    await db.set(`users.${userId}`, user);
+    const userUpdate = {
+      level: user.level,
+      xp: user.xp,
+      requiredXP,
+      progress: user.xp / requiredXP,
+    };
+    await Set.user(user.id, userUpdate);
 
     // Update member contribution if in a server
-    if (user.currentServerId && user.members?.[user.currentServerId]) {
-      const member = user.members[user.currentServerId];
+    if (user.currentServerId) {
+      const member = user.members.find(
+        (m) => m.serverId === user.currentServerId,
+      );
+      if (!member) {
+        throw new Error(
+          `User(${user.id}) not found in server(${user.currentServerId})`,
+        );
+      }
 
       member.contribution += XP_SYSTEM.XP_PER_HOUR;
 
-      await db.set(`members.${member.id}`, member);
+      const memberUpdate = {
+        contribution: member.contribution,
+      };
+      await Set.member(member.id, memberUpdate);
     }
 
     // Update last XP award time
-    Map.userLastXpAwardedAt.set(userId, Date.now());
+    Map.userElapsedTime.set(userId, 0);
 
     // Emit update to client
-    io.to(socketId).emit('userUpdate', {
-      level: user.level,
-      xp: user.xp,
-      requiredXP: Func.calculateRequiredXP(user.level),
-    });
+    socket.emit('userUpdate', userUpdate);
 
-    new Logger('WebSocket').info(
-      `User(${user.id}) earned XP. Level: ${user.level}`,
+    new Logger('XPSystem').info(
+      `User(${user.id}) obatin XP. Level: ${user.level}`,
     );
   } catch (error) {
-    new Logger('WebSocket').error(`Error in XP interval: ${error.message}`);
+    new Logger('XPSystem').error(
+      `Error obtaining user(${userId}) xp: ${error.message}`,
+    );
   }
+};
+
+const initialElapseTime = (userId) => {
+  if (!userId) return 0;
+  const elapsedTime = Map.userElapsedTime.get(userId) || 0;
+  const joinTime = Map.userTimeFlag.get(userId) || Date.now();
+  const leftTime = Date.now();
+  const newElapsedTime =
+    (elapsedTime + leftTime - joinTime) % XP_SYSTEM.INTERVAL_MS;
+  Map.userElapsedTime.set(userId, newElapsedTime);
+  return newElapsedTime;
+};
+
+const restoreElapseTime = (userId) => {
+  if (!userId) return 0;
+  const elapsedTime = Map.userElapsedTime.get(userId) || 0;
+  const joinTime = Date.now();
+  Map.userTimeFlag.set(userId, joinTime);
+  return elapsedTime;
 };
 
 module.exports = { ...interval };
