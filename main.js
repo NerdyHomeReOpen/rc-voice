@@ -370,11 +370,9 @@ ipcMain.on('close-window', () => {
 // Socket IPC event handling
 ipcMain.on('socket-event', (event, data) => {
   // Forward the event to all other windows except the sender
-  BrowserWindow.getAllWindows().forEach((window) => {
-    if (window.webContents !== event.sender) {
-      window.webContents.send('socket-event', data);
-    }
-  });
+  BrowserWindow.getAllWindows().forEach((window) =>
+    window.webContents.send('socket-event', data),
+  );
 });
 
 // Popup handlers
