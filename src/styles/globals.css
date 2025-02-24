@@ -43,6 +43,8 @@ body,
   flex: 1;
   min-height: 0;
   background-color: #ffffff;
+  border: 1px solid #a7a7a7;
+  border-top: 0;
 }
 
 ::-webkit-scrollbar {

@@ -180,16 +180,16 @@ const Header: React.FC<HeaderProps> = React.memo(
               >
                 <div className={header['tabLable']}>{TabLable}</div>
                 <div className={header['tabBg']}></div>
+                {TabId > 2 && (
+                  <CircleX
+                    onClick={() => handleLeaveServer()}
+                    size={16}
+                    className={header['tabClose']}
+                  />
+                )}
               </div>
             );
           })}
-          {MAIN_TABS.length > 2 && (
-            <CircleX
-              onClick={() => handleLeaveServer()}
-              size={16}
-              className={header['tabClose']}
-            />
-          )}
         </div>
         {/* Buttons */}
         <div className={header['buttons']}>
