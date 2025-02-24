@@ -44,14 +44,10 @@ const getGroupMessages = (
       lastGroup.contents.push(message.content);
     } else {
       acc.push({
-        id: message.id,
-        type: message.type,
+        ...message,
         contents: [message.content],
         permissionLevel:
           'permissionLevel' in message ? message.permissionLevel : null,
-        senderId: message.senderId,
-        timestamp: message.timestamp,
-        sender: message.sender,
       });
     }
     return acc;

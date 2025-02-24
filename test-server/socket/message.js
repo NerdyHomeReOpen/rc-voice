@@ -52,7 +52,10 @@ const messageHandler = {
       const messageId = uuidv4();
       await Set.message(messageId, {
         id: messageId,
+        content: message.content,
+        permissionLevel: message.permissionLevel,
         channelId: channel.id,
+        senderId: message.senderId,
         timestamp: Date.now().valueOf(),
       });
 
@@ -119,7 +122,9 @@ const messageHandler = {
       const directMessageId = uuidv4();
       await Set.directMessage(directMessageId, {
         id: directMessageId,
+        content: directMessage.content,
         friendId: friend.id,
+        senderId: directMessage.senderId,
         timestamp: Date.now().valueOf(),
       });
 
