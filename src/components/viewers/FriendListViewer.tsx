@@ -215,7 +215,7 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
     const [searchQuery, setSearchQuery] = useState<string>('');
 
     const filteredFriends =
-      friends?.filter((friend) => friend.user.name.includes(searchQuery)) ?? [];
+      friends?.filter((friend) => friend.user?.name.includes(searchQuery)) ?? [];
 
     // Tab Control
     const [selectedTabId, setSelectedTabId] = useState<number>(0);

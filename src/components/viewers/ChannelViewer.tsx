@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable react/display-name */
@@ -71,7 +69,8 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
 
     const categoryVisibility = category.settings.visibility ?? 'public';
     const categoryName = category.name ?? '';
-    const userMember = server.members?.find((m) => m.userId === user.id);
+    // const userMember = server.members?.find((m) => m.userId === user.id);
+    const userMember = server.members?.[user.id];
     const userPermission = userMember?.permissionLevel ?? 1;
     const subChannels = category.subChannels ?? [];
     const canEdit = userPermission >= 5;
@@ -268,7 +267,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
     const channelName = channel.name ?? '';
     const channelUsers =
       server.users?.filter((u) => u.currentChannelId === channel.id) ?? [];
-    const userMember = server.members?.find((m) => m.userId === user.id);
+    // const userMember = server.members?.find((m) => m.userId === user.id);
+    const userMember = server.members?.[user.id];
     const userPermission = userMember?.permissionLevel ?? 1;
     const userInChannel = user.currentChannelId === channel.id;
     const canEdit = userPermission >= 5;
@@ -424,13 +424,15 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const channelUserMember = server.members?.find((m) => m.userId === user.id);
+    // const channelUserMember = server.members?.find((m) => m.userId === user.id);
+    const channelUserMember = server.members?.[user.id];
     const channelUserPermission = channelUserMember?.permissionLevel ?? 1;
     const channelUserNickname = channelUserMember?.nickname ?? user.name;
     const channelUserLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
     const channelUserGender = user.gender;
     const channelUserBadges = user.badges ?? [];
-    const userMember = server.members?.find((m) => m.userId === user.id);
+    // const userMember = server.members?.find((m) => m.userId === user.id);
+    const userMember = server.members?.[user.id];
     const userPermission = userMember?.permissionLevel ?? 1;
     const canEdit = userPermission >= 5;
 
@@ -584,7 +586,8 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
     (ch) => ch.id == user.currentChannelId,
   );
   const userCurrentChannelName = userCurrentChannel?.name ?? '';
-  const userMember = server.members?.find((m) => m.userId === user.id);
+  // const userMember = server.members?.find((m) => m.userId === user.id);
+  const userMember = server.members?.[user.id];
   const userPermission = userMember?.permissionLevel ?? 1;
   const serverChannels = server.channels ?? [];
   const canEdit = userPermission >= 5;
@@ -605,7 +608,8 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
     if (!movedChannel) return;
 
     // Permission check
-    const userMember = server.members?.find((m) => m.userId === user.id);
+    // const userMember = server.members?.find((m) => m.userId === user.id);
+    const userMember = server.members?.[user.id];
     const userPermission = userMember?.permissionLevel ?? 1;
     const canEdit = userPermission >= 5;
     if (!canEdit) return;

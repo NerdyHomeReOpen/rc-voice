@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect } from 'react';
@@ -49,9 +50,10 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
     }, [onClose]);
 
     const userGender = user.gender;
-    const userMember = server.members?.find(
-      (member) => member.userId === user.id,
-    );
+    // const userMember = server.members?.find(
+    //   (member) => member.userId === user.id,
+    // );
+    const userMember = server.members?.[user.id];
     const userPermission = userMember?.permissionLevel ?? 1;
     const userContributions = userMember?.contribution ?? 0;
     const userLevel = Math.min(56, Math.ceil(user.level / 5));

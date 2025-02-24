@@ -84,6 +84,7 @@ export interface Member {
   serverId: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
+  user: User | null;
 }
 
 export interface Server {
@@ -111,7 +112,9 @@ export interface Server {
   users?: User[];
   channels?: Channel[];
   applications?: ServerApplication[];
-  members?: Member[];
+  members?: {
+    [userId: string]: Member;
+  };
 }
 
 export interface ServerApplication {
@@ -121,6 +124,7 @@ export interface ServerApplication {
   serverId: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
+  user: User | null;
 }
 
 export interface Channel {

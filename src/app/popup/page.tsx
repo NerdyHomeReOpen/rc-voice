@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 
 // Types
@@ -24,19 +24,20 @@ const getButtonStyle = (button: ModalButton, disabled: boolean) => {
   }
 };
 
-interface ModalProps {
-  title?: string;
-  buttons?: ModalButton[];
-  width?: string;
-  height?: string;
-  changeContent?: string[];
-  children?: React.ReactNode;
-  onClose?: () => void;
-}
+// interface ModalProps {
+//   title?: string;
+//   buttons: ModalButton[];
+//   width: string;
+//   height: string;
+//   changeContent: string[];
+//   children: React.ReactNode;
+//   onClose: () => void;
+// }
 
 const Modal = React.memo(
-  ({ title, buttons, children, onClose = () => {} }: ModalProps) => {
-    const hasButtons = buttons && buttons.length > 0;
+  // ({ title, buttons, onClose = () => {} }: { title: string, buttons: ModalButton[], onClose: () => void }) => {
+    () => {
+    // const hasButtons = buttons && buttons.length > 0;
 
     const getMainContent = () => {
       return <> </>;
@@ -59,14 +60,14 @@ const Modal = React.memo(
         className={`fixed w-full h-full flex-1 flex-col bg-white rounded shadow-lg overflow-hidden transform outline-g`}
       >
         {/* Top Nevigation */}
-        <Header title={title} onClose={onClose}></Header>
+        {/* <Header title={title} onClose={onClose}></Header> */}
         {/* Main Content */}
         <div className="flex flex-1 min-h-0 overflow-y-auto">
           {getMainContent()}
         </div>
         {/* Bottom */}
         <div className="flex flex-row justify-end items-center bg-gray-50">
-          {hasButtons && (
+          {/* {hasButtons && (
             <div className="flex justify-end gap-2 p-4 bg-gray-50">
               {buttons.map((button, i) => (
                 <button
@@ -82,7 +83,7 @@ const Modal = React.memo(
                 </button>
               ))}
             </div>
-          )}
+          )} */}
         </div>
       </div>
     );

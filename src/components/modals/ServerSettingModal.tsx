@@ -18,7 +18,7 @@ import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 import ContextMenu from '@/components/ContextMenu';
 
 // Types
-import type { Application, Server, Member, User } from '@/types';
+import type { ServerApplication, Server, Member, User } from '@/types';
 
 // Utils
 import { getPermissionText } from '@/utils/formatters';
@@ -68,7 +68,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   } | null>(null);
 
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState<ServerApplication[]>([]);
   const [applicationContextMenu, setApplicationContextMenu] = useState<{
     x: number;
     y: number;

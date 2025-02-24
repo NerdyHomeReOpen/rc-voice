@@ -1,6 +1,4 @@
 /* eslint-disable react/display-name */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useCallback } from 'react';
 
