@@ -196,7 +196,7 @@ const channelHandler = {
       );
     }
   },
-  createChannel: async (io, socket, sessionId, serverId, channel) => {
+  createChannel: async (io, socket, sessionId, channel) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -221,17 +221,17 @@ const channelHandler = {
           404,
         );
       }
-      const server = servers[serverId];
+      const server = servers[channel.serverId];
       if (!server) {
         throw new SocketError(
-          `Server(${serverId}) not found`,
+          `Server(${channel.serverId}) not found`,
           'CREATECHANNEL',
           'SERVER',
           404,
         );
       }
       // Check permissions
-      const userPermission = Get.userPermissionInServer(userId, serverId);
+      const userPermission = Get.userPermissionInServer(userId, server.id);
       if (userPermission < 5) {
         throw new SocketError(
           'Insufficient permissions',
@@ -245,7 +245,7 @@ const channelHandler = {
       const channelId = uuidv4();
       await Set.channel(channelId, {
         name: channel.name,
-        serverId: server.id,
+        serverId: channel.serverId,
         order: await Get.serverChannels(server.id).length,
         createdAt: Date.now().valueOf(),
       });
@@ -274,9 +274,10 @@ const channelHandler = {
       new Logger('WebSocket').error('Error adding channel: ' + error.message);
     }
   },
-  updateChannel: async (io, socket, sessionId, channelId, editedChannel) => {
+  updateChannel: async (io, socket, sessionId, editedChannel) => {
     // Get database
     const users = (await db.get('users')) || {};
+    const servers = (await db.get('servers')) || {};
     const channels = (await db.get('channels')) || {};
 
     try {
@@ -299,16 +300,24 @@ const channelHandler = {
           404,
         );
       }
-      const channel = channels[channelId];
+      const channel = channels[editedChannel.id];
       if (!channel) {
         throw new SocketError(
-          `Channel(${channelId}) not found`,
+          `Channel(${editedChannel.id}) not found`,
           'UPDATECHANNEL',
           'CHANNEL',
           404,
         );
       }
-
+      const server = servers[channel.serverId];
+      if (!server) {
+        throw new SocketError(
+          `Server(${channel.serverId}) not found`,
+          'UPDATECHANNEL',
+          'SERVER',
+          404,
+        );
+      }
       // Check permissions
       const userPermission = await Get.userPermissionInServer(
         user.id,
@@ -324,16 +333,16 @@ const channelHandler = {
       }
 
       // Update channel
-      await Set.channel(channelId, editedChannel);
+      await Set.channel(channel.id, editedChannel);
 
       // Emit updated data (to all users in the Channel)
-      io.to(`channel_${channelId}`).emit('channelUpdate', {
+      io.to(`channel_${channel.id}`).emit('channelUpdate', {
         ...editedChannel,
       });
 
       // Emit updated data (to all users in the server)
-      io.to(`server_${channel.serverId}`).emit('serverUpdate', {
-        channels: await Get.serverChannels(channel.serverId),
+      io.to(`server_${server.id}`).emit('serverUpdate', {
+        channels: await Get.serverChannels(server.id),
       });
 
       new Logger('WebSocket').info(

@@ -13,7 +13,7 @@ const Set = utils.set;
 const SocketError = require('./socketError');
 
 const messageHandler = {
-  sendMessage: async (io, socket, sessionId, channelId, message) => {
+  sendMessage: async (io, socket, sessionId, message) => {
     // Get database
     const users = (await db.get('users')) || {};
     const channels = (await db.get('channels')) || {};
@@ -38,10 +38,10 @@ const messageHandler = {
           404,
         );
       }
-      const channel = channels[channelId];
+      const channel = channels[message.channelId];
       if (!channel) {
         throw new SocketError(
-          `Channel(${channelId}) not found`,
+          `Channel(${message.channelId}) not found`,
           'SENDMESSAGE',
           'CHANNEL',
           404,
@@ -51,17 +51,16 @@ const messageHandler = {
       // Create new message
       const messageId = uuidv4();
       await Set.message(messageId, {
-        id: messageId,
         content: message.content,
         permissionLevel: message.permissionLevel,
-        channelId: channel.id,
+        channelId: message.channelId,
         senderId: message.senderId,
         timestamp: Date.now().valueOf(),
       });
 
       // Emit updated data (to all users in the channel)
       io.to(`channel_${channel.id}`).emit('channelUpdate', {
-        messages: (await Get.channel(channelId)).messages,
+        messages: (await Get.channel(channel.id)).messages,
       });
 
       new Logger('WebSocket').info(
@@ -83,7 +82,7 @@ const messageHandler = {
       new Logger('WebSocket').error('Error sending message: ' + error.message);
     }
   },
-  sendDirectMessage: async (io, socket, sessionId, friendId, directMessage) => {
+  sendDirectMessage: async (io, socket, sessionId, directMessage) => {
     // Get database
     const users = (await db.get('users')) || {};
     const friends = (await db.get('friends')) || {};
@@ -108,10 +107,10 @@ const messageHandler = {
           404,
         );
       }
-      const friend = friends[friendId];
+      const friend = friends[directMessage.friendId];
       if (!friend) {
         throw new SocketError(
-          `Friend(${friendId}) not found`,
+          `Friend(${directMessage.friendId}) not found`,
           'SENDDIRECTMESSAGE',
           'FRIEND',
           404,
@@ -121,9 +120,8 @@ const messageHandler = {
       // Create new message
       const directMessageId = uuidv4();
       await Set.directMessage(directMessageId, {
-        id: directMessageId,
         content: directMessage.content,
-        friendId: friend.id,
+        friendId: directMessage.friendId,
         senderId: directMessage.senderId,
         timestamp: Date.now().valueOf(),
       });

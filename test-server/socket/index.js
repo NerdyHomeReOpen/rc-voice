@@ -114,7 +114,6 @@ module.exports = (io) => {
     socket.on('updateServer', async (data) => {
       // data = {
       //   sessionId:
-      //   serverId:
       //   server: {
       //     ...
       //   }
@@ -122,8 +121,8 @@ module.exports = (io) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, serverId, server: editedServer } = data;
-      if (!sessionId || !serverId || !editedServer) {
+      const { sessionId, server: editedServer } = data;
+      if (!sessionId || !editedServer) {
         throw new SocketError(
           'Missing required fields',
           'UPDATESERVER',
@@ -131,7 +130,7 @@ module.exports = (io) => {
           400,
         );
       }
-      serverHandler.updateServer(io, socket, sessionId, serverId, editedServer);
+      serverHandler.updateServer(io, socket, sessionId, editedServer);
     });
     // Channel
     socket.on('connectChannel', async (data) => {
@@ -175,7 +174,6 @@ module.exports = (io) => {
     socket.on('createChannel', async (data) => {
       // data = {
       //   sessionId:
-      //   serverId:
       //   channel: {
       //     ...
       //   },
@@ -183,8 +181,8 @@ module.exports = (io) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, serverId, channel } = data;
-      if (!sessionId || !serverId || !channel) {
+      const { sessionId, channel } = data;
+      if (!sessionId || !channel) {
         throw new SocketError(
           'Missing required fields',
           'CREATECHANNEL',
@@ -192,12 +190,11 @@ module.exports = (io) => {
           400,
         );
       }
-      channelHandler.createChannel(io, socket, sessionId, serverId, channel);
+      channelHandler.createChannel(io, socket, sessionId, channel);
     });
     socket.on('updateChannel', async (data) => {
       // data = {
       //   sessionId:
-      //   channelId:
       //   channel: {
       //     ...
       //   },
@@ -205,8 +202,8 @@ module.exports = (io) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, channelId, channel: editedChannel } = data;
-      if (!sessionId || !channelId || !editedChannel) {
+      const { sessionId, channel: editedChannel } = data;
+      if (!sessionId || !editedChannel) {
         throw new SocketError(
           'Missing required fields',
           'UPDATECHANNEL',
@@ -214,13 +211,7 @@ module.exports = (io) => {
           400,
         );
       }
-      channelHandler.updateChannel(
-        io,
-        socket,
-        sessionId,
-        channelId,
-        editedChannel,
-      );
+      channelHandler.updateChannel(io, socket, sessionId, editedChannel);
     });
     socket.on('deleteChannel', async (data) => {
       // data = {
@@ -245,7 +236,6 @@ module.exports = (io) => {
     socket.on('sendMessage', async (data) => {
       // data = {
       //   sessionId:
-      //   channelId:
       //   message: {
       //     ...
       //   }
@@ -253,8 +243,8 @@ module.exports = (io) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, channelId, message } = data;
-      if (!sessionId || !channelId || !message) {
+      const { sessionId, message } = data;
+      if (!sessionId || !message) {
         throw new SocketError(
           'Missing required fields',
           'SENDMESSAGE',
@@ -262,12 +252,11 @@ module.exports = (io) => {
           400,
         );
       }
-      messageHandler.sendMessage(io, socket, sessionId, channelId, message);
+      messageHandler.sendMessage(io, socket, sessionId, message);
     });
     socket.on('sendDirectMessage', async (data) => {
       // data = {
       //   sessionId:
-      //   friendId:
       //   message: {
       //     ...
       //   }
@@ -275,8 +264,8 @@ module.exports = (io) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, friendId, message } = data;
-      if (!sessionId || !friendId || !message) {
+      const { sessionId, message } = data;
+      if (!sessionId || !message) {
         throw new SocketError(
           'Missing required fields',
           'SENDDIRECTMESSAGE',
@@ -284,13 +273,7 @@ module.exports = (io) => {
           400,
         );
       }
-      messageHandler.sendDirectMessage(
-        io,
-        socket,
-        sessionId,
-        friendId,
-        message,
-      );
+      messageHandler.sendDirectMessage(io, socket, sessionId, message);
     });
   });
 };

@@ -377,7 +377,7 @@ const serverHandler = {
       new Logger('Server').error(`Error creating server: ${error.message}`);
     }
   },
-  updateServer: async (io, socket, sessionId, serverId, editedServer) => {
+  updateServer: async (io, socket, sessionId, editedServer) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -404,16 +404,19 @@ const serverHandler = {
           404,
         );
       }
-      const server = servers[serverId];
+      const server = servers[editedServer.id];
       if (!server) {
         throw new SocketError(
-          `Server(${serverId}) not found`,
+          `Server(${editedServer.id}) not found`,
           'UPDATESERVER',
           'SERVER',
           404,
         );
       }
-      const userPermission = await Get.userPermissionInServer(userId, serverId);
+      const userPermission = await Get.userPermissionInServer(
+        userId,
+        server.id,
+      );
       if (userPermission < 5) {
         throw new SocketError(
           'Insufficient permissions',
@@ -492,7 +495,7 @@ const serverHandler = {
       }
 
       // Create new server object with only allowed updates
-      servers[serverId] = {
+      await Set.server(server.id, {
         ...server,
         ..._.pick(editedServer, [
           'name',
@@ -505,15 +508,10 @@ const serverHandler = {
           ...server.settings,
           ..._.pick(editedServer.settings || {}, ['visibility']),
         },
-      };
-
-      // Update in database
-      await db.set(`servers.${serverId}`, servers[serverId]);
+      });
 
       // Emit updated data to all users in the server
-      io.to(`server_${serverId}`).emit('serverUpdate', {
-        ...editedServer,
-      });
+      io.to(`server_${server.id}`).emit('serverUpdate', editedServer);
 
       new Logger('Server').success(
         `Server(${server.id}) updated by user(${user.id})`,

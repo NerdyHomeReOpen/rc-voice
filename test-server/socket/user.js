@@ -161,9 +161,9 @@ const userHandler = {
     } catch (error) {
       // Emit error data (only to the user)
       if (error instanceof SocketError) {
-        io.to(socketId).emit('error', error);
+        io.to(socket.id).emit('error', error);
       } else {
-        io.to(socketId).emit('error', {
+        io.to(socket.id).emit('error', {
           message: `登出時發生無法預期的錯誤: ${error.message}`,
           part: 'DISCONNECTUSER',
           tag: 'EXCEPTION_ERROR',
