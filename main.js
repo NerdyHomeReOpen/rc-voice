@@ -6,6 +6,10 @@ const isDev = require('electron-is-dev');
 const net = require('net');
 const DiscordRPC = require('discord-rpc');
 
+// Track windows
+let mainWindow = null;
+let authWindow = null;
+
 function waitForPort(port) {
   return new Promise((resolve, reject) => {
     let timeout = 30000; // 30 seconds timeout
@@ -76,11 +80,12 @@ async function createMainWindow() {
     }
   }
 
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     minWidth: 1200,
     minHeight: 800,
     frame: false,
     transparent: true,
+    resizable: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -90,7 +95,34 @@ async function createMainWindow() {
   mainWindow.loadURL(`${baseUri}`);
 
   // Open DevTools in development mode
-  // if (isDev) mainWindow.webContents.openDevTools();
+  if (isDev) mainWindow.webContents.openDevTools();
+
+  // wait for page load to send initial state
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.send(
+      mainWindow.isMaximized() ? 'window-maximized' : 'window-unmaximized',
+    );
+  });
+
+  // listen for window state change
+  mainWindow.on('maximize', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('window-maximized');
+    }
+  });
+
+  mainWindow.on('unmaximize', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('window-unmaximized');
+    }
+  });
+
+  // Handle window closed
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  return mainWindow;
 }
 
 async function createAuthWindow() {
@@ -119,7 +151,34 @@ async function createAuthWindow() {
   authWindow.loadURL(`${baseUri}`);
 
   // Open DevTools in development mode
-  // if (isDev) authWindow.webContents.openDevTools();
+  if (isDev) authWindow.webContents.openDevTools();
+
+  // wait for page load to send initial state
+  authWindow.webContents.on('did-finish-load', () => {
+    authWindow.webContents.send(
+      authWindow.isMaximized() ? 'window-maximized' : 'window-unmaximized',
+    );
+  });
+
+  // listen for window state change
+  authWindow.on('maximize', () => {
+    if (authWindow && !authWindow.isDestroyed()) {
+      authWindow.webContents.send('window-maximized');
+    }
+  });
+
+  authWindow.on('unmaximize', () => {
+    if (authWindow && !authWindow.isDestroyed()) {
+      authWindow.webContents.send('window-unmaximized');
+    }
+  });
+
+  // Handle window closed
+  authWindow.on('closed', () => {
+    authWindow = null;
+  });
+
+  return authWindow;
 }
 
 async function createPopup(page) {
@@ -148,7 +207,9 @@ async function createPopup(page) {
   popup.loadURL(`${baseUri}/popup?page=${page}`); // Add page query parameter
 
   // Open DevTools in development mode
-  // if (isDev) createServerPopup.webContents.openDevTools();
+  if (isDev) createServerPopup.webContents.openDevTools();
+
+  return createServerPopup;
 }
 
 async function setActivity() {
@@ -262,7 +323,6 @@ ipcMain.on('open-window', async (event, window) => {
 });
 
 // Window management IPC handlers
-// Change event name to 'login'
 ipcMain.on('auth-success', () => {
   // Close auth window and create main window
   if (authWindow) {
@@ -310,9 +370,11 @@ ipcMain.on('close-window', () => {
 // Socket IPC event handling
 ipcMain.on('socket-event', (event, data) => {
   // Forward the event to all other windows except the sender
-  BrowserWindow.getAllWindows().forEach((window) =>
-    window.webContents.send('socket-event', data),
-  );
+  BrowserWindow.getAllWindows().forEach((window) => {
+    if (window.webContents !== event.sender) {
+      window.webContents.send('socket-event', data);
+    }
+  });
 });
 
 // Popup handlers
@@ -326,32 +388,28 @@ ipcMain.on('open-popup', (popup) => {
   }
 });
 
-ipcMain.on('close', () => {
-  const currentWindow = BrowserWindow.getFocusedWindow();
-  if (currentWindow) {
-    currentWindow.close();
-  }
+// listen for window control event
+ipcMain.on('window-control', (event, command) => {
+  const window = BrowserWindow.fromWebContents(event.sender);
+  if (!window) return;
 
-  if (rpc) {
-    rpc.destroy().catch(console.error);
-  }
-});
-
-ipcMain.on('reload', () => {
-  const currentWindow = BrowserWindow.getFocusedWindow();
-  if (currentWindow) {
-    currentWindow.webContents.reload();
-  }
-
-  if (rpc) {
-    rpc.destroy().catch(console.error);
-  }
-});
-
-ipcMain.on('minimize', () => {
-  const currentWindow = BrowserWindow.getFocusedWindow();
-  if (currentWindow) {
-    currentWindow.minimize();
+  switch (command) {
+    case 'minimize':
+      window.minimize();
+      break;
+    case 'maximize':
+      if (window.isMaximized()) {
+        window.unmaximize();
+      } else {
+        window.maximize();
+      }
+      break;
+    case 'unmaximize':
+      window.unmaximize();
+      break;
+    case 'close':
+      window.close();
+      break;
   }
 });
 
