@@ -27,16 +27,19 @@ import { measureLatency } from '@/utils/measureLatency';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
+
+// Services
+import { electronService } from '@/services/electron.service';
+
 import Auth from './auth/page';
 
 interface HeaderProps {
   selectedId?: number;
   onSelect?: (tabId: number) => void;
-  onClose?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = React.memo(
-  ({ selectedId = 1, onSelect, onClose }) => {
+  ({ selectedId = 1, onSelect }) => {
     // Redux
     const user = useSelector((state: { user: User | null }) => state.user);
     const server = useSelector(
@@ -70,13 +73,27 @@ const Header: React.FC<HeaderProps> = React.memo(
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     const handleFullscreen = () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
+      if (!isFullscreen) {
+        electronService.getAvailability()
+          ? electronService.window.maximize()
+          : document.documentElement.requestFullscreen();
         setIsFullscreen(true);
       } else {
-        document.exitFullscreen();
+        electronService.getAvailability()
+          ? electronService.window.unmaximize()
+          : document.exitFullscreen();
         setIsFullscreen(false);
       }
+    };
+
+    const handleMinimize = () => {
+      if (electronService.getAvailability()) electronService.window.minimize();
+      else console.warn('IPC not available - not in Electron environment');
+    };
+
+    const handleClose = () => {
+      if (electronService.getAvailability()) electronService.window.close();
+      else console.warn('IPC not available - not in Electron environment');
     };
 
     // Menu Control
@@ -273,13 +290,13 @@ const Header: React.FC<HeaderProps> = React.memo(
               </div>
             </div>
           </div>
-          <div className={header['minimize']} />
+          <div className={header['minimize']} onClick={handleMinimize} />
           <div
             className={isFullscreen ? header['restore'] : header['maxsize']}
             onClick={handleFullscreen}
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           />
-          <div className={header['close']} onClick={onClose} />
+          <div className={header['close']} onClick={handleClose} />
         </div>
       </div>
     );
@@ -319,7 +336,7 @@ const HomeComponent = () => {
   }, [server]);
 
   const getMainContent = () => {
-    if (!socket || !sessionId) return <LoadingSpinner />;
+    if (!user) return <LoadingSpinner />;
     else {
       switch (selectedTabId) {
         case 1:
@@ -333,14 +350,6 @@ const HomeComponent = () => {
     }
   };
 
-  const handleCloseWindow = () => {
-    if (window.electron) {
-      window.electron.close();
-    } else {
-      window.close();
-    }
-  };
-
   return !socket || !sessionId ? (
     <Auth />
   ) : (
@@ -349,7 +358,6 @@ const HomeComponent = () => {
       <Header
         selectedId={selectedTabId}
         onSelect={(tabId) => setSelectedTabId(tabId)}
-        onClose={handleCloseWindow}
       />
       {/* Main Content */}
       <div className="content">{getMainContent()}</div>

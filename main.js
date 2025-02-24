@@ -83,8 +83,8 @@ async function createMainWindow() {
     transparent: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
+      nodeIntegration: true,
+      contextIsolation: false,
     },
   });
   mainWindow.loadURL(`${baseUri}`);
@@ -112,8 +112,8 @@ async function createAuthWindow() {
     transparent: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
+      nodeIntegration: true,
+      contextIsolation: false,
     },
   });
   authWindow.loadURL(`${baseUri}`);
@@ -141,8 +141,8 @@ async function createPopup(page) {
     transparent: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
+      nodeIntegration: true,
+      contextIsolation: false,
     },
   });
   popup.loadURL(`${baseUri}/popup?page=${page}`); // Add page query parameter
@@ -261,10 +261,65 @@ ipcMain.on('open-window', async (event, window) => {
   }
 });
 
-ipcMain.on('open-popup', async (event, popup) => {
+// Window management IPC handlers
+// Change event name to 'login'
+ipcMain.on('auth-success', () => {
+  // Close auth window and create main window
+  if (authWindow) {
+    authWindow.close();
+    authWindow = null;
+  }
+  createMainWindow();
+});
+
+ipcMain.on('logout', () => {
+  // Close main window and create auth window
+  if (mainWindow) {
+    mainWindow.close();
+    mainWindow = null;
+  }
+  createAuthWindow();
+});
+
+// Window control handlers
+ipcMain.on('minimize-window', () => {
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  if (currentWindow) {
+    currentWindow.minimize();
+  }
+});
+
+ipcMain.on('maximize-window', () => {
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  if (currentWindow) {
+    if (currentWindow.isMaximized()) {
+      currentWindow.unmaximize();
+    } else {
+      currentWindow.maximize();
+    }
+  }
+});
+
+ipcMain.on('close-window', () => {
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  if (currentWindow) {
+    currentWindow.close();
+  }
+});
+
+// Socket IPC event handling
+ipcMain.on('socket-event', (event, data) => {
+  // Forward the event to all other windows except the sender
+  BrowserWindow.getAllWindows().forEach((window) =>
+    window.webContents.send('socket-event', data),
+  );
+});
+
+// Popup handlers
+ipcMain.on('open-popup', (popup) => {
   switch (popup) {
     case 'create-server':
-      await createPopup('create-server');
+      createCreateServerPopup();
       break;
     default:
       break;
