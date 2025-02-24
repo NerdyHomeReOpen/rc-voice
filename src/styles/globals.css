@@ -43,19 +43,24 @@ body,
   flex: 1;
   min-height: 0;
   background-color: #ffffff;
+  border: 1px solid #cbcbcb;
+  border-top: 1px solid #cbcbcb00;
 }
 
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #6d6d6d0f;
   border-radius: 4px;
   border: 1px solid #6d6d6d26;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #6d6d6d38;
 }
