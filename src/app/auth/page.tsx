@@ -65,7 +65,9 @@ const Auth: React.FC = () => {
   // State
   const [isLogin, setIsLogin] = useState<boolean>(true);
 
-  const handleLogin = () => {};
+  const handleLogin = () => {
+    electronService.auth.login();
+  };
 
   return (
     <>

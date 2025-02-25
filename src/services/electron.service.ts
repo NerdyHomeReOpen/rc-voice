@@ -90,9 +90,9 @@ export const electronService = {
 
   // Auth related methods
   auth: {
-    notifySuccess: () => {
+    login: () => {
       if (isElectron) {
-        ipcRenderer.send('auth-success');
+        ipcRenderer.send('login');
       }
     },
     logout: () => {

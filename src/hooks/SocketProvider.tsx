@@ -237,199 +237,197 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   //   };
   // }, [socket, sessionId, user, server, channel]);
 
-  const setupSocketListeners = useCallback(
-    (socket: Socket) => {
-      const handleDisconnect = () => {
-        console.log('Socket disconnected, ', sessionId);
-        store.dispatch(clearServer());
-        store.dispatch(clearUser());
-        store.dispatch(clearSessionToken());
-        localStorage.removeItem('sessionToken');
-      };
-      const handleUserConnect = (user: any) => {
-        console.log('User connected: ', user);
-        store.dispatch(setUser(user));
-      };
-      const handleUserDisconnect = () => {
-        console.log('User disconnected');
-        store.dispatch(clearServer());
-        store.dispatch(clearUser());
-        store.dispatch(clearSessionToken());
-        localStorage.removeItem('sessionToken');
-      };
-      const handleUserUpdate = (data: Partial<User>) => {
-        console.log('User update: ', data);
-        if (!user) return;
-        store.dispatch(setUser({ ...user, ...data }));
-      };
-      const handleServerConnect = (server: Server) => {
-        console.log('Server connected: ', server);
-        store.dispatch(setServer(server));
-      };
-      const handleServerDisconnect = () => {
-        console.log('Server disconnected');
-        store.dispatch(clearServer());
-      };
-      const handleServerUpdate = (data: Partial<Server>) => {
-        console.log('Server update: ', data);
-        if (!server) return;
-        store.dispatch(setServer({ ...server, ...data }));
-      };
-      const handleChannelConnect = (channel: Channel) => {
-        store.dispatch(setChannel(channel));
-        console.log('Channel connected: ', channel);
-      };
-      const handleChannelDisconnect = () => {
-        console.log('Channel disconnected');
-        store.dispatch(clearChannel());
-      };
-      const handleChannelUpdate = (data: Partial<Channel>) => {
-        console.log('Channel update: ', data);
-        if (!channel) return;
-        store.dispatch(setChannel({ ...channel, ...data }));
-      };
-      const handleDirectMessage = (data: any) => {
-        console.log('Direct message: ', data);
-      };
-      const handlePlaySound = (sound: 'join' | 'leave') => {
-        switch (sound) {
-          case 'join':
-          // console.log('Play join sound');
-          // joinSoundRef.current?.play();
-          // break;
-          case 'leave':
-          // console.log('Play leave sound');
-          // leaveSoundRef.current?.play();
-          // break;
-        }
-      };
-
-      if (electronService.getAvailability()) {
-        const socketEvents: SocketServerEventData['type'][] = [
-          'connect',
-          'disconnect',
-          'userConnect',
-          'userDisconnect',
-          'userUpdate',
-          'serverConnect',
-          'serverDisconnect',
-          'serverUpdate',
-          'channelConnect',
-          'channelDisconnect',
-          'channelUpdate',
-          'directMessage',
-          'playSound',
-        ];
-
-        socket.on('connect_error', (error) => {
-          ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
-            type: 'error',
-            error: error.message,
-          });
-        });
-        socket.on('error', (error) => {
-          ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
-            type: 'error',
-            error: error,
-          });
-        });
-        socketEvents.forEach((event) => {
-          socket.on(event, (data: any) => {
-            ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
-              type: event,
-              payload: data,
-            });
-          });
-        });
-
-        ipcService.onFromMain(
-          SOCKET_IPC_CHANNEL,
-          (data: SocketServerEventData) => {
-            console.log('Socket event from main:', data);
-            switch (data.type) {
-              case 'error':
-                // errorHandler.ResponseError(data.error);
-                break;
-              case 'disconnect':
-                handleDisconnect();
-                break;
-              case 'userConnect':
-                handleUserConnect(data.payload);
-                break;
-              case 'userDisconnect':
-                handleUserDisconnect();
-                break;
-              case 'userUpdate':
-                handleUserUpdate(data.payload);
-                break;
-              case 'serverConnect':
-                handleServerConnect(data.payload);
-                break;
-              case 'serverDisconnect':
-                handleServerDisconnect();
-                break;
-              case 'serverUpdate':
-                handleServerUpdate(data.payload);
-                break;
-              case 'channelConnect':
-                handleChannelConnect(data.payload);
-                break;
-              case 'channelDisconnect':
-                handleChannelDisconnect();
-                break;
-              case 'channelUpdate':
-                handleChannelUpdate(data.payload);
-                break;
-              case 'directMessage':
-                handleDirectMessage(data.payload);
-                break;
-              case 'playSound':
-                handlePlaySound(data.payload);
-                break;
-              default:
-                break;
-            }
-          },
-        );
-        return () => {
-          socketEvents.forEach((event) => () => socket.off(event));
-          ipcService.removeListener(SOCKET_IPC_CHANNEL);
-        };
-      } else {
-        socket.on('connect', () =>
-          console.log('Connected to server with session ID:', sessionId),
-        );
-        socket.on('error', (error) => errorHandler.ResponseError(error));
-        socket.on('disconnect', handleDisconnect);
-        socket.on('userConnect', handleUserConnect);
-        socket.on('userDisconnect', handleUserDisconnect);
-        socket.on('userUpdate', handleUserUpdate);
-        socket.on('serverConnect', handleServerConnect);
-        socket.on('serverDisconnect', handleServerDisconnect);
-        socket.on('serverUpdate', handleServerUpdate);
-        socket.on('channelConnect', handleChannelConnect);
-        socket.on('channelDisconnect', handleChannelDisconnect);
-        socket.on('channelUpdate', handleChannelUpdate);
-        socket.on('directMessage', handleDirectMessage);
-        socket.on('playSound', handlePlaySound);
-        return () => {
-          socket.off('disconnect', handleDisconnect);
-          socket.off('userConnect', handleUserConnect);
-          socket.off('userDisconnect', handleUserDisconnect);
-          socket.off('userUpdate', handleUserUpdate);
-          socket.off('serverConnect', handleServerConnect);
-          socket.off('serverDisconnect', handleServerDisconnect);
-          socket.off('serverUpdate', handleServerUpdate);
-          socket.off('channelConnect', handleChannelConnect);
-          socket.off('channelDisconnect', handleChannelDisconnect);
-          socket.off('channelUpdate', handleChannelUpdate);
-          socket.off('directMessage', handleDirectMessage);
-          socket.off('playSound', handlePlaySound);
-        };
+  useEffect(() => {
+    if (!socket || !sessionId) return;
+    const handleDisconnect = () => {
+      console.log('Socket disconnected, ', sessionId);
+      store.dispatch(clearServer());
+      store.dispatch(clearUser());
+      store.dispatch(clearSessionToken());
+      localStorage.removeItem('sessionToken');
+    };
+    const handleUserConnect = (user: any) => {
+      console.log('User connected: ', user);
+      store.dispatch(setUser(user));
+    };
+    const handleUserDisconnect = () => {
+      console.log('User disconnected');
+      store.dispatch(clearServer());
+      store.dispatch(clearUser());
+      store.dispatch(clearSessionToken());
+      localStorage.removeItem('sessionToken');
+    };
+    const handleUserUpdate = (data: Partial<User>) => {
+      console.log('User update: ', data);
+      if (!user) return;
+      store.dispatch(setUser({ ...user, ...data }));
+    };
+    const handleServerConnect = (server: Server) => {
+      console.log('Server connected: ', server);
+      store.dispatch(setServer(server));
+    };
+    const handleServerDisconnect = () => {
+      console.log('Server disconnected');
+      store.dispatch(clearServer());
+    };
+    const handleServerUpdate = (data: Partial<Server>) => {
+      console.log('Server update: ', data);
+      if (!server) return;
+      store.dispatch(setServer({ ...server, ...data }));
+    };
+    const handleChannelConnect = (channel: Channel) => {
+      store.dispatch(setChannel(channel));
+      console.log('Channel connected: ', channel);
+    };
+    const handleChannelDisconnect = () => {
+      console.log('Channel disconnected');
+      store.dispatch(clearChannel());
+    };
+    const handleChannelUpdate = (data: Partial<Channel>) => {
+      console.log('Channel update: ', data);
+      if (!channel) return;
+      store.dispatch(setChannel({ ...channel, ...data }));
+    };
+    const handleDirectMessage = (data: any) => {
+      console.log('Direct message: ', data);
+    };
+    const handlePlaySound = (sound: 'join' | 'leave') => {
+      switch (sound) {
+        case 'join':
+        // console.log('Play join sound');
+        // joinSoundRef.current?.play();
+        // break;
+        case 'leave':
+        // console.log('Play leave sound');
+        // leaveSoundRef.current?.play();
+        // break;
       }
-    },
-    [sessionId],
-  );
+    };
+
+    if (electronService.getAvailability()) {
+      const socketEvents: SocketServerEventData['type'][] = [
+        'connect',
+        'disconnect',
+        'userConnect',
+        'userDisconnect',
+        'userUpdate',
+        'serverConnect',
+        'serverDisconnect',
+        'serverUpdate',
+        'channelConnect',
+        'channelDisconnect',
+        'channelUpdate',
+        'directMessage',
+        'playSound',
+      ];
+
+      socket.on('connect_error', (error) => {
+        ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
+          type: 'error',
+          error: error.message,
+        });
+      });
+      socket.on('error', (error) => {
+        ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
+          type: 'error',
+          error: error,
+        });
+      });
+      socketEvents.forEach((event) => {
+        socket.on(event, (data: any) => {
+          ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
+            type: event,
+            payload: data,
+          });
+        });
+      });
+
+      ipcService.onFromMain(
+        SOCKET_IPC_CHANNEL,
+        (data: SocketServerEventData) => {
+          console.log('Socket event from main:', data);
+          switch (data.type) {
+            case 'error':
+              // errorHandler.ResponseError(data.error);
+              break;
+            case 'disconnect':
+              handleDisconnect();
+              break;
+            case 'userConnect':
+              handleUserConnect(data.payload);
+              break;
+            case 'userDisconnect':
+              handleUserDisconnect();
+              break;
+            case 'userUpdate':
+              handleUserUpdate(data.payload);
+              break;
+            case 'serverConnect':
+              handleServerConnect(data.payload);
+              break;
+            case 'serverDisconnect':
+              handleServerDisconnect();
+              break;
+            case 'serverUpdate':
+              handleServerUpdate(data.payload);
+              break;
+            case 'channelConnect':
+              handleChannelConnect(data.payload);
+              break;
+            case 'channelDisconnect':
+              handleChannelDisconnect();
+              break;
+            case 'channelUpdate':
+              handleChannelUpdate(data.payload);
+              break;
+            case 'directMessage':
+              handleDirectMessage(data.payload);
+              break;
+            case 'playSound':
+              handlePlaySound(data.payload);
+              break;
+            default:
+              break;
+          }
+        },
+      );
+      return () => {
+        socketEvents.forEach((event) => () => socket.off(event));
+        ipcService.removeListener(SOCKET_IPC_CHANNEL);
+      };
+    } else {
+      socket.on('connect', () =>
+        console.log('Connected to server with session ID:', sessionId),
+      );
+      socket.on('error', (error) => errorHandler.ResponseError(error));
+      socket.on('disconnect', handleDisconnect);
+      socket.on('userConnect', handleUserConnect);
+      socket.on('userDisconnect', handleUserDisconnect);
+      socket.on('userUpdate', handleUserUpdate);
+      socket.on('serverConnect', handleServerConnect);
+      socket.on('serverDisconnect', handleServerDisconnect);
+      socket.on('serverUpdate', handleServerUpdate);
+      socket.on('channelConnect', handleChannelConnect);
+      socket.on('channelDisconnect', handleChannelDisconnect);
+      socket.on('channelUpdate', handleChannelUpdate);
+      socket.on('directMessage', handleDirectMessage);
+      socket.on('playSound', handlePlaySound);
+      return () => {
+        socket.off('disconnect', handleDisconnect);
+        socket.off('userConnect', handleUserConnect);
+        socket.off('userDisconnect', handleUserDisconnect);
+        socket.off('userUpdate', handleUserUpdate);
+        socket.off('serverConnect', handleServerConnect);
+        socket.off('serverDisconnect', handleServerDisconnect);
+        socket.off('serverUpdate', handleServerUpdate);
+        socket.off('channelConnect', handleChannelConnect);
+        socket.off('channelDisconnect', handleChannelDisconnect);
+        socket.off('channelUpdate', handleChannelUpdate);
+        socket.off('directMessage', handleDirectMessage);
+        socket.off('playSound', handlePlaySound);
+      };
+    }
+  }, [socket, sessionId, user, server, channel]);
 
   const initialSocket = useCallback(() => {
     if (!sessionId || socketRef.current) return;
@@ -455,13 +453,8 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         console.log('Connecting with web service');
       }
 
-      const cleanupSocketListeners = setupSocketListeners(socket);
       socket.connect();
-
-      return () => {
-        cleanupSocketListeners?.();
-        socket.disconnect();
-      };
+      return () => socket.disconnect();
     } catch (error) {
       console.error('Socket initialization error:', error);
       setError(
@@ -470,7 +463,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         }`,
       );
     }
-  }, [isMainWindow, setupSocketListeners]);
+  }, [sessionId, isMainWindow]);
 
   // const disconnect = useCallback(() => {
   //   if (socketRef.current) {

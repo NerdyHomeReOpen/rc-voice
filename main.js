@@ -148,7 +148,7 @@ async function createAuthWindow() {
       contextIsolation: false,
     },
   });
-  authWindow.loadURL(`${baseUri}`);
+  authWindow.loadURL(`${baseUri}/auth`);
 
   // Open DevTools in development mode
   if (isDev) authWindow.webContents.openDevTools();
@@ -323,7 +323,7 @@ ipcMain.on('open-window', async (event, window) => {
 });
 
 // Window management IPC handlers
-ipcMain.on('auth-success', () => {
+ipcMain.on('login', () => {
   // Close auth window and create main window
   if (authWindow) {
     authWindow.close();
