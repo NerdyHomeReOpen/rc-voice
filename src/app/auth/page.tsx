@@ -65,8 +65,8 @@ const Auth: React.FC = () => {
   // State
   const [isLogin, setIsLogin] = useState<boolean>(true);
 
-  const handleLogin = () => {
-    electronService.auth.login();
+  const handleLogin = (sessionId: string) => {
+    electronService.auth.login(sessionId);
   };
 
   return (
@@ -77,7 +77,7 @@ const Auth: React.FC = () => {
       <div className="content">
         {isLogin ? (
           <LoginPage
-            onLoginSuccess={() => handleLogin()}
+            onLoginSuccess={(sessionId) => handleLogin(sessionId)}
             onRegisterClick={() => setIsLogin(false)}
           />
         ) : (

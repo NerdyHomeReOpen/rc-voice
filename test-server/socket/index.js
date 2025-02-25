@@ -12,6 +12,7 @@ const messageHandler = require('./message');
 
 module.exports = (io) => {
   io.use((socket, next) => {
+    console.log(socket.handshake.query.sessionId);
     const sessionId = socket.handshake.query.sessionId;
     if (!sessionId) {
       new Logger('Socket').error(`Invalid session ID: ${sessionId}`);

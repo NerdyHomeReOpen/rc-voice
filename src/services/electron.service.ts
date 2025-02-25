@@ -17,28 +17,28 @@ export const electronService = {
   // Get service availability
   getAvailability: () => !!ipcRenderer,
 
-  // Send message to main process
-  sendToMain: (channel: string, data: any) => {
+  // Send message to main process (sendSocketEvent)
+  sendSocketEvent: (event: string, data: any) => {
     if (isElectron) {
-      ipcRenderer.send(channel, data);
+      ipcRenderer.send(event, data);
     } else {
       console.warn('IPC not available - not in Electron environment');
     }
   },
 
-  // Listen for messages from main process
-  onFromMain: (channel: string, callback: (data: any) => void) => {
+  // Listen for messages from main process (onSocketEvent)
+  onSocketEvent: (event: string, callback: (data: any) => void) => {
     if (isElectron) {
-      ipcRenderer.on(channel, (_: any, data: any) => callback(data));
+      ipcRenderer.on(event, (data: any) => callback(data));
     } else {
       console.warn('IPC not available - not in Electron environment');
     }
   },
 
   // Remove all listeners for a specific channel
-  removeListener: (channel: string) => {
+  removeListener: (event: string) => {
     if (isElectron) {
-      ipcRenderer.removeAllListeners(channel);
+      ipcRenderer.removeAllListeners(event);
     } else {
       console.warn('IPC not available - not in Electron environment');
     }
@@ -90,9 +90,9 @@ export const electronService = {
 
   // Auth related methods
   auth: {
-    login: () => {
+    login: (sessionId: string) => {
       if (isElectron) {
-        ipcRenderer.send('login');
+        ipcRenderer.send('login', sessionId);
       }
     },
     logout: () => {

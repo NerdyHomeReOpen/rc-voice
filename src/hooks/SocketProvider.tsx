@@ -29,8 +29,8 @@ import { clearChannel, setChannel } from '@/redux/channelSlice';
 // Services
 import {
   ipcService,
-  SOCKET_IPC_CHANNEL,
-  SocketServerEventData,
+  SocketClientEvent,
+  SocketServerEvent,
 } from '@/services/ipc.service';
 import { electronService } from '@/services/electron.service';
 
@@ -87,12 +87,12 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     (state: { sessionToken: string | null }) => state.sessionToken,
   );
 
-  useEffect(() => {
-    const token = store.getState().sessionToken ?? null;
-    if (!token) return;
-    store.dispatch(setSessionToken(token));
-    localStorage.setItem('sessionToken', token);
-  }, [sessionId]);
+  // useEffect(() => {
+  //   const token = store.getState().sessionToken ?? null;
+  //   if (!token) return;
+  //   store.dispatch(setSessionToken(token));
+  //   localStorage.setItem('sessionToken', token);
+  // }, [sessionId]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -237,10 +237,110 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   //   };
   // }, [socket, sessionId, user, server, channel]);
 
+  // const setupSocketListeners = useCallback(
+  //   (socket: Socket) => {
+
+  //     if (electronService.getAvailability()) {
+  //       const socketEvents: SocketServerEventData['type'][] = [
+  //         'connect',
+  //         'disconnect',
+  //         'userConnect',
+  //         'userDisconnect',
+  //         'userUpdate',
+  //         'serverConnect',
+  //         'serverDisconnect',
+  //         'serverUpdate',
+  //         'channelConnect',
+  //         'channelDisconnect',
+  //         'channelUpdate',
+  //         'directMessage',
+  //         'playSound',
+  //       ];
+
+  //       socket.on('connect_error', (error) => {
+  //         ipcService.sendSocketEvent(SOCKET_IPC_CHANNEL, {
+  //           type: 'error',
+  //           error: error.message,
+  //         });
+  //       });
+  //       socket.on('error', (error) => {
+  //         ipcService.sendSocketEvent(SOCKET_IPC_CHANNEL, {
+  //           type: 'error',
+  //           error: error,
+  //         });
+  //       });
+  //       socketEvents.forEach((event) => {
+  //         socket.on(event, (data: any) => {
+  //           ipcService.sendSocketEvent(SOCKET_IPC_CHANNEL, {
+  //             type: event,
+  //             payload: data,
+  //           });
+  //         });
+  //       });
+
+  //       return () => {
+  //         socketEvents.forEach((event) => () => socket.off(event));
+  //         ipcService.removeListener(SOCKET_IPC_CHANNEL);
+  //       };
+  //     } else {
+  //     }
+  //   },
+  //   [sessionId],
+  // );
+
+  // const initialSocket = useCallback(() => {
+  //   if (!sessionId || socketRef.current) return;
+  //   try {
+  //     const socket: Socket = io(WS_URL, {
+  //       transports: ['websocket'],
+  //       reconnection: true,
+  //       reconnectionAttempts: 5,
+  //       reconnectionDelay: 1000,
+  //       reconnectionDelayMax: 5000,
+  //       timeout: 20000,
+  //       autoConnect: false,
+  //       query: {
+  //         sessionId: sessionId,
+  //       },
+  //     });
+  //     setSocket(socket);
+  //     socketRef.current = socket;
+
+  //     if (electronService.getAvailability()) {
+  //       console.log('Connecting with electron service');
+  //     } else {
+  //       console.log('Connecting with web service');
+  //     }
+
+  //     const cleanupSocketListeners = setupSocketListeners(socket);
+  //     socket.connect();
+
+  //     return () => {
+  //       cleanupSocketListeners?.();
+  //       socket.disconnect();
+  //     };
+  //   } catch (error) {
+  //     console.error('Socket initialization error:', error);
+  //     setError(
+  //       `Socket initialization error: ${
+  //         error instanceof Error ? error.message : String(error)
+  //       }`,
+  //     );
+  //   }
+  // }, [isMainWindow, setupSocketListeners]);
+
+  // const disconnect = useCallback(() => {
+  //   if (socketRef.current) {
+  //     socketRef.current.disconnect();
+  //     socketRef.current = null;
+  //     setSocket(null);
+  //     setIsConnected(false);
+  //   }
+  // }, []);
+
   useEffect(() => {
-    if (!socket || !sessionId) return;
     const handleDisconnect = () => {
-      console.log('Socket disconnected, ', sessionId);
+      console.log('Socket disconnected');
       store.dispatch(clearServer());
       store.dispatch(clearUser());
       store.dispatch(clearSessionToken());
@@ -304,187 +404,63 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       }
     };
 
-    if (electronService.getAvailability()) {
-      const socketEvents: SocketServerEventData['type'][] = [
-        'connect',
-        'disconnect',
-        'userConnect',
-        'userDisconnect',
-        'userUpdate',
-        'serverConnect',
-        'serverDisconnect',
-        'serverUpdate',
-        'channelConnect',
-        'channelDisconnect',
-        'channelUpdate',
-        'directMessage',
-        'playSound',
-      ];
-
-      socket.on('connect_error', (error) => {
-        ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
-          type: 'error',
-          error: error.message,
-        });
-      });
-      socket.on('error', (error) => {
-        ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
-          type: 'error',
-          error: error,
-        });
-      });
-      socketEvents.forEach((event) => {
-        socket.on(event, (data: any) => {
-          ipcService.sendToMain(SOCKET_IPC_CHANNEL, {
-            type: event,
-            payload: data,
-          });
-        });
-      });
-
-      ipcService.onFromMain(
-        SOCKET_IPC_CHANNEL,
-        (data: SocketServerEventData) => {
-          console.log('Socket event from main:', data);
-          switch (data.type) {
-            case 'error':
-              // errorHandler.ResponseError(data.error);
-              break;
-            case 'disconnect':
-              handleDisconnect();
-              break;
-            case 'userConnect':
-              handleUserConnect(data.payload);
-              break;
-            case 'userDisconnect':
-              handleUserDisconnect();
-              break;
-            case 'userUpdate':
-              handleUserUpdate(data.payload);
-              break;
-            case 'serverConnect':
-              handleServerConnect(data.payload);
-              break;
-            case 'serverDisconnect':
-              handleServerDisconnect();
-              break;
-            case 'serverUpdate':
-              handleServerUpdate(data.payload);
-              break;
-            case 'channelConnect':
-              handleChannelConnect(data.payload);
-              break;
-            case 'channelDisconnect':
-              handleChannelDisconnect();
-              break;
-            case 'channelUpdate':
-              handleChannelUpdate(data.payload);
-              break;
-            case 'directMessage':
-              handleDirectMessage(data.payload);
-              break;
-            case 'playSound':
-              handlePlaySound(data.payload);
-              break;
-            default:
-              break;
-          }
-        },
-      );
-      return () => {
-        socketEvents.forEach((event) => () => socket.off(event));
-        ipcService.removeListener(SOCKET_IPC_CHANNEL);
-      };
-    } else {
-      socket.on('connect', () =>
-        console.log('Connected to server with session ID:', sessionId),
-      );
-      socket.on('error', (error) => errorHandler.ResponseError(error));
-      socket.on('disconnect', handleDisconnect);
-      socket.on('userConnect', handleUserConnect);
-      socket.on('userDisconnect', handleUserDisconnect);
-      socket.on('userUpdate', handleUserUpdate);
-      socket.on('serverConnect', handleServerConnect);
-      socket.on('serverDisconnect', handleServerDisconnect);
-      socket.on('serverUpdate', handleServerUpdate);
-      socket.on('channelConnect', handleChannelConnect);
-      socket.on('channelDisconnect', handleChannelDisconnect);
-      socket.on('channelUpdate', handleChannelUpdate);
-      socket.on('directMessage', handleDirectMessage);
-      socket.on('playSound', handlePlaySound);
-      return () => {
-        socket.off('disconnect', handleDisconnect);
-        socket.off('userConnect', handleUserConnect);
-        socket.off('userDisconnect', handleUserDisconnect);
-        socket.off('userUpdate', handleUserUpdate);
-        socket.off('serverConnect', handleServerConnect);
-        socket.off('serverDisconnect', handleServerDisconnect);
-        socket.off('serverUpdate', handleServerUpdate);
-        socket.off('channelConnect', handleChannelConnect);
-        socket.off('channelDisconnect', handleChannelDisconnect);
-        socket.off('channelUpdate', handleChannelUpdate);
-        socket.off('directMessage', handleDirectMessage);
-        socket.off('playSound', handlePlaySound);
-      };
-    }
-  }, [socket, sessionId, user, server, channel]);
-
-  const initialSocket = useCallback(() => {
-    if (!sessionId || socketRef.current) return;
-    try {
-      const socket: Socket = io(WS_URL, {
-        transports: ['websocket'],
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        timeout: 20000,
-        autoConnect: false,
-        query: {
-          sessionId: sessionId,
-        },
-      });
-      setSocket(socket);
-      socketRef.current = socket;
-
-      if (electronService.getAvailability()) {
-        console.log('Connecting with electron service');
-      } else {
-        console.log('Connecting with web service');
-      }
-
-      socket.connect();
-      return () => socket.disconnect();
-    } catch (error) {
-      console.error('Socket initialization error:', error);
-      setError(
-        `Socket initialization error: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    }
-  }, [sessionId, isMainWindow]);
-
-  // const disconnect = useCallback(() => {
-  //   if (socketRef.current) {
-  //     socketRef.current.disconnect();
-  //     socketRef.current = null;
-  //     setSocket(null);
-  //     setIsConnected(false);
-  //   }
-  // }, []);
-
-  useEffect(() => {
-    // Initialize will only run once, means only one socket connection per session ID
-    if (!isInitializedRef.current) {
-      isInitializedRef.current = true;
-      const cleanupSocket = initialSocket();
-      return () => {
-        isInitializedRef.current = false;
-        cleanupSocket?.();
-      };
-    }
-  }, [sessionId, isMainWindow, initialSocket]);
+    ipcService.onSocketEvent(SocketServerEvent.CONNECT, () =>
+      console.log('Connected to server'),
+    );
+    ipcService.onSocketEvent(SocketServerEvent.ERROR, (error) =>
+      errorHandler.ResponseError(error),
+    );
+    ipcService.onSocketEvent(SocketServerEvent.DISCONNECT, handleDisconnect);
+    ipcService.onSocketEvent(SocketServerEvent.USER_CONNECT, handleUserConnect);
+    ipcService.onSocketEvent(
+      SocketServerEvent.USER_DISCONNECT,
+      handleUserDisconnect,
+    );
+    ipcService.onSocketEvent(SocketServerEvent.USER_UPDATE, handleUserUpdate);
+    ipcService.onSocketEvent(
+      SocketServerEvent.SERVER_CONNECT,
+      handleServerConnect,
+    );
+    ipcService.onSocketEvent(
+      SocketServerEvent.SERVER_DISCONNECT,
+      handleServerDisconnect,
+    );
+    ipcService.onSocketEvent(
+      SocketServerEvent.SERVER_UPDATE,
+      handleServerUpdate,
+    );
+    ipcService.onSocketEvent(
+      SocketServerEvent.CHANNEL_CONNECT,
+      handleChannelConnect,
+    );
+    ipcService.onSocketEvent(
+      SocketServerEvent.CHANNEL_DISCONNECT,
+      handleChannelDisconnect,
+    );
+    ipcService.onSocketEvent(
+      SocketServerEvent.CHANNEL_UPDATE,
+      handleChannelUpdate,
+    );
+    ipcService.onSocketEvent(
+      SocketServerEvent.DIRECT_MESSAGE,
+      handleDirectMessage,
+    );
+    ipcService.onSocketEvent(SocketServerEvent.PLAY_SOUND, handlePlaySound);
+    return () => {
+      ipcService.removeListener(SocketServerEvent.DISCONNECT);
+      ipcService.removeListener(SocketServerEvent.USER_CONNECT);
+      ipcService.removeListener(SocketServerEvent.USER_DISCONNECT);
+      ipcService.removeListener(SocketServerEvent.USER_UPDATE);
+      ipcService.removeListener(SocketServerEvent.SERVER_CONNECT);
+      ipcService.removeListener(SocketServerEvent.SERVER_DISCONNECT);
+      ipcService.removeListener(SocketServerEvent.SERVER_UPDATE);
+      ipcService.removeListener(SocketServerEvent.CHANNEL_CONNECT);
+      ipcService.removeListener(SocketServerEvent.CHANNEL_DISCONNECT);
+      ipcService.removeListener(SocketServerEvent.CHANNEL_UPDATE);
+      ipcService.removeListener(SocketServerEvent.DIRECT_MESSAGE);
+      ipcService.removeListener(SocketServerEvent.PLAY_SOUND);
+    };
+  }, [user, server, channel]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected, error }}>

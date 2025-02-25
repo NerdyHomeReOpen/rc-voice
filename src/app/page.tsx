@@ -350,9 +350,7 @@ const HomeComponent = () => {
     }
   };
 
-  return !socket || !sessionId ? (
-    <Auth />
-  ) : (
+  return (
     <>
       {/* Top Navigation */}
       <Header
