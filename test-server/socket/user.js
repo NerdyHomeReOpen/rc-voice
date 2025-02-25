@@ -44,7 +44,15 @@ const userHandler = {
       for (const [_socketId, _userId] of Map.socketToUser) {
         if (_userId === userId) {
           // Emit force disconnect event
-          await userHandler.disconnect(io, socket, _socketId);
+          const sessionId = await Map.userSessions.get(_userId);
+          if (!sessionId) {
+            new Logger('WebSocket').warn(
+              `Can not find session ID for user(${userId})`,
+            );
+          }
+
+          // FIXME: cant not disconnect exist socket connection
+          await userHandler.disconnect(io, socket, sessionId);
 
           new Logger('WebSocket').warn(
             `User(${userId}) already connected from another socket. Force disconnecting...`,
