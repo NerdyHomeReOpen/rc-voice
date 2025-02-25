@@ -14,6 +14,7 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
   ({ onSendMessage }) => {
     // Input Control
     const [messageInput, setMessageInput] = useState<string>('');
+    const [isComposing, setIsComposing] = useState<boolean>(false);
     const MAXLENGTH = 2000;
 
     // Emoji Picker Control
@@ -53,22 +54,27 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
           placeholder={'輸入訊息...'}
           value={messageInput}
           onChange={(e) => {
+            e.preventDefault();
             const input = e.target.value;
             setMessageInput(input);
-          }}
-          onKeyDown={(e) => {
-            if (e.key != 'Enter' || e.shiftKey) return;
-            if (messageInput.trim() && messageInput.length <= MAXLENGTH) {
-              e.preventDefault();
-              onSendMessage?.(messageInput);
-              setMessageInput('');
-            }
           }}
           onPaste={(e) => {
             e.preventDefault();
             const text = e.clipboardData.getData('text');
             setMessageInput((prev) => prev + text);
           }}
+          onKeyDown={(e) => {
+            if (e.shiftKey) return;
+            if (e.key !== 'Enter') return;
+            if (!messageInput.trim()) return;
+            if (messageInput.length > MAXLENGTH) return;
+            if (isComposing) return;
+            e.preventDefault();
+            onSendMessage?.(messageInput);
+            setMessageInput('');
+          }}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={() => setIsComposing(false)}
           maxLength={MAXLENGTH}
           aria-label="訊息輸入框"
         />
