@@ -413,15 +413,21 @@ const serverHandler = {
           404,
         );
       }
-      const userPermission = await Get.userPermissionInServer(
-        userId,
-        server.id,
-      );
-      if (userPermission < 5) {
+      const members = await Get.serverMembers(server.id);
+      if (!members[user.id]) {
+        throw new SocketError(
+          `User(${user.id}) not found in server(${server.id})`,
+          'UPDATECHANNEL',
+          'MEMBER',
+          404,
+        );
+      }
+      const userPermission = members[user.id].permission;
+      if (userPermission < 4) {
         throw new SocketError(
           'Insufficient permissions',
-          'UPDATESERVER',
-          'PERMISSION',
+          'UPDATECHANNEL',
+          'USER_PERMISSION',
           403,
         );
       }

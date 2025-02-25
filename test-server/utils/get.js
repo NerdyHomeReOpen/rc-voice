@@ -32,13 +32,6 @@ const get = {
       .filter((member) => member.userId === userId)
       .reduce((acc, member) => ({ ...acc, [member.serverId]: member }), {});
   },
-  // userPermissionInServer: async (userId, serverId) => {
-  //   const members = (await db.get('members')) || {};
-  //   const member = Object.values(members).find(
-  //     (member) => member.userId === userId && member.serverId === serverId,
-  //   );
-  //   return member ? member.permissionLevel : null;
-  // },
   userFriends: async (userId) => {
     const friends = (await db.get('friends')) || {};
     return Object.values(friends).filter(
@@ -72,14 +65,10 @@ const get = {
   // Server
   server: async (serverId) => {
     const servers = (await db.get('servers')) || {};
-    const channels = (await db.get('channels')) || {};
-    const users = (await db.get('users')) || {};
     const server = servers[serverId];
     if (!server) return null;
     return {
       ...server,
-      lobby: channels[server.lobbyId],
-      owner: users[server.ownerId],
       users: await get.serverUsers(serverId),
       channels: await get.serverChannels(serverId),
       members: await get.serverMembers(serverId),
