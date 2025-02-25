@@ -163,7 +163,7 @@ const ServerPageComponent: React.FC = () => {
               className={styles['avatarPicture']}
               style={{
                 background: `url(${serverAvatar})`,
-                backgroundSize: 'contain',
+                backgroundSize: 'cover',
                 backgroundPosition: '0 0',
               }}
             />

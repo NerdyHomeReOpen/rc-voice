@@ -42,7 +42,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
     socket?.emit('connectServer', { serverId, sessionId });
   };
 
-  const serverIcon = server.avatarUrl
+  const serverAvatar = server.avatarUrl
     ? API_URL + server.avatarUrl
     : '/logo_server_def.png';
   const serverName = server.name ?? '';
@@ -64,9 +64,9 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
         <div
           className={styles['myGroupsRoomAvatarPicture']}
           style={{
-            backgroundImage: `url(${serverIcon})`,
-            width: '50px',
-            height: '50px',
+            background: `url(${serverAvatar})`,
+            backgroundSize: 'cover',
+            backgroundPosition: '0 0',
           }}
         ></div>
         <div className={styles['myGroupsRoomInfo']}>
