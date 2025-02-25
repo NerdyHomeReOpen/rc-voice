@@ -131,9 +131,7 @@ const ServerPageComponent: React.FC = () => {
   // Server Setting Control
   const [showServerSetting, setShowServerSetting] = useState<boolean>(false);
 
-  const userMember = user?.members?.find(
-    (member) => member.serverId === server?.id,
-  );
+  const userMember = user ? server?.members?.[user.id] : null;
   const serverChannels = server?.channels ?? [];
   const serverAvatar = server?.avatarUrl
     ? API_URL + server.avatarUrl
