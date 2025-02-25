@@ -219,7 +219,7 @@ const HomePageComponent: React.FC = React.memo(() => {
 
               <div className={styles['myGroupsItem']}>
                 <div className={styles['myGroupsTitle']} data-key="30283">
-                  我們為您推薦了一些群：
+                  我的語音群
                 </div>
                 <ServerGrid servers={userServers} />
               </div>
