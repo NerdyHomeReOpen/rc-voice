@@ -150,7 +150,7 @@ async function createAuthWindow() {
     }
   }
 
-  const authWindow = new BrowserWindow({
+  authWindow = new BrowserWindow({
     width: 1000,
     height: 650,
     resizable: false,
