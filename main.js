@@ -114,26 +114,7 @@ async function createMainWindow() {
     mainWindow.webContents.send(
       mainWindow.isMaximized() ? 'window-maximized' : 'window-unmaximized',
     );
-    console.log('Sending initial data to renderer process: ', sharedData);
     mainWindow.webContents.send('initial-data', sharedData);
-  });
-
-  // listen for window state change
-  mainWindow.on('maximize', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('window-maximized');
-    }
-  });
-
-  mainWindow.on('unmaximize', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('window-unmaximized');
-    }
-  });
-
-  // Handle window closed
-  mainWindow.on('closed', () => {
-    mainWindow = null;
   });
 
   return mainWindow;
@@ -172,24 +153,6 @@ async function createAuthWindow() {
     authWindow.webContents.send(
       authWindow.isMaximized() ? 'window-maximized' : 'window-unmaximized',
     );
-  });
-
-  // listen for window state change
-  authWindow.on('maximize', () => {
-    if (authWindow && !authWindow.isDestroyed()) {
-      authWindow.webContents.send('window-maximized');
-    }
-  });
-
-  authWindow.on('unmaximize', () => {
-    if (authWindow && !authWindow.isDestroyed()) {
-      authWindow.webContents.send('window-unmaximized');
-    }
-  });
-
-  // Handle window closed
-  authWindow.on('closed', () => {
-    authWindow = null;
   });
 
   return authWindow;
