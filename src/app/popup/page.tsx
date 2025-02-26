@@ -17,6 +17,7 @@ import CreateServerModal from '@/components/modals/CreateServerModal';
 import AddChannelModal from '@/components/modals/AddChannelModal';
 import DeleteChannelModal from '@/components/modals/DeleteChannelModal';
 import EditChannelModal from '@/components/modals/EditChannelModal';
+import ServerApplication from '@/components/modals/ServerApplicationModal';
 
 const Modal = React.memo(() => {
   const [type, setType] = useState<string | null>(null);
@@ -43,6 +44,8 @@ const Modal = React.memo(() => {
         return { title: '創建頻道', button: ['close'] };
       case 'del-channel':
         return { title: '刪除頻道', button: ['close'] };
+      case 'apply-server':
+        return { title: '申請會員', button: ['close'] };
       default:
         return undefined;
     }
@@ -79,6 +82,8 @@ const Modal = React.memo(() => {
         return <AddChannelModal onClose={() => {}} isRoot={false} />;
       case 'del-channel':
         return <DeleteChannelModal onClose={() => {}} channel={mockChannel} />;
+      case 'apply-server':
+        return <ServerApplication onClose={() => {}} server={undefined} />;
       default:
         return <></>;
     }

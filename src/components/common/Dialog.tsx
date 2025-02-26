@@ -5,7 +5,7 @@ import Popup from '../../styles/common/popup.module.css';
 interface DialogProps {
   popupIcon: string;
   textBorder: string;
-  title: string;
+  title: React.ReactNode;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
