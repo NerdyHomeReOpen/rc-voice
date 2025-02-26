@@ -34,7 +34,6 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   const [showPrivateModal, setShowPrivateModal] = useState(false);
 
   const handleServerSelect = (serverId: string) => {
-    console.log('serverId', serverId);
     socket?.connectServer(serverId);
   };
 
