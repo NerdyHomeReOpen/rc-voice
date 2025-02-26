@@ -11,6 +11,10 @@ import { Channel, Visibility } from '@/types';
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 
+// CSS
+import EditChannel from '../../styles/popups/editChannel.module.css';
+import Popup from '../../styles/common/popup.module.css';
+
 interface EditChannelModalProps {
   onClose: () => void;
   channel: Channel;
@@ -18,19 +22,14 @@ interface EditChannelModalProps {
 
 const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
   ({ onClose, channel }) => {
-    // Redux
-    const sessionId = useSelector(
-      (state: { sessionToken: string }) => state.sessionToken,
-    );
-
     // Socket
     const socket = useSocket();
 
     // Form Control
     const [editedChannel, setEditedChannel] = useState<Partial<Channel>>({
-      name: channel.name,
+      name: channel?.name,
       settings: {
-        ...channel.settings,
+        ...channel?.settings,
       },
     });
 
@@ -41,66 +40,64 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     };
 
     return (
-      <Modal
-        title={`編輯${channel.isCategory ? '類別' : '頻道'}`}
-        onClose={onClose}
-        onSubmit={handleSubmit}
-        width="300px"
-        height="auto"
-        buttons={[
-          {
-            label: '取消',
-            style: 'secondary',
-            onClick: onClose,
-          },
-          {
-            label: '確定',
-            style: 'primary',
-            type: 'submit',
-            onClick: () => {},
-          },
-        ]}
-      >
-        <div className="p-4 space-y-4">
-          <input
-            type="text"
-            value={editedChannel.name}
-            onChange={(e) =>
-              setEditedChannel((prev) => ({
-                ...prev,
-                name: e.target.value,
-              }))
-            }
-            className="w-full p-2 border rounded"
-            placeholder={`${channel.isCategory ? '類別' : '頻道'}名稱`}
-            required
-          />
-          <select
-            value={editedChannel.settings?.visibility}
-            onChange={(e) =>
-              setEditedChannel((prev) => {
-                const settings = prev.settings ?? channel.settings;
-                return {
-                  ...prev,
-                  settings: {
-                    ...settings,
-                    visibility: e.target.value as Visibility,
-                  },
-                };
-              })
-            }
-            className="w-full p-2 border rounded"
-          >
-            <option value="public">公開</option>
-            <option value="private">會員</option>
-            <option value="readonly">唯讀</option>
-          </select>
+      <form className={Popup['popupContainer']} onSubmit={handleSubmit}>
+        <div className={Popup['popupMessageWrapper']}>
+          <div className={EditChannel['popupBody']}>
+            <div className={Popup['inputBox']}>
+              <div className={Popup['title']}>
+                {`${channel?.isCategory ? '類別' : '頻道'}`}名稱
+              </div>
+              <div className={Popup['inputBorder']}>
+                <input
+                  type="text"
+                  value={editedChannel?.name}
+                  onChange={(e) =>
+                    setEditedChannel((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+            <div className={Popup['inputBox']}>
+              <div className={Popup['title']}>訪問受限</div>
+              <div className={Popup['inputBorder']}>
+                <select
+                  value={editedChannel?.settings?.visibility}
+                  onChange={(e) =>
+                    setEditedChannel((prev) => {
+                      const settings = prev?.settings ?? channel?.settings;
+                      return {
+                        ...prev,
+                        settings: {
+                          ...settings,
+                          visibility: e.target.value as Visibility,
+                        },
+                      };
+                    })
+                  }
+                >
+                  <option value="public">任何人可以訪問</option>
+                  <option value="private">禁止遊客訪問</option>
+                  <option value="readonly">唯讀</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className={Popup['popupFooter']}>
+            <button type="submit" className={Popup['button']}>
+              確定
+            </button>
+            <button type="button" className={Popup['button']} onClick={onClose}>
+              取消
+            </button>
+          </div>
         </div>
-      </Modal>
+      </form>
     );
   },
 );
 
 EditChannelModal.displayName = 'EditChannelModal';
-
 export default EditChannelModal;
