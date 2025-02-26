@@ -221,7 +221,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                 }`}
                 onClick={handleSubmit}
               >
-                確認
+                確定
               </button>
             )}
             <button className={Popup['button']} onClick={onClose}>
