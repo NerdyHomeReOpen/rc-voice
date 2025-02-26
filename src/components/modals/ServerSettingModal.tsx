@@ -349,13 +349,7 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
       }
 
       // Emit all updates together
-      socket?.emit('updateServer', {
-        sessionId: sessionId,
-        serverId: server.id,
-        server: {
-          ...updates,
-        },
-      });
+      socket?.updateServer(updates);
 
       // Update original state after successful emission
       setOriginalServerData({

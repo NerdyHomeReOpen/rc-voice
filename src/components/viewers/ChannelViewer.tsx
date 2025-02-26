@@ -259,7 +259,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
           }
         }
 
-        socket?.emit('connectChannel', { sessionId, channelId });
+        socket?.connectChannel(channelId);
       }
     };
 
@@ -734,10 +734,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
     if (currentChannel && currentChannel.isCategory) {
       const lobbyChannel = server.channels?.find((c) => c.isLobby);
       if (lobbyChannel && lobbyChannel.id !== user.currentChannelId) {
-        socket?.emit('connectChannel', {
-          sessionId,
-          channelId: lobbyChannel.id,
-        });
+        socket?.connectChannel(lobbyChannel.id);
       }
     }
   }, [server.channels, user.currentChannelId, sessionId, socket]);

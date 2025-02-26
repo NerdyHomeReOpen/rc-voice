@@ -11,7 +11,7 @@ import LoginPage from '@/components/pages/LoginPage';
 import RegisterPage from '@/components/pages/RegisterPage';
 
 // Services
-import { electronService } from '@/services/electron.service';
+import { ipcService } from '@/services/ipc.service';
 
 const Header: React.FC = React.memo(() => {
   // Fullscreen Control
@@ -19,25 +19,25 @@ const Header: React.FC = React.memo(() => {
 
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
-      electronService.getAvailability()
-        ? electronService.window.maximize()
+      ipcService.getAvailability()
+        ? ipcService.window.maximize()
         : document.documentElement.requestFullscreen();
       setIsFullscreen(true);
     } else {
-      electronService.getAvailability()
-        ? electronService.window.unmaximize()
+      ipcService.getAvailability()
+        ? ipcService.window.unmaximize()
         : document.exitFullscreen();
       setIsFullscreen(false);
     }
   };
 
   const handleMinimize = () => {
-    if (electronService.getAvailability()) electronService.window.minimize();
+    if (ipcService.getAvailability()) ipcService.window.minimize();
     else console.warn('IPC not available - not in Electron environment');
   };
 
   const handleClose = () => {
-    if (electronService.getAvailability()) electronService.window.close();
+    if (ipcService.getAvailability()) ipcService.window.close();
     else console.warn('IPC not available - not in Electron environment');
   };
 
@@ -66,7 +66,7 @@ const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
 
   const handleLogin = (sessionId: string) => {
-    electronService.auth.login(sessionId);
+    ipcService.auth.login(sessionId);
   };
 
   return (

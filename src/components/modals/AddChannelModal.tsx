@@ -52,14 +52,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
 
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
-      socket?.emit('createChannel', {
-        sessionId: sessionId,
-        serverId: server.id,
-        channel: newChannel,
-      });
-      socket?.on('error', (error: { message: string }) => {
-        setError(error.message);
-      });
+      socket?.createChannel(newChannel);
       onClose();
     };
 

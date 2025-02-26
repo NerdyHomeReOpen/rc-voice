@@ -49,11 +49,7 @@ const ServerPageComponent: React.FC = () => {
   const socket = useSocket();
 
   const handleSendMessage = (message: Message): void => {
-    socket?.emit('sendMessage', {
-      sessionId,
-      channelId: message.channelId,
-      message,
-    });
+    socket?.sendMessage(message);
   };
 
   // Volume Control

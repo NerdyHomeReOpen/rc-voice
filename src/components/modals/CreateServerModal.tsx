@@ -73,13 +73,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       e.preventDefault();
 
       console.log('Create Server:', newServer);
-      socket?.emit('createServer', {
-        sessionId: sessionId,
-        server: newServer,
-      });
-      socket?.on('error', (error: { message: string }) => {
-        setErrors({ general: error.message });
-      });
+      socket?.createServer(newServer);
       onClose();
     };
 

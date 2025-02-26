@@ -19,6 +19,13 @@ let authWindow = null;
 const WS_URL = 'http://localhost:4500';
 let socketInstance = null;
 
+// Share data between main and renderer processes
+let sharedData = {
+  user: null,
+  server: null,
+  channel: null,
+};
+
 // Disocrd RPC
 const clientId = '1242441392341516288';
 DiscordRPC.register(clientId);
@@ -107,6 +114,8 @@ async function createMainWindow() {
     mainWindow.webContents.send(
       mainWindow.isMaximized() ? 'window-maximized' : 'window-unmaximized',
     );
+    console.log('Sending initial data to renderer process: ', sharedData);
+    mainWindow.webContents.send('initial-data', sharedData);
   });
 
   // listen for window state change
@@ -251,56 +260,102 @@ function connectSocket(sessionId) {
       );
     });
     socket.on('userConnect', (data) => {
+      sharedData.user = data;
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('userConnect', data),
       );
     });
     socket.on('userDisconnect', (data) => {
+      sharedData.user = null;
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('userDisconnect', data),
       );
     });
     socket.on('userUpdate', (data) => {
+      sharedData.user = { ...sharedData.user, ...data };
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('userUpdate', data),
       );
     });
     socket.on('serverConnect', (data) => {
+      sharedData.server = data;
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('serverConnect', data),
       );
     });
     socket.on('serverDisconnect', (data) => {
+      sharedData.server = null;
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('serverDisconnect', data),
       );
     });
     socket.on('serverUpdate', (data) => {
+      sharedData.server = { ...sharedData.server, ...data };
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('serverUpdate', data),
       );
     });
     socket.on('channelConnect', (data) => {
+      sharedData.channel = data;
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('channelConnect', data),
       );
     });
     socket.on('channelDisconnect', (data) => {
+      sharedData.channel = null;
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('channelDisconnect', data),
       );
     });
     socket.on('channelUpdate', (data) => {
+      sharedData.channel = { ...sharedData.channel, ...data };
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('channelUpdate', data),
       );
     });
 
     // Socket IPC event handling
-    ipcMain.on('updateUser', (_, data) => socket.emit('updateUser', data));
-    ipcMain.on('updateServer', (_, data) => socket.emit('updateServer', data));
+    ipcMain.on('connectUser', (_, data) =>
+      socket.emit('connectUser', { sessionId, ...data }),
+    );
+    ipcMain.on('updateUser', (_, data) =>
+      socket.emit('updateUser', { sessionId, ...data }),
+    );
+    ipcMain.on('connectServer', (_, data) =>
+      socket.emit('connectServer', { sessionId, ...data }),
+    );
+    ipcMain.on('disconnectServer', (_, data) =>
+      socket.emit('disconnectServer', { sessionId, ...data }),
+    );
+    ipcMain.on('createServer', (_, data) =>
+      socket.emit('createServer', { sessionId, ...data }),
+    );
+    ipcMain.on('updateServer', (_, data) =>
+      socket.emit('updateServer', { sessionId, ...data }),
+    );
+    ipcMain.on('deleteServer', (_, data) =>
+      socket.emit('deleteServer', { sessionId, ...data }),
+    );
+    ipcMain.on('connectChannel', (_, data) =>
+      socket.emit('connectChannel', { sessionId, ...data }),
+    );
+    ipcMain.on('disconnectChannel', (_, data) =>
+      socket.emit('disconnectChannel', { sessionId, ...data }),
+    );
     ipcMain.on('updateChannel', (_, data) =>
-      socket.emit('updateChannel', data),
+      socket.emit('updateChannel', { sessionId, ...data }),
+    );
+    ipcMain.on('createChannel', (_, data) =>
+      socket.emit('createChannel', { sessionId, ...data }),
+    );
+    ipcMain.on('deleteChannel', (_, data) =>
+      socket.emit('deleteChannel', { sessionId, ...data }),
+    );
+    ipcMain.on('sendMessage', (_, data) =>
+      socket.emit('sendMessage', { sessionId, ...data }),
+    );
+    ipcMain.on('sendDirectMessage', (_, data) =>
+      socket.emit('sendDirectMessage', { sessionId, ...data }),
     );
 
     // Close auth window and create main window
@@ -420,10 +475,6 @@ app.whenReady().then(async () => {
         break;
     }
   });
-
-  return () => {
-    socket.disconnect();
-  };
 });
 
 app.on('activate', async () => {

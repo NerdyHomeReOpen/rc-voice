@@ -36,11 +36,7 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
     const socket = useSocket();
 
     const handleSendMessage = (directMessage: DirectMessage) => {
-      socket?.emit('sendDirectMessage', {
-        sessionId: sessionId,
-        recieverId: friend.user?.id,
-        directMessage,
-      });
+      socket?.sendDirectMessage(directMessage);
     };
 
     const friendUser = friend.user;

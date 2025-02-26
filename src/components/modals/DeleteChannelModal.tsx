@@ -31,13 +31,7 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = React.memo(
 
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
-      socket?.emit('deleteChannel', {
-        sessionId: sessionId,
-        channelId: channel.id,
-      });
-      socket?.on('error', (error: { message: string }) => {
-        setError(error.message);
-      });
+      socket?.deleteChannel(channel.id);
       onClose();
     };
 

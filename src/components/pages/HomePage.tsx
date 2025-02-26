@@ -15,7 +15,6 @@ import type { Server, User } from '@/types';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
-import { errorHandler } from '@/utils/errorHandler';
 
 // Services
 import { API_URL } from '@/services/api.service';
@@ -28,9 +27,6 @@ interface ServerCardProps {
 const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   // Redux
   const user = useSelector((state: { user: User | null }) => state.user);
-  const sessionId = useSelector(
-    (state: { sessionToken: string | null }) => state.sessionToken,
-  );
 
   // Socket Control
   const socket = useSocket();
@@ -38,7 +34,8 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   const [showPrivateModal, setShowPrivateModal] = useState(false);
 
   const handleServerSelect = (serverId: string) => {
-    socket?.emit('connectServer', { serverId, sessionId });
+    console.log('serverId', serverId);
+    socket?.connectServer(serverId);
   };
 
   const serverAvatar = server.avatarUrl

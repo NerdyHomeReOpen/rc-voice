@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import styles from '@/styles/common/header.module.css';
 
 // Services
-import { electronService } from '@/services/electron.service';
+import { ipcService } from '@/services/ipc.service';
 
 interface HeaderProps {
   title?: string;
@@ -17,25 +17,25 @@ const Header: React.FC<HeaderProps> = React.memo(({ title, onClose }) => {
 
   const handleFullscreen = () => {
     if (!isFullscreen) {
-      electronService.getAvailability()
-        ? electronService.window.maximize()
+      ipcService.getAvailability()
+        ? ipcService.window.maximize()
         : document.documentElement.requestFullscreen();
       setIsFullscreen(true);
     } else {
-      electronService.getAvailability()
-        ? electronService.window.unmaximize()
+      ipcService.getAvailability()
+        ? ipcService.window.unmaximize()
         : document.exitFullscreen();
       setIsFullscreen(false);
     }
   };
 
   const handleMinimize = () => {
-    if (electronService.getAvailability()) electronService.window.minimize();
+    if (ipcService.getAvailability()) ipcService.window.minimize();
     else console.warn('IPC not available - not in Electron environment');
   };
 
   const handleClose = () => {
-    if (electronService.getAvailability()) electronService.window.close();
+    if (ipcService.getAvailability()) ipcService.window.close();
     else console.warn('IPC not available - not in Electron environment');
   };
 

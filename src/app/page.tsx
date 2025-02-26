@@ -29,7 +29,7 @@ import { measureLatency } from '@/utils/measureLatency';
 import { useSocket } from '@/hooks/SocketProvider';
 
 // Services
-import { electronService } from '@/services/electron.service';
+import { ipcService } from '@/services/ipc.service';
 
 import Auth from './auth/page';
 
@@ -53,7 +53,7 @@ const Header: React.FC<HeaderProps> = React.memo(
     const socket = useSocket();
 
     const handleLogout = () => {
-      socket?.close();
+      socket?.disconnectUser();
       localStorage.removeItem('autoLogin');
       localStorage.removeItem('encryptedPassword');
       localStorage.removeItem('sessionToken');
@@ -62,11 +62,11 @@ const Header: React.FC<HeaderProps> = React.memo(
     const handleLeaveServer = () => {
       if (!user) return;
       const serverId = user.currentServerId;
-      socket?.emit('disconnectServer', { serverId, sessionId });
+      socket?.disconnectServer(serverId);
     };
 
     const handleUpdateStatus = (status: User['status']) => {
-      socket?.emit('updateUser', { sessionId, user: { status } });
+      socket?.updateUser({ status });
     };
 
     // Fullscreen Control
@@ -74,25 +74,25 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     const handleFullscreen = () => {
       if (!isFullscreen) {
-        electronService.getAvailability()
-          ? electronService.window.maximize()
+        ipcService.getAvailability()
+          ? ipcService.window.maximize()
           : document.documentElement.requestFullscreen();
         setIsFullscreen(true);
       } else {
-        electronService.getAvailability()
-          ? electronService.window.unmaximize()
+        ipcService.getAvailability()
+          ? ipcService.window.unmaximize()
           : document.exitFullscreen();
         setIsFullscreen(false);
       }
     };
 
     const handleMinimize = () => {
-      if (electronService.getAvailability()) electronService.window.minimize();
+      if (ipcService.getAvailability()) ipcService.window.minimize();
       else console.warn('IPC not available - not in Electron environment');
     };
 
     const handleClose = () => {
-      if (electronService.getAvailability()) electronService.window.close();
+      if (ipcService.getAvailability()) ipcService.window.close();
       else console.warn('IPC not available - not in Electron environment');
     };
 
@@ -311,12 +311,6 @@ const HomeComponent = () => {
   const server = useSelector(
     (state: { server: Server | null }) => state.server,
   );
-  const sessionId = useSelector(
-    (state: { sessionToken: string | null }) => state.sessionToken,
-  );
-
-  // Socket Control
-  const socket = useSocket();
 
   // Sound Control
   const joinSoundRef = useRef<HTMLAudioElement | null>(null);

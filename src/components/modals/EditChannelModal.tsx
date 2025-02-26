@@ -35,11 +35,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
 
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
-      socket?.emit('updateChannel', {
-        sessionId: sessionId,
-        channelId: channel.id,
-        channel: editedChannel,
-      });
+      socket?.updateChannel(editedChannel);
       onClose();
     };
 
