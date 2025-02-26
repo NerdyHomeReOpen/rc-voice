@@ -14,7 +14,7 @@ import { User, Server } from '@/types';
 
 // CSS
 import Popup from '../../styles/common/popup.module.css';
-import CreateServer from '../../styles/createServer.module.css';
+import CreateServer from '../../styles/popups/createServer.module.css';
 
 // Validation
 export const validateName = (name: string): string => {
