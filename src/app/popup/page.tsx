@@ -7,10 +7,7 @@ import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 
 // Types
-import { Channel, Visibility } from '@/types';
-
-// Contexts
-import { useModal } from '@/context/modalContext';
+import { Channel, popupType } from '@/types';
 
 // Modals
 import CreateServerModal from '@/components/modals/CreateServerModal';
@@ -20,31 +17,30 @@ import EditChannelModal from '@/components/modals/EditChannelModal';
 import ServerApplication from '@/components/modals/ServerApplicationModal';
 
 const Modal = React.memo(() => {
-  const [type, setType] = useState<string | null>(null);
+  const [type, setType] = useState<popupType | null>(null);
 
   useEffect(() => {
     if (window.location.search) {
       const params = new URLSearchParams(window.location.search);
-      const type = params.get('type');
+      const type = params.get('type') as popupType;
       setType(type);
     }
   }, []);
 
   const getTitle = (isCategory?: boolean) => {
-    if (type === 'edit-channel') {
-      return {
-        title: `編輯${isCategory ? '類別' : '頻道'}`,
-        button: ['close'],
-      };
-    }
     switch (type) {
-      case 'create-server':
+      case popupType.CREATE_SERVER:
         return { title: '創建語音群', button: ['close'] };
-      case 'add-channel':
+      case popupType.CREATE_CHANNEL:
         return { title: '創建頻道', button: ['close'] };
-      case 'del-channel':
+      case popupType.EDIT_CHANNEL:
+        return {
+          title: `編輯${isCategory ? '類別' : '頻道'}`,
+          button: ['close'],
+        };
+      case popupType.DELETE_CHANNEL:
         return { title: '刪除頻道', button: ['close'] };
-      case 'apply-server':
+      case popupType.APPLY_MEMBER:
         return { title: '申請會員', button: ['close'] };
       default:
         return undefined;
@@ -71,18 +67,16 @@ const Modal = React.memo(() => {
       createdAt: 0,
     };
 
-    if (type === 'edit-channel') {
-      return <EditChannelModal onClose={() => {}} channel={mockChannel} />;
-    }
-
     switch (type) {
-      case 'create-server':
+      case popupType.CREATE_SERVER:
         return <CreateServerModal onClose={() => {}} />;
-      case 'add-channel':
+      case popupType.CREATE_CHANNEL:
         return <AddChannelModal onClose={() => {}} isRoot={false} />;
-      case 'del-channel':
+      case popupType.EDIT_CHANNEL:
+        return <EditChannelModal onClose={() => {}} channel={mockChannel} />;
+      case popupType.DELETE_CHANNEL:
         return <DeleteChannelModal onClose={() => {}} channel={mockChannel} />;
-      case 'apply-server':
+      case popupType.APPLY_MEMBER:
         return <ServerApplication onClose={() => {}} server={undefined} />;
       default:
         return <></>;
@@ -91,7 +85,6 @@ const Modal = React.memo(() => {
 
   const getButtons = () => {};
 
-  // if (!isOpen) return null;
   return (
     <div
       className={`fixed w-full h-full flex-1 flex-col bg-white rounded shadow-lg overflow-hidden transform outline-g`}

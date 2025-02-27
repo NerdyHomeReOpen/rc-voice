@@ -7,17 +7,17 @@ import { useSelector } from 'react-redux';
 import styles from '@/styles/homePage.module.css';
 
 // Components
-import CreateServerModal from '@/components/modals/CreateServerModal';
 import ServerApplicationModal from '@/components/modals/ServerApplicationModal';
 
 // Type
-import type { Server, User } from '@/types';
+import { popupType, type Server, type User } from '@/types';
 
 // Hooks
 import { useSocket } from '@/hooks/SocketProvider';
 
 // Services
 import { API_URL } from '@/services/api.service';
+import { ipcService } from '@/services/ipc.service';
 
 // ServerCard Component
 interface ServerCardProps {
@@ -109,14 +109,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
-  // Create Server Modal Control
-  const [showCreateServer, setShowCreateServer] = useState(false);
-
   return (
     <>
-      {showCreateServer && (
-        <CreateServerModal onClose={() => setShowCreateServer(false)} />
-      )}
       <header className={styles['homeHeader']}>
         <div className={styles['left']}>
           <div className={styles['backBtn']} />
@@ -153,14 +147,9 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
           <button
             className={styles['navegateItem']}
             data-key="30014"
-            onClick={() => {
-              // if (window.electron) {
-              //   window.electron.openPopup('create-server');
-              // } else {
-              //   window.location.href = '/popup?page=create-server';
-              // }
-              setShowCreateServer(true);
-            }}
+            onClick={() =>
+              ipcService.popup.open(popupType.CREATE_SERVER, 600, 450)
+            }
           >
             <div></div>
             創建語音群

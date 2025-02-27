@@ -18,7 +18,7 @@ import grade from '@/styles/common/grade.module.css';
 import permission from '@/styles/common/permission.module.css';
 
 // Types
-import type { Channel, Server, User } from '@/types';
+import { popupType, type Channel, type Server, type User } from '@/types';
 
 // Redux
 import store from '@/redux/store';
@@ -83,7 +83,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                     label: '編輯',
                     show: canEdit,
                     onClick: () =>
-                      ipcService.popup.open('edit-channel', 400, 300),
+                      ipcService.popup.open(popupType.EDIT_CHANNEL, 400, 300),
                   },
                   {
                     id: 'add',
@@ -91,7 +91,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                     label: '新增',
                     show: canEdit && category.isRoot,
                     onClick: () =>
-                      ipcService.popup.open('create-channel', 400, 300),
+                      ipcService.popup.open(popupType.CREATE_CHANNEL, 400, 300),
                   },
                   {
                     id: 'delete',
@@ -99,7 +99,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                     label: '刪除',
                     show: canEdit && !category.isLobby,
                     onClick: () =>
-                      ipcService.popup.open('delete-channel', 400, 300),
+                      ipcService.popup.open(popupType.DELETE_CHANNEL, 400, 300),
                   },
                 ]);
               }}
@@ -222,7 +222,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                     label: '編輯',
                     show: canEdit,
                     onClick: () =>
-                      ipcService.popup.open('edit-channel', 400, 300),
+                      ipcService.popup.open(popupType.EDIT_CHANNEL, 400, 300),
                   },
                   {
                     id: 'add',
@@ -230,7 +230,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                     label: '新增',
                     show: canEdit && !channel.isLobby && channel.isRoot,
                     onClick: () =>
-                      ipcService.popup.open('create-channel', 400, 300),
+                      ipcService.popup.open(popupType.CREATE_CHANNEL, 400, 300),
                   },
                   {
                     id: 'delete',
@@ -238,7 +238,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                     label: '刪除',
                     show: canEdit && !channel.isLobby,
                     onClick: () =>
-                      ipcService.popup.open('delete-channel', 400, 300),
+                      ipcService.popup.open(popupType.DELETE_CHANNEL, 400, 300),
                   },
                 ]);
               }}
@@ -574,7 +574,8 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
               icon: <Plus size={14} className="w-5 h-5 mr-2" />,
               label: '新增',
               show: canEdit,
-              onClick: () => ipcService.popup.open('create-channel', 400, 300),
+              onClick: () =>
+                ipcService.popup.open(popupType.CREATE_CHANNEL, 400, 300),
             },
           ]);
         }}

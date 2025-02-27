@@ -93,7 +93,7 @@ async function createMainWindow() {
   }
 
   mainWindow = new BrowserWindow({
-    minWidth: 1200,
+    minWidth: 1400,
     minHeight: 800,
     frame: false,
     transparent: true,
@@ -132,8 +132,8 @@ async function createAuthWindow() {
   }
 
   authWindow = new BrowserWindow({
-    width: 1000,
-    height: 650,
+    width: 610,
+    height: 450,
     resizable: false,
     frame: false,
     transparent: true,
@@ -170,8 +170,8 @@ async function createPopup(type, height, width) {
   }
 
   const popup = new BrowserWindow({
-    minWidth: width ?? 800,
-    minHeight: height ?? 600,
+    width: width ?? 800,
+    height: height ?? 600,
     resizable: false,
     frame: false,
     transparent: true,
@@ -412,7 +412,7 @@ app.whenReady().then(async () => {
   });
 
   // Popup handlers
-  ipcMain.on('open-popup', (type, height, width) =>
+  ipcMain.on('open-popup', (_, type, height, width) =>
     createPopup(type, height, width),
   );
 
