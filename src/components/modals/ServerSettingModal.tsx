@@ -172,45 +172,47 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   useEffect(() => {
     if (!socket || !sessionId) return;
 
-    if (activeTabIndex === 2) {
-      // Emit getMembers event
-      socket.emit('getMembers', {
-        sessionId: sessionId,
-        serverId: server.id,
-      });
+    return;
+    // 這裡需修改 先return處理
+    // if (activeTabIndex === 2) {
+    //   // Emit getMembers event
+    //   socket.emit('getMembers', {
+    //     sessionId: sessionId,
+    //     serverId: server.id,
+    //   });
 
-      // Set up listener for members response
-      const handleMembers = (data: any) => {
-        setMembers(data);
-      };
+    //   // Set up listener for members response
+    //   const handleMembers = (data: any) => {
+    //     setMembers(data);
+    //   };
 
-      // Add listener
-      socket.on('members', handleMembers);
+    //   // Add listener
+    //   socket.on('members', handleMembers);
 
-      // Cleanup function
-      return () => {
-        socket.off('members', handleMembers);
-      };
-    } else if (activeTabIndex === 4) {
-      // Emit getApplications event
-      socket.emit('getApplications', {
-        sessionId: sessionId,
-        serverId: server.id,
-      });
+    //   // Cleanup function
+    //   return () => {
+    //     socket.off('members', handleMembers);
+    //   };
+    // } else if (activeTabIndex === 4) {
+    //   // Emit getApplications event
+    //   socket.emit('getApplications', {
+    //     sessionId: sessionId,
+    //     serverId: server.id,
+    //   });
 
-      // Set up listener for applications response
-      const handleApplications = (data: any) => {
-        setApplications(data);
-      };
+    //   // Set up listener for applications response
+    //   const handleApplications = (data: any) => {
+    //     setApplications(data);
+    //   };
 
-      // Add listener
-      socket.on('applications', handleApplications);
+    //   // Add listener
+    //   socket.on('applications', handleApplications);
 
-      // Cleanup function
-      return () => {
-        socket.off('applications', handleApplications);
-      };
-    }
+    //   // Cleanup function
+    //   return () => {
+    //     socket.off('applications', handleApplications);
+    //   };
+    // }
   }, [activeTabIndex, socket, sessionId, server.id]);
 
   const handleMemberContextMenu = (e: React.MouseEvent, member: any) => {
@@ -287,12 +289,13 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
   const handleApplicationAction = (action: 'accept' | 'reject') => {
     if (!applicationContextMenu?.application) return;
 
-    socket?.emit('handleApplication', {
-      sessionId: sessionId,
-      serverId: server.id,
-      applicationId: applicationContextMenu.application.id,
-      action: action,
-    });
+    // 這裡需修改
+    // socket?.emit('handleApplication', {
+    //   sessionId: sessionId,
+    //   serverId: server.id,
+    //   applicationId: applicationContextMenu.application.id,
+    //   action: action,
+    // });
   };
 
   const handleSubmit = useCallback(async () => {
@@ -745,12 +748,13 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
         const sortedMembers = processMembers(members, searchText, sortState);
 
         const handleUserMove = (target: Member) => {
-          socket?.emit('ManageUserAction', {
-            sessionId: sessionId,
-            serverId: server.id,
-            targetId: target.userId,
-            type: 'move',
-          });
+          // 這裡需修改
+          // socket?.emit('ManageUserAction', {
+          //   sessionId: sessionId,
+          //   serverId: server.id,
+          //   targetId: target.userId,
+          //   type: 'move',
+          // });
         };
 
         const handleKickServer = (target: Member) => {
@@ -758,12 +762,13 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
             prev.filter((member) => member.id !== target.id),
           );
 
-          socket?.emit('ManageUserAction', {
-            sessionId: sessionId,
-            serverId: server.id,
-            targetId: target.userId,
-            type: 'kick',
-          });
+          // 這裡需修改
+          // socket?.emit('ManageUserAction', {
+          //   sessionId: sessionId,
+          //   serverId: server.id,
+          //   targetId: target.userId,
+          //   type: 'kick',
+          // });
         };
 
         const handleBlockUser = (target: Member) => {
@@ -771,12 +776,13 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
             prev.filter((member) => member.id !== target.id),
           );
 
-          socket?.emit('ManageUserAction', {
-            sessionId: sessionId,
-            serverId: server.id,
-            targetId: target.userId,
-            type: 'block',
-          });
+          // 這裡需修改
+          // socket?.emit('ManageUserAction', {
+          //   sessionId: sessionId,
+          //   serverId: server.id,
+          //   targetId: target.userId,
+          //   type: 'block',
+          // });
         };
 
         return (
@@ -848,12 +854,15 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
 
                 return (
                   <div className="text-sm">
-                    <ContextMenu
-                      x={memberContextMenu.x}
-                      y={memberContextMenu.y}
-                      onClose={() => setMemberContextMenu(null)}
-                      items={menuItems}
-                    />
+                    {
+                      // 這裡需修改
+                      /* <ContextMenu
+                        x={memberContextMenu.x}
+                        y={memberContextMenu.y}
+                        onClose={() => setMemberContextMenu(null)}
+                        items={menuItems}
+                      /> */
+                    }
                   </div>
                 );
               })}
@@ -1113,25 +1122,28 @@ const ServerSettingModal = memo(({ onClose }: ServerSettingModalProps) => {
         return (
           <>
             {applicationContextMenu && (
-              <ContextMenu
-                x={applicationContextMenu.x}
-                y={applicationContextMenu.y}
-                onClose={() => setApplicationContextMenu(null)}
-                items={[
-                  {
-                    label: '接受申請',
-                    onClick: () => handleApplicationAction('accept'),
-                    icon: <Check size={16} className="text-green-500" />,
-                    className: 'text-green-600 hover:bg-green-50',
-                  },
-                  {
-                    label: '拒絕申請',
-                    onClick: () => handleApplicationAction('reject'),
-                    icon: <X size={16} className="text-red-500" />,
-                    className: 'text-red-600 hover:bg-red-50',
-                  },
-                ]}
-              />
+              {
+                // 這裡需修改
+                // <ContextMenu
+                //   x={applicationContextMenu.x}
+                //   y={applicationContextMenu.y}
+                //   onClose={() => setApplicationContextMenu(null)}
+                //   items={[
+                //     {
+                //       label: '接受申請',
+                //       onClick: () => handleApplicationAction('accept'),
+                //       icon: <Check size={16} className="text-green-500" />,
+                //       className: 'text-green-600 hover:bg-green-50',
+                //     },
+                //     {
+                //       label: '拒絕申請',
+                //       onClick: () => handleApplicationAction('reject'),
+                //       icon: <X size={16} className="text-red-500" />,
+                //       className: 'text-red-600 hover:bg-red-50',
+                //     },
+                //   ]}
+                // />
+              }
             )}
             <div className="flex flex-col h-full p-4">
               <div className="flex justify-between items-center mb-6">

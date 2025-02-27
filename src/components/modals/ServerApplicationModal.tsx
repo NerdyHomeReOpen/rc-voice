@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
 
 // Redux
@@ -34,27 +35,28 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     const handleSubmit = () => {
       setError(null);
 
-      // Emit application event
-      socket?.emit('applyServerMembership', {
-        sessionId,
-        serverId: server.id,
-        application: {
-          description: description.trim() || '',
-          timestamp: Date.now(),
-        },
-      });
+      // 這裡需修改
+      // // Emit application event
+      // socket?.emit('applyServerMembership', {
+      //   sessionId,
+      //   serverId: server.id,
+      //   application: {
+      //     description: description.trim() || '',
+      //     timestamp: Date.now(),
+      //   },
+      // });
 
-      // Handle response
-      socket?.once(
-        'applicationResponse',
-        (response: { success: boolean; message: string }) => {
-          if (response.success) {
-            onClose();
-          } else {
-            setError(response.message);
-          }
-        },
-      );
+      // // Handle response
+      // socket?.once(
+      //   'applicationResponse',
+      //   (response: { success: boolean; message: string }) => {
+      //     if (response.success) {
+      //       onClose();
+      //     } else {
+      //       setError(response.message);
+      //     }
+      //   },
+      // );
     };
 
     return (
