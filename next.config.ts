@@ -7,7 +7,9 @@ const nextConfig: NextConfig = {
     // 例如: 'your-production-domain.com'
   },
   basePath: '',
+  assetPrefix: '',
   trailingSlash: false,
+  output: "export"
 };
 
 export default nextConfig;

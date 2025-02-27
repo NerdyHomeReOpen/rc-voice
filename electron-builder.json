@@ -1,0 +1,43 @@
+{
+  "appId": "com.null.rcvoice",
+  "productName": "RC-Voice",
+  "copyright": "Copyright © 2025 null",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "main.js",
+    "package.json",
+    "./out/**/*"
+  ],
+  "asar": true,
+  "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+  "win": {
+    "target": [
+      "nsis",
+      "portable"
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "perMachine": true,
+    "artifactName": "${productName}-${version}-${os}-${arch}-Setup.${ext}"
+  },
+  "mac": {
+    "category": "public.app-category.social-networking",
+    "target": [
+        "dmg",
+        "zip"
+    ]
+  },
+  "linux": {
+    "category": "Network",
+    "target": [
+        "AppImage",
+        "deb",
+        "rpm",
+        "zip"
+    ]
+  }
+}
