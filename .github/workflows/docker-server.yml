@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  server-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,9 +28,9 @@ jobs:
           name: rc-server
           path: /tmp/rc-server.tar
 
-  use:
+  server-use:
     runs-on: ubuntu-latest
-    needs: build
+    needs: server-build
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4

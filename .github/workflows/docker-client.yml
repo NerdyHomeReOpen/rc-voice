@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  client-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,9 +28,9 @@ jobs:
           name: rc-client
           path: /tmp/rc-client.tar
 
-  use:
+  client-use:
     runs-on: ubuntu-latest
-    needs: build
+    needs: client-build
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
