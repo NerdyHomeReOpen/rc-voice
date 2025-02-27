@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import CreateServerModal from '@/components/modals/CreateServerModal';
 import React, { createContext, useContext, useState } from 'react';
 
