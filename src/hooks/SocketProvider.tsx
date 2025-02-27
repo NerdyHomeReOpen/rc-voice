@@ -122,13 +122,25 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
   // Initialize socket event listeners
   // make sure it only runs once
   useEffect(() => {
+    let isInitialDataReceived = false;
     if (ipcService.getAvailability()) {
       ipcService.onInitialData((data) => {
+        if (!data.user) {
+          console.error('No user data in initial data');
+          return;
+        }
+        isInitialDataReceived = true;
         console.log('Initial data:', data);
         store.dispatch(setUser(data.user));
         store.dispatch(setServer(data.server));
         store.dispatch(setChannel(data.channel));
       });
+
+      // make sure we get the initial data
+      if (!isInitialDataReceived) {
+        console.log('Not received initial data, request initial data again.');
+        ipcService.requestInitialData();
+      }
 
       const eventHandlers = {
         [SocketServerEvent.CONNECT]: () => console.log('Connected to server'),

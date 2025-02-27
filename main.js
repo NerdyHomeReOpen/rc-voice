@@ -440,6 +440,11 @@ app.whenReady().then(async () => {
         break;
     }
   });
+
+  // request initial data
+  ipcMain.on('request-initial-data', (event) => {
+    event.sender.send('initial-data', sharedData);
+  });
 });
 
 app.on('activate', async () => {

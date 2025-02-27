@@ -56,6 +56,14 @@ export const ipcService = {
     }
   },
 
+  requestInitialData: () => {
+    if (isElectron) {
+      ipcRenderer.send('request-initial-data');
+    } else {
+      console.warn('IPC not available - not in Electron environment');
+    }
+  },
+
   // Window control methods
   window: {
     minimize: () => {
