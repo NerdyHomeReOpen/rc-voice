@@ -100,7 +100,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       };
       reader.readAsDataURL(file);
     };
-
+    
     const maxGroups = 3,
       remainingGroups = maxGroups - (user?.ownedServers?.length ?? 0);
 
