@@ -8,7 +8,7 @@ import styles from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
 
 // Types
-import type { Friend, FriendGroup } from '@/types';
+import { popupType, type Friend, type FriendGroup } from '@/types';
 
 // Components
 import BadgeViewer from '@/components/viewers/BadgeViewer';
@@ -116,7 +116,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
         onDoubleClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          ipcService.popup.open('direct-message', 400, 300);
+          ipcService.popup.open(popupType.DIRECT_MESSAGE, 600, 450);
         }}
       >
         <div

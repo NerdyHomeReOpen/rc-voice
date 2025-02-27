@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import dynamic from 'next/dynamic';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CircleX } from 'lucide-react';
 
@@ -12,7 +12,7 @@ import { CircleX } from 'lucide-react';
 import header from '@/styles/common/header.module.css';
 
 // Types
-import type { Channel, Server, User } from '@/types';
+import type { Server, User } from '@/types';
 
 // Pages
 import FriendPage from '@/components/pages/FriendPage';
@@ -31,9 +31,6 @@ import { useSocket } from '@/hooks/SocketProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
-
-import Auth from './auth/page';
-import Modal from './popup/page';
 
 interface HeaderProps {
   selectedId?: number;
@@ -146,6 +143,8 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     return (
       <div className={header['header']}>
+        {/* Title */}
+        <div className={`${header['titleBox']} ${header['big']}`}></div>
         {/* User Status */}
         <div className={header['userStatus']}>
           {showUserSetting && (
@@ -314,8 +313,6 @@ const Home = () => {
   );
   const user = useSelector((state: { user: User | null }) => state.user);
 
-  // Modal Control
-
   // Tab Control
   const [selectedTabId, setSelectedTabId] = useState<number>(1);
 
@@ -353,23 +350,4 @@ const Home = () => {
 
 Home.displayName = 'Home';
 
-// use dynamic import to disable SSR
-const Root = dynamic(
-  () =>
-    Promise.resolve(() => {
-      // Redux
-      const sessionId = useSelector(
-        (state: { sessionToken: string | null }) => state.sessionToken,
-      );
-
-      // Socket
-      const socket = useSocket();
-
-      return !socket || !sessionId ? <Auth /> : <Home />;
-    }),
-  {
-    ssr: false,
-  },
-);
-
-export default Root;
+export default Home;

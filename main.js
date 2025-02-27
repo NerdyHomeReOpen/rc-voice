@@ -93,7 +93,7 @@ async function createMainWindow() {
   }
 
   mainWindow = new BrowserWindow({
-    minWidth: 1200,
+    minWidth: 1400,
     minHeight: 800,
     frame: false,
     transparent: true,
@@ -132,8 +132,8 @@ async function createAuthWindow() {
   }
 
   authWindow = new BrowserWindow({
-    width: 1000,
-    height: 650,
+    width: 610,
+    height: 450,
     resizable: false,
     frame: false,
     transparent: true,
@@ -170,8 +170,8 @@ async function createPopup(type, height, width) {
   }
 
   const popup = new BrowserWindow({
-    minWidth: width ?? 800,
-    minHeight: height ?? 600,
+    width: width ?? 800,
+    height: height ?? 600,
     resizable: false,
     frame: false,
     transparent: true,
@@ -375,6 +375,69 @@ app.whenReady().then(async () => {
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
       // app.quit();
+    }
+  });
+
+  // Window management IPC handlers
+  ipcMain.on('login', (_, sessionId) => {
+    if (!socketInstance) socketInstance = connectSocket(sessionId);
+    socketInstance.connect();
+  });
+  ipcMain.on('logout', () => {
+    socketInstance = disconnectSocket(socketInstance);
+  });
+
+  // Window control handlers
+  ipcMain.on('minimize-window', () => {
+    const currentWindow = BrowserWindow.getFocusedWindow();
+    if (currentWindow) {
+      currentWindow.minimize();
+    }
+  });
+  ipcMain.on('maximize-window', () => {
+    const currentWindow = BrowserWindow.getFocusedWindow();
+    if (currentWindow) {
+      if (currentWindow.isMaximized()) {
+        currentWindow.unmaximize();
+      } else {
+        currentWindow.maximize();
+      }
+    }
+  });
+  ipcMain.on('close-window', () => {
+    const currentWindow = BrowserWindow.getFocusedWindow();
+    if (currentWindow) {
+      currentWindow.close();
+    }
+  });
+
+  // Popup handlers
+  ipcMain.on('open-popup', (_, type, height, width) =>
+    createPopup(type, height, width),
+  );
+
+  // listen for window control event
+  ipcMain.on('window-control', (event, command) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (!window) return;
+
+    switch (command) {
+      case 'minimize':
+        window.minimize();
+        break;
+      case 'maximize':
+        if (window.isMaximized()) {
+          window.unmaximize();
+        } else {
+          window.maximize();
+        }
+        break;
+      case 'unmaximize':
+        window.unmaximize();
+        break;
+      case 'close':
+        window.close();
+        break;
     }
   });
 

@@ -133,8 +133,8 @@ export interface Channel {
   isRoot: boolean;
   isCategory: boolean;
   isLobby: boolean;
-  voiceMode: "free" | "queue" | "forbidden";
-  chatMode: "free" | "forbidden";
+  voiceMode: 'free' | 'queue' | 'forbidden';
+  chatMode: 'free' | 'forbidden';
   order: number;
   serverId: string;
   settings: {
@@ -208,7 +208,7 @@ export enum SocketClientEvent {
   DELETE_CHANNEL = 'deleteChannel',
   SEND_MESSAGE = 'sendMessage',
   SEND_DIRECT_MESSAGE = 'sendDirectMessage',
-};
+}
 
 export enum SocketServerEvent {
   CONNECT = 'connect',
@@ -225,4 +225,14 @@ export enum SocketServerEvent {
   CHANNEL_UPDATE = 'channelUpdate',
   PLAY_SOUND = 'playSound',
   ERROR = 'error',
+}
+
+export enum popupType {
+  CREATE_SERVER = 'createServer',
+  EDIT_SERVER = 'editServer',
+  CREATE_CHANNEL = 'createChannel',
+  DELETE_CHANNEL = 'deleteChannel',
+  EDIT_CHANNEL = 'editChannel',
+  APPLY_MEMBER = 'applyMember',
+  DIRECT_MESSAGE = 'directMessage',
 }

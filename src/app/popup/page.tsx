@@ -6,51 +6,85 @@ import React, { useEffect, useState } from 'react';
 // Components
 import Header from '@/components/Header';
 
-// Contexts
-import { useModal } from '@/context/modalContext';
+// Types
+import { Channel, popupType } from '@/types';
 
 // Modals
 import CreateServerModal from '@/components/modals/CreateServerModal';
+import AddChannelModal from '@/components/modals/AddChannelModal';
+import DeleteChannelModal from '@/components/modals/DeleteChannelModal';
+import EditChannelModal from '@/components/modals/EditChannelModal';
+import ServerApplication from '@/components/modals/ServerApplicationModal';
 
 const Modal = React.memo(() => {
-  const [type, setType] = useState<string | null>(null);
+  const [type, setType] = useState<popupType | null>(null);
 
   useEffect(() => {
-    // if window has query
     if (window.location.search) {
       const params = new URLSearchParams(window.location.search);
-      const type = params.get('type');
+      const type = params.get('type') as popupType;
       setType(type);
     }
   }, []);
 
-  const getTitle = () => {
+  const getTitle = (isCategory?: boolean) => {
     switch (type) {
-      case 'create-server':
-        return 'Create Server';
-      case 'profile':
-        return 'Profile';
-      case 'server':
-        return 'Server';
+      case popupType.CREATE_SERVER:
+        return { title: '創建語音群', button: ['close'] };
+      case popupType.CREATE_CHANNEL:
+        return { title: '創建頻道', button: ['close'] };
+      case popupType.EDIT_CHANNEL:
+        return {
+          title: `編輯${isCategory ? '類別' : '頻道'}`,
+          button: ['close'],
+        };
+      case popupType.DELETE_CHANNEL:
+        return { title: '刪除頻道', button: ['close'] };
+      case popupType.APPLY_MEMBER:
+        return { title: '申請會員', button: ['close'] };
       default:
-        return '';
+        return undefined;
     }
   };
+
   const getMainContent = () => {
+    const mockChannel: Channel = {
+      id: 'default',
+      name: '',
+      isCategory: false,
+      settings: {
+        visibility: 'public',
+        bitrate: 0,
+        slowmode: false,
+        userLimit: 0,
+      },
+      isRoot: false,
+      isLobby: false,
+      voiceMode: 'free',
+      chatMode: 'free',
+      order: 0,
+      serverId: '',
+      createdAt: 0,
+    };
+
     switch (type) {
-      case 'create-server':
+      case popupType.CREATE_SERVER:
         return <CreateServerModal onClose={() => {}} />;
-      case 'profile':
-      // return <FriendPage />;
-      case 'server':
-      // return <ServerPage />;
+      case popupType.CREATE_CHANNEL:
+        return <AddChannelModal onClose={() => {}} isRoot={false} />;
+      case popupType.EDIT_CHANNEL:
+        return <EditChannelModal onClose={() => {}} channel={mockChannel} />;
+      case popupType.DELETE_CHANNEL:
+        return <DeleteChannelModal onClose={() => {}} channel={mockChannel} />;
+      case popupType.APPLY_MEMBER:
+        return <ServerApplication onClose={() => {}} server={undefined} />;
       default:
         return <></>;
     }
   };
+
   const getButtons = () => {};
 
-  // if (!isOpen) return null;
   return (
     <div
       className={`fixed w-full h-full flex-1 flex-col bg-white rounded shadow-lg overflow-hidden transform outline-g`}
