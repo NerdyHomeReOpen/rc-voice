@@ -5004,6 +5004,14 @@ regexp.prototype.flags@^1.5.3:
     gopd "^1.2.0"
     set-function-name "^2.0.2"
 
+"register-scheme@git+https://github.com/devsnek/node-register-scheme.git#e7cc9a63a1f512565da44cb57316d9fb10750e17":
+  version "0.0.2"
+  uid e7cc9a63a1f512565da44cb57316d9fb10750e17
+  resolved "git+https://github.com/devsnek/node-register-scheme.git#e7cc9a63a1f512565da44cb57316d9fb10750e17"
+  dependencies:
+    bindings "^1.3.0"
+    node-addon-api "^1.3.0"
+
 "register-scheme@github:devsnek/node-register-scheme":
   version "0.0.2"
   resolved "git+ssh://git@github.com/devsnek/node-register-scheme.git#e7cc9a63a1f512565da44cb57316d9fb10750e17"
