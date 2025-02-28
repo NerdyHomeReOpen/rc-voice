@@ -1,7 +1,7 @@
 FROM node:20 AS builder
 WORKDIR /app
 COPY package*.json yarn.lock ./
-RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+RUN npm install
 RUN yarn install
 COPY . .
 RUN npm run build
