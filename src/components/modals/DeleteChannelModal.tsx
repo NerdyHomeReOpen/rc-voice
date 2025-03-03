@@ -25,7 +25,7 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = ({
 
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
-    socket?.deleteChannel(channel.id);
+    socket?.send.deleteChannel({ channelId: channel.id });
     onClose();
   };
 

@@ -27,8 +27,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ user }) => {
   const socket = useSocket();
 
   const handleChangeSignature = (signature: string) => {
-    const updatedUser: Partial<User> = { signature };
-    socket?.updateUser(updatedUser);
+    socket?.send.updateUser({ user: { signature } });
   };
 
   // Input Control

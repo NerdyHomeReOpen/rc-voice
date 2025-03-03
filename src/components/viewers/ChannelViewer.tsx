@@ -178,7 +178,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
 
     const handleJoinChannel = (channelId: string) => {
       if (user?.currentChannelId == channelId) return;
-      socket?.connectChannel(channelId);
+      socket?.send.connectChannel({ channelId });
     };
 
     const channelVisibility = channel.settings.visibility ?? 'public';
@@ -287,7 +287,9 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     // User Info Block Control
     // const [showInfoBlock, setShowInfoBlock] = useState<boolean>(false);
     const userId = user.id;
-    const [userSpeakingStatus, setUserSpeakingStatus] = useState<{ [userId: string]: boolean }>({[userId]: true});
+    const [userSpeakingStatus, setUserSpeakingStatus] = useState<{
+      [userId: string]: boolean;
+    }>({ [userId]: true });
 
     // socket?.on("user-speaking", ({ userId, isSpeaking }: { userId: string, isSpeaking: boolean }) => {
     //   setUserSpeakingStatus(prevStatus => {
@@ -361,8 +363,10 @@ const UserTab: React.FC<UserTabProps> = React.memo(
             ]);
           }}
         >
-          <div className={`${styles['userState']}
-          ${userSpeakingStatus[user.id] ? styles['unplay'] : ""}`} />
+          <div
+            className={`${styles['userState']}
+          ${userSpeakingStatus[user.id] ? styles['unplay'] : ''}`}
+          />
           <div
             className={`${styles['userIcon']} ${
               permission[channelUserGender]
@@ -443,7 +447,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
     // Helper to emit updates
     const emitUpdates = (updates: Partial<Channel>[]) => {
       if (updates.length === 0) return;
-      socket?.updateChannel(updates);
+      socket?.send.updateChannel({ channel: updates });
     };
 
     // Handle combining channels

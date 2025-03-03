@@ -18,6 +18,7 @@ const channels = {};
 const channelRelations = {};
 const messages = {};
 const directMessages = {};
+const voicePresences = {};
 
 const init = async () => {
   await db.deleteAll();
@@ -38,6 +39,7 @@ const init = async () => {
   await db.set('channelRelations', channelRelations);
   await db.set('messages', messages);
   await db.set('directMessages', directMessages);
+  await db.set('voicePresences', voicePresences);
   console.log('Database initialized');
 };
 

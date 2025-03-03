@@ -53,10 +53,7 @@ const get = {
   userServers: async (userId) => {
     const servers = (await db.get('servers')) || {};
     const members = (await db.get('members')) || {};
-    return Object.values(members)
-      .filter((member) => member.userId === userId)
-      .map((member) => servers[member.serverId])
-      .filter((server) => server);
+    return Object.values(servers).filter((server) => server);
   },
   userOwnedServers: async (userId) => {
     const servers = (await db.get('servers')) || {};
@@ -109,6 +106,7 @@ const get = {
       users: await get.channelUsers(channelId),
       messages: await get.channelMessage(channelId),
       subChannel: await get.channelChildren(channelId),
+      voicePresences: await get.channelVoicePresences(channelId),
     };
   },
   channelUsers: async (channelId) => {
@@ -134,6 +132,12 @@ const get = {
       .filter((relation) => relation.parentId === channelId)
       .map((relation) => channels[relation.childId])
       .filter((channel) => channel);
+  },
+  channelVoicePresences: async (channelId) => {
+    const voicePresences = (await db.get('voicePresences')) || {};
+    return Object.values(voicePresences).filter(
+      (voicePresence) => voicePresence.channelId === channelId,
+    );
   },
   // Friend
   friend: async (friendId) => {

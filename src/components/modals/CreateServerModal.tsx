@@ -83,9 +83,9 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
 
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
-
-      console.log('Create Server:', newServer);
-      socket?.createServer(newServer);
+      socket?.send.createServer({
+        server: { ...newServer, ownerId: user?.id ?? '' },
+      });
       onClose();
     };
 

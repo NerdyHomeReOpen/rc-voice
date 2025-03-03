@@ -148,6 +148,15 @@ export interface Channel {
   subChannels?: Channel[];
   messages?: Message[];
   users?: User[];
+  rtcConnections?: string[];
+}
+
+export interface voicePresences {
+  id: string;
+  username: string;
+  isSpeaker: boolean;
+  isSpeaking: boolean;
+  isMuted: boolean;
 }
 
 export interface Message {
@@ -215,8 +224,12 @@ export enum SocketClientEvent {
   CREATE_CHANNEL = 'createChannel',
   UPDATE_CHANNEL = 'updateChannel',
   DELETE_CHANNEL = 'deleteChannel',
-  SEND_MESSAGE = 'sendMessage',
-  SEND_DIRECT_MESSAGE = 'sendDirectMessage',
+  SEND_MESSAGE = 'message',
+  SEND_DIRECT_MESSAGE = 'directMessage',
+  // SEND_VOICE_STREAM = 'sendVoiceStream',
+  RTC_OFFER = 'RTCOffer',
+  RTC_ANSWER = 'RTCAnswer',
+  RTC_ICE_CANDIDATE = 'RTCIceCandidate',
 }
 
 export enum SocketServerEvent {
@@ -232,9 +245,16 @@ export enum SocketServerEvent {
   CHANNEL_CONNECT = 'channelConnect',
   CHANNEL_DISCONNECT = 'channelDisconnect',
   CHANNEL_UPDATE = 'channelUpdate',
-  PLAY_SOUND = 'playSound',
+  // PLAY_SOUND = 'playSound',
   ERROR = 'error',
-  SEND_SOCKET = 'sendSocket',
+  // SEND_SOCKET = 'sendSocket',
+  // VOICE_STREAM = 'voiceStream',
+  RTC_CONNECT = 'RTCConnect',
+  RTC_OFFER = 'RTCOffer',
+  RTC_ANSWER = 'RTCAnswer',
+  RTC_ICE_CANDIDATE = 'RTCIceCandidate',
+  RTC_JOIN = 'RTCJoin',
+  RTC_LEAVE = 'RTCLeave',
 }
 
 export enum popupType {

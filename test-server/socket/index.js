@@ -9,9 +9,9 @@ const userHandler = require('./user');
 const serverHandler = require('./server');
 const channelHandler = require('./channel');
 const messageHandler = require('./message');
-const callHandler = require("./call");
+const rtcHandler = require('./rtc');
 
-let serverCall = new callHandler();
+// let serverCall = new callHandler();
 
 module.exports = (io, db) => {
   io.use((socket, next) => {
@@ -238,7 +238,7 @@ module.exports = (io, db) => {
       channelHandler.deleteChannel(io, socket, sessionId, channelId);
     });
     // Message
-    socket.on('sendMessage', async (data) => {
+    socket.on('message', async (data) => {
       // data = {
       //   sessionId:
       //   message: {
@@ -259,7 +259,7 @@ module.exports = (io, db) => {
       }
       messageHandler.sendMessage(io, socket, sessionId, message);
     });
-    socket.on('sendDirectMessage', async (data) => {
+    socket.on('directMessage', async (data) => {
       // data = {
       //   sessionId:
       //   message: {
@@ -280,12 +280,79 @@ module.exports = (io, db) => {
       }
       messageHandler.sendDirectMessage(io, socket, sessionId, message);
     });
+    // RTC
+    socket.on('RTCOffer', async (data) => {
+      // data = {
+      //   sessionId:
+      //   to:
+      //   offer: {
+      //     ...
+      //   }
+      // };
+      console.log(data);
+
+      // Validate data
+      const { sessionId, to, offer } = data;
+      if (!sessionId || !to || !offer) {
+        throw new SocketError(
+          'Missing required fields',
+          'SENDRTCOFFER',
+          'DATA',
+          400,
+        );
+      }
+      rtcHandler.offer(io, socket, sessionId, to, offer);
+    });
+    socket.on('RTCAnswer', async (data) => {
+      // data = {
+      //   sessionId:
+      //   to:
+      //   answer: {
+      //     ...
+      //   }
+      // };
+      console.log(data);
+
+      // Validate data
+      const { sessionId, to, answer } = data;
+      if (!sessionId || !to || !answer) {
+        throw new SocketError(
+          'Missing required fields',
+          'SENDRTCANSWER',
+          'DATA',
+          400,
+        );
+      }
+      rtcHandler.answer(io, socket, sessionId, to, answer);
+    });
+    socket.on('RTCIceCandidate', async (data) => {
+      // data = {
+      //   sessionId:
+      //   to:
+      //   candidate: {
+      //     ...
+      //   }
+      // };
+      console.log(data);
+
+      // Validate data
+      const { sessionId, to, candidate } = data;
+      if (!sessionId || !to || !candidate) {
+        throw new SocketError(
+          'Missing required fields',
+          'SENDRTCCANDIDATE',
+          'DATA',
+          400,
+        );
+      }
+      rtcHandler.candidate(io, socket, sessionId, to, candidate);
+    });
   });
 
-  async function runServerCall() {
-    const channels = (await db.get('channels')) || {};
-    const CallLogger = new Logger('Call');
-    serverCall = new callHandler(io, channels, CallLogger);
-  }
-  runServerCall();
+  // async function runServerCall() {
+  //   const channels = (await db.get('channels')) || {};
+  //   const CallLogger = new Logger('Call');
+  //   serverCall = new callHandler(io, channels, CallLogger);
+  // }
+  // runServerCall();
 };

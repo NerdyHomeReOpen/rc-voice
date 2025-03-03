@@ -153,11 +153,11 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
-    socket?.updateUser(editedUser);
+    socket?.send.updateUser({ user: editedUser });
     onClose();
   };
   const handleLogout = () => {
-    socket?.disconnectUser();
+    // socket?.disconnectUser();
     onClose();
   };
 

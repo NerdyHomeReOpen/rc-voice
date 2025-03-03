@@ -26,6 +26,7 @@ import { useSocket } from '@/providers/SocketProvider';
 // Services
 import { API_URL } from '@/services/api.service';
 import { ipcService } from '@/services/ipc.service';
+import { useWebRTC } from '@/providers/WebRTCProvider';
 
 const getStoredBoolean = (key: string, defaultValue: boolean): boolean => {
   const stored = localStorage.getItem(key);
@@ -47,8 +48,11 @@ const ServerPageComponent: React.FC = () => {
   const socket = useSocket();
 
   const handleSendMessage = (message: Message): void => {
-    socket?.sendMessage(message);
+    socket?.send.message({ message });
   };
+
+  // Call
+  const webRTC = useWebRTC();
 
   // Volume Control
   const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
@@ -241,13 +245,13 @@ const ServerPageComponent: React.FC = () => {
             </div>
             <div
               className={`${styles['micButton']} ${
-                isMicOn ? styles['active'] : ''
+                webRTC.isMute ? '' : styles['active']
               }`}
-              onClick={() => setIsMicOn(!isMicOn)}
+              onClick={() => webRTC.toggleMute?.()}
             >
               <div className={styles['micIcon']} />
               <div className={styles['micText']}>
-                {isMicOn ? '已拿麥' : '拿麥發言'}
+                {webRTC.isMute ? '拿麥發言' : '已拿麥'}
               </div>
             </div>
             <div className={styles['buttons']}>
@@ -255,9 +259,9 @@ const ServerPageComponent: React.FC = () => {
               <div className={styles['saperator']} />
               <div
                 className={`${styles['micModeButton']} ${
-                  isMicOn ? styles['active'] : ''
+                  webRTC.isMute ? '' : styles['active']
                 }`}
-                onClick={() => setIsMicOn(!isMicOn)}
+                onClick={() => webRTC.toggleMute?.()}
               />
               <div className={styles['speakerButton']} />
               <div className={styles['recordModeButton']} />

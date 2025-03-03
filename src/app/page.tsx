@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = React.memo(
     const socket = useSocket();
 
     const handleLogout = () => {
-      socket?.disconnectUser();
+      ipcService.auth.logout();
       localStorage.removeItem('autoLogin');
       localStorage.removeItem('encryptedPassword');
       localStorage.removeItem('sessionToken');
@@ -58,12 +58,11 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     const handleLeaveServer = () => {
       if (!user) return;
-      const serverId = user.currentServerId;
-      socket?.disconnectServer(serverId);
+      socket?.send.disconnectServer({ serverId: user.currentServerId });
     };
 
     const handleUpdateStatus = (status: User['status']) => {
-      socket?.updateUser({ status });
+      socket?.send.updateUser({ user: { status } });
     };
 
     // Fullscreen Control

@@ -11,6 +11,8 @@ const Set = utils.set;
 // Socket error
 const SocketError = require('./socketError');
 
+const rtcHandler = require('./rtc');
+
 const channelHandler = {
   connectChannel: async (io, socket, sessionId, channelId) => {
     // Get database
@@ -79,7 +81,8 @@ const channelHandler = {
       io.to(`channel_${channel.id}`).emit('playSound', 'join');
 
       // Join the channel
-      socket.join(`channel_${channel.id}`);
+      // socket.join(`channel_${channel.id}`);
+      await rtcHandler.join(io, socket, sessionId, channel.id);
 
       // Emit updated data (only to the user)
       io.to(socket.id).emit('userUpdate', update);
@@ -161,7 +164,8 @@ const channelHandler = {
       Interval.clearObtainXpInterval(socket);
 
       // Leave the channel
-      socket.leave(`channel_${channel.id}`);
+      // socket.leave(`channel_${channel.id}`);
+      await rtcHandler.leave(io, socket, sessionId, channel.id);
 
       // Play sound
       io.to(`channel_${channel.id}`).emit('playSound', 'leave');

@@ -65,16 +65,12 @@ const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
   };
 
   return (
-    <>
+    <ContextMenuContext.Provider value={{ showContextMenu, closeContextMenu }}>
       {isVisible && (
         <ContextMenu x={x} y={y} onClose={closeContextMenu} items={items} />
       )}
-      <ContextMenuContext.Provider
-        value={{ showContextMenu, closeContextMenu }}
-      >
-        {children}
-      </ContextMenuContext.Provider>
-    </>
+      {children}
+    </ContextMenuContext.Provider>
   );
 };
 

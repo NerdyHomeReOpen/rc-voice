@@ -123,6 +123,21 @@ const set = {
     await db.set(`directMessages.${id}`, directMessages[id]);
     return directMessages[id];
   },
+  voicePresence: async (id, data) => {
+    const voicePresences = await db.get('voicePresences');
+    voicePresences[id] = {
+      isSpeaker: false,
+      isSpeaking: false,
+      isMuted: false,
+      userId: '',
+      channelId: '',
+      ...voicePresences[id],
+      ...data,
+      id,
+    };
+    await db.set(`voicePresences.${id}`, voicePresences[id]);
+    return voicePresences[id];
+  },
 };
 
 module.exports = { ...set };

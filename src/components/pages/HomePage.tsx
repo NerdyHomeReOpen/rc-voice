@@ -29,7 +29,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   const socket = useSocket();
 
   const handleServerSelect = (serverId: string) => {
-    socket?.connectServer(serverId);
+    socket?.send.connectServer({ serverId });
   };
 
   const serverAvatar = server.avatarUrl
