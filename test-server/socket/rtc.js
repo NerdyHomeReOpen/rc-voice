@@ -16,12 +16,26 @@ const rtcRooms = {};
 const rtcHandler = {
   offer: async (io, socket, sessionId, to, offer) => {
     try {
-      socket.to(to).emit('RTCOffer', { from: socket.id, offer });
+      console.log(`[RTC] Handle Offer: from ${socket.id} to ${to}`);
+
+      // ensure offer is serializable
+      const serializedOffer = offer
+        ? {
+            type: offer.type,
+            sdp: offer.sdp,
+          }
+        : null;
+      socket.to(to).emit('RTCOffer', {
+        from: socket.id,
+        offer: serializedOffer,
+      });
 
       new Logger('RTC').info(
         `User(socket-id: ${socket.id}) sent offer to user(socket-id: ${to})`,
       );
-    } catch {
+      console.log(`[RTC] Offer forwarded`);
+    } catch (error) {
+      console.error(`[RTC] Handle Offer error:`, error);
       new Logger('RTC').error(
         `Error sending offer to user (socket-id: ${to}): ${error.message}`,
       );
@@ -30,12 +44,27 @@ const rtcHandler = {
 
   answer: async (io, socket, sessionId, to, answer) => {
     try {
-      socket.to(to).emit('RTCAnswer', { from: socket.id, answer });
+      console.log(`[RTC] Handle Answer: from ${socket.id} to ${to}`);
+
+      // ensure answer is serializable
+      const serializedAnswer = answer
+        ? {
+            type: answer.type,
+            sdp: answer.sdp,
+          }
+        : null;
+
+      socket.to(to).emit('RTCAnswer', {
+        from: socket.id,
+        answer: serializedAnswer,
+      });
 
       new Logger('RTC').info(
         `User(socket-id: ${socket.id}) sent answer to user(socket-id: ${to})`,
       );
+      console.log(`[RTC] Answer forwarded`);
     } catch (error) {
+      console.error(`[RTC] Handle Answer error:`, error);
       new Logger('RTC').error(
         `Error sending answer to user (socket-id: ${to}): ${error.message}`,
       );
@@ -44,12 +73,29 @@ const rtcHandler = {
 
   candidate: async (io, socket, sessionId, to, candidate) => {
     try {
-      socket.to(to).emit('RTCIceCandidate', { from: socket.id, candidate });
+      console.log(`[RTC] Handle ICE Candidate: from ${socket.id} to ${to}`);
+
+      // ensure candidate is serializable
+      const serializedCandidate = candidate
+        ? {
+            candidate: candidate.candidate,
+            sdpMid: candidate.sdpMid,
+            sdpMLineIndex: candidate.sdpMLineIndex,
+            usernameFragment: candidate.usernameFragment,
+          }
+        : null;
+
+      socket.to(to).emit('RTCIceCandidate', {
+        from: socket.id,
+        candidate: serializedCandidate,
+      });
 
       new Logger('RTC').info(
         `User(socket-id: ${socket.id}) sent ICE candidate to user(socket-id: ${to})`,
       );
+      console.log(`[RTC] ICE Candidate forwarded`);
     } catch (error) {
+      console.error(`[RTC] Handle ICE Candidate error:`, error);
       new Logger('RTC').error(
         `Error sending ICE candidate user (socket-id: ${to}): ${error.message}`,
       );
@@ -67,10 +113,10 @@ const rtcHandler = {
       socket.to(`channel_${channelId}`).emit('RTCJoin', socket.id);
 
       // Emit RTC join event (Only to the user)
-      socket.emit(
-        'RTCConnect',
-        rtcRooms[channelId].filter((id) => id !== socket.id),
+      const existingUsers = rtcRooms[channelId].filter(
+        (id) => id !== socket.id,
       );
+      socket.emit('RTCConnect', existingUsers);
 
       new Logger('RTC').info(`User(${sessionId}) joined channel(${channelId})`);
     } catch (error) {

@@ -23,7 +23,46 @@ export const ipcService = {
   // Send message to main process (sendSocketEvent)
   sendSocketEvent: (event: SocketClientEvent, data: any) => {
     if (isElectron) {
-      ipcRenderer.send(event, data);
+      try {
+        let serializedData = data;
+
+        // handle WebRTC related events serialization
+        if (event === SocketClientEvent.RTC_ICE_CANDIDATE && data.candidate) {
+          // serialize ICE Candidate
+          serializedData = {
+            ...data,
+            candidate: {
+              candidate: data.candidate.candidate,
+              sdpMid: data.candidate.sdpMid,
+              sdpMLineIndex: data.candidate.sdpMLineIndex,
+              usernameFragment: data.candidate.usernameFragment,
+            },
+          };
+        } else if (event === SocketClientEvent.RTC_OFFER && data.offer) {
+          // serialize Offer
+          serializedData = {
+            ...data,
+            offer: {
+              type: data.offer.type,
+              sdp: data.offer.sdp,
+            },
+          };
+        } else if (event === SocketClientEvent.RTC_ANSWER && data.answer) {
+          // serialize Answer
+          serializedData = {
+            ...data,
+            answer: {
+              type: data.answer.type,
+              sdp: data.answer.sdp,
+            },
+          };
+        }
+
+        ipcRenderer.send(event, serializedData);
+      } catch (error) {
+        console.error('IPC send error:', error);
+        console.error('try to send data:', event, data);
+      }
     } else {
       console.warn('IPC not available - not in Electron environment');
     }
