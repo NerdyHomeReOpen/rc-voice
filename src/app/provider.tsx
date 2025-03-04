@@ -6,7 +6,6 @@ import { Provider } from 'react-redux';
 // Providers
 import SocketProvider from '@/providers/SocketProvider';
 import ContextMenuProvider from '@/providers/ContextMenuProvider';
-import WebRTCProvider from '@/providers/WebRTCProvider';
 
 // Redux
 import store from '@/redux/store';
@@ -19,9 +18,7 @@ const Providers = ({ children }: ProvidersProps) => {
   return (
     <Provider store={store}>
       <SocketProvider>
-        <WebRTCProvider>
-          <ContextMenuProvider>{children}</ContextMenuProvider>
-        </WebRTCProvider>
+        <ContextMenuProvider>{children}</ContextMenuProvider>
       </SocketProvider>
     </Provider>
   );

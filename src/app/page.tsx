@@ -25,6 +25,7 @@ import UserSettingModal from '@/components/modals/UserSettingModal';
 import { measureLatency } from '@/utils/measureLatency';
 
 // Providers
+import WebRTCProvider from '@/providers/WebRTCProvider';
 import { useSocket } from '@/providers/SocketProvider';
 
 // Services
@@ -423,14 +424,14 @@ const Home = () => {
   };
 
   return (
-    <>
+    <WebRTCProvider>
       <Header
         selectedId={selectedTabId}
         onSelect={(tabId) => setSelectedTabId(tabId)}
       />
       {/* Main Content */}
       <div className="content">{getMainContent()}</div>
-    </>
+    </WebRTCProvider>
   );
 };
 

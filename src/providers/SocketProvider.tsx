@@ -52,8 +52,8 @@ interface SocketProviderProps {
 const SocketProvider = ({ children }: SocketProviderProps) => {
   const [event, setEvent] = useState<SocketContextType['event']>();
 
-  if (ipcService.getAvailability()) {
-    useEffect(() => {
+  useEffect(() => {
+    if (ipcService.getAvailability()) {
       ipcService.requestInitialData();
       ipcService.onInitialData((data) => {
         console.log('Initial data:', data);
@@ -85,8 +85,8 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
           ipcService.removeListener(event);
         });
       };
-    }, []);
-  }
+    }
+  }, []);
 
   return (
     <SocketContext.Provider value={{ event }}>
