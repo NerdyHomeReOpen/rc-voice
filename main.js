@@ -338,14 +338,14 @@ function connectSocket(sessionId) {
         window.webContents.send('RTCConnect', data),
       );
     });
-    socket.on('RTCAnswer', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCAnswer', data),
-      );
-    });
     socket.on('RTCOffer', (data) => {
       BrowserWindow.getAllWindows().forEach((window) =>
         window.webContents.send('RTCOffer', data),
+      );
+    });
+    socket.on('RTCAnswer', (data) => {
+      BrowserWindow.getAllWindows().forEach((window) =>
+        window.webContents.send('RTCAnswer', data),
       );
     });
     socket.on('RTCIceCandidate', (data) => {
@@ -363,32 +363,6 @@ function connectSocket(sessionId) {
         window.webContents.send('RTCLeave', data),
       );
     });
-
-    // socket.on('voiceStream', (data) => {
-    //   BrowserWindow.getAllWindows().forEach((window) =>
-    //     window.webContents.send('voiceStream', data),
-    //   );
-    // });
-
-    // socket.on('update-users-list', (users) =>
-    //   console.log('Call users list: ', users),
-    // );
-    // socket.on('audio-stream', ({ from, data }) => {
-    //   BrowserWindow.getAllWindows().forEach((window) =>
-    //     window.webContents.send('audio-stream', from, data),
-    //   );
-    // });
-    // socket.on('update-disconnect', () => {
-    //   BrowserWindow.getAllWindows().forEach((window) =>
-    //     window.webContents.send('update-disconnect'),
-    //   );
-    // });
-    // socket.on('room-list', (rooms) => console.log('Channel list: ', rooms));
-    // socket.on('user-speaking', (data) => {
-    //   BrowserWindow.getAllWindows().forEach((window) =>
-    //     window.webContents.send('user-speaking', data),
-    //   );
-    // });
 
     // Socket IPC event handling
     ipcMain.on('connectUser', (_, data) =>
@@ -427,29 +401,21 @@ function connectSocket(sessionId) {
     ipcMain.on('deleteChannel', (_, data) =>
       socket.emit('deleteChannel', { sessionId, ...data }),
     );
-    ipcMain.on('sendMessage', (_, data) =>
-      socket.emit('sendMessage', { sessionId, ...data }),
+    ipcMain.on('message', (_, data) =>
+      socket.emit('message', { sessionId, ...data }),
     );
-    ipcMain.on('sendDirectMessage', (_, data) =>
-      socket.emit('sendDirectMessage', { sessionId, ...data }),
+    ipcMain.on('directMessage', (_, data) =>
+      socket.emit('directMessage', { sessionId, ...data }),
     );
-    ipcMain.on('sendRTCAnswer', (_, data) =>
-      socket.emit('sendRTCAnswer', { sessionId, ...data }),
+    ipcMain.on('RTCOffer', (_, data) =>
+      socket.emit('RTCOffer', { sessionId, ...data }),
     );
-    ipcMain.on('sendRTCOffer', (_, data) =>
-      socket.emit('sendRTCOffer', { sessionId, ...data }),
+    ipcMain.on('RTCAnswer', (_, data) =>
+      socket.emit('RTCAnswer', { sessionId, ...data }),
     );
-    ipcMain.on('sendRTCIceCandidate', (_, data) =>
-      socket.emit('sendRTCIceCandidate', { sessionId, ...data }),
+    ipcMain.on('RTCIceCandidate', (_, data) =>
+      socket.emit('RTCIceCandidate', { sessionId, ...data }),
     );
-
-    // ipcMain.on('sendVoiceStream', (_, data) => {
-    //   socket.emit('sendVoiceStream', { sessionId, ...data });
-    // });
-
-    // ipcMain.on('join-room', (_, data) =>
-    //   socket.emit('join-room', { sessionId, ...data }),
-    // );
 
     // Close auth window and create main window
     if (authWindow) {

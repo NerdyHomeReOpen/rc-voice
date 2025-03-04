@@ -140,6 +140,6 @@ export const ipcService = {
       if (isElectron) {
         ipcRenderer.send('update-discord-presence', presence);
       }
-    }
-  }
+    },
+  },
 };
