@@ -289,7 +289,7 @@ module.exports = (io, db) => {
       //     ...
       //   }
       // };
-      console.log(data);
+      // console.log(data);
 
       // Validate data
       const { sessionId, to, offer } = data;
@@ -311,7 +311,7 @@ module.exports = (io, db) => {
       //     ...
       //   }
       // };
-      console.log(data);
+      // console.log(data);
 
       // Validate data
       const { sessionId, to, answer } = data;
@@ -333,7 +333,7 @@ module.exports = (io, db) => {
       //     ...
       //   }
       // };
-      console.log(data);
+      // console.log(data);
 
       // Validate data
       const { sessionId, to, candidate } = data;
@@ -348,11 +348,4 @@ module.exports = (io, db) => {
       rtcHandler.candidate(io, socket, sessionId, to, candidate);
     });
   });
-
-  // async function runServerCall() {
-  //   const channels = (await db.get('channels')) || {};
-  //   const CallLogger = new Logger('Call');
-  //   serverCall = new callHandler(io, channels, CallLogger);
-  // }
-  // runServerCall();
 };

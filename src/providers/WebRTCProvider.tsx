@@ -59,14 +59,33 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     });
 
     socket?.on.RTCConnect(async (rtcConnections: string[]) => {
-      console.log('rtcConnections: ', rtcConnections);
-      for (const rtcConnection of rtcConnections) {
-        await createPeerConnection(rtcConnection);
-      }
+      // for (const rtcConnection of rtcConnections) {
+      //   await createPeerConnection(rtcConnection);
+      // }
     });
 
     socket?.on.RTCJoin(async (rtcConnection: string) => {
       await createPeerConnection(rtcConnection);
+      try {
+        // Create offer
+        const offer = await peerConnections.current[
+          rtcConnection
+        ].createOffer();
+        await peerConnections.current[rtcConnection].setLocalDescription(offer);
+
+        // Send offer
+        socket?.send.RTCOffer({
+          to: rtcConnection,
+          offer: {
+            type: offer.type,
+            sdp: offer.sdp,
+          },
+        });
+
+        console.log('WebRTC: send offer to', rtcConnection);
+      } catch (error) {
+        console.error('WebRTC: create or send Offer error:', error);
+      }
     });
 
     socket?.on.RTCLeave(async (rtcConnection: string) => {
@@ -81,20 +100,31 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       };
     }
     socket?.on.RTCOffer(async ({ from, offer }: RTCOfferProps) => {
+      console.log('WebRTC: receive offer from', from);
       try {
         if (!peerConnections.current[from]) await createPeerConnection(from);
 
-        const offerDescription = new RTCSessionDescription({
+        // Receive offer
+        const offerDes = new RTCSessionDescription({
           type: offer.type,
           sdp: offer.sdp,
         });
+        await peerConnections.current[from].setRemoteDescription(offerDes);
 
-        await peerConnections.current[from].setRemoteDescription(
-          offerDescription,
-        );
+        // Create answer
         const answer = await peerConnections.current[from].createAnswer();
         await peerConnections.current[from].setLocalDescription(answer);
-        socket.send.RTCAnswer({ to: from, answer });
+
+        // Send answer
+        socket.send.RTCAnswer({
+          to: from,
+          answer: {
+            type: answer.type,
+            sdp: answer.sdp,
+          },
+        });
+
+        console.log('WebRTC: send answer to', from);
       } catch (error) {
         console.error('WebRTC: handle Offer error:', error);
       }
@@ -108,15 +138,16 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       };
     }
     socket?.on.RTCAnswer(async ({ from, answer }: RTCAnswerProps) => {
+      console.log('WebRTC: receive answer from', from);
       try {
-        const answerDescription = new RTCSessionDescription({
+        if (!peerConnections.current[from]) return;
+
+        // Receive answer
+        const answerDes = new RTCSessionDescription({
           type: answer.type,
           sdp: answer.sdp,
         });
-
-        await peerConnections.current[from].setRemoteDescription(
-          answerDescription,
-        );
+        await peerConnections.current[from].setRemoteDescription(answerDes);
       } catch (error) {
         console.error('WebRTC: handle Answer error:', error);
       }
@@ -134,19 +165,16 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     socket?.on.RTCIceCandidate(
       async ({ from, candidate }: RTCIceCandidateProps) => {
         try {
-          if (!peerConnections.current[from]) {
-            console.log('WebRTC: cannot find peer connection, try to create new connection');
-            await createPeerConnection(from);
-          }
+          if (!peerConnections.current[from]) return;
 
+          // Receive ICE candidate
           const iceCandidate = new RTCIceCandidate({
             candidate: candidate.candidate,
             sdpMid: candidate.sdpMid,
             sdpMLineIndex: candidate.sdpMLineIndex,
             usernameFragment: candidate.usernameFragment,
           });
-
-          await peerConnections.current[from]?.addIceCandidate(iceCandidate);
+          await peerConnections.current[from].addIceCandidate(iceCandidate);
         } catch (error) {
           console.error('WebRTC: add ICE Candidate failed:', error);
         }
@@ -155,6 +183,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   }, [socket]);
 
   const createPeerConnection = async (rtcConnection: string) => {
+    console.log('WebRTC: create peer connection, target user:', rtcConnection);
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const peer = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -164,24 +193,26 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log('WebRTC: generate ICE Candidate:', event.candidate);
-
-        const serializedCandidate = {
-          candidate: event.candidate.candidate,
-          sdpMid: event.candidate.sdpMid,
-          sdpMLineIndex: event.candidate.sdpMLineIndex,
-          usernameFragment: event.candidate.usernameFragment,
-        };
-
+        // Send candidate
         socket?.send.RTCIceCandidate({
           to: rtcConnection,
-          candidate: serializedCandidate,
+          candidate: {
+            candidate: event.candidate.candidate,
+            sdpMid: event.candidate.sdpMid,
+            sdpMLineIndex: event.candidate.sdpMLineIndex,
+            usernameFragment: event.candidate.usernameFragment,
+          },
         });
+
+        console.log('WebRTC: send ICE candidate to', rtcConnection);
       }
     };
 
     peer.oniceconnectionstatechange = () => {
-      console.log('WebRTC: ICE connection state changed:', peer.iceConnectionState);
+      console.log(
+        'WebRTC: ICE connection state changed:',
+        peer.iceConnectionState,
+      );
     };
 
     peer.ontrack = (event) => {
@@ -195,28 +226,11 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     };
 
     peerConnections.current[rtcConnection] = peer;
-
-    try {
-      const offer = await peer.createOffer();
-      await peer.setLocalDescription(offer);
-
-      const serializedOffer = {
-        type: offer.type,
-        sdp: offer.sdp,
-      };
-
-      socket?.send.RTCOffer({
-        to: rtcConnection,
-        offer: serializedOffer,
-      });
-    } catch (error) {
-      console.error('WebRTC: create or send Offer error:', error);
-    }
   };
 
   const removePeerConnection = async (rtcConnection: string) => {
     console.log('WebRTC: remove peer connection, target user:', rtcConnection);
-    peerConnections.current[rtcConnection]?.close();
+    peerConnections.current[rtcConnection].close();
     delete peerConnections.current[rtcConnection];
     setPeers((prev) => {
       const newPeers = { ...prev };
@@ -226,12 +240,10 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   };
 
   const joinVoiceChannel = (channelId: string) => {
-    console.log('WebRTC: try to join voice channel', channelId);
     socket?.send.connectChannel({ channelId });
   };
 
   const leaveVoiceChannel = () => {
-    console.log('WebRTC: try to leave voice channel');
     if (channelId) {
       socket?.send.disconnectChannel({ channelId });
     }
@@ -245,7 +257,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         track.enabled = isMute;
       });
       setIsMute(!isMute);
-      console.log('WebRTC: mute state toggled to:', !isMute);
     }
   };
 
@@ -253,18 +264,16 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     <WebRTCContext.Provider
       value={{ joinVoiceChannel, leaveVoiceChannel, toggleMute, isMute }}
     >
-      <audio ref={localAudioRef} autoPlay controls />
       {Object.keys(peers).map((userId) => (
-        <div key={userId}>
-          <h3>使用者 {userId} 的音訊</h3>
-          <audio
-            ref={(el) => {
-              if (el) el.srcObject = peers[userId];
-            }}
-            autoPlay
-            controls
-          />
-        </div>
+        <audio
+          key={userId}
+          ref={(el) => {
+            if (el) el.srcObject = peers[userId];
+          }}
+          autoPlay
+          controls
+          style={{ display: 'none' }}
+        />
       ))}
       {children}
     </WebRTCContext.Provider>

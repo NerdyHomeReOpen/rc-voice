@@ -339,53 +339,18 @@ function connectSocket(sessionId) {
       );
     });
     socket.on('RTCOffer', (data) => {
-      // make sure data is serializable
-      const serializedData = {
-        from: data.from,
-        offer: data.offer
-          ? {
-              type: data.offer.type,
-              sdp: data.offer.sdp,
-            }
-          : null,
-      };
-
       BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCOffer', serializedData),
+        window.webContents.send('RTCOffer', data),
       );
     });
     socket.on('RTCAnswer', (data) => {
-      // make sure data is serializable
-      const serializedData = {
-        from: data.from,
-        answer: data.answer
-          ? {
-              type: data.answer.type,
-              sdp: data.answer.sdp,
-            }
-          : null,
-      };
-
       BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCAnswer', serializedData),
+        window.webContents.send('RTCAnswer', data),
       );
     });
     socket.on('RTCIceCandidate', (data) => {
-      // make sure data is serializable
-      const serializedData = {
-        from: data.from,
-        candidate: data.candidate
-          ? {
-              candidate: data.candidate.candidate,
-              sdpMid: data.candidate.sdpMid,
-              sdpMLineIndex: data.candidate.sdpMLineIndex,
-              usernameFragment: data.candidate.usernameFragment,
-            }
-          : null,
-      };
-
       BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCIceCandidate', serializedData),
+        window.webContents.send('RTCIceCandidate', data),
       );
     });
     socket.on('RTCJoin', (data) => {
@@ -398,32 +363,6 @@ function connectSocket(sessionId) {
         window.webContents.send('RTCLeave', data),
       );
     });
-
-    // socket.on('voiceStream', (data) => {
-    //   BrowserWindow.getAllWindows().forEach((window) =>
-    //     window.webContents.send('voiceStream', data),
-    //   );
-    // });
-
-    // socket.on('update-users-list', (users) =>
-    //   console.log('Call users list: ', users),
-    // );
-    // socket.on('audio-stream', ({ from, data }) => {
-    //   BrowserWindow.getAllWindows().forEach((window) =>
-    //     window.webContents.send('audio-stream', from, data),
-    //   );
-    // });
-    // socket.on('update-disconnect', () => {
-    //   BrowserWindow.getAllWindows().forEach((window) =>
-    //     window.webContents.send('update-disconnect'),
-    //   );
-    // });
-    // socket.on('room-list', (rooms) => console.log('Channel list: ', rooms));
-    // socket.on('user-speaking', (data) => {
-    //   BrowserWindow.getAllWindows().forEach((window) =>
-    //     window.webContents.send('user-speaking', data),
-    //   );
-    // });
 
     // Socket IPC event handling
     ipcMain.on('connectUser', (_, data) =>
@@ -462,68 +401,21 @@ function connectSocket(sessionId) {
     ipcMain.on('deleteChannel', (_, data) =>
       socket.emit('deleteChannel', { sessionId, ...data }),
     );
-    ipcMain.on('sendMessage', (_, data) =>
-      socket.emit('sendMessage', { sessionId, ...data }),
+    ipcMain.on('message', (_, data) =>
+      socket.emit('message', { sessionId, ...data }),
     );
-    ipcMain.on('sendDirectMessage', (_, data) =>
-      socket.emit('sendDirectMessage', { sessionId, ...data }),
+    ipcMain.on('directMessage', (_, data) =>
+      socket.emit('directMessage', { sessionId, ...data }),
     );
-    ipcMain.on('sendRTCOffer', (_, data) => {
-      // make sure data is serializable
-      const serializedData = {
-        sessionId,
-        to: data.to,
-        offer: data.offer
-          ? {
-              type: data.offer.type,
-              sdp: data.offer.sdp,
-            }
-          : null,
-      };
-
-      socket.emit('RTCOffer', serializedData);
-      console.log('主進程: sendRTCOffer 已發送到伺服器');
-    });
-    ipcMain.on('sendRTCAnswer', (_, data) => {
-      // make sure data is serializable
-      const serializedData = {
-        sessionId,
-        to: data.to,
-        answer: data.answer
-          ? {
-              type: data.answer.type,
-              sdp: data.answer.sdp,
-            }
-          : null,
-      };
-
-      socket.emit('RTCAnswer', serializedData);
-    });
-    ipcMain.on('sendRTCIceCandidate', (_, data) => {
-      // make sure data is serializable
-      const serializedData = {
-        sessionId,
-        to: data.to,
-        candidate: data.candidate
-          ? {
-              candidate: data.candidate.candidate,
-              sdpMid: data.candidate.sdpMid,
-              sdpMLineIndex: data.candidate.sdpMLineIndex,
-              usernameFragment: data.candidate.usernameFragment,
-            }
-          : null,
-      };
-
-      socket.emit('RTCIceCandidate', serializedData);
-    });
-
-    // ipcMain.on('sendVoiceStream', (_, data) => {
-    //   socket.emit('sendVoiceStream', { sessionId, ...data });
-    // });
-
-    // ipcMain.on('join-room', (_, data) =>
-    //   socket.emit('join-room', { sessionId, ...data }),
-    // );
+    ipcMain.on('RTCOffer', (_, data) =>
+      socket.emit('RTCOffer', { sessionId, ...data }),
+    );
+    ipcMain.on('RTCAnswer', (_, data) =>
+      socket.emit('RTCAnswer', { sessionId, ...data }),
+    );
+    ipcMain.on('RTCIceCandidate', (_, data) =>
+      socket.emit('RTCIceCandidate', { sessionId, ...data }),
+    );
 
     // Close auth window and create main window
     if (authWindow) {

@@ -26,16 +26,9 @@ import { clearChannel, setChannel } from '@/redux/channelSlice';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
-// Providers
-import { useWebRTC } from './WebRTCProvider';
-
 // const WS_URL = 'ws://localhost:4500';
 
 type SocketContextType = {
-  // event?: Record<
-  //   SocketClientEvent | SocketServerEvent,
-  //   (...args: any[]) => void
-  // >;
   event?: {
     send: Record<SocketClientEvent, (data: any) => void>;
     on: Record<SocketServerEvent, (callback: (data: any) => void) => void>;
@@ -54,15 +47,6 @@ interface SocketProviderProps {
 }
 
 const SocketProvider = ({ children }: SocketProviderProps) => {
-  // const handleSendSocket = (socket: Socket) => {
-  //   console.log('socket: ', socket);
-  //   if (!newCallRef.current) {
-  //     newCallRef.current = new Call(socket);
-  //     newCall = newCallRef.current;
-  //   } else {
-  //     newCall = newCallRef.current;
-  //   }
-  // };
   const handleDisconnect = () => {
     console.log('Socket disconnected');
     store.dispatch(clearServer());
@@ -115,34 +99,12 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     if (!channel_) return;
     store.dispatch(setChannel({ ...channel_, ...data }));
   };
-  // const handlePlaySound = (sound: 'join' | 'leave') => {
-  //   switch (sound) {
-  //     case 'join':
-  //     // console.log('Play join sound');
-  //     // joinSoundRef.current?.play();
-  //     // break;
-  //     case 'leave':
-  //     // console.log('Play leave sound');
-  //     // leaveSoundRef.current?.play();
-  //     // break;
-  //   }
-  // };
-  // const handleVoiceStream = (data: ArrayBuffer) => {
-  //   // FIXME: handle voice stream
-  //   const audioBlob = new Blob([data], { type: 'audio/webm' }); // 重新組合 Blob
-  //   const audioUrl = URL.createObjectURL(audioBlob);
-  //   const audio = new Audio(audioUrl);
-  //   audio.play();
-  // };
 
   // Initialize socket event listeners
-  // make sure it only runs once
   useEffect(() => {
-    let isInitialDataReceived = false;
     if (ipcService.getAvailability()) {
       ipcService.requestInitialData();
       ipcService.onInitialData((data) => {
-        isInitialDataReceived = true;
         console.log('Initial data:', data);
         store.dispatch(setUser(data.user));
         store.dispatch(setServer(data.server));
@@ -162,9 +124,6 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
         [SocketServerEvent.CHANNEL_CONNECT]: handleChannelConnect,
         [SocketServerEvent.CHANNEL_DISCONNECT]: handleChannelDisconnect,
         [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
-        // [SocketServerEvent.PLAY_SOUND]: handlePlaySound,
-        // [SocketServerEvent.VOICE_STREAM]: handleVoiceStream,
-        // [SocketServerEvent.SEND_SOCKET]: handleSendSocket,
       };
 
       Object.entries(eventHandlers).forEach(([event, handler]) => {
@@ -196,88 +155,6 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
       return acc;
     }, {} as Record<SocketServerEvent, (callback: (data: any) => void) => void>),
   };
-
-  // const event = {
-  //   // Client events
-
-  //   [SocketClientEvent.CONNECT_USER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.CONNECT_USER, data),
-  //   [SocketClientEvent.DISCONNECT_USER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.DISCONNECT_USER, data),
-  //   [SocketClientEvent.UPDATE_USER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.UPDATE_USER, data),
-  //   [SocketClientEvent.CONNECT_SERVER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.CONNECT_SERVER, data),
-  //   [SocketClientEvent.DISCONNECT_SERVER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.DISCONNECT_SERVER, data),
-  //   [SocketClientEvent.CREATE_SERVER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.CREATE_SERVER, data),
-  //   [SocketClientEvent.UPDATE_SERVER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.UPDATE_SERVER, data),
-  //   [SocketClientEvent.DELETE_SERVER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.DELETE_SERVER, data),
-  //   [SocketClientEvent.CONNECT_CHANNEL]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.CONNECT_CHANNEL, data),
-  //   [SocketClientEvent.DISCONNECT_CHANNEL]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.DISCONNECT_CHANNEL, data),
-  //   [SocketClientEvent.CREATE_CHANNEL]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.CREATE_CHANNEL, data),
-  //   [SocketClientEvent.UPDATE_CHANNEL]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.UPDATE_CHANNEL, data),
-  //   [SocketClientEvent.DELETE_CHANNEL]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.DELETE_CHANNEL, data),
-  //   [SocketClientEvent.SEND_MESSAGE]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.SEND_MESSAGE, data),
-  //   [SocketClientEvent.SEND_DIRECT_MESSAGE]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.SEND_DIRECT_MESSAGE, data),
-  //   [SocketClientEvent.RTC_ANSWER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.RTC_ANSWER, data),
-  //   [SocketClientEvent.RTC_OFFER]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.RTC_OFFER, data),
-  //   [SocketClientEvent.RTC_ICE_CANDIDATE]: (data: any) =>
-  //     ipcService.sendSocketEvent(SocketClientEvent.RTC_ICE_CANDIDATE, data),
-
-  //   // Server events
-  //   [SocketServerEvent.CONNECT]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.CONNECT, callback),
-  //   [SocketServerEvent.DISCONNECT]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.DISCONNECT, callback),
-  //   [SocketServerEvent.NOTIFICATION]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.NOTIFICATION, callback),
-  //   [SocketServerEvent.USER_CONNECT]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.USER_CONNECT, callback),
-  //   [SocketServerEvent.USER_DISCONNECT]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.USER_DISCONNECT, callback),
-  //   [SocketServerEvent.USER_UPDATE]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.USER_UPDATE, callback),
-  //   [SocketServerEvent.SERVER_CONNECT]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.SERVER_CONNECT, callback),
-  //   [SocketServerEvent.SERVER_DISCONNECT]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.SERVER_DISCONNECT, callback),
-  //   [SocketServerEvent.SERVER_UPDATE]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.SERVER_UPDATE, callback),
-  //   [SocketServerEvent.CHANNEL_CONNECT]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.CHANNEL_CONNECT, callback),
-  //   [SocketServerEvent.CHANNEL_DISCONNECT]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.CHANNEL_DISCONNECT, callback),
-  //   [SocketServerEvent.CHANNEL_UPDATE]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.CHANNEL_UPDATE, callback),
-  //   // [SocketServerEvent.PLAY_SOUND]: (callback: (data: any) => void) =>
-  //   //   ipcService.onSocketEvent(SocketServerEvent.PLAY_SOUND, callback),
-  //   [SocketServerEvent.ERROR]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.ERROR, callback),
-  //   // [SocketServerEvent.VOICE_STREAM]: (
-  //   //   callback: (voiceStream: ArrayBuffer) => void,
-  //   // ) => ipcService.onSocketEvent(SocketServerEvent.VOICE_STREAM, callback),
-  //   // [SocketServerEvent.SEND_SOCKET]: (callback: () => void) =>
-  //   //   ipcService.onSocketEvent(SocketServerEvent.SEND_SOCKET, callback),
-  //   [SocketServerEvent.RTC_ANSWER]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.RTC_ANSWER, callback),
-  //   [SocketServerEvent.RTC_OFFER]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.RTC_OFFER, callback),
-  //   [SocketServerEvent.RTC_ICE_CANDIDATE]: (callback: (data: any) => void) =>
-  //     ipcService.onSocketEvent(SocketServerEvent.RTC_ICE_CANDIDATE, callback),
-  // };
 
   return (
     <SocketContext.Provider value={{ event }}>
