@@ -163,11 +163,12 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       [SocketServerEvent.RTC_ICE_CANDIDATE]: handleRTCIceCandidate,
     };
 
-    const unsubscribe = Object.entries(eventHandlers).map(
-      ([event, handler]) => {
-        return socket.on[event as SocketServerEvent](handler);
-      },
-    );
+    const unsubscribe: (() => void)[] = [];
+
+    Object.entries(eventHandlers).map(([event, handler]) => {
+      const unsub = socket.on[event as SocketServerEvent](handler);
+      unsubscribe.push(unsub);
+    });
 
     return () => {
       unsubscribe.forEach((unsub) => unsub());
