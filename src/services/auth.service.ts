@@ -4,7 +4,6 @@ import { ipcService } from '@/services/ipc.service';
 
 // Utils
 import { base64encode } from '@/utils/base64encode';
-import { isTokenExpired } from '@/utils/jwt';
 
 interface LoginFormData {
   account: string;
@@ -23,40 +22,59 @@ interface RegisterFormData {
 export const authService = {
   login: async (formData: LoginFormData) => {
     try {
+      if (formData.autoLogin)
+        localStorage.setItem('autoLogin', 'true');
+      else
+        localStorage.setItem('autoLogin', 'false');
+      if (formData.rememberAccount)
+        localStorage.setItem('account', formData.account);
+      else
+        localStorage.removeItem('account');
+
       const loginData = {
         ...formData,
         password: base64encode(formData.password),
       };
       const response = await apiService.post('/login', loginData);
 
-      if (!response) {
-        throw new Error('伺服器無回應');
-      }
+      if (!response || !response.token) throw new Error('伺服器無回應');
+        
+      localStorage.setItem('token', response.token);
+      console.log('Login with token:', response.token);
+      ipcService.auth.login(response.token);
 
-      if (response?.sessionId) {
-        localStorage.setItem('jwtToken', response.sessionId);
-      }
-
-      return response;
+      return true;
     } catch (error) {
-      console.error('登入請求失敗:', error);
-      throw error;
+      return false;
     }
   },
 
   register: async (formData: RegisterFormData) => {
-    const registerData = {
-      ...formData,
-      password: base64encode(formData.password),
-    };
-    return await apiService.post('/register', registerData);
+    try{
+      const registerData = {
+        ...formData,
+        password: base64encode(formData.password),
+      };
+      const response = await apiService.post('/register', registerData);
+
+      if (!response) 
+        throw new Error('伺服器無回應');
+
+      return true;
+    }catch (error) {
+      return false;
+    }
   },
 
   logout: () => {
-    localStorage.removeItem('jwtToken');
-    localStorage.removeItem('autoLogin');
-    if (ipcService.getAvailability()) {
+    try{
+      localStorage.removeItem('token');
+      localStorage.removeItem('autoLogin');
       ipcService.auth.logout();
+
+      return true;
+    }catch (error) {
+      return false;
     }
   },
 
@@ -64,33 +82,20 @@ export const authService = {
     return localStorage.getItem('autoLogin') === 'true';
   },
 
-  // Method to get current token
-  getToken: () => {
-    return localStorage.getItem('jwtToken');
+  isRememberAccountEnabled: () => {
+    return localStorage.getItem('account') !== null;
   },
 
-  // Method to validate token and auto log in
   autoLogin: async () => {
     const autoLogin = localStorage.getItem('autoLogin') === 'true';
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem('token');
 
-    if (!autoLogin || !token) {
-      return false;
-    }
+    if (!autoLogin || !token) return false;
 
-    if (isTokenExpired(token)) {
-      localStorage.removeItem('jwtToken');
-      return false;
-    }
+    console.log('Auto login with token:', token);
+    ipcService.auth.login(token);
 
-    // Return token for auto login
-    return token;
-  },
-
-  // Method to clear auto login
-  clearAutoLogin: () => {
-    localStorage.removeItem('autoLogin');
-    localStorage.removeItem('jwtToken');
+    return true;
   },
 };
 

@@ -123,14 +123,13 @@ export const ipcService = {
 
   // Auth related methods
   auth: {
-    login: (sessionId: string) => {
+    login: (token: string) => {
       if (isElectron) {
-        ipcRenderer.send('login', sessionId);
+        ipcRenderer.send('login', token);
       }
     },
     logout: () => {
       if (isElectron) {
-        localStorage.removeItem('jwtToken');
         ipcRenderer.send('logout');
       }
     },

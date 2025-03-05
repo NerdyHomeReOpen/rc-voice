@@ -23,7 +23,6 @@ import UserSettingModal from '@/components/modals/UserSettingModal';
 
 // Utils
 import { measureLatency } from '@/utils/measureLatency';
-import { isTokenExpired } from '@/utils/jwt';
 
 // Providers
 import WebRTCProvider from '@/providers/WebRTCProvider';
@@ -37,6 +36,7 @@ import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearChannel, setChannel } from '@/redux/channelSlice';
+import authService from '@/services/auth.service';
 
 interface HeaderProps {
   selectedId?: number;
@@ -54,13 +54,6 @@ const Header: React.FC<HeaderProps> = React.memo(
     // Socket
     const socket = useSocket();
 
-    const handleDisconnect = () => {
-      console.log('Socket disconnected');
-      store.dispatch(clearChannel());
-      store.dispatch(clearServer());
-      store.dispatch(clearUser());
-      localStorage.removeItem('sessionToken');
-    };
     const handleUserConnect = (user: any) => {
       console.log('User connected: ', user);
       store.dispatch(setUser(user));
@@ -70,7 +63,7 @@ const Header: React.FC<HeaderProps> = React.memo(
       store.dispatch(clearChannel());
       store.dispatch(clearServer());
       store.dispatch(clearUser());
-      localStorage.removeItem('sessionToken');
+      authService.logout();
     };
     const handleUserUpdate = (data: Partial<User>) => {
       console.log('User update: ', data);
@@ -107,10 +100,7 @@ const Header: React.FC<HeaderProps> = React.memo(
       store.dispatch(setChannel({ ...channel_, ...data }));
     };
     const handleLogout = () => {
-      ipcService.auth.logout();
-      localStorage.removeItem('autoLogin');
-      localStorage.removeItem('encryptedPassword');
-      localStorage.removeItem('sessionToken');
+      authService.logout();
     };
     const handleLeaveServer = () => {
       if (!user) return;
@@ -125,8 +115,8 @@ const Header: React.FC<HeaderProps> = React.memo(
 
       const eventHandlers = {
         [SocketServerEvent.CONNECT]: () => console.log('Socket connected'),
-        [SocketServerEvent.ERROR]: (error: any) => console.error(error),
-        [SocketServerEvent.DISCONNECT]: handleDisconnect,
+        [SocketServerEvent.DISCONNECT]: () =>
+          console.log('Socket disconnected'),
         [SocketServerEvent.USER_CONNECT]: handleUserConnect,
         [SocketServerEvent.USER_DISCONNECT]: handleUserDisconnect,
         [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
@@ -136,6 +126,7 @@ const Header: React.FC<HeaderProps> = React.memo(
         [SocketServerEvent.CHANNEL_CONNECT]: handleChannelConnect,
         [SocketServerEvent.CHANNEL_DISCONNECT]: handleChannelDisconnect,
         [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
+        [SocketServerEvent.ERROR]: (error: any) => console.error(error),
       };
 
       const unsubscribe: (() => void)[] = [];
@@ -166,31 +157,21 @@ const Header: React.FC<HeaderProps> = React.memo(
         setIsFullscreen(false);
       }
     };
-
     const handleMinimize = () => {
-      if (ipcService.getAvailability()) ipcService.window.minimize();
-      else console.warn('IPC not available - not in Electron environment');
+      ipcService.window.minimize();
     };
-
     const handleClose = () => {
-      if (ipcService.getAvailability()) ipcService.window.close();
-      else console.warn('IPC not available - not in Electron environment');
+      ipcService.window.close();
     };
-
     const handleOpenDevtool = () => {
-      if (ipcService.getAvailability()) ipcService.window.openDevtool();
-      else console.warn('IPC not available - not in Electron environment');
+      ipcService.window.openDevtool();
     };
 
     // Menu Control
     const [showMenu, setShowMenu] = useState(false);
 
-    // User Setting Control
-    const [showUserSetting, setShowUserSetting] = useState<boolean>(false);
-
     // Status Dropdown Control
-    const [showStatusDropdown, setShowStatusDropdown] =
-      useState<boolean>(false);
+    const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
     // Tab Control
     const MAIN_TABS = React.useMemo(() => {
@@ -234,9 +215,6 @@ const Header: React.FC<HeaderProps> = React.memo(
         <div className={`${header['titleBox']} ${header['big']}`}></div>
         {/* User Status */}
         <div className={header['userStatus']}>
-          {showUserSetting && (
-            <UserSettingModal onClose={() => setShowUserSetting(false)} />
-          )}
           <div className={header['nameDisplay']}>{userName}</div>
           <div
             className={header['statusBox']}
@@ -374,6 +352,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 className={`${header['option']} ${header['hasImage']}`}
                 data-type="exit"
                 data-key="30061"
+                onClick={() => handleClose()}
               >
                 退出
               </div>
@@ -423,42 +402,6 @@ const Home = () => {
       }
     }
   };
-
-  useEffect(() => {
-    const attemptAutoLogin = async () => {
-      // Check if auto login is enabled
-      const autoLogin = localStorage.getItem('autoLogin') === 'true';
-      if (!autoLogin) return;
-
-      // Get stored token
-      const token = localStorage.getItem('jwtToken');
-
-      // If no token, exit
-      if (!token) return;
-
-      // Check if token is valid (not expired)
-      if (isTokenExpired(token)) {
-        // Token expired, clear it
-        localStorage.removeItem('jwtToken');
-        return;
-      }
-
-      try {
-        // Connect to socket with token
-        ipcService.auth.login(token);
-
-        // You might need to fetch the user data here if needed
-        // const userData = await authService.getUserData();
-      } catch (error) {
-        console.error('Auto login failed:', error);
-        // Clean up on failure
-        localStorage.removeItem('jwtToken');
-        localStorage.removeItem('autoLogin');
-      }
-    };
-
-    attemptAutoLogin();
-  }, []);
 
   return (
     <WebRTCProvider>

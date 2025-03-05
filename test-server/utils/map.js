@@ -1,60 +1,46 @@
 const map = {
-  userSessions: new Map(), // sessionId -> userId
+  userToSession: new Map(), // userId -> sessionId
+  sessionToUser: new Map(), // sessionId -> userId
   userToSocket: new Map(), // userId -> socketId
   socketToUser: new Map(), // socketId -> userId
   contributionIntervalMap: new Map(), // socketId -> interval
   userElapsedTime: new Map(),
   userTimeFlag: new Map(),
   createUserIdSessionIdMap: (userId, sessionId) => {
-    if (!map.userSessions.has(sessionId)) {
-      map.userSessions.set(sessionId, userId);
-      return true;
-    }
-    return false;
+    map.userToSession.set(userId, sessionId);
+    map.sessionToUser.set(sessionId, userId);
   },
-  deleteUserIdSessionIdMap: (userId = null) => {
-    if (userId && map.userSessions.has(userId)) {
-      map.userSessions.delete(userId);
-      return true;
+  deleteUserIdSessionIdMap: (userId = null, sessionId = null) => {
+    if (userId && map.userToSession.has(userId)) {
+      const _sessionId = map.userToSession.get(userId);
+      if (sessionId == _sessionId) map.userToSession.delete(userId);
     }
-    return false;
+    if (sessionId && map.sessionToUser.has(sessionId)) {
+      const _userId = map.sessionToUser.get(sessionId);
+      if (userId == _userId) map.sessionToUser.delete(sessionId);
+    }
   },
   createUserIdSocketIdMap: (userId, socketId) => {
-    if (!map.socketToUser.has(socketId) && !map.userToSocket.has(userId)) {
-      map.socketToUser.set(socketId, userId);
-      map.userToSocket.set(userId, socketId);
-      return true;
-    }
-    return false;
+    map.userToSocket.set(userId, socketId);
+    map.socketToUser.set(socketId, userId);
   },
   deleteUserIdSocketIdMap: (userId = null, socketId = null) => {
     if (userId && map.userToSocket.has(userId)) {
-      socketId = map.userToSocket.get(userId);
-      map.socketToUser.delete(socketId);
-      map.userToSocket.delete(userId);
-      return true;
+      const _socketId = map.userToSocket.get(userId);
+      if (socketId == _socketId) map.userToSocket.delete(userId);
     }
     if (socketId && map.socketToUser.has(socketId)) {
-      userId = map.socketToUser.get(socketId);
-      map.userToSocket.delete(userId);
-      map.socketToUser.delete(socketId);
-      return true;
+      const _userId = map.socketToUser.get(socketId);
+      if (userId == _userId) map.socketToUser.delete(socketId);
     }
-    return false;
   },
   createContributionIntervalMap: (socketId, intervalId) => {
-    if (!map.contributionIntervalMap.has(socketId)) {
-      map.contributionIntervalMap.set(socketId, intervalId);
-      return true;
-    }
-    return false;
+    map.contributionIntervalMap.set(socketId, intervalId);
   },
-  deleteContributionIntervalMap: (socketId) => {
-    if (map.contributionIntervalMap.has(socketId)) {
+  deleteContributionIntervalMap: (socketId = null) => {
+    if (socketId && map.contributionIntervalMap.has(socketId)) {
       map.contributionIntervalMap.delete(socketId);
-      return true;
     }
-    return false;
   },
 };
 

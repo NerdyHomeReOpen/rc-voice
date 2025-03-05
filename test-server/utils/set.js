@@ -1,6 +1,6 @@
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
-
+// Utils
 const func = require('./func');
 
 const set = {

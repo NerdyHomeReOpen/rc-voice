@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 // Utils
@@ -11,41 +10,17 @@ const Func = utils.func;
 const Set = utils.set;
 // Socket error
 const SocketError = require('./socketError');
+// Handlers
 const serverHandler = require('./server');
 const channelHandler = require('./channel');
 
 const userHandler = {
-  connectUser: async (io, socket, sessionId) => {
+  connectUser: async (io, socket, sessionId, userId) => {
     // Get database
     const users = (await db.get('users')) || {};
 
     try {
       // Validate data
-      // Get userId from session map
-      let userId = Map.userSessions.get(sessionId);
-
-      // If userId not found in the map but socket has it from JWT verification
-      if (!userId && socket.userId) {
-        // This means the JWT token is valid (verified by middleware) but session wasn't in the map
-        // Likely due to server restart, so we should recreate the session
-        userId = socket.userId;
-
-        // Recreate the session mapping
-        Map.createUserIdSessionIdMap(userId, sessionId);
-
-        new Logger('WebSocket').info(
-          `Restored session for user(${userId}) after server restart`,
-        );
-      }
-
-      if (!userId) {
-        throw new SocketError(
-          `Invalid session ID(${sessionId})`,
-          'CONNECTUSER',
-          'SESSION_EXPIRED',
-          401,
-        );
-      }
       const user = users[userId];
       if (!user) {
         throw new SocketError(
@@ -59,32 +34,16 @@ const userHandler = {
       // Check if user is already connected
       for (const [_socketId, _userId] of Map.socketToUser) {
         if (_userId === userId) {
-          // Emit force disconnect event
-          const sessionId = await Map.userSessions.get(_userId);
-          if (!sessionId) {
-            new Logger('WebSocket').warn(
-              `Can not find session ID for user(${userId})`,
-            );
-          }
-
           // FIXME: cant not disconnect exist socket connection
-          await userHandler.disconnect(io, socket, sessionId);
-
-          new Logger('WebSocket').warn(
-            `User(${userId}) already connected from another socket. Force disconnecting...`,
-          );
+          io.to(_socketId).emit('userDisconnect', null);
         }
       }
 
+      // Save user session connection
+      Map.createUserIdSessionIdMap(user.id, sessionId);
+
       // Save user socket connection
-      if (!Map.createUserIdSocketIdMap(user.id, socket.id)) {
-        throw new SocketError(
-          'Cannot create user socket map',
-          'CONNECTUSER',
-          'CREATE_USER_SOCKET_MAP',
-          500,
-        );
-      }
+      Map.createUserIdSocketIdMap(user.id, socket.id);
 
       // Emit data (only to the user)
       io.to(socket.id).emit('userConnect', await Get.user(user.id));
@@ -111,7 +70,7 @@ const userHandler = {
       new Logger('WebSocket').error(`Error connecting user: ${error.message}`);
     }
   },
-  disconnect: async (io, socket, sessionId) => {
+  disconnectUser: async (io, socket, sessionId) => {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
@@ -119,12 +78,12 @@ const userHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
-          `Invalid socket ID(${sessionId})`,
-          'DISCONNECTUSER',
-          'SOKET_ID',
+          `Invalid session ID(${sessionId})`,
+          'UPDATEUSER',
+          'SESSION_EXPIRED',
           401,
         );
       }
@@ -161,15 +120,11 @@ const userHandler = {
         );
       }
 
+      // Remove user session connection
+      Map.deleteUserIdSessionIdMap(userId, sessionId);
+
       // Remove user socket connection
-      if (!Map.deleteUserIdSocketIdMap(userId, socket.id)) {
-        throw new SocketError(
-          'Cannot delete user socket connection',
-          'DISCONNECTUSER',
-          'DELETE_USER_SOCKET_MAP',
-          500,
-        );
-      }
+      Map.deleteUserIdSocketIdMap(userId, socket.id);
 
       // Update user
       const update = {
@@ -177,9 +132,6 @@ const userHandler = {
         lastActiveAt: Date.now(),
       };
       await Set.user(userId, update);
-
-      // Emit data (only to the user)
-      io.to(socket.id).emit('userDisconnect', null);
 
       new Logger('WebSocket').success(`User(${userId}) disconnected`);
     } catch (error) {
@@ -206,7 +158,7 @@ const userHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,

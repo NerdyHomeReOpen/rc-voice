@@ -20,7 +20,7 @@ const messageHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -89,7 +89,7 @@ const messageHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,

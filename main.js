@@ -28,7 +28,7 @@ if (isDev) {
 // Track windows
 let mainWindow = null;
 let authWindow = null;
-let popupWindows = {};
+let popups = {};
 
 // Socket connection
 const WS_URL = 'http://localhost:4500';
@@ -202,9 +202,9 @@ async function createAuthWindow() {
 
 async function createPopup(type, height, width, initialData) {
   // Track popup windows
-  if (popupWindows[type] && !popupWindows[type].isDestroyed()) {
-    popupWindows[type].focus();
-    return popupWindows[type];
+  if (popups[type] && !popups[type].isDestroyed()) {
+    popups[type].focus();
+    return popups[type];
   }
 
   if (isDev) {
@@ -217,7 +217,7 @@ async function createPopup(type, height, width, initialData) {
     }
   }
 
-  const popup = new BrowserWindow({
+  popups[type] = new BrowserWindow({
     width: width ?? 800,
     height: height ?? 600,
     resizable: false,
@@ -231,27 +231,27 @@ async function createPopup(type, height, width, initialData) {
   });
 
   if (app.isPackaged || !isDev) {
-    appServe(popup).then(() => {
-      popup.loadURL(`app://./popup.html?type=${type}`);
+    appServe(popups[type]).then(() => {
+      popups[type].loadURL(`app://./popup.html?type=${type}`);
     });
   } else {
-    popup.loadURL(`${baseUri}/popup?type=${type}`);
+    popups[type].loadURL(`${baseUri}/popup?type=${type}`);
     // Open DevTools in development mode
-    popup.webContents.openDevTools();
+    popups[type].webContents.openDevTools();
   }
 
-  popup.webContents.on('closed', () => {
-    popupWindows[type] = null;
+  popups[type].webContents.on('closed', () => {
+    popups[type] = null;
   });
 
-  popup.webContents.on('request-initial-data', (event) => {
+  popups[type].webContents.on('request-initial-data', (event) => {
     event.sender.send('initial-data', initialData);
   });
 
-  return popup;
+  return popups[type];
 }
 
-function connectSocket(sessionId) {
+function connectSocket(token) {
   const socket = io(WS_URL, {
     transports: ['websocket'],
     reconnection: true,
@@ -261,7 +261,7 @@ function connectSocket(sessionId) {
     timeout: 20000,
     autoConnect: false,
     query: {
-      sessionId,
+      jwt: token,
     },
   });
 
@@ -370,56 +370,40 @@ function connectSocket(sessionId) {
     });
 
     // Socket IPC event handling
-    ipcMain.on('connectUser', (_, data) =>
-      socket.emit('connectUser', { sessionId, ...data }),
-    );
-    ipcMain.on('updateUser', (_, data) =>
-      socket.emit('updateUser', { sessionId, ...data }),
-    );
+    ipcMain.on('connectUser', (_, data) => socket.emit('connectUser', data));
+    ipcMain.on('updateUser', (_, data) => socket.emit('updateUser', data));
     ipcMain.on('connectServer', (_, data) =>
-      socket.emit('connectServer', { sessionId, ...data }),
+      socket.emit('connectServer', data),
     );
     ipcMain.on('disconnectServer', (_, data) =>
-      socket.emit('disconnectServer', { sessionId, ...data }),
+      socket.emit('disconnectServer', data),
     );
-    ipcMain.on('createServer', (_, data) =>
-      socket.emit('createServer', { sessionId, ...data }),
-    );
-    ipcMain.on('updateServer', (_, data) =>
-      socket.emit('updateServer', { sessionId, ...data }),
-    );
-    ipcMain.on('deleteServer', (_, data) =>
-      socket.emit('deleteServer', { sessionId, ...data }),
-    );
+    ipcMain.on('createServer', (_, data) => socket.emit('createServer', data));
+    ipcMain.on('updateServer', (_, data) => socket.emit('updateServer', data));
+    ipcMain.on('deleteServer', (_, data) => socket.emit('deleteServer', data));
     ipcMain.on('connectChannel', (_, data) =>
-      socket.emit('connectChannel', { sessionId, ...data }),
+      socket.emit('connectChannel', data),
     );
     ipcMain.on('disconnectChannel', (_, data) =>
-      socket.emit('disconnectChannel', { sessionId, ...data }),
+      socket.emit('disconnectChannel', data),
     );
     ipcMain.on('updateChannel', (_, data) =>
-      socket.emit('updateChannel', { sessionId, ...data }),
+      socket.emit('updateChannel', data),
     );
     ipcMain.on('createChannel', (_, data) =>
-      socket.emit('createChannel', { sessionId, ...data }),
+      socket.emit('createChannel', data),
     );
     ipcMain.on('deleteChannel', (_, data) =>
-      socket.emit('deleteChannel', { sessionId, ...data }),
+      socket.emit('deleteChannel', data),
     );
-    ipcMain.on('message', (_, data) =>
-      socket.emit('message', { sessionId, ...data }),
-    );
+    ipcMain.on('message', (_, data) => socket.emit('message', data));
     ipcMain.on('directMessage', (_, data) =>
-      socket.emit('directMessage', { sessionId, ...data }),
+      socket.emit('directMessage', data),
     );
-    ipcMain.on('RTCOffer', (_, data) =>
-      socket.emit('RTCOffer', { sessionId, ...data }),
-    );
-    ipcMain.on('RTCAnswer', (_, data) =>
-      socket.emit('RTCAnswer', { sessionId, ...data }),
-    );
+    ipcMain.on('RTCOffer', (_, data) => socket.emit('RTCOffer', data));
+    ipcMain.on('RTCAnswer', (_, data) => socket.emit('RTCAnswer', data));
     ipcMain.on('RTCIceCandidate', (_, data) =>
-      socket.emit('RTCIceCandidate', { sessionId, ...data }),
+      socket.emit('RTCIceCandidate', data),
     );
 
     mainWindow?.show();
@@ -431,8 +415,6 @@ function connectSocket(sessionId) {
 
 function disconnectSocket(socket) {
   socket?.disconnect();
-  mainWindow?.hide();
-  authWindow?.show();
   return null;
 }
 
@@ -457,43 +439,6 @@ app.on('ready', async () => {
   mainWindow.hide();
   authWindow.show();
 
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents
-      .executeJavaScript(
-        `
-      (function() {
-        const autoLogin = localStorage.getItem('autoLogin') === 'true';
-        const token = localStorage.getItem('jwtToken');
-        
-        if (autoLogin && token) {
-          // Try to parse the token to check if it's valid
-          try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const currentTime = Date.now() / 1000;
-            
-            // Check if token is expired
-            if (payload.exp && payload.exp > currentTime) {
-              // Token is valid, trigger login in main process
-              require('electron').ipcRenderer.send('login', token);
-              return true;
-            }
-          } catch (e) {
-            console.error('Error parsing token:', e);
-          }
-        }
-        
-        // No valid token, show auth window
-        return false;
-      })()
-    `,
-      )
-      .then((shouldAutoLogin) => {
-        if (!shouldAutoLogin) {
-          authWindow.show();
-        }
-      });
-  });
-
   app.on('before-quit', () => {
     if (rpc) rpc.destroy().catch(console.error);
   });
@@ -503,25 +448,21 @@ app.on('ready', async () => {
   });
 
   ipcMain.on('login', (_, token) => {
-    if (!socketInstance) socketInstance = connectSocket(token);
-    socketInstance.connect();
-
     mainWindow.show();
     authWindow.hide();
+    if (!socketInstance) socketInstance = connectSocket(token);
+    socketInstance.connect();
   });
 
   ipcMain.on('logout', () => {
-    // Disconnect socket
-    socketInstance = disconnectSocket(socketInstance);
-
-    // Show auth window and hide main window
     mainWindow.hide();
     authWindow.show();
+    socketInstance = disconnectSocket(socketInstance);
   });
 
   // Popup handlers
   ipcMain.on('open-popup', async (_, type, height, width) => {
-    popupWindows[type] = await createPopup(type, height, width);
+    createPopup(type, height, width);
   });
 
   // Window control event handlers

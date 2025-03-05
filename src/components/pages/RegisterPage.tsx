@@ -116,8 +116,7 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
       )
         return;
       try {
-        const data = await authService.register(formData);
-        if (data) onRegisterSuccess();
+        if (await authService.register(formData)) onRegisterSuccess();
       } catch (error) {
         setErrors({
           general: error instanceof Error ? error.message : '未知錯誤',

@@ -10,7 +10,7 @@ const Interval = utils.interval;
 const Set = utils.set;
 // Socket error
 const SocketError = require('./socketError');
-
+// Handlers
 const rtcHandler = require('./rtc');
 
 const channelHandler = {
@@ -21,7 +21,7 @@ const channelHandler = {
 
     try {
       // validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -125,7 +125,7 @@ const channelHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -207,7 +207,7 @@ const channelHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -294,7 +294,7 @@ const channelHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -388,7 +388,7 @@ const channelHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,

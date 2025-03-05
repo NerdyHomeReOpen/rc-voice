@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // CSS
 import header from '@/styles/common/header.module.css';
@@ -12,6 +12,7 @@ import RegisterPage from '@/components/pages/RegisterPage';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
+import authService from '@/services/auth.service';
 
 const Header: React.FC = React.memo(() => {
   // Fullscreen Control
@@ -67,9 +68,9 @@ const Auth: React.FC = () => {
   // State
   const [isLogin, setIsLogin] = useState<boolean>(true);
 
-  const handleLogin = (sessionId: string) => {
-    ipcService.auth.login(sessionId);
-  };
+  useEffect(() => {
+    authService.autoLogin();
+  }, []);
 
   return (
     <>
@@ -79,7 +80,7 @@ const Auth: React.FC = () => {
       <div className="content">
         {isLogin ? (
           <LoginPage
-            onLoginSuccess={(sessionId) => handleLogin(sessionId)}
+            onLoginSuccess={() => {}}
             onRegisterClick={() => setIsLogin(false)}
           />
         ) : (

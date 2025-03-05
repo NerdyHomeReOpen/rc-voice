@@ -1,5 +1,6 @@
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
+// Constants
 const { XP_SYSTEM } = require('../constant');
 
 const func = {

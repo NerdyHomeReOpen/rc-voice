@@ -2,14 +2,14 @@ const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 const fs = require('fs').promises;
 const path = require('path');
-
+// Constants
 const {
   XP_SYSTEM,
   UPLOADS_DIR,
   MIME_TYPES,
   CLEANUP_INTERVAL_MS,
 } = require('../constant');
-
+// Utils
 const Logger = require('./logger');
 const Map = require('./map');
 const Get = require('./get');
@@ -36,16 +36,12 @@ const interval = {
       const timeout = setTimeout(async () => {
         await obtainXp(socket, userId);
 
-        if (!Map.deleteContributionIntervalMap(socket.id)) {
-          throw new Error(`Interval not found for socket(${socket.id})`);
-        }
+        Map.deleteContributionIntervalMap(socket.id);
 
         interval.setupObtainXpInterval(socket);
       }, leftTime);
 
-      if (!Map.createContributionIntervalMap(socket.id, timeout)) {
-        throw new Error(`Interval already exists for socket(${socket.id})`);
-      }
+      Map.createContributionIntervalMap(socket.id, timeout);
 
       new Logger('XPSystem').info(
         `Obtain XP interval set up for user(${userId}) with left time: ${leftTime}`,
@@ -74,9 +70,7 @@ const interval = {
       // Initial elapsed time to map
       const elapsedTime = initialElapseTime(userId);
 
-      if (!Map.deleteContributionIntervalMap(socket.id)) {
-        throw new Error(`Interval not found for socket(${socket.id})`);
-      }
+      Map.deleteContributionIntervalMap(socket.id);
 
       clearTimeout(interval);
 

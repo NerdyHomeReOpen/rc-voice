@@ -7,15 +7,15 @@ const JWT_EXPIRES_IN = '7d';
 
 const jwtUtil = {
   // Generate a JWT token for a user
-  generateToken: (userId) => {
-    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  generateToken: (data) => {
+    return jwt.sign({ ...data }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
   },
 
   // Verify a JWT token
-  verifyToken: (sessionId) => {
+  verifyToken: (token) => {
     try {
-      const decoded = jwt.verify(sessionId, JWT_SECRET);
-      return { valid: true, userId: decoded.userId };
+      const decoded = jwt.verify(token, JWT_SECRET);
+      return { valid: true, ...decoded };
     } catch (error) {
       return { valid: false, error: error.message };
     }

@@ -1,35 +1,24 @@
+const { v4: uuidv4 } = require('uuid');
+// Utils
 const utils = require('../utils');
-const jwtUtil = require('../utils/jwt');
 const Logger = utils.logger;
 const Map = utils.map;
 const Get = utils.get;
 const Interval = utils.interval;
-
+const JWT = utils.jwt;
+// Socket error
 const SocketError = require('./socketError');
+// Handlers
 const userHandler = require('./user');
 const serverHandler = require('./server');
 const channelHandler = require('./channel');
 const messageHandler = require('./message');
 const rtcHandler = require('./rtc');
 
-// let serverCall = new callHandler();
-
-module.exports = (io, db) => {
+module.exports = (io) => {
   io.use((socket, next) => {
-    const sessionId = socket.handshake.query.sessionId;
-    if (!sessionId) {
-      new Logger('Socket').error(`Invalid session ID: ${sessionId}`);
-      return next(
-        new SocketError('Invalid session ID', 'AUTH', 'SESSION_EXPIRED', 401),
-      );
-    }
-    socket.sessionId = sessionId;
-    return next();
-  });
-
-  io.use((socket, next) => {
-    const sessionId = socket.handshake.query.sessionId;
-    if (!sessionId) {
+    const jwt = socket.handshake.query.jwt;
+    if (!jwt) {
       return next(
         new SocketError(
           'No authentication token',
@@ -39,49 +28,111 @@ module.exports = (io, db) => {
         ),
       );
     }
-
-    // Verify JWT token
-    const result = jwtUtil.verifyToken(sessionId);
+    const result = JWT.verifyToken(jwt);
     if (!result.valid) {
       return next(
         new SocketError('Invalid token', 'AUTH', 'TOKEN_INVALID', 401),
       );
     }
-
-    socket.userId = result.userId;
-    socket.sessionId = sessionId;
-
-    const existingUserId = Map.userSessions.get(sessionId);
-    if (!existingUserId) {
-      // If session doesn't exist but JWT is valid, note this for later handling
-      socket.isSessionRestored = true;
-      new Logger('Socket').info(
-        `Valid token without session for user(${result.userId}). Will restore.`,
+    const userId = result.userId;
+    if (!userId) {
+      return next(
+        new SocketError('Invalid token', 'AUTH', 'TOKEN_INVALID', 401),
       );
     }
+
+    // Generate a new session ID
+    const sessionId = uuidv4();
+
+    socket.jwt = jwt;
+    socket.sessionId = sessionId;
 
     return next();
   });
 
+  // Connect
   io.on('connection', (socket) => {
-    // Connect
-    userHandler.connectUser(io, socket, socket.sessionId);
+    // Validate data
+    const result = JWT.verifyToken(socket.jwt);
+    if (!result.valid) {
+      throw new SocketError(
+        'Invalid token',
+        'CONNECTUSER',
+        'TOKEN_INVALID',
+        401,
+      );
+    }
+    const userId = result.userId;
+    if (!userId) {
+      throw new SocketError(
+        'Invalid token',
+        'CONNECTUSER',
+        'TOKEN_INVALID',
+        401,
+      );
+    }
+    const sessionId = socket.sessionId;
+    if (!sessionId) {
+      throw new SocketError(
+        'Invalid session',
+        'CONNECTUSER',
+        'SESSION_INVALID',
+        401,
+      );
+    }
+    userHandler.connectUser(io, socket, sessionId, userId);
     // Disconnect
     socket.on('disconnect', () => {
-      userHandler.disconnect(io, socket, socket.sessionId);
+      // Validate data
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'DISCONNECTUSER',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'DISCONNECTUSER',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      userHandler.disconnectUser(io, socket, sessionId);
     });
     // User
     socket.on('updateUser', async (data) => {
       // data = {
-      //   sessionId:
       //   user: {
       //     ...
       //   }
       // }
 
       // Validate data
-      const { sessionId, user: editedUser } = data;
-      if (!sessionId || !editedUser) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'UPDATEUSER',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'UPDATEUSER',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { user: editedUser } = data;
+      if (!editedUser) {
         throw new SocketError(
           'Missing required fields',
           'UPDATEUSER',
@@ -94,14 +145,31 @@ module.exports = (io, db) => {
     // Server
     socket.on('connectServer', async (data) => {
       // data = {
-      //   sessionId:
       //   serverId:
       // }
       // console.log(data);
 
       // Validate data
-      const { sessionId, serverId } = data;
-      if (!sessionId || !serverId) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'CONNECTSERVER',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'CONNECTSERVER',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { serverId } = data;
+      if (!serverId) {
         throw new SocketError(
           'Missing required fields',
           'CONNECTSERVER',
@@ -113,14 +181,31 @@ module.exports = (io, db) => {
     });
     socket.on('disconnectServer', async (data) => {
       // data = {
-      //   sessionId:
       //   serverId:
       // }
       // console.log(data);
 
       // Validate data
-      const { sessionId, serverId } = data;
-      if (!sessionId || !serverId) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'DISCONNECTSERVER',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'DISCONNECTSERVER',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { serverId } = data;
+      if (!serverId) {
         throw new SocketError(
           'Missing required fields',
           'DISCONNECTSERVER',
@@ -132,7 +217,6 @@ module.exports = (io, db) => {
     });
     socket.on('createServer', async (data) => {
       // data = {
-      //   sessionId:
       //   server: {
       //     ...
       //   }
@@ -140,8 +224,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, server } = data;
-      if (!sessionId || !server) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'CREATESERVER',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'CREATESERVER',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { server } = data;
+      if (!server) {
         throw new SocketError(
           'Missing required fields',
           'CREATESERVER',
@@ -153,7 +255,6 @@ module.exports = (io, db) => {
     });
     socket.on('updateServer', async (data) => {
       // data = {
-      //   sessionId:
       //   server: {
       //     ...
       //   }
@@ -161,8 +262,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, server: editedServer } = data;
-      if (!sessionId || !editedServer) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'UPDATESERVER',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'UPDATESERVER',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { server: editedServer } = data;
+      if (!editedServer) {
         throw new SocketError(
           'Missing required fields',
           'UPDATESERVER',
@@ -175,14 +294,31 @@ module.exports = (io, db) => {
     // Channel
     socket.on('connectChannel', async (data) => {
       // data = {
-      //   sessionId:
       //   channelId:
       // }
       // console.log(data);
 
       // Validate data
-      const { sessionId, channelId } = data;
-      if (!sessionId || !channelId) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'CONNECTCHANNEL',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'CONNECTCHANNEL',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { channelId } = data;
+      if (!channelId) {
         throw new SocketError(
           'Missing required fields',
           'CONNECTCHANNEL',
@@ -194,14 +330,31 @@ module.exports = (io, db) => {
     });
     socket.on('disconnectChannel', async (data) => {
       // data = {
-      //   sessionId:
       //   channelId:
       // }
       // console.log(data);
 
       // Validate data
-      const { sessionId, channelId } = data;
-      if (!sessionId || !channelId) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'DISCONNECTCHANNEL',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'DISCONNECTCHANNEL',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { channelId } = data;
+      if (!channelId) {
         throw new SocketError(
           'Missing required fields',
           'DISCONNECTCHANNEL',
@@ -210,11 +363,9 @@ module.exports = (io, db) => {
         );
       }
       channelHandler.disconnectChannel(io, socket, sessionId, channelId);
-      serverCall.handleDisconnect(socket);
     });
     socket.on('createChannel', async (data) => {
       // data = {
-      //   sessionId:
       //   channel: {
       //     ...
       //   },
@@ -222,8 +373,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, channel } = data;
-      if (!sessionId || !channel) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'CREATECHANNEL',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'CREATECHANNEL',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { channel } = data;
+      if (!channel) {
         throw new SocketError(
           'Missing required fields',
           'CREATECHANNEL',
@@ -235,7 +404,6 @@ module.exports = (io, db) => {
     });
     socket.on('updateChannel', async (data) => {
       // data = {
-      //   sessionId:
       //   channel: {
       //     ...
       //   },
@@ -243,8 +411,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, channel: editedChannel } = data;
-      if (!sessionId || !editedChannel) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'UPDATECHANNEL',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'UPDATECHANNEL',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { channel: editedChannel } = data;
+      if (!editedChannel) {
         throw new SocketError(
           'Missing required fields',
           'UPDATECHANNEL',
@@ -256,14 +442,31 @@ module.exports = (io, db) => {
     });
     socket.on('deleteChannel', async (data) => {
       // data = {
-      //   sessionId:
       //   channelId:
       // }
       // console.log(data);
 
       // Validate data
-      const { sessionId, channelId } = data;
-      if (!sessionId || !channelId) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'DELETECHANNEL',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'DELETECHANNEL',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { channelId } = data;
+      if (!channelId) {
         throw new SocketError(
           'Missing required fields',
           'DELETECHANNEL',
@@ -276,7 +479,6 @@ module.exports = (io, db) => {
     // Message
     socket.on('message', async (data) => {
       // data = {
-      //   sessionId:
       //   message: {
       //     ...
       //   }
@@ -284,8 +486,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, message } = data;
-      if (!sessionId || !message) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'SENDMESSAGE',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'SENDMESSAGE',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { message } = data;
+      if (!message) {
         throw new SocketError(
           'Missing required fields',
           'SENDMESSAGE',
@@ -297,7 +517,6 @@ module.exports = (io, db) => {
     });
     socket.on('directMessage', async (data) => {
       // data = {
-      //   sessionId:
       //   message: {
       //     ...
       //   }
@@ -305,8 +524,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, message } = data;
-      if (!sessionId || !message) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'SENDDIRECTMESSAGE',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'SENDDIRECTMESSAGE',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { message } = data;
+      if (!message) {
         throw new SocketError(
           'Missing required fields',
           'SENDDIRECTMESSAGE',
@@ -319,7 +556,6 @@ module.exports = (io, db) => {
     // RTC
     socket.on('RTCOffer', async (data) => {
       // data = {
-      //   sessionId:
       //   to:
       //   offer: {
       //     ...
@@ -328,8 +564,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, to, offer } = data;
-      if (!sessionId || !to || !offer) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'SENDRTCOFFER',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'SENDRTCOFFER',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { to, offer } = data;
+      if (!to || !offer) {
         throw new SocketError(
           'Missing required fields',
           'SENDRTCOFFER',
@@ -341,7 +595,6 @@ module.exports = (io, db) => {
     });
     socket.on('RTCAnswer', async (data) => {
       // data = {
-      //   sessionId:
       //   to:
       //   answer: {
       //     ...
@@ -350,8 +603,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, to, answer } = data;
-      if (!sessionId || !to || !answer) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'SENDRTCANSWER',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'SENDRTCANSWER',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { to, answer } = data;
+      if (!to || !answer) {
         throw new SocketError(
           'Missing required fields',
           'SENDRTCANSWER',
@@ -363,7 +634,6 @@ module.exports = (io, db) => {
     });
     socket.on('RTCIceCandidate', async (data) => {
       // data = {
-      //   sessionId:
       //   to:
       //   candidate: {
       //     ...
@@ -372,8 +642,26 @@ module.exports = (io, db) => {
       // console.log(data);
 
       // Validate data
-      const { sessionId, to, candidate } = data;
-      if (!sessionId || !to || !candidate) {
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result.valid) {
+        throw new SocketError(
+          'Invalid token',
+          'SENDRTCCANDIDATE',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new SocketError(
+          'Invalid session',
+          'SENDRTCCANDIDATE',
+          'SESSION_INVALID',
+          401,
+        );
+      }
+      const { to, candidate } = data;
+      if (!to || !candidate) {
         throw new SocketError(
           'Missing required fields',
           'SENDRTCCANDIDATE',

@@ -8,10 +8,10 @@ const fs = require('fs').promises;
 const path = require('path');
 
 const utils = require('./utils');
-const jwtUtil = require('./utils/jwt');
 const Logger = utils.logger;
 const Set = utils.set;
 const Get = utils.get;
+const JWT = utils.jwt;
 
 const {
   PORT,
@@ -128,14 +128,15 @@ const server = http.createServer((req, res) => {
           lastActiveAt: Date.now(),
         });
 
-        // Generate session id
-        const sessionId = jwtUtil.generateToken(user.id);
-        utils.map.userSessions.set(sessionId, user.id);
+        // Generate JWT token
+        const jwt = JWT.generateToken({
+          userId: user.id,
+        });
 
         sendSuccess(res, {
           message: '登入成功',
           data: {
-            sessionId: sessionId,
+            token: jwt,
             user: await Get.user(user.id),
           },
         });
@@ -158,15 +159,15 @@ const server = http.createServer((req, res) => {
     const sessionId = authHeader.split(' ')[1];
 
     // Verify current token
-    const result = jwtUtil.verifyToken(sessionId);
+    const result = JWT.verifyToken(sessionId);
     if (!result.valid) {
       return sendError(res, 401, 'Invalid token');
     }
 
-    const newToken = jwtUtil.generateToken(result.userId);
+    const newToken = JWT.generateToken(result.userId);
 
     // Update the user sessions map
-    utils.map.userSessions.set(newToken, result.userId);
+    utils.map.sessionToUser.set(newToken, result.userId);
 
     sendSuccess(res, {
       message: 'Token refreshed',
@@ -243,16 +244,6 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   },
 });
-
-// const Call = require("./call");
-// let serverCall = new Call();
-// async function runServerCall() {
-//   const channels = (await db.get('channels')) || {};
-//   const CallLogger = new Logger('Call');
-//   serverCall = new Call(io, channels, CallLogger);
-// }
-// runServerCall();
-// serverCall.handleDisconnect(socket);
 
 require('./socket/index')(io, db);
 

@@ -4,6 +4,7 @@ const set = require('./set');
 const func = require('./func');
 const interval = require('./interval');
 const map = require('./map');
+const jwt = require('./jwt');
 
 module.exports = {
   logger,
@@ -12,4 +13,5 @@ module.exports = {
   func,
   interval,
   map,
+  jwt,
 };

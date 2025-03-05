@@ -28,7 +28,7 @@ interface LoginPageData {
 }
 
 interface LoginPageProps {
-  onLoginSuccess: (sessionId: string) => void;
+  onLoginSuccess: () => void;
   onRegisterClick: () => void;
 }
 
@@ -75,14 +75,7 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
       e.preventDefault();
       setIsLoading(true);
       try {
-        const response = await authService.login(formData);
-
-        if (response?.sessionId) {
-          if (formData.autoLogin) localStorage.setItem('autoLogin', 'true');
-          else localStorage.removeItem('autoLogin');
-
-          onLoginSuccess(response.sessionId);
-        }
+        if (await authService.login(formData)) onLoginSuccess();
       } catch (error) {
         setErrors({
           general: error instanceof Error ? error.message : '未知錯誤',

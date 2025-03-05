@@ -4,13 +4,14 @@ const db = new QuickDB();
 const fs = require('fs').promises;
 const path = require('path');
 const _ = require('lodash');
+const formidable = require('formidable');
+// Constants
 const {
   UPLOADS_PATH,
   SERVER_AVATAR_PATH,
   UPLOADS_DIR,
   SERVER_AVATAR_DIR,
 } = require('../constant');
-const formidable = require('formidable');
 // Utils
 const utils = require('../utils');
 const Logger = utils.logger;
@@ -21,6 +22,7 @@ const Func = utils.func;
 const Set = utils.set;
 // Socket error
 const SocketError = require('./socketError');
+// Handlers
 const channelHandler = require('./channel');
 
 const serverHandler = {
@@ -32,7 +34,7 @@ const serverHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -157,7 +159,7 @@ const serverHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -243,7 +245,7 @@ const serverHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
@@ -386,7 +388,7 @@ const serverHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      const userId = Map.sessionToUser.get(sessionId);
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,
