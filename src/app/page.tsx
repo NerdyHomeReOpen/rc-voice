@@ -54,6 +54,12 @@ const Header: React.FC<HeaderProps> = React.memo(
     // Socket
     const socket = useSocket();
 
+    const handleConnect = () => {
+      console.log('Socket connected');
+    };
+    const handleDisconnect = () => {
+      console.log('Socket disconnected');
+    };
     const handleUserConnect = (user: any) => {
       console.log('User connected: ', user);
       store.dispatch(setUser(user));
@@ -100,6 +106,9 @@ const Header: React.FC<HeaderProps> = React.memo(
       store.dispatch(setChannel({ ...channel_, ...data }));
     };
     const handleLogout = () => {
+      store.dispatch(clearChannel());
+      store.dispatch(clearServer());
+      store.dispatch(clearUser());
       authService.logout();
     };
     const handleLeaveServer = () => {
@@ -114,9 +123,8 @@ const Header: React.FC<HeaderProps> = React.memo(
       if (!socket) return;
 
       const eventHandlers = {
-        [SocketServerEvent.CONNECT]: () => console.log('Socket connected'),
-        [SocketServerEvent.DISCONNECT]: () =>
-          console.log('Socket disconnected'),
+        [SocketServerEvent.CONNECT]: () => handleConnect,
+        [SocketServerEvent.DISCONNECT]: () => handleDisconnect,
         [SocketServerEvent.USER_CONNECT]: handleUserConnect,
         [SocketServerEvent.USER_DISCONNECT]: handleUserDisconnect,
         [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
