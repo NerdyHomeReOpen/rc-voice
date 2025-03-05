@@ -21,7 +21,23 @@ const userHandler = {
 
     try {
       // Validate data
-      const userId = Map.userSessions.get(sessionId);
+      // Get userId from session map
+      let userId = Map.userSessions.get(sessionId);
+
+      // If userId not found in the map but socket has it from JWT verification
+      if (!userId && socket.userId) {
+        // This means the JWT token is valid (verified by middleware) but session wasn't in the map
+        // Likely due to server restart, so we should recreate the session
+        userId = socket.userId;
+
+        // Recreate the session mapping
+        Map.createUserIdSessionIdMap(userId, sessionId);
+
+        new Logger('WebSocket').info(
+          `Restored session for user(${userId}) after server restart`,
+        );
+      }
+
       if (!userId) {
         throw new SocketError(
           `Invalid session ID(${sessionId})`,

@@ -50,6 +50,16 @@ module.exports = (io, db) => {
 
     socket.userId = result.userId;
     socket.sessionId = sessionId;
+
+    const existingUserId = Map.userSessions.get(sessionId);
+    if (!existingUserId) {
+      // If session doesn't exist but JWT is valid, note this for later handling
+      socket.isSessionRestored = true;
+      new Logger('Socket').info(
+        `Valid token without session for user(${result.userId}). Will restore.`,
+      );
+    }
+
     return next();
   });
 
