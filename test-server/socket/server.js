@@ -757,6 +757,138 @@ const serverHandler = {
       new Logger('Server').error(`Error updating server: ${error.message}`);
     }
   },
+  getSearchResult: async (io, socket, data) => {
+    // Get database
+    const users = (await db.get('users')) || {};
+    const members = (await db.get('members')) || {};
+
+    try {
+      // Validate data
+      const jwt = socket.jwt;
+      if (!jwt) {
+        throw new StandardizedError(
+          '無可用的 JWT',
+          'ValidationError',
+          'GETSEARCHRESULT',
+          'TOKEN_MISSING',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new StandardizedError(
+          '無可用的 session ID',
+          'ValidationError',
+          'GETSEARCHRESULT',
+          'SESSION_MISSING',
+          401,
+        );
+      }
+      const result = JWT.verifyToken(jwt);
+      if (!result.valid) {
+        throw new StandardizedError(
+          '無效的 token',
+          'ValidationError',
+          'GETSEARCHRESULT',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const { query } = data;
+      if (!query || typeof query !== 'string') {
+        throw new StandardizedError(
+          '無效的搜尋查詢',
+          'ValidationError',
+          'GETSEARCHRESULT',
+          'QUERY_INVALID',
+          400,
+        );
+      }
+      const userId = Map.sessionToUser.get(sessionId);
+      if (!userId) {
+        throw new StandardizedError(
+          `無效的 session ID(${sessionId})`,
+          'ValidationError',
+          'GETSEARCHRESULT',
+          'SESSION_EXPIRED',
+          401,
+        );
+      }
+      const user = users[userId];
+      if (!user) {
+        throw new StandardizedError(
+          `使用者(${userId})不存在`,
+          'ValidationError',
+          'GETSEARCHRESULT',
+          'USER',
+          404,
+        );
+      }
+
+      const servers = (await db.get('servers')) || {};
+
+      const searchResults = Object.values(servers).filter((server) => {
+        const queryStr = String(query).trim();
+        const displayIdStr = String(server.displayId).trim();
+        const isExactIdMatch =
+          displayIdStr.toLowerCase() === queryStr.toLowerCase();
+        if (isExactIdMatch) return true;
+
+        if (server.settings.visibility === 'invisible') return false;
+
+        // Use the existing calculateSimilarity function that implements Levenshtein distance
+        const nameLower = server.name.toLowerCase();
+        const queryLower = query.toLowerCase();
+        const similarityScore = Func.calculateSimilarity(nameLower, queryLower);
+
+        // If query is a substring of name, or similarity score is high enough (0.6 or higher)
+        return nameLower.includes(queryLower) || similarityScore >= 0.6;
+      });
+
+      const maxResults = 20;
+      const limitedResults = searchResults.slice(0, maxResults);
+
+      const resultsWithMembership = await Promise.all(
+        limitedResults.map(async (server) => {
+          const memberKey = `mb_${userId}-${server.id}`;
+          const isMember = !!members[memberKey];
+
+          return {
+            id: server.id,
+            name: server.name,
+            displayId: server.displayId,
+            ownerId: server.ownerId,
+            avatarUrl: server.avatarUrl,
+            description: server.description,
+            visibility: server.settings.visibility,
+            isMember: isMember,
+          };
+        }),
+      );
+
+      // Emit search results to the user
+      io.to(socket.id).emit('searchResults', {
+        results: resultsWithMembership,
+      });
+    } catch (error) {
+      if (!(error instanceof StandardizedError)) {
+        error = new StandardizedError(
+          `搜尋伺服器時發生無法預期的錯誤: ${error.message}`,
+          'ServerError',
+          'GETSEARCHRESULT',
+          'EXCEPTION_ERROR',
+          500,
+        );
+      }
+
+      // Emit error to the user
+      io.to(socket.id).emit('error', error);
+
+      new Logger('WebSocket').error(
+        `Error searching servers: ${error.message}`,
+      );
+    }
+  },
 };
 
 module.exports = { ...serverHandler };

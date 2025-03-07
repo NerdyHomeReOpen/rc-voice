@@ -230,6 +230,7 @@ export enum SocketClientEvent {
   RTC_OFFER = 'RTCOffer',
   RTC_ANSWER = 'RTCAnswer',
   RTC_ICE_CANDIDATE = 'RTCIceCandidate',
+  GET_SEARCH_RESULT = 'getSearchResult',
 }
 
 export enum SocketServerEvent {
@@ -252,6 +253,7 @@ export enum SocketServerEvent {
   RTC_ICE_CANDIDATE = 'RTCIceCandidate',
   RTC_JOIN = 'RTCJoin',
   RTC_LEAVE = 'RTCLeave',
+  SEARCH_RESULTS = 'searchResults',
 }
 
 export enum popupType {

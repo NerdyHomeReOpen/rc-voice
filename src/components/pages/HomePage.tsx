@@ -98,10 +98,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
-  const handleOpenCreateServerPopup = () => {
-    ipcService.popup.open(popupType.CREATE_SERVER, 600, 450, { data: 'test' });
-  };
-
   return (
     <>
       <header className={styles['homeHeader']}>
@@ -164,8 +160,11 @@ const HomePageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User | null }) => state.user);
 
+  // Socket Control
+  const socket = useSocket();
+
   // State
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Server[]>([]);
 
   const userRecentServers = user?.recentServers ?? [];
   const userOwnedServers = user?.ownedServers ?? [];
@@ -190,12 +189,33 @@ const HomePageComponent: React.FC = React.memo(() => {
     });
   }, []);
 
+  const handleSearch = (query: string) => {
+    if (query.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+
+    socket?.send.getSearchResult({ query });
+    socket?.on.searchResults((data) => {
+      setSearchResults(data.results);
+    });
+  };
+
   return (
     <div className={styles['homeWrapper']}>
-      <Header onSearch={(query: string) => setSearchQuery(query)} />
+      <Header onSearch={handleSearch} />
       <main className={styles['myGroupsWrapper']}>
         <div className={styles['myGroupsContain']}>
           <div className={styles['myGroupsView']}>
+            {searchResults.length > 0 && (
+              <div className={styles['myGroupsItem']}>
+                <div className={styles['myGroupsTitle']} data-key="60005">
+                  搜尋結果
+                </div>
+                <ServerGrid servers={searchResults} />
+              </div>
+            )}
+
             <div className={styles['myGroupsItem']}>
               <div className={styles['myGroupsTitle']} data-key="60005">
                 最近訪問

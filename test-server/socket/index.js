@@ -99,6 +99,9 @@ module.exports = (io) => {
     socket.on('updateServer', async (data) =>
       serverHandler.updateServer(io, socket, data),
     );
+    socket.on('getSearchResult', async (data) => {
+      serverHandler.getSearchResult(io, socket, data);
+    });
     // Channel
     socket.on('connectChannel', async (data) =>
       channelHandler.connectChannel(io, socket, data),
