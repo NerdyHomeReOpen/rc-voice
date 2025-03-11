@@ -39,6 +39,8 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = ({
             title={`您確定要刪除頻道：${channel?.name} 嗎？`}
             onSubmit={handleSubmit}
             onClose={onClose}
+            iconType={'error'}
+            submitTo={''}
           />
         </div>
 

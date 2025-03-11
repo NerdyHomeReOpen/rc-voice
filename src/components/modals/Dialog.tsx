@@ -1,4 +1,5 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { FormEvent } from 'react';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
@@ -18,12 +19,16 @@ const DialogIcon = {
 
 interface DialogProps {
   iconType: keyof typeof DialogIcon;
+  popupIcon: string;
+  textBorder: string;
   title: React.ReactNode;
   submitTo: string;
+  onSubmit?: (e: FormEvent<Element>) => void;
+  onClose?: (e: FormEvent<Element>) => void;
 }
 
 const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
-  const { iconType, title, submitTo } = initialData;
+  const { iconType, popupIcon, textBorder, title, submitTo, onSubmit, onClose } = initialData;
 
   const handleClose = () => {
     ipcService.window.close();
