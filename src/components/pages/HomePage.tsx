@@ -195,37 +195,12 @@ const HomePageComponent: React.FC = React.memo(() => {
         },
       ],
     });
-
-    socket?.send.getUserServers({});
-
-    const handleGetUserServers = (updatedData: {
-      recentServers: Server[];
-      ownedServers: Server[];
-      favServers: Server[];
-    }) => {
-      setRecentServers((prev) =>
-        JSON.stringify(prev) === JSON.stringify(updatedData.recentServers)
-          ? prev
-          : updatedData.recentServers,
-      );
-      setOwnedServers((prev) =>
-        JSON.stringify(prev) === JSON.stringify(updatedData.ownedServers)
-          ? prev
-          : updatedData.ownedServers,
-      );
-      setFavServers((prev) =>
-        JSON.stringify(prev) === JSON.stringify(updatedData.favServers)
-          ? prev
-          : updatedData.favServers,
-      );
-    };
-
-    const removeListener = socket?.on.getUserServers(handleGetUserServers);
-
-    return () => {
-      removeListener?.();
-    };
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket?.send.refreshUser(null);
+  }, [socket]);
 
   const handleSearch = (query: string) => {
     if (query.trim() === '') {

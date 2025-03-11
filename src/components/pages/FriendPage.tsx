@@ -106,6 +106,9 @@ const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
 
+  // Socket
+  const socket = useSocket();
+
   // Sidebar Control
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
   const [isResizing, setIsResizing] = useState<boolean>(false);
@@ -144,6 +147,11 @@ const FriendPageComponent: React.FC = React.memo(() => {
 
   const userFriends = user.friends ?? [];
   const userFriendGroups = user.friendGroups ?? [];
+
+  useEffect(() => {
+    if (!socket) return;
+    socket?.send.refreshUser(null);
+  }, [socket]);
 
   return (
     <div className={styles['friendWrapper']}>

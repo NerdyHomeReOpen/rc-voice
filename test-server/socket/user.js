@@ -310,7 +310,7 @@ const userHandler = {
       new Logger('WebSocket').error(`Error updating user: ${error.message}`);
     }
   },
-  getUserServers: async (io, socket) => {
+  refreshUser: async (io, socket) => {
     const users = (await db.get('users')) || {};
 
     try {
@@ -320,7 +320,7 @@ const userHandler = {
         throw new StandardizedError(
           '無可用的 JWT',
           'ValidationError',
-          'GETUSERSERVERS',
+          'REFRESHUSER',
           'TOKEN_MISSING',
           401,
         );
@@ -330,7 +330,7 @@ const userHandler = {
         throw new StandardizedError(
           '無可用的 session ID',
           'ValidationError',
-          'GETUSERSERVERS',
+          'REFRESHUSER',
           'SESSION_MISSING',
           401,
         );
@@ -340,7 +340,7 @@ const userHandler = {
         throw new StandardizedError(
           '無效的 token',
           'ValidationError',
-          'GETUSERSERVERS',
+          'REFRESHUSER',
           'TOKEN_INVALID',
           401,
         );
@@ -351,7 +351,7 @@ const userHandler = {
         throw new StandardizedError(
           `無效的 session ID(${sessionId})`,
           'ValidationError',
-          'GETUSERSERVERS',
+          'REFRESHUSER',
           'SESSION_EXPIRED',
           401,
         );
@@ -361,29 +361,20 @@ const userHandler = {
         throw new StandardizedError(
           `使用者(${userId})不存在`,
           'ValidationError',
-          'GETUSERSERVERS',
+          'REFRESHUSER',
           'USER',
           404,
         );
       }
 
-      // Get user servers
-      const recentServers = (await Get.userRecentServers(userId)) || [];
-      const ownedServers = (await Get.userOwnedServers(userId)) || [];
-      const favServers = (await Get.userFavServers(userId)) || [];
-
       // Emit data (only to the user)
-      io.to(socket.id).emit('getUserServers', {
-        recentServers,
-        ownedServers,
-        favServers,
-      });
+      io.to(socket.id).emit('userUpdate', await Get.user(userId));
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `獲取使用者伺服器時發生無法預期的錯誤: ${error.message}`,
+          `刷新使用者時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
-          'GETUSERSERVERS',
+          'REFRESHUSER',
           'EXCEPTION_ERROR',
           500,
         );
@@ -392,9 +383,7 @@ const userHandler = {
       // Emit data (only to the user)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
-        `Error disconnecting user: ${error.message}`,
-      );
+      new Logger('WebSocket').error(`Error refreshing user: ${error.message}`);
     }
   },
 };

@@ -84,11 +84,9 @@ module.exports = (io) => {
     // Disconnect
     socket.on('disconnect', () => userHandler.disconnectUser(io, socket));
     // User
+    socket.on('refreshUser', async () => userHandler.refreshUser(io, socket));
     socket.on('updateUser', async (data) =>
       userHandler.updateUser(io, socket, data),
-    );
-    socket.on('getUserServers', async () =>
-      userHandler.getUserServers(io, socket),
     );
     // Server
     socket.on('connectServer', async (data) =>
