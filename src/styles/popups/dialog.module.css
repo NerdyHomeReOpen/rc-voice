@@ -1,0 +1,42 @@
+.body {
+  padding: 20px;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+}
+
+.dialogIcon {
+  margin-right: 1rem;
+  content: '';
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  background: url(../../../public/pic_alert.png) no-repeat center center;
+  vertical-align: middle;
+  background-size: contain;
+  min-width: 36px;
+}
+.dialogIcon.alert {
+  background: url(../../../public/pic_alert.png) no-repeat center center;
+}
+.dialogIcon.alert2 {
+  background: url(../../../public/pic_alert2.png) no-repeat center center;
+}
+.dialogIcon.error {
+  background: url(../../../public/pic_error.png) no-repeat center center;
+}
+.dialogIcon.warning {
+  background: url(../../../public/pic_warning.png) no-repeat center center;
+}
+.dialogIcon.info {
+  background: url(../../../public/pic_information.png) no-repeat center center;
+}
+.dialogIcon.success {
+  background: url(../../../public/pic_ok.png) no-repeat center center;
+}
