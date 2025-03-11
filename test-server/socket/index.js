@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { v4: uuidv4 } = require('uuid');
 // Utils
 const utils = require('../utils');
-const Logger = utils.logger;
-const Map = utils.map;
-const Get = utils.get;
-const Interval = utils.interval;
+// const Logger = utils.logger;
+// const Map = utils.map;
+// const Get = utils.get;
+// const Interval = utils.interval;
 const JWT = utils.jwt;
 // Socket error
 const StandardizedError = require('../standardizedError');

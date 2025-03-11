@@ -4,8 +4,8 @@ const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs').promises;
-const path = require('path');
+// const fs = require('fs').promises;
+// const path = require('path');
 
 const utils = require('./utils');
 const Logger = utils.logger;
@@ -16,8 +16,8 @@ const JWT = utils.jwt;
 const {
   PORT,
   CONTENT_TYPE_JSON,
-  UPLOADS_DIR,
-  MIME_TYPES,
+  // UPLOADS_DIR,
+  // MIME_TYPES,
 } = require('./constant');
 
 // Send Error/Success Response
