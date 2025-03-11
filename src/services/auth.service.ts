@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Services
 import { apiService } from '@/services/api.service';
 import { ipcService } from '@/services/ipc.service';

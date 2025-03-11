@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable @next/next/no-img-element */
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { ArrowUp } from 'lucide-react';
