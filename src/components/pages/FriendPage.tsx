@@ -18,6 +18,9 @@ import type { User } from '@/types';
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
 
+// Services
+import { ipcService } from '@/services/ipc.service';
+
 const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User | null }) => state.user);
@@ -32,6 +35,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
 
   // Variables
   const MAXLENGTH = 300;
+  const userName = user?.name ?? '';
   const userLevel = user?.level ?? 1;
   const userGrade = Math.min(56, Math.ceil(userLevel / 5)); // 56 is max level
   const userAvatarUrl = user?.avatarUrl ?? null;
@@ -80,6 +84,26 @@ const FriendPageComponent: React.FC = React.memo(() => {
     };
   }, [resize, stopResizing]);
 
+  // Update Discord Presence
+  useEffect(() => {
+    ipcService.discord.updatePresence({
+      details: `正在瀏覽好友列表`,
+      state: `使用者: ${userName}`,
+      largeImageKey: 'app_icon',
+      largeImageText: 'RC Voice',
+      smallImageKey: 'home_icon',
+      smallImageText: '好友列表',
+      timestamp: Date.now(),
+      buttons: [
+        {
+          label: '加入我們的Discord伺服器',
+          url: 'https://discord.gg/adCWzv6wwS',
+        },
+      ],
+    });
+  }, []);
+
+  // Refresh User
   useEffect(() => {
     socket?.send.refreshUser(null);
   }, []);
@@ -87,7 +111,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
   return (
     <div className={friendPage['friendWrapper']}>
       {/* Header */}
-      <div className={friendPage['friendHeader']}>
+      <header className={friendPage['friendHeader']}>
         <div
           className={friendPage['avatarPicture']}
           style={
@@ -137,9 +161,9 @@ const FriendPageComponent: React.FC = React.memo(() => {
             onCompositionEnd={() => setIsComposing(false)}
           />
         </div>
-      </div>
-      {/* Content */}
-      <div className={friendPage['friendContent']}>
+      </header>
+      {/* Main Content */}
+      <main className={friendPage['friendContent']}>
         {/* Left Sidebar */}
         <div
           className={friendPage['sidebar']}
@@ -156,7 +180,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
         <div className={friendPage['mainContent']}>
           <div className={friendPage['header']}>{'好友動態'}</div>
         </div>
-      </div>
+      </main>
     </div>
   );
 });
