@@ -1,10 +1,42 @@
-.label {
-  font-size: 14px;
+.tab {
+  background: #f0f0f0;
+  height: 40px;
+  display: flex;
+}
+.tab .item {
+  height: 100%;
+  width: 125px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  text-align: center;
+}
+.tab .item.active {
+  background: #a7c0e9;
+}
+
+.body {
+  padding: 15px;
+  gap: 15px;
+}
+
+.message {
+  padding: 5px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  background: #fff8dc;
+  border: 1px solid #ffd700;
+}
+
+.typeLabel {
+  font-size: 0.9rem;
   font-weight: bold;
-  display: block;
-  margin-bottom: 10px;
   color: #646464;
-  padding-top: 20px;
+}
+.inputLabel {
+  font-size: 0.9rem;
+  min-width: 40px;
 }
 
 .buttonGroup {
@@ -12,57 +44,34 @@
   flex-direction: column;
   gap: 10px;
   align-items: center;
-  padding-top: 20px;
+  padding: 30px;
 }
-
-.button {
-  font-size: 13px;
+.buttonGroup .button {
   width: 50%;
   padding: 10px;
   border: 1px solid #ccc;
   background: white;
   cursor: pointer;
   border-radius: 4px;
+  font-size: 0.9rem;
   text-align: center;
 }
 
-.message {
-  background: #fff8dc;
-  padding: 5px;
-  border: 1px solid #ffd700;
-  margin-bottom: 15px;
-  font-size: 13px;
-}
-
-.header {
-  background: #f0f0f0;
-  height: 40px;
+.inputGroup {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
 }
 
-.headerButton {
-  height: 100%;
-  width: 125px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #a7c0e9;
-}
-
-.headerButton span {
-  font-size: 12px;
-  text-align: center;
-}
-
-.changeAvatarWrapper {
+.avatarWrapper {
   display: flex;
   justify-content: center;
-  margin-bottom: 15px;
   height: auto;
   width: 100%;
   min-height: 134px;
 }
 
-.changeAvatarPicture {
+.avatarPicture {
   max-height: 100px;
 }

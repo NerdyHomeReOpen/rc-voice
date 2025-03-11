@@ -1,19 +1,29 @@
 .popupContainer {
-  width: 100%;
-  height: 100%;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #858585;
   background: url(../../../public/dialog_body_bg.png) no-repeat center center;
   background-size: cover;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
 }
 
-.headerBox {
+.popupBody {
+  flex: 1;
+  min-height: 0;
+}
+
+.popupFooter {
+  min-height: 50px;
+  max-height: 50px;
+  padding: 10px 15px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: #f4f4f5;
+  border-top: 1px solid #e3e3e5;
+}
+
+/* .headerBox {
   display: flex;
   justify-content: space-between;
   background-color: #0073c6;
@@ -30,9 +40,9 @@
   font-size: 16px;
   width: 100%;
   color: #fff;
-}
+} */
 
-.header:before {
+/* .header:before {
   content: '';
   display: inline-block;
   width: 18px;
@@ -45,9 +55,9 @@
 .title {
   margin-left: 5px;
   font-size: 13px;
-}
+} */
 
-.popupHeader {
+/* .popupHeader {
   background: #f0f0f0;
   height: 40px;
 }
@@ -58,9 +68,9 @@
   align-items: center;
   justify-content: space-evenly;
   -webkit-app-region: no-drag;
-}
+} */
 
-.close {
+/* .close {
   display: inline-block;
   width: 20px;
   height: 20px;
@@ -76,23 +86,8 @@
 
 .close:active {
   background-position: -40px 0;
-}
-
-.popupFooter {
-  padding: 10px 15px;
-  background-color: #f4f4f5;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  border-top: 1px solid #e3e3e5;
-  border-bottom: 1px solid #e3e3e5;
-}
-
-.popupBody {
-  padding: 15px;
-  height: 290px;
-}
-
+} */
+/* 
 .popupMessageBox {
   height: 100%;
   display: flex;
@@ -151,7 +146,7 @@
 
 .popupIconSuccess {
   background: url(../../../public/pic_ok.png) no-repeat center center;
-}
+} */
 
 .button {
   margin-right: 5px;
@@ -168,45 +163,35 @@
   border-radius: 5px;
   background: #fff;
 }
-
 .button:hover {
   background: #fafafa;
 }
-
 .button:active {
   background: #f5f5f5;
 }
 
 .inputBox {
-  font-size: 13px;
-  margin: 5;
+  width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 2px;
-  margin-top: 2px;
-  width: 100%;
+  font-size: 0.9rem;
 }
-
-.inputBox .title {
-  font-size: 13px;
-  width: 5rem;
+.inputBox .label {
+  min-width: 5rem;
 }
-
-.inputBox .title.impotant:after {
+.inputBox .label.required:after {
   content: '*';
   color: red;
 }
-
-.inputBorder {
+.inputBox .input {
   border: 1px solid #ddd;
-  padding-top: 0;
-  padding-bottom: 0;
+  padding: 2px;
   background: #fff;
   position: relative;
   display: inline-block;
-  font-size: 13px;
   width: 100%;
+  resize: none;
 }
 
 .inputBorder input,
@@ -233,7 +218,6 @@
   font-size: 13px;
   width: 100%;
 }
-
 .textBorder span,
 .textBorder div {
   width: 100% !important;
