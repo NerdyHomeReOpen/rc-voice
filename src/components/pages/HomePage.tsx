@@ -198,9 +198,8 @@ const HomePageComponent: React.FC = React.memo(() => {
   }, []);
 
   useEffect(() => {
-    if (!socket) return;
     socket?.send.refreshUser(null);
-  }, [socket]);
+  }, []);
 
   const handleSearch = (query: string) => {
     if (query.trim() === '') {

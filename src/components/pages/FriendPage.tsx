@@ -149,9 +149,8 @@ const FriendPageComponent: React.FC = React.memo(() => {
   const userFriendGroups = user.friendGroups ?? [];
 
   useEffect(() => {
-    if (!socket) return;
     socket?.send.refreshUser(null);
-  }, [socket]);
+  }, []);
 
   return (
     <div className={styles['friendWrapper']}>
