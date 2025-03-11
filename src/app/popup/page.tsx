@@ -158,15 +158,13 @@ const Modal = React.memo(() => {
   };
 
   return (
-    <div
-      className={`fixed w-full h-full flex-1 flex-col bg-white rounded shadow-lg overflow-hidden transform outline-g`}
-    >
+    <>
       {/* Top Nevigation */}
       <Header title={getTitle()}></Header>
       {/* Main Content */}
       {getMainContent()}
       {/* Bottom */}
-      <div className="flex flex-row justify-end items-center bg-gray-50">
+      {/* <div className="flex flex-row justify-end items-center bg-gray-50">
         <div className="flex justify-end gap-2 p-4 bg-gray-50">
           {getButtons().map((button, i) => (
             <button
@@ -179,8 +177,8 @@ const Modal = React.memo(() => {
             </button>
           ))}
         </div>
-      </div>
-    </div>
+      </div> */}
+    </>
   );
 });
 
