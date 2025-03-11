@@ -25,24 +25,19 @@ const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User | null }) => state.user);
 
-  // Socket
-  const socket = useSocket();
-
-  const handleChangeSignature = (signature: User['signature']) => {
-    const editedUser = { signature };
-    socket?.send.updateUser({ user: editedUser });
-  };
-
   // Variables
   const MAXLENGTH = 300;
-  const userName = user?.name ?? '';
-  const userLevel = user?.level ?? 1;
+  const userName = user?.name || '未知使用者';
+  const userLevel = user?.level || 1;
   const userGrade = Math.min(56, Math.ceil(userLevel / 5)); // 56 is max level
-  const userAvatarUrl = user?.avatarUrl ?? null;
-  const userBadges = user?.badges ?? [];
-  const userSignature = user?.signature ?? '';
-  const userFriends = user?.friends ?? [];
-  const userFriendGroups = user?.friendGroups ?? [];
+  const userAvatarUrl = user?.avatarUrl || '';
+  const userBadges = user?.badges || [];
+  const userSignature = user?.signature || '';
+  const userFriends = user?.friends || [];
+  const userFriendGroups = user?.friendGroups || [];
+
+  // Socket
+  const socket = useSocket();
 
   // Input Control
   const [signatureInput, setSignatureInput] = useState<string>(userSignature);
@@ -107,6 +102,12 @@ const FriendPageComponent: React.FC = React.memo(() => {
   useEffect(() => {
     socket?.send.refreshUser(null);
   }, []);
+
+  // Handlers
+  const handleChangeSignature = (signature: User['signature']) => {
+    const editedUser = { signature };
+    socket?.send.updateUser({ user: editedUser });
+  };
 
   return (
     <div className={friendPage['friendWrapper']}>

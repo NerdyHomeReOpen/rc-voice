@@ -6,6 +6,9 @@ import { useSelector } from 'react-redux';
 // CSS
 import homePage from '@/styles/homePage.module.css';
 
+// Components
+import ServerListViewer from '@/components/viewers/ServerListViewer';
+
 // Type
 import { popupType, type Server, type User } from '@/types';
 
@@ -14,9 +17,6 @@ import { useSocket } from '@/providers/SocketProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
-
-// Components
-import ServerListViewer from '../viewers/ServerListViewer';
 
 const HomePageComponent: React.FC = React.memo(() => {
   // Redux
@@ -30,13 +30,6 @@ const HomePageComponent: React.FC = React.memo(() => {
 
   // Socket Control
   const socket = useSocket();
-
-  const handleSearch = (query: string) => {
-    socket?.send.searchServer({ query });
-    socket?.on.serverSearch((results: Server[]) => {
-      setSearchResults(results);
-    });
-  };
 
   // Search Results Control
   const [searchResults, setSearchResults] = useState<Server[]>([]);
@@ -65,8 +58,17 @@ const HomePageComponent: React.FC = React.memo(() => {
     socket?.send.refreshUser(null);
   }, []);
 
+  // Handlers
+  const handleSearch = (query: string) => {
+    socket?.send.searchServer({ query });
+    socket?.on.serverSearch((results: Server[]) => {
+      setSearchResults(results);
+    });
+  };
+
   return (
     <div className={homePage['homeWrapper']}>
+      {/* Header */}
       <header className={homePage['homeHeader']}>
         <div className={homePage['left']}>
           <div className={homePage['backBtn']} />

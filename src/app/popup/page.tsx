@@ -33,6 +33,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ title, buttons }) => {
   // Fullscreen Control
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Handlers
   const handleFullscreen = () => {
     isFullscreen
       ? ipcService.window.unmaximize()

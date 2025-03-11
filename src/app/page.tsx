@@ -29,65 +29,37 @@ import { useSocket } from '@/providers/SocketProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
+import authService from '@/services/auth.service';
 
 // Redux
 import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearChannel, setChannel } from '@/redux/channelSlice';
-import authService from '@/services/auth.service';
 
 interface HeaderProps {
   selectedId?: number;
-  onSelect?: (tabId: number) => void;
+  setSelectedTabId?: (tabId: number) => void;
 }
 
 const Header: React.FC<HeaderProps> = React.memo(
-  ({ selectedId = 1, onSelect }) => {
+  ({ selectedId = 1, setSelectedTabId }) => {
     // Redux
     const user = useSelector((state: { user: User | null }) => state.user);
     const server = useSelector(
       (state: { server: Server | null }) => state.server,
     );
 
+    // Variables
+    const userCurrentServerId = user?.currentServerId || '';
+    const userName = user?.name || 'Unknown';
+    const userStatus = user?.status || 'online';
+
     // Socket
     const socket = useSocket();
 
-    const handleLogout = () => {
-      store.dispatch(clearChannel());
-      store.dispatch(clearServer());
-      store.dispatch(clearUser());
-      authService.logout();
-    };
-    const handleLeaveServer = () => {
-      if (!user) return;
-      socket?.send.disconnectServer({ serverId: user.currentServerId });
-    };
-    const handleUpdateStatus = (status: User['status']) => {
-      socket?.send.updateUser({ user: { status } });
-    };
-    const handleCreateError = (error: StandardizedError) => {
-      new errorHandler(error).show();
-    };
-
     // Fullscreen Control
     const [isFullscreen, setIsFullscreen] = useState(false);
-
-    const handleFullscreen = () => {
-      isFullscreen
-        ? ipcService.window.unmaximize()
-        : ipcService.window.maximize();
-      setIsFullscreen(!isFullscreen);
-    };
-    const handleMinimize = () => {
-      ipcService.window.minimize();
-    };
-    const handleClose = () => {
-      ipcService.window.close();
-    };
-    const handleOpenDevtool = () => {
-      ipcService.window.openDevtool();
-    };
 
     // Menu Control
     const [showMenu, setShowMenu] = useState(false);
@@ -128,8 +100,44 @@ const Header: React.FC<HeaderProps> = React.memo(
       { status: 'gn', label: '離線' },
     ];
 
-    const userName = user?.name ?? 'Unknown';
-    const userStatus = user?.status ?? 'online';
+    // Handlers
+    const handleLogout = () => {
+      store.dispatch(clearChannel());
+      store.dispatch(clearServer());
+      store.dispatch(clearUser());
+      authService.logout();
+    };
+
+    const handleLeaveServer = (serverId: string) => {
+      socket?.send.disconnectServer({ serverId: serverId });
+    };
+
+    const handleUpdateStatus = (status: User['status']) => {
+      socket?.send.updateUser({ user: { status } });
+    };
+
+    const handleCreateError = (error: StandardizedError) => {
+      new errorHandler(error).show();
+    };
+
+    const handleFullscreen = () => {
+      isFullscreen
+        ? ipcService.window.unmaximize()
+        : ipcService.window.maximize();
+      setIsFullscreen(!isFullscreen);
+    };
+
+    const handleMinimize = () => {
+      ipcService.window.minimize();
+    };
+
+    const handleClose = () => {
+      ipcService.window.close();
+    };
+
+    const handleOpenDevtool = () => {
+      ipcService.window.openDevtool();
+    };
 
     return (
       <div className={header['header']}>
@@ -176,7 +184,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                   TabId === selectedId ? header['selected'] : ''
                 }`}
                 onClick={() => {
-                  onSelect?.(TabId);
+                  setSelectedTabId?.(TabId);
                   Tab.onClick();
                 }}
               >
@@ -184,7 +192,10 @@ const Header: React.FC<HeaderProps> = React.memo(
                 <div className={header['tabBg']}></div>
                 {TabId > 2 && (
                   <CircleX
-                    onClick={() => handleLeaveServer()}
+                    onClick={() => {
+                      handleLeaveServer(userCurrentServerId);
+                      setSelectedTabId?.(1);
+                    }}
                     size={16}
                     className={header['tabClose']}
                   />
@@ -404,11 +415,6 @@ const Home = () => {
   // Tab Control
   const [selectedTabId, setSelectedTabId] = useState<number>(1);
 
-  useEffect(() => {
-    if (server) setSelectedTabId(3);
-    else setSelectedTabId(1);
-  }, [server]);
-
   const getMainContent = () => {
     if (!socket) return <LoadingSpinner />;
     switch (selectedTabId) {
@@ -426,7 +432,7 @@ const Home = () => {
       <WebRTCProvider>
         <Header
           selectedId={selectedTabId}
-          onSelect={(tabId) => setSelectedTabId(tabId)}
+          setSelectedTabId={setSelectedTabId}
         />
         {/* Main Content */}
         <div className="content">{getMainContent()}</div>

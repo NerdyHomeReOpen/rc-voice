@@ -29,13 +29,7 @@ import { useSocket } from '@/providers/SocketProvider';
 import { ipcService } from '@/services/ipc.service';
 import { useWebRTC } from '@/providers/WebRTCProvider';
 
-const getStoredBoolean = (key: string, defaultValue: boolean): boolean => {
-  const stored = localStorage.getItem(key);
-  if (stored === null) return defaultValue;
-  return stored === 'true';
-};
-
-const ServerPageComponent: React.FC = () => {
+const ServerPageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User | null }) => state.user);
   const server = useSelector(
@@ -44,20 +38,6 @@ const ServerPageComponent: React.FC = () => {
   const channel = useSelector(
     (state: { channel: Channel | null }) => state.channel,
   );
-
-  // Socket
-  const socket = useSocket();
-
-  const handleSendMessage = (message: Message): void => {
-    socket?.send.message({ message });
-  };
-
-  const handleOpenServerSettings = () => {
-    ipcService.popup.open(popupType.EDIT_SERVER, 450, 600);
-    ipcService.initialData.onRequest(popupType.EDIT_SERVER, {
-      server: server,
-    });
-  };
 
   // Variables
   const userMember = user ? server?.members?.[user.id] : null;
@@ -71,7 +51,10 @@ const ServerPageComponent: React.FC = () => {
   const serverAnnouncement = server?.announcement ?? '';
   const channelMessages = channel?.messages ?? [];
 
-  // Call
+  // Socket
+  const socket = useSocket();
+
+  // WebRTC
   const webRTC = useWebRTC();
 
   // Sidebar Control
@@ -110,24 +93,6 @@ const ServerPageComponent: React.FC = () => {
     };
   }, [resize, stopResizing]);
 
-  // Notification Control
-  const [notification, setNotification] = useState<boolean>(() =>
-    getStoredBoolean('notification', true),
-  );
-
-  useEffect(() => {
-    localStorage.setItem('notification', notification.toString());
-  }, [notification]);
-
-  // Mic Control
-  const [isMicOn, setIsMicOn] = useState<boolean>(() =>
-    getStoredBoolean('mic', false),
-  );
-
-  useEffect(() => {
-    localStorage.setItem('mic', isMicOn.toString());
-  }, [isMicOn]);
-
   // Update Discord Presence
   useEffect(() => {
     ipcService.discord.updatePresence({
@@ -147,8 +112,21 @@ const ServerPageComponent: React.FC = () => {
     });
   }, [serverName, serverUserCount]);
 
+  // Handlers
+  const handleSendMessage = (message: Message): void => {
+    socket?.send.message({ message });
+  };
+
+  const handleOpenServerSettings = () => {
+    ipcService.popup.open(popupType.EDIT_SERVER, 450, 600);
+    ipcService.initialData.onRequest(popupType.EDIT_SERVER, {
+      server: server,
+    });
+  };
+
   return (
     <div className={styles['serverWrapper']}>
+      {/* Main Content */}
       <main className={styles['serverContent']}>
         {/* Left Sidebar */}
         <div
@@ -244,7 +222,7 @@ const ServerPageComponent: React.FC = () => {
       </main>
     </div>
   );
-};
+});
 
 ServerPageComponent.displayName = 'ServerPageComponent';
 
