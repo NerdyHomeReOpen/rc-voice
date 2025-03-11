@@ -5,7 +5,7 @@ import React, { memo, useState, FormEvent } from 'react';
 import type { ModalButton, ModalTabItem } from '@/types';
 
 // Components
-import Header from '@/components/Header';
+// import Header from '@/components/Header';
 
 const getButtonStyle = (button: ModalButton, disabled: boolean) => {
   switch (button.style) {
