@@ -832,8 +832,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
             <>
               {memberContextMenu &&
                 (() => {
-                  const isCurrentUser =
-                    memberContextMenu.member.userId === mainUser?.id;
+                  const isCurrentUser = false;
+                    // memberContextMenu.member.userId === mainUser?.id;
                   const menuItems = [
                     {
                       label: '傳送即時訊息',
