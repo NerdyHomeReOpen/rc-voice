@@ -4,6 +4,7 @@ COPY package*.json ./
 RUN yarn install --frozen-lockfile
 COPY index.js ./
 COPY constant.js ./
+COPY standardizedError.js ./
 COPY ./utils ./utils
 COPY ./socket ./socket
 CMD ["node", "index.js"]
