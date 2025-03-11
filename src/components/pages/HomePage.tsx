@@ -168,16 +168,11 @@ const HomePageComponent: React.FC = React.memo(() => {
 
   // State
   const [searchResults, setSearchResults] = useState<Server[]>([]);
-  const [recentServers, setRecentServers] = useState<Server[]>(
-    user?.recentServers ?? [],
-  );
-  const [ownedServers, setOwnedServers] = useState<Server[]>(
-    user?.ownedServers ?? [],
-  );
-  const [favServers, setFavServers] = useState<Server[]>(
-    user?.favServers ?? [],
-  );
+
   const userName = user?.name || 'Unknown';
+  const ownedServers = user?.ownedServers || [];
+  const recentServers = user?.recentServers || [];
+  const favServers = user?.favServers || [];
 
   useEffect(() => {
     ipcService.discord.updatePresence({
@@ -206,7 +201,6 @@ const HomePageComponent: React.FC = React.memo(() => {
       setSearchResults([]);
       return;
     }
-
     socket?.send.searchServer({ query });
     socket?.on.serverSearch((results: Server[]) => {
       setSearchResults(results);
