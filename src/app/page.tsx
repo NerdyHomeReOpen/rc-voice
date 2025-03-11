@@ -410,17 +410,14 @@ const Home = () => {
   }, [server]);
 
   const getMainContent = () => {
-    if (!user) return <LoadingSpinner />;
-    else {
-      switch (selectedTabId) {
-        case 1:
-          return <HomePage />;
-        case 2:
-          return <FriendPage />;
-        case 3:
-          if (!server) return;
-          return <ServerPage />;
-      }
+    if (!socket) return <LoadingSpinner />;
+    switch (selectedTabId) {
+      case 1:
+        return <HomePage />;
+      case 2:
+        return <FriendPage />;
+      case 3:
+        return <ServerPage />;
     }
   };
 
