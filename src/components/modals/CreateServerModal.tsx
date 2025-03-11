@@ -64,7 +64,7 @@ const ServerTypeTab: React.FC<ServerTypeTabProps> = ({
             <div
               key={type}
               className={`${createServer['button']} ${
-                !remainingGroups ? popup['disabled'] : ''
+                server.type === type ? createServer['selected'] : ''
               }`}
               onClick={() => setServer({ ...server, type })}
             >
