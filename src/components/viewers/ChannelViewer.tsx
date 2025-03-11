@@ -20,8 +20,6 @@ import permission from '@/styles/common/permission.module.css';
 // Types
 import { popupType, type Channel, type Server, type User } from '@/types';
 
-// Redux
-import store from '@/redux/store';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
