@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [main]
+    branches: [main, fix-Dockerfile]
   pull_request:
     branches: [main]
   workflow_dispatch:
