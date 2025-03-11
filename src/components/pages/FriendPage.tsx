@@ -13,7 +13,7 @@ import FriendListViewer from '@/components/viewers/FriendListViewer';
 import BadgeViewer from '@/components/viewers/BadgeViewer';
 
 // Types
-import type { User } from '@/types';
+import { type User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';

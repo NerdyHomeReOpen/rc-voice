@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import dynamic from 'next/dynamic';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
 // CSS
@@ -11,10 +11,6 @@ import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 import MessageViewer from '@/components/viewers/MessageViewer';
 import ChannelViewer from '@/components/viewers/ChannelViewer';
 import MessageInputBox from '@/components/MessageInputBox';
-
-// Modals
-import ServerSettingModal from '@/components/modals/EditServerModal';
-import UserSettingModal from '@/components/modals/UserSettingModal';
 
 // Types
 import {
@@ -56,24 +52,27 @@ const ServerPageComponent: React.FC = () => {
     socket?.send.message({ message });
   };
 
-  // Call
-  const webRTC = useWebRTC();
-
-  // Volume Control
-  const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(100);
-  const volumeSliderRef = useRef<HTMLDivElement>(null);
-
-  const handleCloseVolumeSlider = (event: MouseEvent) => {
-    if (volumeSliderRef.current?.contains(event.target as Node))
-      setShowVolumeSlider(false);
+  const handleOpenServerSettings = () => {
+    ipcService.popup.open(popupType.EDIT_SERVER, 450, 600);
+    ipcService.initialData.onRequest(popupType.EDIT_SERVER, {
+      server: server,
+    });
   };
 
-  useEffect(() => {
-    document.addEventListener('mousedown', handleCloseVolumeSlider);
-    return () =>
-      document.removeEventListener('mousedown', handleCloseVolumeSlider);
-  }, []);
+  // Variables
+  const userMember = user ? server?.members?.[user.id] : null;
+  const userPermissionLevel = userMember?.permissionLevel ?? (0 as Permission);
+  const serverUsers = server?.users ?? [];
+  const serverUserCount = serverUsers.length;
+  const serverChannels = server?.channels ?? [];
+  const serverAvatar = server?.avatar || '/logo_server_def.png';
+  const serverName = server?.name ?? '';
+  const serverDisplayId = server?.displayId ?? '';
+  const serverAnnouncement = server?.announcement ?? '';
+  const channelMessages = channel?.messages ?? [];
+
+  // Call
+  const webRTC = useWebRTC();
 
   // Sidebar Control
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
@@ -129,23 +128,7 @@ const ServerPageComponent: React.FC = () => {
     localStorage.setItem('mic', isMicOn.toString());
   }, [isMicOn]);
 
-  // User Setting Control
-  const [showUserSetting, setShowUserSetting] = useState<boolean>(false);
-
-  // Server Setting Control
-  const [showServerSetting, setShowServerSetting] = useState<boolean>(false);
-
-  const userMember = user ? server?.members?.[user.id] : null;
-  const userPermissionLevel = userMember?.permissionLevel ?? (0 as Permission);
-  const serverUsers = server?.users ?? [];
-  const serverUserCount = serverUsers.length;
-  const serverChannels = server?.channels ?? [];
-  const serverAvatar = server?.avatar || '/logo_server_def.png';
-  const serverName = server?.name ?? '';
-  const serverDisplayId = server?.displayId ?? '';
-  const serverAnnouncement = server?.announcement ?? '';
-  const channelMessages = channel?.messages ?? [];
-
+  // Update Discord Presence
   useEffect(() => {
     ipcService.discord.updatePresence({
       details: `在 ${serverName} 中`,
@@ -164,25 +147,14 @@ const ServerPageComponent: React.FC = () => {
     });
   }, [serverName, serverUserCount]);
 
-  const handleOpenServerSettings = () => {
-    ipcService.popup.open(popupType.EDIT_SERVER, 450, 600);
-    ipcService.initialData.onRequest(popupType.EDIT_SERVER, {
-      server: server,
-    });
-  };
-
   return (
     <div className={styles['serverWrapper']}>
-      <div className={styles['serverContent']}>
-        {showUserSetting && (
-          <UserSettingModal onClose={() => setShowUserSetting(false)} />
-        )}
+      <main className={styles['serverContent']}>
         {/* Left Sidebar */}
         <div
           className={styles['sidebar']}
           style={{ width: `${sidebarWidth}px` }}
         >
-          {/* Server image and info */}
           <div className={styles['sidebarHeader']}>
             <div
               className={styles['avatarPicture']}
@@ -192,7 +164,6 @@ const ServerPageComponent: React.FC = () => {
                 backgroundPosition: '0 0',
               }}
             />
-
             <div className={styles['baseInfoBox']}>
               <div className={styles['container']}>
                 <div className={styles['name']}>{serverName} </div>
@@ -213,22 +184,18 @@ const ServerPageComponent: React.FC = () => {
               />
             </div>
           </div>
-          {/* Channel List */}
           <ChannelViewer channels={serverChannels} />
         </div>
         {/* Resize Handle */}
         <div className="resizeHandle" onMouseDown={startResizing} />
         {/* Right Content */}
         <div className={styles['mainContent']}>
-          {/* Announcement Area */}
           <div className={styles['announcementArea']}>
             <MarkdownViewer markdownText={serverAnnouncement} />
           </div>
-          {/* Messages Area */}
           <div className={styles['messageArea']}>
             <MessageViewer messages={channelMessages} />
           </div>
-          {/* Input Area */}
           <div className={styles['inputArea']}>
             <MessageInputBox
               onSendMessage={(msg) => {
@@ -245,7 +212,6 @@ const ServerPageComponent: React.FC = () => {
               }}
             />
           </div>
-          {/* Bottom Controls */}
           <div className={styles['buttonArea']}>
             <div className={styles['buttons']}>
               <div className={styles['voiceModeButton']}>自由發言</div>
@@ -275,7 +241,7 @@ const ServerPageComponent: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
