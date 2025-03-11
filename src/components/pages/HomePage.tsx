@@ -94,10 +94,11 @@ ServerGrid.displayName = 'ServerGrid';
 
 // Header Component
 interface HeaderProps {
+  user: User | null;
   onSearch: (query: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
+const Header: React.FC<HeaderProps> = React.memo(({ user, onSearch }) => {
   return (
     <>
       <header className={styles['homeHeader']}>
@@ -138,9 +139,12 @@ const Header: React.FC<HeaderProps> = React.memo(({ onSearch }) => {
           <button
             className={styles['navegateItem']}
             data-key="30014"
-            onClick={() =>
-              ipcService.popup.open(popupType.CREATE_SERVER, 407, 550)
-            }
+            onClick={() => {
+              ipcService.popup.open(popupType.CREATE_SERVER, 407, 550);
+              ipcService.initialData.onRequest(popupType.CREATE_SERVER, {
+                user: user,
+              });
+            }}
           >
             <div></div>
             創建語音群
@@ -205,7 +209,7 @@ const HomePageComponent: React.FC = React.memo(() => {
 
   return (
     <div className={styles['homeWrapper']}>
-      <Header onSearch={handleSearch} />
+      <Header onSearch={handleSearch} user={user} />
       <main className={styles['myGroupsWrapper']}>
         <div className={styles['myGroupsContain']}>
           <div className={styles['myGroupsView']}>

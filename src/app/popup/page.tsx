@@ -95,7 +95,7 @@ const Modal = React.memo(() => {
       case popupType.EDIT_USER:
         return; // <EditUserModal onClose={() => {}} />;
       case popupType.CREATE_SERVER:
-        return <CreateServerModal onClose={() => {}} />;
+        return <CreateServerModal {...initialData} />;
       case popupType.EDIT_SERVER:
         return <EditServerModal {...initialData} />;
       case popupType.DELETE_SERVER:

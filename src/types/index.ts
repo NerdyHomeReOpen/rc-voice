@@ -95,6 +95,7 @@ export interface Server {
   avatarUrl: string | null;
   announcement: string;
   description: string;
+  type: string;
   displayId: string;
   slogan: string;
   level: number;
