@@ -31,7 +31,6 @@ import {
 import { useSocket } from '@/providers/SocketProvider';
 
 // Services
-import { API_URL } from '@/services/api.service';
 import { ipcService } from '@/services/ipc.service';
 import { useWebRTC } from '@/providers/WebRTCProvider';
 
@@ -142,9 +141,7 @@ const ServerPageComponent: React.FC = () => {
   const serverUsers = server?.users ?? [];
   const serverUserCount = serverUsers.length;
   const serverChannels = server?.channels ?? [];
-  const serverAvatar = server?.avatarUrl
-    ? API_URL + server.avatarUrl
-    : '/logo_server_def.png';
+  const serverAvatar = server?.avatar || '/logo_server_def.png';
   const serverName = server?.name ?? '';
   const serverDisplayId = server?.displayId ?? '';
   const serverAnnouncement = server?.announcement ?? '';
@@ -191,7 +188,7 @@ const ServerPageComponent: React.FC = () => {
             <div
               className={styles['avatarPicture']}
               style={{
-                background: `url(${serverAvatar})`,
+                backgroundImage: `url(${serverAvatar})`,
                 backgroundSize: 'cover',
                 backgroundPosition: '0 0',
               }}

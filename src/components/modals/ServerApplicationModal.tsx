@@ -40,7 +40,6 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      console.log(description);
       // Emit application event
       // socket?.emit('applyServerMembership', {
       //   sessionId,

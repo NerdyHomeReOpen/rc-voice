@@ -8,6 +8,7 @@ const {
   UPLOADS_DIR,
   MIME_TYPES,
   CLEANUP_INTERVAL_MS,
+  SERVER_AVATAR_DIR,
 } = require('../constant');
 // Utils
 const Logger = require('./logger');
@@ -104,34 +105,33 @@ const interval = {
 
 const cleanupUnusedAvatars = async () => {
   try {
-    // Get all avatar files from directory
-    const files = await fs.readdir(UPLOADS_DIR);
-
-    // Get all servers from database
+    const files = await fs.readdir(SERVER_AVATAR_DIR);
     const servers = (await db.get('servers')) || {};
+    const avatarMap = {};
 
-    // Get list of active avatar URLs
-    const activeAvatars = new Set(
-      Object.values(servers)
-        .map((server) => server.avatarUrl)
-        .filter((url) => url && !url.includes('logo_server_def.png'))
-        .map((url) => path.basename(url)),
-    );
+    for (const serverId in servers) {
+      if (servers.hasOwnProperty(serverId)) {
+        const server = servers[serverId];
 
-    // Find unused avatar files
-    const unusedFiles = files.filter((file) => {
-      // Skip non-image files
-      if (!Object.keys(MIME_TYPES).some((ext) => file.endsWith(ext))) {
-        return false;
+        if (
+          server.avatarUrl &&
+          !server.avatarUrl.includes('logo_server_def.png')
+        ) {
+          const avatarFile = path.basename(server.avatarUrl);
+          avatarMap[avatarFile] = true;
+        }
       }
-      // Check if file is not used by any server
-      return !activeAvatars.has(file);
+    }
+
+    const unusedFiles = files.filter((file) => {
+      if (!Object.keys(MIME_TYPES).some((ext) => file.endsWith(ext)))
+        return false;
+      return !avatarMap[file];
     });
 
-    // Delete unused files
     for (const file of unusedFiles) {
       try {
-        await fs.unlink(path.join(UPLOADS_DIR, file));
+        await fs.unlink(path.join(SERVER_AVATAR_DIR, file));
         new Logger('Cleanup').success(`Deleted unused avatar: ${file}`);
       } catch (error) {
         new Logger('Cleanup').error(
@@ -140,7 +140,7 @@ const cleanupUnusedAvatars = async () => {
       }
     }
 
-    if (!unusedFiles.length) {
+    if (unusedFiles.length === 0) {
       new Logger('Cleanup').info('No unused avatars to delete');
     } else {
       new Logger('Cleanup').info(

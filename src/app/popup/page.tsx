@@ -149,7 +149,6 @@ const Modal = React.memo(() => {
     <>
       {/* Top Nevigation */}
       <Header title={getTitle()?.title} buttons={getTitle()?.button} />
-
       {/* Main Content */}
       {getMainContent()}
     </>

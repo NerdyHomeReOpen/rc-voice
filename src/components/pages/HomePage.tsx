@@ -13,7 +13,6 @@ import { popupType, type Server, type User } from '@/types';
 import { useSocket } from '@/providers/SocketProvider';
 
 // Services
-import { API_URL } from '@/services/api.service';
 import { ipcService } from '@/services/ipc.service';
 
 // ServerCard Component
@@ -32,9 +31,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
     socket?.send.connectServer({ serverId });
   };
 
-  const serverAvatar = server.avatarUrl
-    ? API_URL + server.avatarUrl
-    : '/logo_server_def.png';
+  const serverAvatar = server?.avatar || '/logo_server_def.png';
   const serverName = server.name ?? '';
   const serverDisplayId = server.displayId ?? '';
   const serverSlogan = server.slogan ?? '';
@@ -48,7 +45,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
         <div
           className={styles['myGroupsRoomAvatarPicture']}
           style={{
-            background: `url(${serverAvatar})`,
+            backgroundImage: `url(${serverAvatar})`,
             backgroundSize: 'cover',
             backgroundPosition: '0 0',
           }}
@@ -171,10 +168,15 @@ const HomePageComponent: React.FC = React.memo(() => {
 
   // State
   const [searchResults, setSearchResults] = useState<Server[]>([]);
-
-  const userRecentServers = user?.recentServers ?? [];
-  const userOwnedServers = user?.ownedServers ?? [];
-  const userFavServers = user?.favServers ?? [];
+  const [recentServers, setRecentServers] = useState<Server[]>(
+    user?.recentServers ?? [],
+  );
+  const [ownedServers, setOwnedServers] = useState<Server[]>(
+    user?.ownedServers ?? [],
+  );
+  const [favServers, setFavServers] = useState<Server[]>(
+    user?.favServers ?? [],
+  );
   const userName = user?.name || 'Unknown';
 
   useEffect(() => {
@@ -193,6 +195,36 @@ const HomePageComponent: React.FC = React.memo(() => {
         },
       ],
     });
+
+    socket?.send.getUserServers({});
+
+    const handleGetUserServers = (updatedData: {
+      recentServers: Server[];
+      ownedServers: Server[];
+      favServers: Server[];
+    }) => {
+      setRecentServers((prev) =>
+        JSON.stringify(prev) === JSON.stringify(updatedData.recentServers)
+          ? prev
+          : updatedData.recentServers,
+      );
+      setOwnedServers((prev) =>
+        JSON.stringify(prev) === JSON.stringify(updatedData.ownedServers)
+          ? prev
+          : updatedData.ownedServers,
+      );
+      setFavServers((prev) =>
+        JSON.stringify(prev) === JSON.stringify(updatedData.favServers)
+          ? prev
+          : updatedData.favServers,
+      );
+    };
+
+    const removeListener = socket?.on.getUserServers(handleGetUserServers);
+
+    return () => {
+      removeListener?.();
+    };
   }, []);
 
   const handleSearch = (query: string) => {
@@ -226,21 +258,21 @@ const HomePageComponent: React.FC = React.memo(() => {
               <div className={styles['myGroupsTitle']} data-key="60005">
                 最近訪問
               </div>
-              <ServerGrid servers={userRecentServers} />
+              <ServerGrid servers={recentServers} />
             </div>
 
             <div className={styles['myGroupsItem']}>
               <div className={styles['myGroupsTitle']} data-key="30283">
                 我的語音群
               </div>
-              <ServerGrid servers={userOwnedServers} />
+              <ServerGrid servers={ownedServers} />
             </div>
 
             <div className={styles['myGroupsItem']}>
               <div className={styles['myGroupsTitle']} data-key="60005">
                 收藏的語音群
               </div>
-              <ServerGrid servers={userFavServers} />
+              <ServerGrid servers={favServers} />
             </div>
           </div>
         </div>

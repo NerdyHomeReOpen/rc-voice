@@ -4,7 +4,6 @@ const db = new QuickDB();
 const fs = require('fs').promises;
 const path = require('path');
 const _ = require('lodash');
-const formidable = require('formidable');
 // Constants
 const {
   UPLOADS_PATH,
@@ -421,6 +420,10 @@ const serverHandler = {
         );
       }
 
+      // Create Ids
+      const serverId = uuidv4();
+      const channelId = uuidv4();
+
       // Handle avatar upload if provided
       let avatarPath = null;
       if (server.avatar) {
@@ -445,17 +448,13 @@ const serverHandler = {
         }
 
         // Create file with unique name
-        const fileName = `${uuidv4()}.${imageType}`;
+        const fileName = `${serverId}.${imageType}`;
         uploadedFilePath = path.join(SERVER_AVATAR_DIR, fileName);
 
         // Save file
         await fs.writeFile(uploadedFilePath, buffer);
         avatarPath = `/${SERVER_AVATAR_PATH}/${fileName}`;
       }
-
-      // Create Ids
-      const serverId = uuidv4();
-      const channelId = uuidv4();
 
       // Create server
       await Set.server(serverId, {
@@ -542,8 +541,6 @@ const serverHandler = {
     const servers = (await db.get('servers')) || {};
     const members = (await db.get('members')) || {};
 
-    console.log('updateServer');
-
     let uploadedFilePath = null;
 
     try {
@@ -586,6 +583,7 @@ const serverHandler = {
         );
       }
       const { server: editedServer } = data;
+      console.log(editedServer);
       if (!editedServer) {
         throw new StandardizedError(
           '無效的資料',
@@ -645,10 +643,10 @@ const serverHandler = {
           403,
         );
       }
+
       if (
-        editedServer.name ||
-        editedServer.name.length > 30 ||
-        !editedServer.name.trim()
+        editedServer.name &&
+        (editedServer.name.length > 30 || !editedServer.name.trim())
       ) {
         throw new StandardizedError(
           '無效的伺服器名稱',
@@ -668,7 +666,6 @@ const serverHandler = {
         );
       }
 
-      // FIXME: Unable change server avatar
       let avatarPath = null;
       if (editedServer.avatar) {
         const matches = editedServer.avatar.match(/^data:image\/(.*?);base64,/);
@@ -691,23 +688,27 @@ const serverHandler = {
           throw new Error('圖片大小超過限制');
         }
 
-        // Create file with unique name
-        const fileName = `${uuidv4()}.${imageType}`;
+        // Create file with server id
+        const fileName = `${server.id}.${imageType}`;
         uploadedFilePath = path.join(SERVER_AVATAR_DIR, fileName);
         avatarPath = `/${SERVER_AVATAR_PATH}/${fileName}`;
 
-        // Delete old avatar if exists and is not default
-        if (
-          server.avatarUrl &&
-          !server.avatarUrl.includes('logo_server_def.png')
-        ) {
+        if (server.avatarUrl) {
           try {
-            const oldFileName = server.avatarUrl.split('/').pop();
-            const oldPath = path.join(SERVER_AVATAR_DIR, oldFileName);
-            await fs.unlink(oldPath);
-          } catch (error) {
-            new Logger('Server').warn(`無法刪除舊頭像: ${error.message}`);
-          }
+            const oldFileBaseName = path.basename(
+              server.avatarUrl,
+              path.extname(server.avatarUrl),
+            );
+
+            const files = await fs.readdir(SERVER_AVATAR_DIR);
+
+            for (const file of files) {
+              if (file.startsWith(oldFileBaseName)) {
+                const oldPath = path.join(SERVER_AVATAR_DIR, file);
+                await fs.unlink(oldPath);
+              }
+            }
+          } catch (e) {}
         }
 
         // Save new file
@@ -722,7 +723,7 @@ const serverHandler = {
           'name',
           'slogan',
           'description',
-          'iconUrl',
+          'avatarUrl',
           'announcement',
         ]),
         settings: {
@@ -760,14 +761,13 @@ const serverHandler = {
     }
   },
   searchServer: async (io, socket, data) => {
-    // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
 
     try {
-      // Validate data
+      // 驗證 token 與 session
       const jwt = socket.jwt;
-      if (!jwt) {
+      if (!jwt)
         throw new StandardizedError(
           '無可用的 JWT',
           'ValidationError',
@@ -775,9 +775,9 @@ const serverHandler = {
           'TOKEN_MISSING',
           401,
         );
-      }
+
       const sessionId = socket.sessionId;
-      if (!sessionId) {
+      if (!sessionId)
         throw new StandardizedError(
           '無可用的 session ID',
           'ValidationError',
@@ -785,9 +785,9 @@ const serverHandler = {
           'SESSION_MISSING',
           401,
         );
-      }
+
       const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
+      if (!result.valid)
         throw new StandardizedError(
           '無效的 token',
           'ValidationError',
@@ -795,9 +795,9 @@ const serverHandler = {
           'TOKEN_INVALID',
           401,
         );
-      }
+
       const { query } = data;
-      if (!query || typeof query !== 'string') {
+      if (!query || typeof query !== 'string')
         throw new StandardizedError(
           '無效的搜尋查詢',
           'ValidationError',
@@ -805,9 +805,9 @@ const serverHandler = {
           'QUERY_INVALID',
           400,
         );
-      }
+
       const userId = Map.sessionToUser.get(sessionId);
-      if (!userId) {
+      if (!userId)
         throw new StandardizedError(
           `無效的 session ID(${sessionId})`,
           'ValidationError',
@@ -815,9 +815,9 @@ const serverHandler = {
           'SESSION_EXPIRED',
           401,
         );
-      }
+
       const user = users[userId];
-      if (!user) {
+      if (!user)
         throw new StandardizedError(
           `使用者(${userId})不存在`,
           'ValidationError',
@@ -825,47 +825,46 @@ const serverHandler = {
           'USER',
           404,
         );
-      }
 
-      const searchResults = Object.values(servers).filter((server) => {
-        const queryStr = String(query).trim();
-        // Check if query is an exact match to the display ID
-        const displayIdStr = String(server.displayId).trim();
-        const isExactIdMatch =
-          displayIdStr.toLowerCase() === queryStr.toLowerCase();
-        // Use calculateSimilarity function to calculate similarity score
-        const nameLower = server.name.toLowerCase();
-        const queryLower = query.toLowerCase();
-        const similarityScore = Func.calculateSimilarity(nameLower, queryLower);
-
-        if (isExactIdMatch) return true;
-        if (server.settings.visibility != 'invisible') return true;
-        if (similarityScore >= 0.6) return true;
-      });
+      const isServerMatch = (server, query) => {
+        const queryStr = query.trim().toLowerCase();
+        return (
+          String(server.displayId).trim().toLowerCase() === queryStr ||
+          server.name.toLowerCase().includes(queryStr) ||
+          Func.calculateSimilarity(server.name.toLowerCase(), queryStr) >= 0.6
+        );
+      };
 
       const maxResults = 20;
-      const results = searchResults.slice(0, maxResults);
+      const searchResults = Object.values(servers)
+        .filter(
+          (server) =>
+            isServerMatch(server, query) &&
+            server.settings.visibility !== 'invisible',
+        )
+        .slice(0, maxResults);
 
-      // Emit search results to the user
-      io.to(socket.id).emit('serverSearch', results);
-
-      new Logger('WebSocket').success(
-        `User(${user.id}) searched for servers with query: ${query}`,
+      const results = await Promise.all(
+        searchResults.map(async (server) => ({
+          ...server,
+          avatar: server.avatarUrl
+            ? await Func.getAvatar('server', server.avatarUrl).catch(() => null)
+            : null,
+        })),
       );
+
+      io.to(socket.id).emit('serverSearch', results);
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `搜尋伺服器時發生無法預期的錯誤: ${error.message}`,
+          `搜尋伺服器時發生錯誤: ${error.message}`,
           'ServerError',
           'SEARCHSERVER',
           'EXCEPTION_ERROR',
           500,
         );
       }
-
-      // Emit error to the user
       io.to(socket.id).emit('error', error);
-
       new Logger('WebSocket').error(
         `Error searching servers: ${error.message}`,
       );

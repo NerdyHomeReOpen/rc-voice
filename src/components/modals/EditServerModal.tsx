@@ -9,7 +9,6 @@ import React, {
 import { ChevronDown, ChevronUp, Search, Check, X } from 'lucide-react';
 
 // Components
-import Modal from '@/components/Modal';
 import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 import ContextMenu from '@/components/ContextMenu';
 
@@ -23,11 +22,8 @@ import { validateName, validateDescription } from './CreateServerModal';
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
 
-// Redux
-import { useSelector } from 'react-redux';
-
-// Service
-import { API_URL } from '@/services/api.service';
+// Services
+import { ipcService } from '@/services/ipc.service';
 
 // CSS
 import EditServer from '../../styles/popups/editServer.module.css';
@@ -296,12 +292,17 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       // });
     };
 
-    const handleSubmit = useCallback(async () => {
+    const handleClose = () => {
+      ipcService.window.close();
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
       try {
-        // Validate form data
-        const nameError = validateName(editingServerData?.name);
+        const nameError =
+          editingServerData?.name && validateName(editingServerData?.name);
         const descriptionError = validateDescription(
-          editingServerData.description,
+          editingServerData?.description,
         );
 
         const newErrors = {
@@ -310,60 +311,53 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
         };
         setErrors(newErrors);
 
-        // Check if there are any errors
         if (Object.values(newErrors).some((error) => error)) return;
 
-        // Prepare updates object
         const updates: Partial<Server> = {};
 
-        // Add all field updates
         if (editingServerData?.name !== originalServerData?.name) {
           updates.name = editingServerData?.name;
         }
-        if (editingServerData.slogan !== originalServerData.slogan) {
-          updates.slogan = editingServerData.slogan;
-        }
-        if (editingServerData.description !== originalServerData.description) {
-          updates.description = editingServerData.description;
+        if (editingServerData?.slogan !== originalServerData?.slogan) {
+          updates.slogan = editingServerData?.slogan;
         }
         if (
-          editingServerData.settings.visibility !==
-          originalServerData.settings.visibility
+          editingServerData?.description !== originalServerData?.description
         ) {
-          updates.settings = { ...editingServerData.settings };
+          updates.description = editingServerData?.description;
         }
-
-        // Add announcement update
         if (
-          markdownContent.trim() !== originalServerData?.announcement?.trim()
+          markdownContent.trim() !==
+          (originalServerData?.announcement || '').trim()
         ) {
           updates.announcement = markdownContent;
         }
 
-        // Add icon update if needed
         if (pendingIconFile) {
           updates.avatar = `data:${pendingIconFile?.type};base64,${pendingIconFile.data}`;
         }
 
-        // Check if there are any updates
-        if (Object.keys(updates).length === 0 && !pendingIconFile) {
-          // onClose();
+        if (Object.keys(updates).length === 0) {
+          handleClose();
           return;
         }
 
-        // Emit all updates together
-        socket?.send.updateServer(updates);
+        socket?.send.updateServer?.({
+          server: {
+            id: server?.id,
+            ...updates,
+          },
+        });
 
-        // Update original state after successful emission
         setOriginalServerData({
           ...editingServerData,
           announcement: markdownContent,
         });
-        // onClose();
+        handleClose();
       } catch (error) {
-        console.error('Failed to update server:', error);
+        console.error('更新伺服器失敗:', error);
       }
-    }, [editingServerData, markdownContent, pendingIconFile, server]);
+    };
 
     const findDifferencesDeep = (
       obj1: Record<string, any>,
@@ -407,14 +401,11 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
 
     useEffect(() => {
       const findDifferencesDeep = (
-        obj1: Record<string, any>,
-        obj2: Record<string, any>,
+        obj1: Record<string, any> = {},
+        obj2: Record<string, any> = {},
         prefix = '',
       ): string[] => {
-        const allKeys = new Set([
-          ...Object.keys(obj1 || {}),
-          ...Object.keys(obj2 || {}),
-        ]);
+        const allKeys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
 
         return Array.from(allKeys).reduce((acc, key) => {
           const fullKey = prefix ? `${prefix}.${key}` : key;
@@ -422,9 +413,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
           const value2 = obj2[key];
 
           if (typeof value1 === 'string' && typeof value2 === 'string') {
-            if (value1.trim() !== value2.trim()) {
-              acc.push(fullKey);
-            }
+            if (value1.trim() !== value2.trim()) acc.push(fullKey);
           } else if (
             value1 &&
             value2 &&
@@ -556,9 +545,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                         backgroundImage: `url(${
                           pendingIconFile
                             ? `data:${pendingIconFile.type};base64,${pendingIconFile.data}`
-                            : server?.avatarUrl
-                            ? API_URL + server.avatarUrl
-                            : '/logo_server_def.png'
+                            : server?.avatar || '/logo_server_def.png'
                         })`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
@@ -735,6 +722,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                   ) : (
                     <textarea
                       className={EditServer['serverSettingTextarea']}
+                      value={markdownContent}
                       onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                         setMarkdownContent(e.target.value)
                       }
@@ -1086,7 +1074,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                       value="public"
                       className="mr-3"
                       checked={
-                        editingServerData.settings.visibility === 'public'
+                        editingServerData?.settings?.visibility === 'public' ||
+                        server.settings.visibility === 'public'
                       }
                       onChange={(e) => {
                         if (e.target.checked)
@@ -1110,7 +1099,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                       value="members"
                       className="mr-3"
                       checked={
-                        editingServerData.settings.visibility === 'private'
+                        editingServerData?.settings?.visibility === 'private' ||
+                        server.settings.visibility === 'private'
                       }
                       onChange={(e) => {
                         if (e.target.checked)
@@ -1139,7 +1129,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                       value="private"
                       className="mr-3"
                       checked={
-                        editingServerData.settings.visibility === 'invisible'
+                        editingServerData?.settings?.visibility ===
+                          'invisible' ||
+                        server.settings.visibility === 'invisible'
                       }
                       onChange={(e) => {
                         if (e.target.checked)

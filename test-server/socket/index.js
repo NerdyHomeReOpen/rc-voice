@@ -86,6 +86,9 @@ module.exports = (io) => {
     socket.on('updateUser', async (data) =>
       userHandler.updateUser(io, socket, data),
     );
+    socket.on('getUserServers', async () =>
+      userHandler.getUserServers(io, socket),
+    );
     // Server
     socket.on('connectServer', async (data) =>
       serverHandler.connectServer(io, socket, data),

@@ -155,7 +155,6 @@ const channelHandler = {
         });
       }
 
-      console.log(error);
       new Logger('WebSocket').error(
         `Error connecting to channel: ${error.message}`,
       );

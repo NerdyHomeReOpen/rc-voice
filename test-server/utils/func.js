@@ -1,7 +1,14 @@
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
+const fs = require('fs').promises;
+const path = require('path');
 // Constants
-const { XP_SYSTEM } = require('../constant');
+const {
+  XP_SYSTEM,
+  MIME_TYPES,
+  SERVER_AVATAR_DIR,
+  USER_AVATAR_DIR,
+} = require('../constant');
 
 const func = {
   calculateRequiredXP: (level) => {
@@ -47,6 +54,21 @@ const func = {
       displayId++;
     }
     return displayId;
+  },
+  getAvatar: async (type = 'server', avatarUrl) => {
+    try {
+      const AVATAR_DIR =
+        type === 'server' ? SERVER_AVATAR_DIR : USER_AVATAR_DIR;
+      const avatarPath = path.join(AVATAR_DIR, path.basename(avatarUrl));
+      const imageBuffer = await fs.readFile(avatarPath);
+      const avatar = `data:${
+        MIME_TYPES[path.extname(avatarPath)]
+      };base64,${imageBuffer.toString('base64')}`;
+
+      return avatar;
+    } catch (error) {
+      return null;
+    }
   },
 };
 

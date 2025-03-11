@@ -217,6 +217,7 @@ export enum SocketClientEvent {
   CONNECT_USER = 'connectUser',
   DISCONNECT_USER = 'disconnectUser',
   UPDATE_USER = 'updateUser',
+  GET_USER_SERVERS = 'getUserServers',
   SEARCH_SERVER = 'searchServer',
   CONNECT_SERVER = 'connectServer',
   DISCONNECT_SERVER = 'disconnectServer',
@@ -242,6 +243,7 @@ export enum SocketServerEvent {
   USER_CONNECT = 'userConnect', // deprecated
   USER_DISCONNECT = 'userDisconnect', // deprecated
   USER_UPDATE = 'userUpdate',
+  GET_USER_SERVERS = 'getUserServers',
   SERVER_SEARCH = 'serverSearch',
   SERVER_CONNECT = 'serverConnect',
   SERVER_DISCONNECT = 'serverDisconnect',

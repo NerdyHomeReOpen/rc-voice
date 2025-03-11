@@ -310,6 +310,93 @@ const userHandler = {
       new Logger('WebSocket').error(`Error updating user: ${error.message}`);
     }
   },
+  getUserServers: async (io, socket) => {
+    const users = (await db.get('users')) || {};
+
+    try {
+      // Validate data
+      const jwt = socket.jwt;
+      if (!jwt) {
+        throw new StandardizedError(
+          '無可用的 JWT',
+          'ValidationError',
+          'GETUSERSERVERS',
+          'TOKEN_MISSING',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new StandardizedError(
+          '無可用的 session ID',
+          'ValidationError',
+          'GETUSERSERVERS',
+          'SESSION_MISSING',
+          401,
+        );
+      }
+      const result = JWT.verifyToken(jwt);
+      if (!result.valid) {
+        throw new StandardizedError(
+          '無效的 token',
+          'ValidationError',
+          'GETUSERSERVERS',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+
+      const userId = Map.sessionToUser.get(sessionId);
+      if (!userId) {
+        throw new StandardizedError(
+          `無效的 session ID(${sessionId})`,
+          'ValidationError',
+          'GETUSERSERVERS',
+          'SESSION_EXPIRED',
+          401,
+        );
+      }
+      const user = users[userId];
+      if (!user) {
+        throw new StandardizedError(
+          `使用者(${userId})不存在`,
+          'ValidationError',
+          'GETUSERSERVERS',
+          'USER',
+          404,
+        );
+      }
+
+      // Get user servers
+      const recentServers = (await Get.userRecentServers(userId)) || [];
+      const ownedServers = (await Get.userOwnedServers(userId)) || [];
+      const favServers = (await Get.userFavServers(userId)) || [];
+
+      // Emit data (only to the user)
+      io.to(socket.id).emit('getUserServers', {
+        recentServers,
+        ownedServers,
+        favServers,
+      });
+    } catch (error) {
+      if (!error instanceof StandardizedError) {
+        error = new StandardizedError(
+          `獲取使用者伺服器時發生無法預期的錯誤: ${error.message}`,
+          'ServerError',
+          'GETUSERSERVERS',
+          'EXCEPTION_ERROR',
+          500,
+        );
+      }
+
+      // Emit data (only to the user)
+      io.to(socket.id).emit('error', error);
+
+      new Logger('WebSocket').error(
+        `Error disconnecting user: ${error.message}`,
+      );
+    }
+  },
 };
 
 module.exports = { ...userHandler };

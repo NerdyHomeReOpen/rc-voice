@@ -1,5 +1,6 @@
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
+const Func = require('./func');
 
 const get = {
   // User
@@ -9,6 +10,7 @@ const get = {
     if (!user) return null;
     return {
       ...user,
+      avatar: user.avatarUrl && (await Func.getAvatar('user', user.avatarUrl)),
       members: await get.userMembers(userId),
       badges: await get.userBadges(userId),
       friends: await get.userFriends(userId),
@@ -61,35 +63,68 @@ const get = {
   userRecentServers: async (userId) => {
     const userServers = (await db.get('userServers')) || {};
     const servers = (await db.get('servers')) || {};
-    return Object.values(userServers)
-      .filter((us) => us.userId === userId && us.recent)
-      .map((us) => servers[us.serverId])
-      .filter((server) => server);
+    return Promise.all(
+      Object.values(userServers)
+        .filter((us) => us.userId === userId && us.recent)
+        .map(async (us) => {
+          const server = servers[us.serverId];
+          if (!server) return null;
+          return {
+            ...server,
+            avatar: server.avatarUrl
+              ? await Func.getAvatar('server', server.avatarUrl)
+              : null,
+          };
+        }),
+    ).then((results) => results.filter((server) => server));
   },
   userOwnedServers: async (userId) => {
     const userServers = (await db.get('userServers')) || {};
     const servers = (await db.get('servers')) || {};
-    return Object.values(userServers)
-      .filter((us) => us.userId === userId && us.owned)
-      .map((us) => servers[us.serverId])
-      .filter((server) => server);
+    return Promise.all(
+      Object.values(userServers)
+        .filter((us) => us.userId === userId && us.owned)
+        .map(async (us) => {
+          const server = servers[us.serverId];
+          if (!server) return null;
+          return {
+            ...server,
+            avatar: server.avatarUrl
+              ? await Func.getAvatar('server', server.avatarUrl)
+              : null,
+          };
+        }),
+    ).then((results) => results.filter((server) => server));
   },
   userFavServers: async (userId) => {
     const userServers = (await db.get('userServers')) || {};
     const servers = (await db.get('servers')) || {};
-    return Object.values(userServers)
-      .filter((us) => us.userId === userId && us.favorite)
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .map((us) => servers[us.serverId])
-      .filter((server) => server);
+    return Promise.all(
+      Object.values(userServers)
+        .filter((us) => us.userId === userId && us.favorite)
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .map(async (us) => {
+          const server = servers[us.serverId];
+          if (!server) return null;
+          return {
+            ...server,
+            avatar: server.avatarUrl
+              ? await Func.getAvatar('server', server.avatarUrl)
+              : null,
+          };
+        }),
+    ).then((results) => results.filter((server) => server));
   },
   // Server
   server: async (serverId) => {
     const servers = (await db.get('servers')) || {};
     const server = servers[serverId];
     if (!server) return null;
+
     return {
       ...server,
+      avatar:
+        server.avatarUrl && (await Func.getAvatar('server', server.avatarUrl)),
       users: await get.serverUsers(serverId),
       channels: await get.serverChannels(serverId),
       members: await get.serverMembers(serverId),
