@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 
 // CSS
-import styles from '@/styles/common/header.module.css';
+import header from '@/styles/common/header.module.css';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -37,22 +37,22 @@ const Header: React.FC<HeaderProps> = React.memo(({ title }) => {
   };
 
   return (
-    <div className={styles['header']}>
-      <div className={styles['titleBox']}>
-        {title?.title && <span className={styles['title']}>{title.title}</span>}
+    <div className={header['header']}>
+      <div className={header['titleBox']}>
+        {title?.title && <span className={header['title']}>{title.title}</span>}
       </div>
-      <div className={styles['buttons']}>
+      <div className={header['buttons']}>
         {title?.button?.includes('minimize') && (
-          <div className={styles['minimize']} onClick={handleMinimize} />
+          <div className={header['minimize']} onClick={handleMinimize} />
         )}
         {title?.button?.includes('maxsize') && (
           <div
-            className={isFullscreen ? styles['restore'] : styles['maxsize']}
+            className={isFullscreen ? header['restore'] : header['maxsize']}
             onClick={handleFullscreen}
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           />
         )}
-        <div className={styles['close']} onClick={handleClose} />
+        <div className={header['close']} onClick={handleClose} />
       </div>
     </div>
   );
