@@ -31,6 +31,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
     socket?.send.connectServer({ serverId });
   };
 
+  // Variables
   const serverAvatar = server?.avatar || '/logo_server_def.png';
   const serverName = server.name ?? '';
   const serverDisplayId = server.displayId ?? '';
@@ -89,15 +90,55 @@ const ServerGrid: React.FC<ServerGridProps> = React.memo(({ servers }) => {
 
 ServerGrid.displayName = 'ServerGrid';
 
-// Header Component
-interface HeaderProps {
-  user: User | null;
-  onSearch: (query: string) => void;
-}
+const HomePageComponent: React.FC = React.memo(() => {
+  // Redux
+  const user = useSelector((state: { user: User | null }) => state.user);
 
-const Header: React.FC<HeaderProps> = React.memo(({ user, onSearch }) => {
+  // Variables
+  const userName = user?.name || 'Unknown';
+  const userOwnedServers = user?.ownedServers || [];
+  const userRecentServers = user?.recentServers || [];
+  const userFavServers = user?.favServers || [];
+
+  // Socket Control
+  const socket = useSocket();
+
+  const handleSearch = (query: string) => {
+    socket?.send.searchServer({ query });
+    socket?.on.serverSearch((results: Server[]) => {
+      setSearchResults(results);
+    });
+  };
+
+  // Search Results Control
+  const [searchResults, setSearchResults] = useState<Server[]>([]);
+
+  // Update Discord Presence
+  useEffect(() => {
+    ipcService.discord.updatePresence({
+      details: `正在瀏覽主頁`,
+      state: `使用者: ${userName}`,
+      largeImageKey: 'app_icon',
+      largeImageText: 'RC Voice',
+      smallImageKey: 'home_icon',
+      smallImageText: '主頁',
+      timestamp: Date.now(),
+      buttons: [
+        {
+          label: '加入我們的Discord伺服器',
+          url: 'https://discord.gg/adCWzv6wwS',
+        },
+      ],
+    });
+  }, []);
+
+  // Refresh User
+  useEffect(() => {
+    socket?.send.refreshUser(null);
+  }, []);
+
   return (
-    <>
+    <div className={styles['homeWrapper']}>
       <header className={styles['homeHeader']}>
         <div className={styles['left']}>
           <div className={styles['backBtn']} />
@@ -108,9 +149,11 @@ const Header: React.FC<HeaderProps> = React.memo(({ user, onSearch }) => {
               placeholder="輸入群ID或群名稱"
               data-placeholder="60021"
               className={styles['searchInput']}
-              onKeyDown={(e) =>
-                e.key === 'Enter' && onSearch(e.currentTarget.value)
-              }
+              onKeyDown={(e) => {
+                if (e.key != 'Enter') return;
+                if (e.currentTarget.value.trim() === '') return;
+                handleSearch(e.currentTarget.value);
+              }}
             />
             <div className={styles['searchIcon']} />
           </div>
@@ -152,64 +195,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ user, onSearch }) => {
           </button>
         </div>
       </header>
-    </>
-  );
-});
-
-Header.displayName = 'Header';
-
-// HomePage Component
-const HomePageComponent: React.FC = React.memo(() => {
-  // Redux
-  const user = useSelector((state: { user: User | null }) => state.user);
-
-  // Socket Control
-  const socket = useSocket();
-
-  // State
-  const [searchResults, setSearchResults] = useState<Server[]>([]);
-
-  const userName = user?.name || 'Unknown';
-  const ownedServers = user?.ownedServers || [];
-  const recentServers = user?.recentServers || [];
-  const favServers = user?.favServers || [];
-
-  useEffect(() => {
-    ipcService.discord.updatePresence({
-      details: `正在瀏覽主頁`,
-      state: `使用者: ${userName}`,
-      largeImageKey: 'app_icon',
-      largeImageText: 'RC Voice',
-      smallImageKey: 'home_icon',
-      smallImageText: '主頁',
-      timestamp: Date.now(),
-      buttons: [
-        {
-          label: '加入我們的Discord伺服器',
-          url: 'https://discord.gg/adCWzv6wwS',
-        },
-      ],
-    });
-  }, []);
-
-  useEffect(() => {
-    socket?.send.refreshUser(null);
-  }, []);
-
-  const handleSearch = (query: string) => {
-    if (query.trim() === '') {
-      setSearchResults([]);
-      return;
-    }
-    socket?.send.searchServer({ query });
-    socket?.on.serverSearch((results: Server[]) => {
-      setSearchResults(results);
-    });
-  };
-
-  return (
-    <div className={styles['homeWrapper']}>
-      <Header onSearch={handleSearch} user={user} />
+      {/* Main Content */}
       <main className={styles['myGroupsWrapper']}>
         <div className={styles['myGroupsContain']}>
           <div className={styles['myGroupsView']}>
@@ -221,26 +207,23 @@ const HomePageComponent: React.FC = React.memo(() => {
                 <ServerGrid servers={searchResults} />
               </div>
             )}
-
             <div className={styles['myGroupsItem']}>
               <div className={styles['myGroupsTitle']} data-key="60005">
                 最近訪問
               </div>
-              <ServerGrid servers={recentServers} />
+              <ServerGrid servers={userRecentServers} />
             </div>
-
             <div className={styles['myGroupsItem']}>
               <div className={styles['myGroupsTitle']} data-key="30283">
                 我的語音群
               </div>
-              <ServerGrid servers={ownedServers} />
+              <ServerGrid servers={userOwnedServers} />
             </div>
-
             <div className={styles['myGroupsItem']}>
               <div className={styles['myGroupsTitle']} data-key="60005">
                 收藏的語音群
               </div>
-              <ServerGrid servers={favServers} />
+              <ServerGrid servers={userFavServers} />
             </div>
           </div>
         </div>
