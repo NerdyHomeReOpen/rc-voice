@@ -112,7 +112,7 @@ const Modal = React.memo(() => {
         return { title: '好友請求', button: ['close'] };
       case popupType.DIRECT_MESSAGE:
         return { title: '私訊', button: ['close'] };
-      case popupType.ERROR:
+      case popupType.DIALOG:
         return { title: '錯誤', button: ['close'] };
       default:
         return undefined;
@@ -141,7 +141,7 @@ const Modal = React.memo(() => {
         return; // <FriendApplication onClose={() => {}} />;
       case popupType.DIRECT_MESSAGE:
         return; // <DirectMessageModal onClose={() => {}} />;
-      case popupType.ERROR:
+      case popupType.DIALOG:
         return <Dialog {...initialData} />;
       default:
         return <></>;
