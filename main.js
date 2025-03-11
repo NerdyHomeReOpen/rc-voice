@@ -114,8 +114,8 @@ async function createMainWindow() {
     frame: false,
     transparent: true,
     resizable: true,
+    hasShadow: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
     },
@@ -166,8 +166,8 @@ async function createAuthWindow() {
     resizable: false,
     frame: false,
     transparent: true,
+    hasShadow: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
     },
@@ -219,8 +219,8 @@ async function createPopup(type, height, width) {
     resizable: false,
     frame: false,
     transparent: true,
+    hasShadow: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
     },

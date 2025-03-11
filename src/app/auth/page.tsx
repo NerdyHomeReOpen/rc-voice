@@ -65,7 +65,7 @@ const Auth: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <div className="wrapper">
       {/* Top Navigation */}
       <Header />
       {/* Main Content */}
@@ -79,7 +79,7 @@ const Auth: React.FC = () => {
           <RegisterPage onRegisterSuccess={() => setIsLogin(true)} />
         )}
       </div>
-    </>
+    </div>
   );
 };
 

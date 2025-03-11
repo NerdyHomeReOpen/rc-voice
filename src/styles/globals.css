@@ -16,6 +16,8 @@
 
 * {
   box-sizing: border-box;
+  font-size: 1rem;
+  font-family: SimSun, Arial, Helvetica, sans-serif;
 }
 
 html,
@@ -28,14 +30,16 @@ body,
   flex-direction: column;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
   overflow: hidden;
   border-radius: 5px;
   font-size: 14px;
-  font-family: SimSun, Arial, Helvetica, sans-serif;
   color: var(--foreground);
   background: none;
   user-select: none;
+}
+
+.wrapper {
+  border: 1px solid #6d6d6d26;
 }
 
 .content {

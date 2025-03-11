@@ -425,14 +425,16 @@ const Home = () => {
   };
 
   return (
-    <WebRTCProvider>
-      <Header
-        selectedId={selectedTabId}
-        onSelect={(tabId) => setSelectedTabId(tabId)}
-      />
-      {/* Main Content */}
-      <div className="content">{getMainContent()}</div>
-    </WebRTCProvider>
+    <div className="wrapper">
+      <WebRTCProvider>
+        <Header
+          selectedId={selectedTabId}
+          onSelect={(tabId) => setSelectedTabId(tabId)}
+        />
+        {/* Main Content */}
+        <div className="content">{getMainContent()}</div>
+      </WebRTCProvider>
+    </div>
   );
 };
 

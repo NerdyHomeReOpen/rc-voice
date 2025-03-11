@@ -149,12 +149,12 @@ const Modal = React.memo(() => {
   };
 
   return (
-    <>
+    <div className="wrapper">
       {/* Top Nevigation */}
       <Header title={getTitle()?.title} buttons={getTitle()?.button} />
       {/* Main Content */}
       {getMainContent()}
-    </>
+    </div>
   );
 });
 
