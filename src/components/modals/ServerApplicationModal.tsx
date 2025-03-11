@@ -141,26 +141,26 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
             <Dialog
               popupIcon="popupIconWarning"
               textBorder={Popup['textBorder']}
-              title={
-                <>
-                  該群的管理員已設定只有會員才能訪問
-                  <br />
-                  如需訪問，請
-                  <span
-                    className={ServerApplication['applyText']}
-                    onClick={() => setIsApplying(true)}
-                    style={{ color: 'blue', cursor: 'pointer' }}
-                  >
-                    申請成為會員
-                  </span>
-                  。
-                </>
-              }
+              title={<>
+                該群的管理員已設定只有會員才能訪問
+                <br />
+                如需訪問，請
+                <span
+                  className={ServerApplication['applyText']}
+                  onClick={() => setIsApplying(true)}
+                  style={{ color: 'blue', cursor: 'pointer' }}
+                >
+                  申請成為會員
+                </span>
+                。
+              </>}
               onSubmit={(e) => {
                 e.preventDefault();
                 setIsApplying(true);
-              }}
+              } }
               onClose={onClose}
+              iconType={'error'}
+              submitTo={''}
             />
           </div>
           <div className={Popup['popupFooter']}>
