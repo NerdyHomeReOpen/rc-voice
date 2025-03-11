@@ -3,11 +3,11 @@
 
 import React, { useEffect, useState } from 'react';
 
-// Components
-import Header from '@/components/Header';
+// CSS
+import header from '@/styles/common/header.module.css';
 
 // Types
-import { Channel, popupType } from '@/types';
+import { popupType } from '@/types';
 
 // Modals
 import CreateServerModal from '@/components/modals/CreateServerModal';
@@ -20,6 +20,54 @@ import ServerApplication from '@/components/modals/ServerApplicationModal';
 // Services
 import { ipcService } from '@/services/ipc.service';
 import Dialog from '@/components/modals/Dialog';
+
+interface HeaderProps {
+  title?: string;
+  buttons?: string[];
+}
+
+const Header: React.FC<HeaderProps> = React.memo(({ title, buttons }) => {
+  // Fullscreen Control
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleFullscreen = () => {
+    isFullscreen
+      ? ipcService.window.unmaximize()
+      : ipcService.window.maximize();
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const handleMinimize = () => {
+    ipcService.window.minimize();
+  };
+
+  const handleClose = () => {
+    ipcService.window.close();
+  };
+
+  return (
+    <div className={header['header']}>
+      <div className={header['titleBox']}>
+        {title && <span className={header['title']}>{title}</span>}
+      </div>
+      <div className={header['buttons']}>
+        {buttons?.includes('minimize') && (
+          <div className={header['minimize']} onClick={handleMinimize} />
+        )}
+        {buttons?.includes('maxsize') && (
+          <div
+            className={isFullscreen ? header['restore'] : header['maxsize']}
+            onClick={handleFullscreen}
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          />
+        )}
+        {buttons?.includes('close') && (
+          <div className={header['close']} onClick={handleClose} />
+        )}
+      </div>
+    </div>
+  );
+});
 
 const Modal = React.memo(() => {
   const [type, setType] = useState<popupType | null>(null);
@@ -39,7 +87,7 @@ const Modal = React.memo(() => {
     }
   }, []);
 
-  const getTitle = (isCategory?: boolean) => {
+  const getTitle = () => {
     switch (type) {
       case popupType.EDIT_USER:
         return { title: '編輯個人資料', button: ['close'] };
@@ -52,10 +100,7 @@ const Modal = React.memo(() => {
       case popupType.CREATE_CHANNEL:
         return { title: '創建頻道', button: ['close'] };
       case popupType.EDIT_CHANNEL:
-        return {
-          title: `編輯${isCategory ? '類別' : '頻道'}`,
-          button: ['close'],
-        };
+        return { title: `編輯頻道`, button: ['close'] };
       case popupType.DELETE_CHANNEL:
         return { title: '刪除頻道', button: ['close'] };
       case popupType.APPLY_MEMBER:
@@ -72,28 +117,9 @@ const Modal = React.memo(() => {
   };
 
   const getMainContent = () => {
-    const mockChannel: Channel = {
-      id: 'default',
-      name: '',
-      isCategory: false,
-      settings: {
-        visibility: 'public',
-        bitrate: 0,
-        slowmode: false,
-        userLimit: 0,
-      },
-      isRoot: false,
-      isLobby: false,
-      voiceMode: 'free',
-      chatMode: 'free',
-      order: 0,
-      serverId: '',
-      createdAt: 0,
-    };
-
     switch (type) {
       case popupType.EDIT_USER:
-        return; // <EditUserModal onClose={() => {}} />;
+        return; // <EditUserModal {...initialData} />;
       case popupType.CREATE_SERVER:
         return <CreateServerModal {...initialData} />;
       case popupType.EDIT_SERVER:
@@ -101,11 +127,11 @@ const Modal = React.memo(() => {
       case popupType.DELETE_SERVER:
         return; // This one doesn't exist :D
       case popupType.CREATE_CHANNEL:
-        return <AddChannelModal onClose={() => {}} isRoot={false} />;
+        return <AddChannelModal {...initialData} />;
       case popupType.EDIT_CHANNEL:
-        return <EditChannelModal onClose={() => {}} channel={mockChannel} />;
+      // return <EditChannelModal onClose={() => {}} channel={} />;
       case popupType.DELETE_CHANNEL:
-        return <DeleteChannelModal onClose={() => {}} channel={mockChannel} />;
+      // return <DeleteChannelModal onClose={() => {}} channel={} />;
       case popupType.APPLY_MEMBER:
         return <ServerApplication onClose={() => {}} server={undefined} />;
       case popupType.APPLY_FRIEND:
@@ -119,65 +145,13 @@ const Modal = React.memo(() => {
     }
   };
 
-  const getButtons = () => {
-    switch (type) {
-      case popupType.EDIT_USER:
-        return [];
-      case popupType.CREATE_SERVER:
-        return [];
-      case popupType.EDIT_SERVER:
-        return [];
-      case popupType.DELETE_SERVER:
-        return [];
-      case popupType.CREATE_CHANNEL:
-        return [];
-      case popupType.EDIT_CHANNEL:
-        return [];
-      case popupType.DELETE_CHANNEL:
-        return [];
-      case popupType.APPLY_MEMBER:
-        return [];
-      case popupType.APPLY_FRIEND:
-        return [];
-      case popupType.DIRECT_MESSAGE:
-        return [];
-      case popupType.ERROR:
-        return [
-          {
-            type: 'button',
-            label: '確定',
-            onClick: () => {
-              ipcService.popup.submit(initialData.submitTo);
-              ipcService.window.close();
-            },
-          },
-        ];
-      default:
-        return [];
-    }
-  };
-
   return (
     <>
       {/* Top Nevigation */}
-      <Header title={getTitle()}></Header>
+      <Header title={getTitle()?.title} buttons={getTitle()?.button} />
+
       {/* Main Content */}
       {getMainContent()}
-      {/* Bottom */}
-      {/* <div className="flex flex-row justify-end items-center bg-gray-50">
-        <div className="flex justify-end gap-2 p-4 bg-gray-50">
-          {getButtons().map((button, i) => (
-            <button
-              key={i}
-              type={button.type as 'button'}
-              onClick={button.onClick}
-              className={`px-4 py-2 rounded`}
-            >
-              {button.label}
-            </button>
-          ))}
-        </div>
-      </div> */}
     </>
   );
 });
