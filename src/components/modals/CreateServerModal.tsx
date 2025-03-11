@@ -9,7 +9,7 @@ import { useSocket } from '@/providers/SocketProvider';
 import { User, Server } from '@/types';
 
 // CSS
-import Popup from '../../styles/common/popup.module.css';
+import popup from '../../styles/common/popup.module.css';
 import createServer from '../../styles/popups/createServer.module.css';
 
 // Services
@@ -61,7 +61,7 @@ const ServerTypeTab: React.FC<ServerTypeTabProps> = ({
             <div
               key={type}
               className={`${createServer['button']} ${
-                !remainingGroups ? Popup['disabled'] : ''
+                !remainingGroups ? popup['disabled'] : ''
               }`}
               onClick={() => setServer({ ...server, type })}
             >
@@ -129,23 +129,23 @@ const ServerBasicInfoTab: React.FC<ServerBasicInfoTabProps> = ({
             <label
               htmlFor="avatar-upload"
               style={{ marginTop: '10px' }}
-              className={Popup['button']}
+              className={popup['button']}
             >
               更換頭像
             </label>
           </div>
         </div>
         <div className={createServer['inputGroup']}>
-          <div className={Popup['inputBox']}>
-            <div className={Popup['label']}>群類型</div>
-            <input className={Popup['input']} disabled value={server.type} />
+          <div className={popup['inputBox']}>
+            <div className={popup['label']}>群類型</div>
+            <input className={popup['input']} disabled value={server.type} />
           </div>
-          <div className={Popup['inputBox']}>
-            <div className={`${Popup['label']} ${Popup['required']}`}>
+          <div className={popup['inputBox']}>
+            <div className={`${popup['label']} ${popup['required']}`}>
               群名稱
             </div>
             <input
-              className={Popup['input']}
+              className={popup['input']}
               type="text"
               value={server.name}
               onChange={(e) => setServer({ ...server, name: e.target.value })}
@@ -159,10 +159,10 @@ const ServerBasicInfoTab: React.FC<ServerBasicInfoTabProps> = ({
             />
             {/* {errors.name && <p className="text-red-500">{errors.name}</p>} */}
           </div>
-          <div className={Popup['inputBox']}>
-            <div className={Popup['label']}>口號</div>
+          <div className={popup['inputBox']}>
+            <div className={popup['label']}>口號</div>
             <textarea
-              className={Popup['input']}
+              className={popup['input']}
               value={server.description}
               onChange={(e) =>
                 setServer({ ...server, description: e.target.value })
@@ -248,10 +248,10 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
         case 0:
           return (
             <>
-              <button className={Popup['button']} onClick={() => setSection(1)}>
+              <button className={popup['button']} onClick={() => setSection(1)}>
                 下一步
               </button>
-              <button className={Popup['button']} onClick={handleClose}>
+              <button className={popup['button']} onClick={handleClose}>
                 取消
               </button>
             </>
@@ -259,10 +259,16 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
         case 1:
           return (
             <>
-              <button className={Popup['button']} onClick={() => setSection(0)}>
+              <button className={popup['button']} onClick={() => setSection(0)}>
                 上一步
               </button>
-              <button className={Popup['button']} onClick={handleSubmit}>
+              <button
+                className={`${popup['button']} ${
+                  !server.name.trim() ? popup['disabled'] : ''
+                }`}
+                disabled={!server.name.trim()}
+                onClick={handleSubmit}
+              >
                 確定
               </button>
             </>
@@ -271,13 +277,14 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     };
 
     return (
-      <div className={Popup['popupContainer']}>
-        <div className={Popup['popupBody']}>{getMainContent()}</div>
-        <div className={Popup['popupFooter']}>{getFooter()}</div>
+      <div className={popup['popupContainer']}>
+        <div className={popup['popupBody']}>{getMainContent()}</div>
+        <div className={popup['popupFooter']}>{getFooter()}</div>
       </div>
     );
   },
 );
 
 CreateServerModal.displayName = 'CreateServerModal';
+
 export default CreateServerModal;
