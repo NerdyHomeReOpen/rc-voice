@@ -6,19 +6,48 @@ import { User } from '@/types';
 
 const userSlice = createSlice({
   name: 'userSlice',
-  initialState: null as User | null,
+  initialState: {
+    id: '',
+    name: '未知使用者',
+    avatar: '',
+    avatarUrl: '',
+    signature: '',
+    status: 'online',
+    gender: 'Male',
+    level: 0,
+    xp: 0,
+    requiredXp: 0,
+    progress: 0,
+    currentChannelId: '',
+    currentServerId: '',
+    lastActiveAt: 0,
+    createdAt: 0,
+  } as User,
   reducers: {
-    setUser: (state, action: { payload: User }) => {
-      return action.payload;
+    setUser: (state, action: { payload: User | Partial<User> }) => {
+      return { ...state, ...action.payload };
     },
     clearUser: (state) => {
-      return null;
-    },
-    updateUser: (state, action: { payload: Partial<User> }) => {
-      if (state) Object.assign(state, action.payload);
+      return {
+        id: '',
+        name: '未知使用者',
+        avatar: '',
+        avatarUrl: '',
+        signature: '',
+        status: 'online',
+        gender: 'Male',
+        level: 0,
+        xp: 0,
+        requiredXp: 0,
+        progress: 0,
+        currentChannelId: '',
+        currentServerId: '',
+        lastActiveAt: 0,
+        createdAt: 0,
+      };
     },
   },
 });
 
-export const { setUser, clearUser, updateUser } = userSlice.actions;
+export const { setUser, clearUser } = userSlice.actions;
 export default userSlice.reducer;

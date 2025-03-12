@@ -45,15 +45,13 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = React.memo(
   ({ selectedId = 1, setSelectedTabId }) => {
     // Redux
-    const user = useSelector((state: { user: User | null }) => state.user);
-    const server = useSelector(
-      (state: { server: Server | null }) => state.server,
-    );
+    const user = useSelector((state: { user: User }) => state.user);
+    const server = useSelector((state: { server: Server }) => state.server);
 
     // Variables
-    const userCurrentServerId = user?.currentServerId || '';
-    const userName = user?.name || 'Unknown';
-    const userStatus = user?.status || 'online';
+    const userCurrentServerId = user.currentServerId;
+    const userName = user.name;
+    const userStatus = user.status;
 
     // Socket
     const socket = useSocket();
@@ -69,20 +67,19 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     // Tab Control
     const MAIN_TABS = React.useMemo(() => {
-      const tabs = [];
-      if (user) {
-        tabs.push({
+      const tabs = [
+        {
           id: 1,
           label: '首頁',
           onClick: () => {},
-        });
-        tabs.push({
+        },
+        {
           id: 2,
           label: '好友',
           onClick: () => {},
-        });
-      }
-      if (server) {
+        },
+      ];
+      if (server.id) {
         tabs.push({
           id: 3,
           label: server.name,
@@ -194,7 +191,6 @@ const Header: React.FC<HeaderProps> = React.memo(
                   <CircleX
                     onClick={() => {
                       handleLeaveServer(userCurrentServerId);
-                      setSelectedTabId?.(1);
                     }}
                     size={16}
                     className={header['tabClose']}
@@ -318,69 +314,8 @@ const Header: React.FC<HeaderProps> = React.memo(
 Header.displayName = 'Header';
 
 const Home = () => {
-  // Redux
-  const server = useSelector(
-    (state: { server: Server | null }) => state.server,
-  );
-  const user = useSelector((state: { user: User | null }) => state.user);
-
   // Socket
   const socket = useSocket();
-
-  const handleConnect = () => {
-    console.log('Socket connected');
-  };
-  const handleDisconnect = () => {
-    console.log('Socket disconnected');
-  };
-  const handleError = (error: StandardizedError) => {
-    new errorHandler(error).show();
-  };
-  const handleUserConnect = (user: any) => {
-    console.log('User connected: ', user);
-    store.dispatch(setUser(user));
-  };
-  const handleUserDisconnect = () => {
-    console.log('User disconnected');
-    store.dispatch(clearChannel());
-    store.dispatch(clearServer());
-    store.dispatch(clearUser());
-    authService.logout();
-  };
-  const handleUserUpdate = (data: Partial<User>) => {
-    console.log('User update: ', data);
-    const user_ = store.getState().user;
-    if (!user_) return;
-    store.dispatch(setUser({ ...user_, ...data }));
-  };
-  const handleServerConnect = (server: Server) => {
-    console.log('Server connected: ', server);
-    store.dispatch(setServer(server));
-  };
-  const handleServerDisconnect = () => {
-    console.log('Server disconnected');
-    store.dispatch(clearServer());
-  };
-  const handleServerUpdate = (data: Partial<Server>) => {
-    console.log('Server update: ', data);
-    const server_ = store.getState().server;
-    if (!server_) return;
-    store.dispatch(setServer({ ...server_, ...data }));
-  };
-  const handleChannelConnect = (channel: Channel) => {
-    console.log('Channel connected: ', channel);
-    store.dispatch(setChannel(channel));
-  };
-  const handleChannelDisconnect = () => {
-    console.log('Channel disconnected');
-    store.dispatch(clearChannel());
-  };
-  const handleChannelUpdate = (data: Partial<Channel>) => {
-    console.log('Channel update: ', data);
-    const channel_ = store.getState().channel;
-    if (!channel_) return;
-    store.dispatch(setChannel({ ...channel_, ...data }));
-  };
 
   useEffect(() => {
     if (!socket) return;
@@ -414,6 +349,70 @@ const Home = () => {
 
   // Tab Control
   const [selectedTabId, setSelectedTabId] = useState<number>(1);
+
+  // Handlers
+  const handleConnect = () => {
+    console.log('Socket connected');
+  };
+
+  const handleDisconnect = () => {
+    console.log('Socket disconnected');
+  };
+
+  const handleError = (error: StandardizedError) => {
+    new errorHandler(error).show();
+  };
+
+  const handleUserConnect = (user: any) => {
+    console.log('User connected: ', user);
+    store.dispatch(setUser(user));
+    setSelectedTabId(1);
+  };
+
+  const handleUserDisconnect = () => {
+    console.log('User disconnected');
+    store.dispatch(clearChannel());
+    store.dispatch(clearServer());
+    store.dispatch(clearUser());
+    authService.logout();
+  };
+
+  const handleUserUpdate = (data: Partial<User>) => {
+    console.log('User update: ', data);
+    store.dispatch(setUser(data));
+  };
+
+  const handleServerConnect = (server: Server) => {
+    console.log('Server connected: ', server);
+    store.dispatch(setServer(server));
+    setSelectedTabId(3);
+  };
+
+  const handleServerDisconnect = () => {
+    console.log('Server disconnected');
+    store.dispatch(clearServer());
+    setSelectedTabId(1);
+  };
+
+  const handleServerUpdate = (data: Partial<Server>) => {
+    console.log('Server update: ', data);
+    store.dispatch(setServer(data));
+  };
+
+  const handleChannelConnect = (channel: Channel) => {
+    console.log('Channel connected: ', channel);
+    store.dispatch(setChannel(channel));
+  };
+
+  const handleChannelDisconnect = () => {
+    console.log('Channel disconnected');
+    store.dispatch(clearChannel());
+  };
+
+  const handleChannelUpdate = (data: Partial<Channel>) => {
+    console.log('Channel update: ', data);
+    store.dispatch(setChannel(data));
+  };
 
   const getMainContent = () => {
     if (!socket) return <LoadingSpinner />;

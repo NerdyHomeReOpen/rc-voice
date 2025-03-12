@@ -17,7 +17,7 @@ interface ServerCardProps {
 
 const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   // Redux
-  const user = useSelector((state: { user: User | null }) => state.user);
+  const user = useSelector((state: { user: User }) => state.user);
 
   // Socket Control
   const socket = useSocket();
@@ -27,10 +27,10 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   };
 
   // Variables
-  const serverAvatar = server?.avatar || '/logo_server_def.png';
-  const serverName = server.name ?? '';
-  const serverDisplayId = server.displayId ?? '';
-  const serverSlogan = server.slogan ?? '';
+  const serverAvatar = server.avatarUrl;
+  const serverName = server.name;
+  const serverDisplayId = server.displayId;
+  const serverSlogan = server.slogan;
 
   return (
     <>

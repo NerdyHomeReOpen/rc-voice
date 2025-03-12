@@ -20,13 +20,13 @@ import { ipcService } from '@/services/ipc.service';
 
 const HomePageComponent: React.FC = React.memo(() => {
   // Redux
-  const user = useSelector((state: { user: User | null }) => state.user);
+  const user = useSelector((state: { user: User }) => state.user);
 
   // Variables
-  const userName = user?.name || 'Unknown';
-  const userOwnedServers = user?.ownedServers || [];
-  const userRecentServers = user?.recentServers || [];
-  const userFavServers = user?.favServers || [];
+  const userName = user.name;
+  const userOwnedServers = user.ownedServers || [];
+  const userRecentServers = user.recentServers || [];
+  const userFavServers = user.favServers || [];
 
   // Socket Control
   const socket = useSocket();
@@ -64,6 +64,11 @@ const HomePageComponent: React.FC = React.memo(() => {
     socket?.on.serverSearch((results: Server[]) => {
       setSearchResults(results);
     });
+  };
+
+  const handleOpenCreateServerPopup = () => {
+    ipcService.popup.open(popupType.CREATE_SERVER, 407, 550);
+    ipcService.initialData.onRequest(popupType.CREATE_SERVER, { user: user });
   };
 
   return (
@@ -109,12 +114,7 @@ const HomePageComponent: React.FC = React.memo(() => {
           <button
             className={homePage['navegateItem']}
             data-key="30014"
-            onClick={() => {
-              ipcService.popup.open(popupType.CREATE_SERVER, 407, 550);
-              ipcService.initialData.onRequest(popupType.CREATE_SERVER, {
-                user: user,
-              });
-            }}
+            onClick={handleOpenCreateServerPopup}
           >
             <div></div>
             創建語音群

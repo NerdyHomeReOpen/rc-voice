@@ -131,9 +131,6 @@ interface UserSettingModalProps {
 const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
-  const sessionId = useSelector(
-    (state: { sessionToken: string }) => state.sessionToken,
-  );
 
   // Socket
   const socket = useSocket();
@@ -153,7 +150,7 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
-    socket?.send.updateUser({ user: editedUser });
+    socket?.send.updateUser({ user: { ...editedUser } });
     onClose();
   };
   const handleLogout = () => {

@@ -31,25 +31,33 @@ import { useWebRTC } from '@/providers/WebRTCProvider';
 
 const ServerPageComponent: React.FC = React.memo(() => {
   // Redux
-  const user = useSelector((state: { user: User | null }) => state.user);
-  const server = useSelector(
-    (state: { server: Server | null }) => state.server,
-  );
-  const channel = useSelector(
-    (state: { channel: Channel | null }) => state.channel,
-  );
+  const user = useSelector((state: { user: User }) => state.user);
+  const server = useSelector((state: { server: Server }) => state.server);
+  const channel = useSelector((state: { channel: Channel }) => state.channel);
 
   // Variables
-  const userMember = user ? server?.members?.[user.id] : null;
-  const userPermissionLevel = userMember?.permissionLevel ?? (0 as Permission);
-  const serverUsers = server?.users ?? [];
+  const serverName = server.name;
+  const serverAvatar = server.avatarUrl;
+  const serverDisplayId = server.displayId;
+  const serverAnnouncement = server.announcement;
+  const serverUsers = server.users || [];
+  const serverChannels = server.channels || [];
+  const serverMembers = server.members || {};
   const serverUserCount = serverUsers.length;
-  const serverChannels = server?.channels ?? [];
-  const serverAvatar = server?.avatar || '/logo_server_def.png';
-  const serverName = server?.name ?? '';
-  const serverDisplayId = server?.displayId ?? '';
-  const serverAnnouncement = server?.announcement ?? '';
-  const channelMessages = channel?.messages ?? [];
+  const channelMessages = channel.messages || [];
+  const userId = user.id;
+  const userCurrentChannelId = user.currentChannelId;
+  const userMember = serverMembers[userId] || {
+    id: '',
+    isBlocked: false,
+    nickname: '',
+    contribution: 0,
+    permissionLevel: 0,
+    userId: '',
+    serverId: '',
+    createdAt: 0,
+  };
+  const userPermissionLevel = userMember.permissionLevel;
 
   // Socket
   const socket = useSocket();
@@ -175,15 +183,15 @@ const ServerPageComponent: React.FC = React.memo(() => {
             <MessageViewer messages={channelMessages} />
           </div>
           <div className={styles['inputArea']}>
+            {/* FIXME: implement message input box here not components */}
             <MessageInputBox
               onSendMessage={(msg) => {
-                if (!user) return;
                 handleSendMessage({
                   id: '',
                   type: 'general',
                   content: msg,
-                  senderId: user.id,
-                  channelId: user.currentChannelId,
+                  senderId: userId,
+                  channelId: userCurrentChannelId,
                   permissionLevel: userPermissionLevel,
                   timestamp: 0,
                 });

@@ -2,15 +2,9 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable react/display-name */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Edit, Plus, Trash } from 'lucide-react';
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from '@hello-pangea/dnd';
 
 // CSS
 import styles from '@/styles/serverPage.module.css';
@@ -19,7 +13,6 @@ import permission from '@/styles/common/permission.module.css';
 
 // Types
 import { popupType, type Channel, type Server, type User } from '@/types';
-
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -33,137 +26,115 @@ import { ipcService } from '@/services/ipc.service';
 
 interface CategoryTabProps {
   category: Channel;
-  server: Server;
   canEdit: boolean;
-  index: number;
 }
 
 const CategoryTab: React.FC<CategoryTabProps> = React.memo(
-  ({ category, server, canEdit, index }) => {
+  ({ category, canEdit }) => {
     // Expanded Control
     const [expanded, setExpanded] = useState<boolean>(true);
 
     // Context Menu
     const contextMenu = useContextMenu();
 
-    const categoryVisibility = category.settings.visibility ?? 'public';
-    const categoryName = category.name ?? '';
-    const categoryChannels: Channel[] = []; //FIXME
+    // Variables
+    const categoryName = category.name;
+    const categoryIsRoot = category.isRoot;
+    const categoryIsLobby = category.isLobby;
+    const categoryVisibility = category.settings.visibility;
+    const categoryChannels = category.subChannels || [];
 
     return (
-      <Draggable
-        draggableId={category.id}
-        index={index}
-        isDragDisabled={!canEdit}
-      >
-        {(provided) => (
-          <div ref={provided.innerRef} {...provided.draggableProps}>
-            {/* Category View */}
-            <div
-              {...provided.dragHandleProps}
-              className={`${styles['channelTab']} ${
-                expanded ? styles['expanded'] : ''
-              } ${
-                category.isLobby ? styles['lobby'] : styles[categoryVisibility]
-              }`}
-              onClick={() =>
-                setExpanded(
-                  categoryVisibility != 'readonly' ? !expanded : false,
-                )
-              }
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                contextMenu.showContextMenu(e.pageX, e.pageY, [
-                  {
-                    id: 'edit',
-                    icon: <Edit size={14} className="w-5 h-5 mr-2" />,
-                    label: '編輯',
-                    show: canEdit,
-                    onClick: () =>
-                      ipcService.popup.open(popupType.EDIT_CHANNEL, 400, 300),
-                  },
-                  {
-                    id: 'add',
-                    icon: <Plus size={14} className="w-5 h-5 mr-2" />,
-                    label: '新增',
-                    show: canEdit && category.isRoot,
-                    onClick: () =>
-                      ipcService.popup.open(popupType.CREATE_CHANNEL, 400, 300),
-                  },
-                  {
-                    id: 'delete',
-                    icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-                    label: '刪除',
-                    show: canEdit && !category.isLobby,
-                    onClick: () =>
-                      ipcService.popup.open(popupType.DELETE_CHANNEL, 400, 300),
-                  },
-                ]);
-              }}
-            >
-              <div className={styles['channelTabLable']}>{categoryName}</div>
-            </div>
+      <div key={category.id}>
+        {/* Category View */}
+        <div
+          className={`
+            ${styles['channelTab']} 
+            ${expanded ? styles['expanded'] : ''} 
+            ${categoryIsLobby ? styles['lobby'] : styles[categoryVisibility]}`}
+          onClick={() =>
+            setExpanded(categoryVisibility != 'readonly' ? !expanded : false)
+          }
+          onContextMenu={(e) => {
+            contextMenu.showContextMenu(e.pageX, e.pageY, [
+              {
+                id: 'edit',
+                icon: <Edit size={14} className="w-5 h-5 mr-2" />,
+                label: '編輯',
+                show: canEdit,
+                onClick: () =>
+                  ipcService.popup.open(popupType.EDIT_CHANNEL, 400, 300),
+              },
+              {
+                id: 'add',
+                icon: <Plus size={14} className="w-5 h-5 mr-2" />,
+                label: '新增',
+                show: canEdit && !categoryIsLobby && categoryIsRoot,
+                onClick: () =>
+                  ipcService.popup.open(popupType.CREATE_CHANNEL, 400, 300),
+              },
+              {
+                id: 'delete',
+                icon: <Trash size={14} className="w-5 h-5 mr-2" />,
+                label: '刪除',
+                show: canEdit && !categoryIsLobby,
+                onClick: () =>
+                  ipcService.popup.open(popupType.DELETE_CHANNEL, 400, 300),
+              },
+            ]);
+          }}
+        >
+          <div className={styles['channelTabLable']}>{categoryName}</div>
+        </div>
 
-            {/* Expanded Sections */}
-            {expanded && (
-              <Droppable
-                droppableId={`category-${category.id}`}
-                type="CHANNEL"
-                isDropDisabled={!canEdit}
-                isCombineEnabled={true}
-                ignoreContainerClipping={true}
-              >
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={styles['channelList']}
-                  >
-                    {categoryChannels
-                      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-                      .map((channel, index) =>
-                        channel.isCategory ? (
-                          <CategoryTab
-                            key={channel.id}
-                            category={channel}
-                            server={server}
-                            canEdit={canEdit}
-                            index={index}
-                          />
-                        ) : (
-                          <ChannelTab
-                            key={channel.id}
-                            channel={channel}
-                            server={server}
-                            canEdit={canEdit}
-                            index={index}
-                          />
-                        ),
-                      )}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            )}
+        {/* Expanded Sections */}
+        {expanded && (
+          <div className={styles['channelList']}>
+            {categoryChannels
+              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+              .map((channel, index) =>
+                channel.isCategory ? (
+                  <CategoryTab
+                    key={channel.id}
+                    category={channel}
+                    canEdit={canEdit}
+                  />
+                ) : (
+                  <ChannelTab
+                    key={channel.id}
+                    channel={channel}
+                    canEdit={canEdit}
+                  />
+                ),
+              )}
           </div>
         )}
-      </Draggable>
+      </div>
     );
   },
 );
 
 interface ChannelTabProps {
   channel: Channel;
-  server: Server;
   canEdit: boolean;
-  index: number;
 }
 
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(
-  ({ channel, server, canEdit, index }) => {
+  ({ channel, canEdit }) => {
     // Redux
-    const user = useSelector((state: { user: User | null }) => state.user);
+    const user = useSelector((state: { user: User }) => state.user);
+    const server = useSelector((state: { server: Server }) => state.server);
+
+    // Variables
+    const serverUsers = server.users || [];
+    const channelName = channel.name;
+    const channelIsRoot = channel.isRoot;
+    const channelIsLobby = channel.isLobby;
+    const channelVisibility = channel.settings.visibility;
+    const channelUsers = serverUsers.filter(
+      (u) => u.currentChannelId === channel.id,
+    );
+    const userInChannel = user.currentChannelId === channel.id;
 
     // Socket
     const socket = useSocket();
@@ -174,331 +145,213 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
     // Expanded Control
     const [expanded, setExpanded] = useState<boolean>(true);
 
+    // Handlers
     const handleJoinChannel = (channelId: string) => {
-      if (user?.currentChannelId == channelId) return;
       socket?.send.connectChannel({ channelId });
     };
 
-    const channelVisibility = channel.settings.visibility ?? 'public';
-    const channelName = channel.name ?? '';
-    const channelUsers =
-      server.users?.filter((u) => u.currentChannelId === channel.id) ?? [];
-    const userInChannel = user?.currentChannelId === channel.id;
-
     return (
-      <Draggable
-        draggableId={channel.id}
-        index={index}
-        isDragDisabled={!canEdit}
-      >
-        {(provided) => (
-          <div ref={provided.innerRef} {...provided.draggableProps}>
-            {/* Channel View */}
-            <div
-              {...provided.dragHandleProps}
-              className={`${styles['channelTab']} ${
-                expanded ? styles['expanded'] : ''
-              } ${
-                channel.isLobby ? styles['lobby'] : styles[channelVisibility]
-              } ${userInChannel ? styles['userCurrentLocation'] : ''} ${
-                !channel.isRoot ? styles['subChannel'] : ''
-              }`}
-              onClick={() =>
-                setExpanded(channelVisibility != 'readonly' ? !expanded : false)
-              }
-              onDoubleClick={() => {
-                channelVisibility !== 'readonly' &&
-                  handleJoinChannel(channel.id);
-              }}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                contextMenu.showContextMenu(e.pageX, e.pageY, [
-                  {
-                    id: 'edit',
-                    icon: <Edit size={14} className="w-5 h-5 mr-2" />,
-                    label: '編輯',
-                    show: canEdit,
-                    onClick: () =>
-                      ipcService.popup.open(popupType.EDIT_CHANNEL, 400, 300),
-                  },
-                  {
-                    id: 'add',
-                    icon: <Plus size={14} className="w-5 h-5 mr-2" />,
-                    label: '新增',
-                    show: canEdit && !channel.isLobby && channel.isRoot,
-                    onClick: () =>
-                      ipcService.popup.open(popupType.CREATE_CHANNEL, 400, 300),
-                  },
-                  {
-                    id: 'delete',
-                    icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-                    label: '刪除',
-                    show: canEdit && !channel.isLobby,
-                    onClick: () =>
-                      ipcService.popup.open(popupType.DELETE_CHANNEL, 400, 300),
-                  },
-                ]);
-              }}
-            >
-              <div className={styles['channelTabLable']}>{channelName}</div>
-              <div className={styles['channelTabCount']}>
-                {`(${channelUsers.length})`}
-              </div>
-            </div>
-            {/* Expanded Sections */}
-            {expanded && (
-              <div className={styles['userList']}>
-                {channelUsers
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((user: User) => (
-                    <UserTab
-                      key={user.id}
-                      user={user}
-                      server={server}
-                      canEdit={canEdit}
-                    />
-                  ))}
-              </div>
-            )}
-          </div>
-        )}
-      </Draggable>
-    );
-  },
-);
-
-interface UserTabProps {
-  server: Server;
-  user: User;
-  canEdit: boolean;
-}
-
-const UserTab: React.FC<UserTabProps> = React.memo(
-  ({ user, server, canEdit }) => {
-    // Context
-    const contextMenu = useContextMenu();
-
-    const channelUser = user;
-    const channelUserMember = server.members?.[user.id];
-    const channelUserPermission = channelUserMember?.permissionLevel ?? 1;
-    const channelUserNickname = channelUserMember?.nickname ?? user.name;
-    const channelUserLevel = Math.min(56, Math.ceil(user.level / 5)); // 56 is max level
-    const channelUserGender = user.gender;
-    const channelUserBadges = user.badges ?? [];
-
-    const handleKickUser = (targetId: string) => {};
-
-    const handleAddFriend = (targetId: string) => {};
-
-    return (
-      <div key={user.id}>
-        {/* User View */}
+      <div key={channel.id}>
+        {/* Channel View */}
         <div
-          className={`${styles['userTab']}`}
-          data-user-block
-          data-user-id={user.id}
-          onDoubleClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            contextMenu.showUserInfoBlock(e.pageX, e.pageY, user, server);
+          className={`
+            ${styles['channelTab']} 
+            ${expanded ? styles['expanded'] : ''} 
+            ${channelIsLobby ? styles['lobby'] : styles[channelVisibility]}  
+            ${channelIsRoot ? '' : styles['subChannel']}`}
+          onClick={() =>
+            setExpanded(channelVisibility != 'readonly' ? !expanded : false)
+          }
+          onDoubleClick={() => {
+            if (userInChannel) return;
+            if (channelVisibility === 'readonly') return;
+            handleJoinChannel(channel.id);
           }}
           onContextMenu={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
             contextMenu.showContextMenu(e.pageX, e.pageY, [
               {
-                id: 'kick',
-                icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-                label: '踢出',
-                show: canEdit && user.id != channelUser.id,
-                onClick: () => {
-                  handleKickUser(user.id);
-                },
+                id: 'edit',
+                icon: <Edit size={14} className="w-5 h-5 mr-2" />,
+                label: '編輯',
+                show: canEdit,
+                onClick: () =>
+                  ipcService.popup.open(popupType.EDIT_CHANNEL, 400, 300),
               },
               {
-                id: 'addFriend',
+                id: 'add',
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
-                label: '新增好友',
-                show: canEdit && user.id != channelUser.id,
-                onClick: () => {
-                  handleAddFriend(user.id);
-                },
+                label: '新增',
+                show: canEdit && !channelIsLobby && channelIsRoot,
+                onClick: () =>
+                  ipcService.popup.open(popupType.CREATE_CHANNEL, 400, 300),
+              },
+              {
+                id: 'delete',
+                icon: <Trash size={14} className="w-5 h-5 mr-2" />,
+                label: '刪除',
+                show: canEdit && !channelIsLobby,
+                onClick: () =>
+                  ipcService.popup.open(popupType.DELETE_CHANNEL, 400, 300),
               },
             ]);
           }}
         >
-          <div
-            className={`${styles['userState']} ${
-              false ? styles['unplay'] : ''
-            }`}
-          />
-          <div
-            className={`${styles['userIcon']} ${
-              permission[channelUserGender]
-            } ${permission[`lv-${channelUserPermission}`]}`}
-          />
-          <div className={styles['userTabName']}>{channelUserNickname}</div>
-          <div
-            className={`${styles['userGrade']} ${
-              grade[`lv-${channelUserLevel}`]
-            }`}
-          />
-          <BadgeViewer badges={channelUserBadges} maxDisplay={3} />
-          {channelUser.id === user.id && (
-            <div className={styles['myLocationIcon']} />
-          )}
+          <div className={styles['channelTabLable']}>{channelName}</div>
+          <div className={styles['channelTabCount']}>
+            {`(${channelUsers.length})`}
+          </div>
         </div>
+        {/* Expanded Sections */}
+        {expanded && (
+          <div className={styles['userList']}>
+            {channelUsers
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((user: User) => (
+                <UserTab key={user.id} user={user} canEdit={canEdit} />
+              ))}
+          </div>
+        )}
       </div>
     );
   },
 );
 
-interface ChannelViewerProps {
-  channels: Channel[] | null;
+interface UserTabProps {
+  user: User;
+  canEdit: boolean;
 }
 
-const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
-  if (!channels) return null;
-
+const UserTab: React.FC<UserTabProps> = React.memo(({ user, canEdit }) => {
   // Redux
-  const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);
-
-  // Socket
-  const socket = useSocket();
 
   // Context
   const contextMenu = useContextMenu();
 
-  const connectStatus = 3;
-  const userCurrentChannel = channels.find(
-    (ch) => ch.id == user.currentChannelId,
+  // Variables
+  const serverMembers = server.members || {};
+  const channelUser = user;
+  const channelUserMember = serverMembers[user.id] || {
+    id: '',
+    isBlocked: false,
+    nickname: '',
+    permissionLevel: 0,
+    userId: '',
+    serverId: '',
+    createdAt: 0,
+  };
+  const channelUserPermission = channelUserMember.permissionLevel;
+  const channelUserNickname = channelUserMember.nickname;
+  const channelUserLevel = user.level;
+  const channelUserGrade = Math.min(56, Math.ceil(channelUserLevel / 5)); // 56 is max level
+  const channelUserGender = user.gender;
+  const channelUserBadges = user.badges || [];
+
+  return (
+    <div key={user.id}>
+      {/* User View */}
+      <div
+        className={`${styles['userTab']}`}
+        data-user-block
+        data-user-id={user.id}
+        onDoubleClick={(e) => {
+          contextMenu.showUserInfoBlock(e.pageX, e.pageY, user, server);
+        }}
+        onContextMenu={(e) => {
+          contextMenu.showContextMenu(e.pageX, e.pageY, [
+            {
+              id: 'kick',
+              icon: <Trash size={14} className="w-5 h-5 mr-2" />,
+              label: '踢出',
+              show: canEdit && user.id != channelUser.id,
+              onClick: () => {
+                // handleKickUser(user.id);
+              },
+            },
+            {
+              id: 'addFriend',
+              icon: <Plus size={14} className="w-5 h-5 mr-2" />,
+              label: '新增好友',
+              show: canEdit && user.id != channelUser.id,
+              onClick: () => {
+                // handleAddFriend(user.id);
+              },
+            },
+          ]);
+        }}
+      >
+        <div
+          className={`${styles['userState']} ${false ? styles['unplay'] : ''}`}
+        />
+        <div
+          className={`${styles['userIcon']} ${permission[channelUserGender]} ${
+            permission[`lv-${channelUserPermission}`]
+          }`}
+        />
+        <div className={styles['userTabName']}>{channelUserNickname}</div>
+        <div
+          className={`${styles['userGrade']} ${
+            grade[`lv-${channelUserGrade}`]
+          }`}
+        />
+        <BadgeViewer badges={channelUserBadges} maxDisplay={3} />
+        {channelUser.id === user.id && (
+          <div className={styles['myLocationIcon']} />
+        )}
+      </div>
+    </div>
   );
-  const userCurrentChannelName = userCurrentChannel?.name ?? '';
-  const userMember = server.members?.[user.id];
-  const userPermission = userMember?.permissionLevel ?? 1;
-  const serverChannels = server.channels ?? [];
+});
+
+interface ChannelViewerProps {
+  channels: Channel[];
+}
+
+const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
+  // Redux
+  const user = useSelector((state: { user: User }) => state.user);
+  const server = useSelector((state: { server: Server }) => state.server);
+
+  // Variables
+  const connectStatus = 3;
+  const serverMembers = server.members || {};
+  const userCurrentChannelId = user.currentChannelId;
+  const userCurrentChannel = channels.find(
+    (ch) => ch.id === userCurrentChannelId,
+  ) || {
+    id: '',
+    name: '未知頻道',
+    isRoot: false,
+    isCategory: false,
+    isLobby: false,
+    voiceMode: 'free',
+    chatMode: 'free',
+    order: 0,
+    serverId: '',
+    settings: {
+      bitrate: 0,
+      slowmode: false,
+      userLimit: -1,
+      visibility: 'public',
+    },
+    createdAt: 0,
+  };
+  const userCurrentChannelName = userCurrentChannel.name;
+  const userCurrentChannelVoiceMode = userCurrentChannel.voiceMode;
+  const userMember = serverMembers[user.id] || {
+    id: '',
+    isBlocked: false,
+    nickname: '',
+    permissionLevel: 0,
+    userId: '',
+    serverId: '',
+    createdAt: 0,
+  };
+  const userPermission = userMember.permissionLevel;
   const canEdit = userPermission >= 5;
 
-  const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId, combine } = result;
-
-    // Validation
-    const movedChannel = channels?.find((ch) => ch.id === draggableId);
-    if (!movedChannel) return;
-
-    // Permission check
-    if (!canEdit) return;
-
-    // Prevent lobby movement restrictions
-    if (
-      movedChannel.isLobby &&
-      (combine || destination?.droppableId !== 'root')
-    ) {
-      return;
-    }
-
-    // Helper to emit updates
-    const emitUpdates = (updates: Partial<Channel>[]) => {
-      if (updates.length === 0) return;
-      socket?.send.updateChannel({ channel: updates });
-    };
-
-    // Handle combining channels
-    if (combine) {
-      const targetChannel = channels?.find(
-        (ch) => ch.id === combine.draggableId,
-      );
-      if (!targetChannel || targetChannel.isLobby) return;
-
-      // Calculate order for moved channel
-      const siblings =
-        channels?.filter((ch) =>
-          ch.subChannels?.some((sub) => sub.id === targetChannel.id),
-        ) || [];
-      const newOrder = siblings.length;
-
-      const updates: Partial<Channel>[] = [
-        {
-          id: targetChannel.id,
-          order: targetChannel.order,
-          // parentChannelId: null,
-          isCategory: true,
-        },
-        {
-          id: movedChannel.id,
-          order: newOrder,
-          // parentChannelId: targetChannel.id,
-          isCategory: false,
-        },
-      ];
-
-      // Update order of siblings in source
-      const sourceChannels = channels?.filter((ch) =>
-        ch.subChannels?.some((sub) => sub.id === movedChannel.id),
-      );
-
-      if (sourceChannels) {
-        const sourceUpdates = sourceChannels.map(
-          (ch, idx): Partial<Channel> => ({
-            id: ch.id,
-            order: idx,
-            // parentChannelId: null,
-            isCategory: ch.isCategory,
-          }),
-        );
-        updates.push(...sourceUpdates);
-      }
-
-      emitUpdates(updates);
-      return;
-    }
-
-    // Handle regular drag and drop
-    if (!destination) return;
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    )
-      return;
-
-    const targetParentId =
-      destination.droppableId === 'root'
-        ? null
-        : destination.droppableId.replace('category-', '');
-
-    // Get channels at destination level
-    const siblings =
-      channels?.filter((ch) => {
-        if (targetParentId === null) {
-          return ch.subChannels === undefined || ch.subChannels.length === 0;
-        }
-        return ch.subChannels?.some((sub) => sub.id === targetParentId);
-      }) || [];
-
-    // Remove moved channel and insert at new position
-    const updatedChannels = siblings.filter((ch) => ch.id !== draggableId);
-    updatedChannels.splice(destination.index, 0, movedChannel);
-
-    // Create updates
-    const updates: Partial<Channel>[] = updatedChannels.map((ch, idx) => ({
-      id: ch.id,
-      order: idx,
-      // parentChannelId: targetParentId,
-      isCategory: ch.isCategory,
-    }));
-
-    // Add moved channel update
-    updates.push({
-      id: movedChannel.id,
-      order: destination.index,
-      // parentChannelId: targetParentId,
-      isCategory: movedChannel.isCategory,
-    });
-
-    emitUpdates(updates);
-  };
+  // Context
+  const contextMenu = useContextMenu();
 
   return (
     <>
@@ -514,7 +367,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
         </div>
       </div>
       {/* Mic Queue */}
-      {userCurrentChannel?.voiceMode === 'queue' && (
+      {userCurrentChannelVoiceMode === 'queue' && (
         <>
           <div className={styles['sectionTitle']}>麥序</div>
           <div className={styles['micQueueBox']}>
@@ -538,8 +391,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
       <div
         className={styles['sectionTitle']}
         onContextMenu={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
           contextMenu.showContextMenu(e.pageX, e.pageY, [
             {
               id: 'addChannel',
@@ -555,47 +406,26 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
         所有頻道
       </div>
       {/* Channel List */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable
-          droppableId="root"
-          type="CHANNEL" // Always accept CHANNEL type items
-          ignoreContainerClipping={true}
-          isDropDisabled={!canEdit}
-          isCombineEnabled={true}
-        >
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={styles['channelList']}
-            >
-              {serverChannels
-                .filter((c) => c.isRoot)
-                .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-                .map((channel, index) =>
-                  channel.isCategory ? (
-                    <CategoryTab
-                      key={channel.id}
-                      category={channel}
-                      server={server}
-                      canEdit={canEdit}
-                      index={index}
-                    />
-                  ) : (
-                    <ChannelTab
-                      key={channel.id}
-                      channel={channel}
-                      server={server}
-                      canEdit={canEdit}
-                      index={index}
-                    />
-                  ),
-                )}
-              {provided.placeholder}
-            </div>
+      <div className={styles['channelList']}>
+        {channels
+          .filter((c) => c.isRoot)
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          .map((channel, index) =>
+            channel.isCategory ? (
+              <CategoryTab
+                key={channel.id}
+                category={channel}
+                canEdit={canEdit}
+              />
+            ) : (
+              <ChannelTab
+                key={channel.id}
+                channel={channel}
+                canEdit={canEdit}
+              />
+            ),
           )}
-        </Droppable>
-      </DragDropContext>
+      </div>
     </>
   );
 };

@@ -23,16 +23,16 @@ import { ipcService } from '@/services/ipc.service';
 
 const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
-  const user = useSelector((state: { user: User | null }) => state.user);
+  const user = useSelector((state: { user: User }) => state.user);
 
   // Variables
   const MAXLENGTH = 300;
-  const userName = user?.name || '未知使用者';
-  const userLevel = user?.level || 1;
+  const userName = user.name;
+  const userAvatarUrl = user.avatarUrl;
+  const userSignature = user.signature;
+  const userLevel = user.level;
   const userGrade = Math.min(56, Math.ceil(userLevel / 5)); // 56 is max level
-  const userAvatarUrl = user?.avatarUrl || '';
   const userBadges = user?.badges || [];
-  const userSignature = user?.signature || '';
   const userFriends = user?.friends || [];
   const userFriendGroups = user?.friendGroups || [];
 
@@ -105,8 +105,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
 
   // Handlers
   const handleChangeSignature = (signature: User['signature']) => {
-    const editedUser = { signature };
-    socket?.send.updateUser({ user: editedUser });
+    socket?.send.updateUser({ user: { signature } });
   };
 
   return (

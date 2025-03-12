@@ -6,13 +6,47 @@ import { Channel } from '@/types';
 
 const channelSlice = createSlice({
   name: 'channelSlice',
-  initialState: null as Channel | null,
+  initialState: {
+    id: '',
+    name: '未知頻道',
+    isRoot: false,
+    isCategory: false,
+    isLobby: false,
+    voiceMode: 'free',
+    chatMode: 'free',
+    order: 0,
+    serverId: '',
+    settings: {
+      bitrate: 0,
+      slowmode: false,
+      userLimit: -1,
+      visibility: 'public',
+    },
+    createdAt: 0,
+  } as Channel,
   reducers: {
-    setChannel: (state, action: { payload: Channel }) => {
-      return action.payload;
+    setChannel: (state, action: { payload: Channel | Partial<Channel> }) => {
+      return { ...state, ...action.payload };
     },
     clearChannel: (state) => {
-      return null;
+      return {
+        id: '',
+        name: '未知頻道',
+        isRoot: false,
+        isCategory: false,
+        isLobby: false,
+        voiceMode: 'free',
+        chatMode: 'free',
+        order: 0,
+        serverId: '',
+        settings: {
+          bitrate: 0,
+          slowmode: false,
+          userLimit: -1,
+          visibility: 'public',
+        },
+        createdAt: 0,
+      };
     },
   },
 });

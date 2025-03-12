@@ -47,6 +47,7 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
     // Loading Control
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    // Handlers
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
       const { name, value, type, checked } = e.target;
       setFormData((prev) => ({
@@ -86,6 +87,7 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
 
     return (
       <div className={styles['loginWrapper']}>
+        {/* Main Content */}
         <div className={styles['loginContent']}>
           <div className={styles['appLogo']}></div>
           <form onSubmit={handleSubmit} className={styles['formWrapper']}>
@@ -152,6 +154,7 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
             </button>
           </form>
         </div>
+        {/* Footer */}
         <div className={styles['loginFooter']}>
           <div className={styles['createAccount']} onClick={onRegisterClick}>
             註冊帳號

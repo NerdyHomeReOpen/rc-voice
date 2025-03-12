@@ -19,7 +19,7 @@ import MessageViewer from '@/components/viewers/MessageViewer';
 import MessageInputBox from '@/components/MessageInputBox';
 
 interface DirectMessageModalProps {
-  friend: Friend | null;
+  friend: Friend;
   onClose: () => void;
 }
 
@@ -29,33 +29,51 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
 
     // Redux
     const user = useSelector((state: { user: User }) => state.user);
-    const sessionId = useSelector(
-      (state: { sessionToken: string }) => state.sessionToken,
-    );
 
     // Socket
     const socket = useSocket();
 
+    // Variables
+    const userId = user.id;
+    const friendUser = friend?.user || {
+      id: '',
+      name: '未知使用者',
+      avatar: '',
+      avatarUrl: '',
+      signature: '',
+      status: 'online',
+      gender: 'Male',
+      level: 0,
+      xp: 0,
+      requiredXp: 0,
+      progress: 0,
+      currentChannelId: '',
+      currentServerId: '',
+      lastActiveAt: 0,
+      createdAt: 0,
+    };
+    const friendId = friendUser.id;
+    const friendAvatar = friendUser.avatarUrl;
+    const friendName = friendUser.name;
+    const friendLevel = friendUser.level;
+    const friendGrade = Math.min(56, Math.ceil(friendLevel / 5)); // 56 is max level
+    const friendDirectMessages = friend.directMessages || [];
+
+    // Handlers
+
     const handleSendMessage = (directMessage: DirectMessage) => {
       socket?.send.directMessage({ directMessage });
     };
-
-    const friendUser = friend.user;
-    const friendAvatar = friendUser?.avatarUrl ?? '/pfp/default.png';
-    const friendName = friendUser?.name;
-    const friendLevel = Math.min(56, Math.ceil((friendUser?.level ?? 0) / 5)); // 56 is max level
-    const friendGradeUrl = `/UserGrade_${friendLevel}.png`;
-    const friendDirectMessages = friend.directMessages ?? [];
 
     return (
       <Modal title={friendName} onClose={onClose} width="600px" height="600px">
         <div className="flex h-full">
           {/* Side Menu */}
           <div className="flex flex-col p-4 w-40 bg-blue-50 text-sm">
-            <img src={friendAvatar} className="w-24 h-24" />
+            {/* <img src={friendAvatar} className="w-24 h-24" /> */}
             <div className="flex items-center gap-2">
               <div className="">{`等級: ${friendLevel}`}</div>
-              <img src={friendGradeUrl} className="select-none" />
+              {/* <img src={friendGradeUrl} className="select-none" /> */}
             </div>
           </div>
           {/* Main Content */}
@@ -72,8 +90,8 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
                     id: '',
                     type: 'general',
                     content: msg,
-                    senderId: user.id,
-                    friendId: friend.id,
+                    senderId: userId,
+                    friendId: friendId,
                     timestamp: 0,
                   });
                 }}
