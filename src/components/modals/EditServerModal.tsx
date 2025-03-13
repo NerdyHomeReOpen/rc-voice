@@ -31,6 +31,7 @@ import { ipcService } from '@/services/ipc.service';
 // CSS
 import EditServer from '../../styles/popups/editServer.module.css';
 import Popup from '../../styles/common/popup.module.css';
+import permission from '@/styles/common/permission.module.css';
 
 interface SortState {
   field:
@@ -46,13 +47,12 @@ type SortFunction = (a: Member, b: Member, direction: number) => number;
 
 interface ServerSettingModalProps {
   server: Server;
+  mainUserId: string;
 }
 
 const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
   (initialData: ServerSettingModalProps) => {
-    const { server } = initialData;
-    // Redux
-    // const mainUser = useSelector((state: { user: User }) => state.user);
+    const { server, mainUserId } = initialData;
 
     // Socket Control
     const socket = useSocket();
@@ -169,14 +169,13 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     useEffect(() => {
       if (!socket) return;
 
-      return;
-      // 這裡需修改 先return處理
-      // if (activeTabIndex === 2) {
-      //   // Emit getMembers event
-      //   socket.emit('getMembers', {
-      //     sessionId: sessionId,
-      //     serverId: server?.id,
-      //   });
+      const ObjectToArray = (obj: Record<string, any>): any[] => {
+        return Object.keys(obj).map((key) => obj[key]);
+      };
+
+      if (activeTabIndex === 2) {
+        setMembers(ObjectToArray(server?.members || {}));
+      }
 
       //   // Set up listener for members response
       //   const handleMembers = (data: any) => {
@@ -210,7 +209,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       //     socket.off('applications', handleApplications);
       //   };
       // }
-    }, [activeTabIndex, socket, server?.id]);
+    }, [activeTabIndex, socket]);
 
     const handleMemberContextMenu = (e: React.MouseEvent, member: any) => {
       e.preventDefault();
@@ -334,6 +333,16 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
           (originalServerData?.announcement || '').trim()
         ) {
           updates.announcement = markdownContent;
+        }
+
+        if (
+          editingServerData?.settings?.visibility !==
+          originalServerData?.settings?.visibility
+        ) {
+          updates.settings = {
+            ...originalServerData?.settings,
+            visibility: editingServerData?.settings?.visibility,
+          };
         }
 
         if (pendingIconFile) {
@@ -832,8 +841,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
             <>
               {memberContextMenu &&
                 (() => {
-                  const isCurrentUser = false;
-                  // memberContextMenu.member.userId === mainUser?.id;
+                  const isCurrentUser =
+                    memberContextMenu.member.userId === mainUserId;
                   const menuItems = [
                     {
                       label: '傳送即時訊息',
@@ -909,7 +918,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                     </div>
                   );
                 })}
-              <div className={EditServer['serverSettingPageBox']}>
+              {/* <div className={EditServer['serverSettingPageBox']}>
                 <div
                   className={`${EditServer['serverSettingItemWrapper']} ${EditServer['markdown']}`}
                 >
@@ -959,7 +968,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                     ```程式碼```, [連結](https://)
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex flex-col p-4">
                 <div className="flex flex-row justify-between items-center mb-6  select-none">
@@ -1072,26 +1081,22 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                 handleMemberContextMenu(e, member);
                               }}
                             >
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                  <img
-                                    src={`/channel/${userGender}_${userPermission}.png`}
-                                    className="w-4 h-5 select-none"
-                                    alt={`${userGender}_${userPermission}`}
-                                  />
-                                  <div>
-                                    <div className="font-medium text-gray-900">
-                                      {userNickname}
-                                    </div>
-                                  </div>
-                                </div>
+                              <td className="px-4 py-3 flex items-center gap-2">
+                                <span
+                                  className={`${permission[userGender]} ${
+                                    permission[`lv-${userPermission}`]
+                                  }`}
+                                />
+                                <span className="font-medium text-gray-900">
+                                  {userNickname}
+                                </span>
                               </td>
                               <td className="px-4 py-3">
-                                <div className="flex flex-col">
+                                <span className="flex flex-col">
                                   <span className="text-gray-500 text-xs">
                                     {getPermissionText(userPermission || 1)}
                                   </span>
-                                </div>
+                                </span>
                               </td>
                               <td className="px-4 py-3 text-gray-500">
                                 {userContributions}
@@ -1424,6 +1429,28 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       }
     };
 
+    const TabItem = ({
+      index,
+      title,
+      dataKey,
+    }: {
+      index: number;
+      title: string;
+      dataKey: string;
+    }) => {
+      return (
+        <div
+          className={`${EditServer['serverSettingTab']} ${
+            activeTabIndex === index ? EditServer['active'] : ''
+          }`}
+          onClick={() => setActiveTabIndex(index)}
+          data-key={dataKey}
+        >
+          {title}
+        </div>
+      );
+    };
+
     return (
       <>
         <form className={Popup['popupContainer']} onSubmit={handleSubmit}>
@@ -1431,48 +1458,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
             {/** 左Tab **/}
             <div className={EditServer['serverSettingLeft']}>
               <div className={EditServer['serverSettingTabsBox']}>
-                <div
-                  className={`${EditServer['serverSettingTab']} ${EditServer['active']}`}
-                  onClick={() => setActiveTabIndex(0)}
-                  data-key="10158"
-                >
-                  查看群資料
-                </div>
-                <div
-                  className={EditServer['serverSettingTab']}
-                  onClick={() => setActiveTabIndex(1)}
-                  data-key="20195"
-                >
-                  公告
-                </div>
-                <div
-                  className={EditServer['serverSettingTab']}
-                  onClick={() => setActiveTabIndex(2)}
-                  data-key="20107"
-                >
-                  會員管理
-                </div>
-                <div
-                  className={EditServer['serverSettingTab']}
-                  onClick={() => setActiveTabIndex(3)}
-                  data-key="20073"
-                >
-                  訪問許可權
-                </div>
-                <div
-                  className={EditServer['serverSettingTab']}
-                  onClick={() => setActiveTabIndex(4)}
-                  data-key="20108"
-                >
-                  會員申請管理
-                </div>
-                <div
-                  className={EditServer['serverSettingTab']}
-                  onClick={() => setActiveTabIndex(5)}
-                  data-key="20144"
-                >
-                  黑名單管理
-                </div>
+                {TabItem({ index: 0, title: '查看群資料', dataKey: '10158' })}
+                {TabItem({ index: 1, title: '公告', dataKey: '20195' })}
+                {TabItem({ index: 2, title: '會員管理', dataKey: '20107' })}
+                {TabItem({ index: 3, title: '訪問許可權', dataKey: '20073' })}
+                {TabItem({ index: 4, title: '會員申請管理', dataKey: '20108' })}
+                {TabItem({ index: 5, title: '黑名單管理', dataKey: '20144' })}
               </div>
             </div>
             {/** 右內容 **/}
@@ -1488,7 +1479,11 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
             <button type="submit" className={Popup['button']}>
               確定
             </button>
-            <button type="button" className={Popup['button']}>
+            <button
+              type="button"
+              className={Popup['button']}
+              onClick={handleClose}
+            >
               取消
             </button>
           </div>

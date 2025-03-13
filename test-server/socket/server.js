@@ -727,6 +727,7 @@ const serverHandler = {
   searchServer: async (io, socket, data) => {
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
+    const members = (await db.get('members')) || {};
 
     try {
       // 驗證 token 與 session
@@ -800,14 +801,25 @@ const serverHandler = {
       };
 
       const maxResults = 20;
-      const searchResults = Object.values(servers)
-        .filter(
-          (server) =>
-            isServerMatch(server, query) &&
-            server.settings.visibility !== 'invisible',
-        )
-        .slice(0, maxResults);
 
+      const exactMatch = Object.values(servers).find(
+        (server) =>
+          String(server.displayId).trim().toLowerCase() ===
+          query.trim().toLowerCase(),
+      );
+
+      const searchResults = exactMatch
+        ? [exactMatch]
+        : Object.values(servers)
+            .filter(
+              (server) =>
+                isServerMatch(server, query) &&
+                (server.settings.visibility === 'public' ||
+                  server.settings.visibility === 'private' ||
+                  server.ownerId === userId ||
+                  members[`mb_${userId}-${server.id}`]?.permissionLevel > 1),
+            )
+            .slice(0, maxResults);
       const results = await Promise.all(
         searchResults.map(async (server) => ({
           ...server,
