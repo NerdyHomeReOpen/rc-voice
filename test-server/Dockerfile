@@ -1,7 +1,8 @@
 FROM node:20
 WORKDIR /app
 COPY package*.json ./
-RUN yarn install --frozen-lockfile
+RUN npm install
+RUN yarn install
 COPY index.js ./
 COPY constant.js ./
 COPY standardizedError.js ./
