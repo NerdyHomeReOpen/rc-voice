@@ -220,6 +220,8 @@ async function createPopup(type, height, width) {
     frame: false,
     transparent: true,
     hasShadow: true,
+    modal: true,
+    parent: mainWindow,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

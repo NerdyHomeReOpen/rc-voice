@@ -10,7 +10,9 @@ const get = {
     if (!user) return null;
     return {
       ...user,
-      avatar: user.avatarUrl && (await Func.getAvatar('user', user.avatarUrl)),
+      avatar: user.avatarUrl
+        ? Func.convertAvatarDataToBase64(user.avatarUrl)
+        : null,
       members: await get.userMembers(userId),
       badges: await get.userBadges(userId),
       friends: await get.userFriends(userId),
@@ -72,7 +74,7 @@ const get = {
           return {
             ...server,
             avatar: server.avatarUrl
-              ? await Func.getAvatar('server', server.avatarUrl)
+              ? Func.convertAvatarDataToBase64(server.avatarUrl)
               : null,
           };
         }),
@@ -90,7 +92,7 @@ const get = {
           return {
             ...server,
             avatar: server.avatarUrl
-              ? await Func.getAvatar('server', server.avatarUrl)
+              ? Func.convertAvatarDataToBase64(server.avatarUrl)
               : null,
           };
         }),
@@ -109,7 +111,7 @@ const get = {
           return {
             ...server,
             avatar: server.avatarUrl
-              ? await Func.getAvatar('server', server.avatarUrl)
+              ? Func.convertAvatarDataToBase64(server.avatarUrl)
               : null,
           };
         }),
@@ -123,8 +125,9 @@ const get = {
 
     return {
       ...server,
-      avatar:
-        server.avatarUrl && (await Func.getAvatar('server', server.avatarUrl)),
+      avatar: server.avatarUrl
+        ? Func.convertAvatarDataToBase64(server.avatarUrl)
+        : null,
       users: await get.serverUsers(serverId),
       channels: await get.serverChannels(serverId),
       members: await get.serverMembers(serverId),

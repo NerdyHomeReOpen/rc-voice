@@ -55,20 +55,23 @@ const func = {
     }
     return displayId;
   },
-  getAvatar: async (type = 'server', avatarUrl) => {
-    try {
-      const AVATAR_DIR =
-        type === 'server' ? SERVER_AVATAR_DIR : USER_AVATAR_DIR;
-      const avatarPath = path.join(AVATAR_DIR, path.basename(avatarUrl));
-      const imageBuffer = await fs.readFile(avatarPath);
-      const avatar = `data:${
-        MIME_TYPES[path.extname(avatarPath)]
-      };base64,${imageBuffer.toString('base64')}`;
+  // getAvatar: async (type = 'server', avatarUrl) => {
+  //   try {
+  //     const AVATAR_DIR =
+  //       type === 'server' ? SERVER_AVATAR_DIR : USER_AVATAR_DIR;
+  //     const avatarPath = path.join(AVATAR_DIR, path.basename(avatarUrl));
+  //     const imageBuffer = await fs.readFile(avatarPath);
+  //     const avatar = `data:${
+  //       MIME_TYPES[path.extname(avatarPath)]
+  //     };base64,${imageBuffer.toString('base64')}`;
 
-      return avatar;
-    } catch (error) {
-      return null;
-    }
+  //     return avatar;
+  //   } catch (error) {
+  //     return null;
+  //   }
+  // },
+  convertAvatarDataToBase64: (avatarData) => {
+    return `data:image/png;base64,${avatarData}`;
   },
 };
 
