@@ -21,15 +21,15 @@ const MIME_TYPES = {
 const PORT = 4500;
 const CONTENT_TYPE_JSON = { 'Content-Type': 'application/json' };
 
-const UPLOADS_PATH = 'uploads';
-const SERVER_AVATAR_PATH = 'uploads/serverAvatars';
-const USER_AVATAR_PATH = 'uploads/userAvatars';
-const UPLOADS_DIR = path.join(__dirname, UPLOADS_PATH);
-const SERVER_AVATAR_DIR = path.join(__dirname, SERVER_AVATAR_PATH);
-const USER_AVATAR_DIR = path.join(__dirname, USER_AVATAR_PATH);
-fs.mkdir(UPLOADS_DIR, { recursive: true }).catch(console.error);
-fs.mkdir(SERVER_AVATAR_DIR, { recursive: true }).catch(console.error);
-fs.mkdir(USER_AVATAR_DIR, { recursive: true }).catch(console.error);
+// const UPLOADS_PATH = 'uploads';
+// const SERVER_AVATAR_PATH = 'uploads/serverAvatars';
+// const USER_AVATAR_PATH = 'uploads/userAvatars';
+// const UPLOADS_DIR = path.join(__dirname, UPLOADS_PATH);
+// const SERVER_AVATAR_DIR = path.join(__dirname, SERVER_AVATAR_PATH);
+// const USER_AVATAR_DIR = path.join(__dirname, USER_AVATAR_PATH);
+// fs.mkdir(UPLOADS_DIR, { recursive: true }).catch(console.error);
+// fs.mkdir(SERVER_AVATAR_DIR, { recursive: true }).catch(console.error);
+// fs.mkdir(USER_AVATAR_DIR, { recursive: true }).catch(console.error);
 
 module.exports = {
   XP_SYSTEM,
@@ -37,10 +37,10 @@ module.exports = {
   PORT,
   MIME_TYPES,
   CONTENT_TYPE_JSON,
-  UPLOADS_PATH,
-  SERVER_AVATAR_PATH,
-  USER_AVATAR_PATH,
-  UPLOADS_DIR,
-  SERVER_AVATAR_DIR,
-  USER_AVATAR_DIR,
+  // UPLOADS_PATH,
+  // SERVER_AVATAR_PATH,
+  // USER_AVATAR_PATH,
+  // UPLOADS_DIR,
+  // SERVER_AVATAR_DIR,
+  // USER_AVATAR_DIR,
 };

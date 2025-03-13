@@ -2,15 +2,8 @@ const { v4: uuidv4 } = require('uuid');
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 const fs = require('fs').promises;
-const path = require('path');
 const _ = require('lodash');
-// Constants
-const {
-  UPLOADS_PATH,
-  SERVER_AVATAR_PATH,
-  UPLOADS_DIR,
-  SERVER_AVATAR_DIR,
-} = require('../constant');
+const sharp = require('sharp');
 // Utils
 const utils = require('../utils');
 const Logger = utils.logger;
@@ -329,7 +322,6 @@ const serverHandler = {
   createServer: async (io, socket, data) => {
     // Get database
     const users = (await db.get('users')) || {};
-    let uploadedFilePath = null;
 
     try {
       // data = {
@@ -425,7 +417,7 @@ const serverHandler = {
       const channelId = uuidv4();
 
       // Handle avatar upload if provided
-      let avatarPath = null;
+      let avatarData = null;
       if (server.avatar) {
         const matches = server.avatar.match(/^data:image\/(.*?);base64,/);
         if (!matches) {
@@ -447,20 +439,16 @@ const serverHandler = {
           throw new Error('圖片大小超過限制');
         }
 
-        // Create file with unique name
-        const fileName = `${serverId}.${imageType}`;
-        uploadedFilePath = path.join(SERVER_AVATAR_DIR, fileName);
-
-        // Save file
-        await fs.writeFile(uploadedFilePath, buffer);
-        avatarPath = `/${SERVER_AVATAR_PATH}/${fileName}`;
+        // Resize image to smaller size
+        const resizedBuffer = await sharp(buffer).resize(200, 200).toBuffer();
+        avatarData = resizedBuffer.toString('base64');
       }
 
       // Create server
       await Set.server(serverId, {
         name: server.name.toString().trim().substring(0, 30),
         description: server.description.toString().substring(0, 200),
-        avatarUrl: avatarPath,
+        avatarUrl: avatarData,
         displayId: await Func.generateUniqueDisplayId(),
         lobbyId: channelId,
         ownerId: userId,
@@ -540,8 +528,6 @@ const serverHandler = {
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
     const members = (await db.get('members')) || {};
-
-    let uploadedFilePath = null;
 
     try {
       // data = {
@@ -666,7 +652,7 @@ const serverHandler = {
         );
       }
 
-      let avatarPath = null;
+      let avatarData = null;
       if (editedServer.avatar) {
         const matches = editedServer.avatar.match(/^data:image\/(.*?);base64,/);
         if (!matches) {
@@ -688,32 +674,10 @@ const serverHandler = {
           throw new Error('圖片大小超過限制');
         }
 
-        // Create file with server id
-        const fileName = `${server.id}.${imageType}`;
-        uploadedFilePath = path.join(SERVER_AVATAR_DIR, fileName);
-        avatarPath = `/${SERVER_AVATAR_PATH}/${fileName}`;
-
-        if (server.avatarUrl) {
-          try {
-            const oldFileBaseName = path.basename(
-              server.avatarUrl,
-              path.extname(server.avatarUrl),
-            );
-
-            const files = await fs.readdir(SERVER_AVATAR_DIR);
-
-            for (const file of files) {
-              if (file.startsWith(oldFileBaseName)) {
-                const oldPath = path.join(SERVER_AVATAR_DIR, file);
-                await fs.unlink(oldPath);
-              }
-            }
-          } catch (e) {}
-        }
-
-        // Save new file
-        await fs.writeFile(uploadedFilePath, buffer);
-        editedServer.avatarUrl = avatarPath;
+        // Resize image to smaller size
+        const resizedBuffer = await sharp(buffer).resize(200, 200).toBuffer();
+        avatarData = resizedBuffer.toString('base64');
+        editedServer.avatarUrl = avatarData;
       }
 
       // Create new server object with only allowed updates
@@ -848,7 +812,7 @@ const serverHandler = {
         searchResults.map(async (server) => ({
           ...server,
           avatar: server.avatarUrl
-            ? await Func.getAvatar('server', server.avatarUrl).catch(() => null)
+            ? `data:image/png;base64,${server.avatarUrl}`
             : null,
         })),
       );

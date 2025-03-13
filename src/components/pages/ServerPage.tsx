@@ -36,7 +36,7 @@ const ServerPageComponent: React.FC = React.memo(() => {
 
   // Variables
   const serverName = server.name;
-  const serverAvatar = server.avatarUrl;
+  const serverAvatar = server.avatar;
   const serverDisplayId = server.displayId;
   const serverAnnouncement = server.announcement;
   const serverUsers = server.users || [];

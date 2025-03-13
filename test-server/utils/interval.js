@@ -85,72 +85,72 @@ const interval = {
     }
   },
 
-  setupCleanupInterval: async () => {
-    try {
-      // Ensure uploads directory exists
-      await fs.mkdir(UPLOADS_DIR, { recursive: true });
+  // setupCleanupInterval: async () => {
+  //   try {
+  //     // Ensure uploads directory exists
+  //     await fs.mkdir(UPLOADS_DIR, { recursive: true });
 
-      // Run cleanup
-      setInterval(cleanupUnusedAvatars, CLEANUP_INTERVAL_MS);
+  //     // Run cleanup
+  //     setInterval(cleanupUnusedAvatars, CLEANUP_INTERVAL_MS);
 
-      // Run initial cleanup
-      await cleanupUnusedAvatars();
-    } catch (error) {
-      new Logger('Cleanup').error(
-        `Error setting up cleanup interval: ${error.message}`,
-      );
-    }
-  },
+  //     // Run initial cleanup
+  //     await cleanupUnusedAvatars();
+  //   } catch (error) {
+  //     new Logger('Cleanup').error(
+  //       `Error setting up cleanup interval: ${error.message}`,
+  //     );
+  //   }
+  // },
 };
 
-const cleanupUnusedAvatars = async () => {
-  try {
-    const files = await fs.readdir(SERVER_AVATAR_DIR);
-    const servers = (await db.get('servers')) || {};
-    const avatarMap = {};
+// const cleanupUnusedAvatars = async () => {
+//   try {
+//     const files = await fs.readdir(SERVER_AVATAR_DIR);
+//     const servers = (await db.get('servers')) || {};
+//     const avatarMap = {};
 
-    for (const serverId in servers) {
-      if (servers.hasOwnProperty(serverId)) {
-        const server = servers[serverId];
+//     for (const serverId in servers) {
+//       if (servers.hasOwnProperty(serverId)) {
+//         const server = servers[serverId];
 
-        if (
-          server.avatarUrl &&
-          !server.avatarUrl.includes('logo_server_def.png')
-        ) {
-          const avatarFile = path.basename(server.avatarUrl);
-          avatarMap[avatarFile] = true;
-        }
-      }
-    }
+//         if (
+//           server.avatarUrl &&
+//           !server.avatarUrl.includes('logo_server_def.png')
+//         ) {
+//           const avatarFile = path.basename(server.avatarUrl);
+//           avatarMap[avatarFile] = true;
+//         }
+//       }
+//     }
 
-    const unusedFiles = files.filter((file) => {
-      if (!Object.keys(MIME_TYPES).some((ext) => file.endsWith(ext)))
-        return false;
-      return !avatarMap[file];
-    });
+//     const unusedFiles = files.filter((file) => {
+//       if (!Object.keys(MIME_TYPES).some((ext) => file.endsWith(ext)))
+//         return false;
+//       return !avatarMap[file];
+//     });
 
-    for (const file of unusedFiles) {
-      try {
-        await fs.unlink(path.join(SERVER_AVATAR_DIR, file));
-        new Logger('Cleanup').success(`Deleted unused avatar: ${file}`);
-      } catch (error) {
-        new Logger('Cleanup').error(
-          `Error deleting file ${file}: ${error.message}`,
-        );
-      }
-    }
+//     for (const file of unusedFiles) {
+//       try {
+//         await fs.unlink(path.join(SERVER_AVATAR_DIR, file));
+//         new Logger('Cleanup').success(`Deleted unused avatar: ${file}`);
+//       } catch (error) {
+//         new Logger('Cleanup').error(
+//           `Error deleting file ${file}: ${error.message}`,
+//         );
+//       }
+//     }
 
-    if (unusedFiles.length === 0) {
-      new Logger('Cleanup').info('No unused avatars to delete');
-    } else {
-      new Logger('Cleanup').info(
-        `Deleted ${unusedFiles.length} unused avatars`,
-      );
-    }
-  } catch (error) {
-    new Logger('Cleanup').error(`Avatar cleanup failed: ${error.message}`);
-  }
-};
+//     if (unusedFiles.length === 0) {
+//       new Logger('Cleanup').info('No unused avatars to delete');
+//     } else {
+//       new Logger('Cleanup').info(
+//         `Deleted ${unusedFiles.length} unused avatars`,
+//       );
+//     }
+//   } catch (error) {
+//     new Logger('Cleanup').error(`Avatar cleanup failed: ${error.message}`);
+//   }
+// };
 
 const obtainXp = async (socket, userId) => {
   try {
