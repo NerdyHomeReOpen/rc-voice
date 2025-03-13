@@ -141,7 +141,7 @@ export const ipcService = {
         // [popupType.CREATE_FRIEND_GROUP]: { height: 600, width: 450 },
         [popupType.EDIT_USER]: { height: 200, width: 300 },
         [popupType.CREATE_SERVER]: { height: 430, width: 520 },
-        [popupType.EDIT_SERVER]: { height: 300, width: 200 },
+        [popupType.EDIT_SERVER]: { height: 450, width: 600 },
         [popupType.DELETE_SERVER]: { height: 300, width: 200 },
         [popupType.CREATE_CHANNEL]: { height: 220, width: 320 },
         [popupType.EDIT_CHANNEL]: { height: 300, width: 200 },
