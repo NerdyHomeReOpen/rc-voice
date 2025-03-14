@@ -3,12 +3,12 @@ import { popupType } from '@/types';
 
 export class StandardizedError extends Error {
   constructor(
-    title: string,
     public name: string = 'Error',
     public error_message: string = 'An error occurred',
     public part: string = 'UNKNOWN_PART',
     public tag: string = 'UNKNOWN_ERROR',
     public status_code: number = 500,
+    title: string = 'Error',
     public handler: () => void = () => {},
   ) {
     super(title);
