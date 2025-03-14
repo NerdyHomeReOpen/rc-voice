@@ -36,6 +36,9 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = React.memo(
   ({ onLoginSuccess, onRegisterClick }) => {
+    // Language
+    const lang = useTranslation();
+
     // Form Control
     const [formData, setFormData] = useState<LoginPageData>({
       account: '',
@@ -49,9 +52,6 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
 
     // Loading Control
     const [isLoading, setIsLoading] = useState<boolean>(false);
-
-    // Language Control
-    const lang = useTranslation();
 
     // Handlers
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {

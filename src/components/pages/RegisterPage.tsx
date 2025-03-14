@@ -43,6 +43,9 @@ interface RegisterPageProps {
 
 const RegisterPage: React.FC<RegisterPageProps> = React.memo(
   ({ onRegisterSuccess }) => {
+    // Language
+    const lang = useTranslation();
+
     // Form Control
     const [formData, setFormData] = useState<RegisterPageData>({
       account: '',
@@ -57,9 +60,6 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
 
     // Loading Control
     const [isLoading, setIsLoading] = useState<boolean>(false);
-
-    // Language Control
-    const lang = useTranslation();
 
     const handleInputChange = (
       e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,

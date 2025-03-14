@@ -66,7 +66,7 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
   ({ messages }) => {
     if (!messages) return null;
 
-    // Language Control
+    // Language
     const lang = useTranslation();
     const { language } = useLanguage();
 

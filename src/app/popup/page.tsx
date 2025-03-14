@@ -79,10 +79,14 @@ const Header: React.FC<HeaderProps> = React.memo(({ title, buttons }) => {
 });
 
 const Modal = React.memo(() => {
-  const [type, setType] = useState<popupType | null>(null);
-  const [initialData, setInitialData] = useState<any | null>(null);
-
+  // Language
   const lang = useTranslation();
+
+  // Type Control
+  const [type, setType] = useState<popupType | null>(null);
+
+  // initialData Control
+  const [initialData, setInitialData] = useState<any | null>(null);
 
   useEffect(() => {
     if (window.location.search) {

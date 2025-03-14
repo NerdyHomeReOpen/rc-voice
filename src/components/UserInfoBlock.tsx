@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import { ArrowUp } from 'lucide-react';
 
 // CSS
@@ -30,7 +29,7 @@ interface UserInfoBlockProps {
 
 const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
   ({ onClose, x, y, user, server }) => {
-    // Language Control
+    // Language
     const lang = useTranslation();
 
     if (!user) return null;

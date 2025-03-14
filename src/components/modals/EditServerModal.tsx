@@ -61,7 +61,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
   (initialData: ServerSettingModalProps) => {
     const { server, mainUserId } = initialData;
 
-    // Socket Control
+    // Socket
     const socket = useSocket();
 
     // Context Menu

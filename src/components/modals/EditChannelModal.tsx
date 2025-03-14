@@ -23,7 +23,7 @@ interface EditChannelModalProps {
 
 const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
   ({ onClose, channel }) => {
-    // Language Control
+    // Language
     const lang = useTranslation();
 
     // Socket
@@ -37,6 +37,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
       },
     });
 
+    // Handlers
     const handleSubmit = async (e: FormEvent<Element>) => {
       e.preventDefault();
       socket?.send.updateChannel({ channel: editedChannel });

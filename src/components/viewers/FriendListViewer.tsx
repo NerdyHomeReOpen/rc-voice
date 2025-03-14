@@ -28,8 +28,11 @@ interface FriendGroupProps {
 
 const FriendGroup: React.FC<FriendGroupProps> = React.memo(
   ({ friendGroup, friends }) => {
-    // Language Control
+    // Language
     const lang = useTranslation();
+
+    // Context Menu
+    const contextMenu = useContextMenu();
 
     // Variables
     const groupName = friendGroup.name;
@@ -37,9 +40,6 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(
 
     // Expanded Control
     const [expanded, setExpanded] = useState<boolean>(true);
-
-    // Context Menu
-    const contextMenu = useContextMenu();
 
     return (
       <div key={friendGroup.id}>
@@ -90,8 +90,11 @@ interface FriendCardProps {
   friend: Friend;
 }
 const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
-  // Language Control
+  // Language
   const lang = useTranslation();
+
+  // Context Menu
+  const contextMenu = useContextMenu();
 
   // Variables
   const friendUser = friend.user || {
@@ -117,9 +120,6 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   const friendLevel = friendUser.level;
   const friendGrade = Math.min(56, Math.ceil(friendLevel / 5)); // 56 is max level
   const friendBadges = friendUser.badges || [];
-
-  // Context Menu Control
-  const contextMenu = useContextMenu();
 
   // Handlers
   const handleOpenDirectMessagePopup = () => {
@@ -176,11 +176,11 @@ interface FriendListViewerProps {
 
 const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
   ({ friendGroups, friends }) => {
-    // Language Control
-    const lang = useTranslation();
-
     // Redux
     const user = useSelector((state: { user: User }) => state.user);
+
+    // Language
+    const lang = useTranslation();
 
     // Search Control
     const [searchQuery, setSearchQuery] = useState<string>('');

@@ -32,14 +32,7 @@ interface CategoryTabProps {
 
 const CategoryTab: React.FC<CategoryTabProps> = React.memo(
   ({ category, canEdit }) => {
-    // Variables
-    const categoryName = category.name;
-    const categoryIsRoot = category.isRoot;
-    const categoryIsLobby = category.isLobby;
-    const categoryVisibility = category.settings.visibility;
-    const categoryChannels = category.subChannels || [];
-
-    // Language Control
+    // Language
     const lang = useTranslation();
 
     // Socket
@@ -47,6 +40,13 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
 
     // Context Menu
     const contextMenu = useContextMenu();
+
+    // Variables
+    const categoryName = category.name;
+    const categoryIsRoot = category.isRoot;
+    const categoryIsLobby = category.isLobby;
+    const categoryVisibility = category.settings.visibility;
+    const categoryChannels = category.subChannels || [];
 
     // Expanded Control
     const [expanded, setExpanded] = useState<boolean>(true);
@@ -161,8 +161,14 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
     const user = useSelector((state: { user: User }) => state.user);
     const server = useSelector((state: { server: Server }) => state.server);
 
-    // Language Control
+    // Language
     const lang = useTranslation();
+
+    // Socket
+    const socket = useSocket();
+
+    // Context Menu
+    const contextMenu = useContextMenu();
 
     // Variables
     const serverUsers = server.users || [];
@@ -174,12 +180,6 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
       (u) => u.currentChannelId === channel.id,
     );
     const userInChannel = user.currentChannelId === channel.id;
-
-    // Socket
-    const socket = useSocket();
-
-    // Context Menu
-    const contextMenu = useContextMenu();
 
     // Expanded Control
     const [expanded, setExpanded] = useState<boolean>(true);
@@ -297,6 +297,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const user = useSelector((state: { user: User }) => state.user);
     const server = useSelector((state: { server: Server }) => state.server);
 
+    // Language
+    const lang = useTranslation();
+
+    // Context
+    const contextMenu = useContextMenu();
+
     // Variables
     const serverMembers = server.members || {};
     const channelUserMember = serverMembers[channelUser.id] || {
@@ -315,12 +321,6 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const channelUserGender = channelUser.gender;
     const channelUserBadges = channelUser.badges || [];
     const isCurrentUser = user.id === channelUser.id;
-
-    // Language Control
-    const lang = useTranslation();
-
-    // Context
-    const contextMenu = useContextMenu();
 
     // Handlers
     const handleOpenApplyFriendPopup = () => {
@@ -400,8 +400,11 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
   const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);
 
-  // Language Control
+  // Language
   const lang = useTranslation();
+
+  // Context
+  const contextMenu = useContextMenu();
 
   // Variables
   const connectStatus = 3;
@@ -440,9 +443,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
   };
   const userPermission = userMember.permissionLevel;
   const canEdit = userPermission >= 5;
-
-  // Context
-  const contextMenu = useContextMenu();
 
   // Handlers
   const handleOpenCreateChannelPopup = () => {

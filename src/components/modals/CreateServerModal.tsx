@@ -39,18 +39,18 @@ interface CreateServerModalProps {
 
 const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
   (initialData: CreateServerModalProps) => {
+    // Language
+    const lang = useTranslation();
+
+    // Socket
+    const socket = useSocket();
+
     // Variables
     const maxGroups = 3;
     const userId = initialData.user?.id || '';
     const userOwnedServers = initialData.user?.ownedServers || [];
     const remainingGroups = maxGroups - userOwnedServers.length;
     const canCreate = remainingGroups > 0;
-
-    // Language Control
-    const lang = useTranslation();
-
-    // Socket Control
-    const socket = useSocket();
 
     // Section Control
     const [section, setSection] = useState<number>(0);

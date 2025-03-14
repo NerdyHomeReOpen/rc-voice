@@ -1,4 +1,6 @@
-import React, { createContext, useContext, Component } from 'react';
+import React, { createContext, useContext, useState } from 'react';
+
+// Types
 import { Translations, LanguageKeys, translations } from '@/types';
 
 interface LanguageContextProps {
@@ -11,41 +13,35 @@ const LanguageContext = createContext<LanguageContextProps | undefined>(
   undefined,
 );
 
-class LanguageProvider extends Component<
-  { children: React.ReactNode },
-  { language: LanguageKeys }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    let lang: LanguageKeys = 'tw';
-    if (typeof localStorage !== 'undefined') {
-      lang = (localStorage.getItem('language') as LanguageKeys) || 'tw';
-    }
-    this.state = {
-      language: lang,
-    };
-  }
+interface LanguageProviderProps {
+  children: React.ReactNode;
+}
 
-  setLanguage = (lang: LanguageKeys) => {
+const LanguageProvider = ({ children }: LanguageProviderProps) => {
+  const [language, setLanguageState] = useState<LanguageKeys>(() => {
+    if (typeof localStorage !== 'undefined') {
+      return (localStorage.getItem('language') as LanguageKeys) || 'tw';
+    }
+    return 'tw';
+  });
+
+  const setLanguage = (lang: LanguageKeys) => {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('language', lang);
     }
-    this.setState({ language: lang });
+    setLanguageState(lang);
   };
 
-  render() {
-    const { language } = this.state;
-    const lang = translations[language];
+  const lang = translations[language];
 
-    return (
-      <LanguageContext.Provider
-        value={{ language, setLanguage: this.setLanguage, translations: lang }}
-      >
-        {this.props.children}
-      </LanguageContext.Provider>
-    );
-  }
-}
+  return (
+    <LanguageContext.Provider
+      value={{ language, setLanguage, translations: lang }}
+    >
+      {children}
+    </LanguageContext.Provider>
+  );
+};
 
 export const useLanguage = (): LanguageContextProps => {
   const context = useContext(LanguageContext);
@@ -59,5 +55,7 @@ export const useTranslation = (): Translations => {
   const { translations } = useLanguage();
   return translations;
 };
+
+LanguageProvider.displayName = 'LanguageProvider';
 
 export { LanguageProvider };

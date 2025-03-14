@@ -23,21 +23,21 @@ const HomePageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
 
+  // Socket
+  const socket = useSocket();
+
+  // Language
+  const { language } = useLanguage();
+  const lang = useTranslation();
+
   // Variables
   const userName = user.name;
   const userOwnedServers = user.ownedServers || [];
   const userRecentServers = user.recentServers || [];
   const userFavServers = user.favServers || [];
 
-  // Socket Control
-  const socket = useSocket();
-
   // Search Results Control
   const [searchResults, setSearchResults] = useState<Server[]>([]);
-
-  // Language Control
-  const { language } = useLanguage();
-  const lang = useTranslation();
 
   // Update Discord Presence
   useEffect(() => {

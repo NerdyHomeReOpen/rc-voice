@@ -63,6 +63,9 @@ const Header: React.FC<HeaderProps> = React.memo(
     // Socket
     const socket = useSocket();
 
+    // Language
+    const lang = useTranslation();
+
     // Fullscreen Control
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -74,7 +77,6 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     // Tab Control
     const { setLanguage } = useLanguage();
-    const lang = useTranslation();
 
     const MAIN_TABS = React.useMemo(() => {
       const tabs = [

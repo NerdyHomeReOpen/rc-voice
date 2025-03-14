@@ -26,6 +26,12 @@ const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
 
+  // Socket
+  const socket = useSocket();
+
+  // Language
+  const lang = useTranslation();
+
   // Variables
   const MAXLENGTH = 300;
   const userName = user.name;
@@ -37,9 +43,6 @@ const FriendPageComponent: React.FC = React.memo(() => {
   const userFriends = user.friends || [];
   const userFriendGroups = user.friendGroups || [];
 
-  // Socket
-  const socket = useSocket();
-
   // Input Control
   const [signatureInput, setSignatureInput] = useState<string>(userSignature);
   const [isComposing, setIsComposing] = useState<boolean>(false);
@@ -47,9 +50,6 @@ const FriendPageComponent: React.FC = React.memo(() => {
   // Sidebar Control
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
   const [isResizing, setIsResizing] = useState<boolean>(false);
-
-  // Language Control
-  const lang = useTranslation();
 
   const startResizing = useCallback((mouseDownEvent: React.MouseEvent) => {
     mouseDownEvent.preventDefault();

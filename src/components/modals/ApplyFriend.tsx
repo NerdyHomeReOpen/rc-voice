@@ -22,17 +22,17 @@ interface ApplyFriendModalProps {
 
 const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
   (initialData: ApplyFriendModalProps) => {
+    // Language
+    const lang = useTranslation();
+
+    // Socket
+    const socket = useSocket();
+
     // Variables
     const targetUserId = initialData.targetUser?.id || '';
     const targetUserName = initialData.targetUser?.name || '';
     const targetUserAvatarUrl = initialData.targetUser?.avatarUrl || '';
     const friendGroups = initialData.user?.friendGroups || [];
-
-    // Language Control
-    const lang = useTranslation();
-
-    // Socket
-    const socket = useSocket();
 
     // State
     const [description, setDescription] = useState('');
@@ -42,6 +42,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
     //   // socket?.send.createFriendApplication({});
     // };
 
+    // Handlers
     const handleOpenSuccessPopup = () => {
       ipcService.popup.open(popupType.DIALOG_SUCCESS);
       ipcService.initialData.onRequest(popupType.DIALOG_SUCCESS, {

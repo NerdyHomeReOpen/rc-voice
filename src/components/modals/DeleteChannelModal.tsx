@@ -17,7 +17,7 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = ({
   onClose,
   channel,
 }) => {
-  // Language Control
+  // Language
   const lang = useTranslation();
 
   // Socket
@@ -26,6 +26,7 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = ({
   // Error Control
   const [error, setError] = useState('');
 
+  // Handlers
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
     socket?.send.deleteChannel({ channelId: channel.id });

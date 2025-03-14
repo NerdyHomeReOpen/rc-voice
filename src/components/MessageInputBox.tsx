@@ -15,13 +15,13 @@ interface MessageInputBoxProps {
 
 const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
   ({ onSendMessage }) => {
+    // Language
+    const lang = useTranslation();
+
     // Input Control
     const [messageInput, setMessageInput] = useState<string>('');
     const [isComposing, setIsComposing] = useState<boolean>(false);
     const MAXLENGTH = 2000;
-
-    // Language Control
-    const lang = useTranslation();
 
     // Emoji Picker Control
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);

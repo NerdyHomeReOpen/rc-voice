@@ -26,12 +26,10 @@ interface DirectMessageModalProps {
 
 const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
   ({ onClose, friend }) => {
-    if (!friend) return null;
-
     // Redux
     const user = useSelector((state: { user: User }) => state.user);
 
-    // Language Control
+    // Language
     const lang = useTranslation();
 
     // Socket
@@ -64,7 +62,6 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
     const friendDirectMessages = friend.directMessages || [];
 
     // Handlers
-
     const handleSendMessage = (directMessage: DirectMessage) => {
       socket?.send.directMessage({ directMessage });
     };

@@ -21,16 +21,16 @@ interface ServerApplicationModalProps {
 
 const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
   React.memo((initialData: ServerApplicationModalProps) => {
-    // Variables
-    const serverName = initialData.server?.name || '';
-    const serverDisplayId = initialData.server?.displayId || '';
-    const serverAvatar = initialData.server?.avatar || null;
-
-    // Language Control
+    // Language
     const lang = useTranslation();
 
     // Socket
     const socket = useSocket();
+
+    // Variables
+    const serverName = initialData.server?.name || '';
+    const serverDisplayId = initialData.server?.displayId || '';
+    const serverAvatar = initialData.server?.avatar || null;
 
     // State
     const [description, setDescription] = useState('');

@@ -27,7 +27,7 @@ interface DialogProps {
 }
 
 const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
-  // Language Control
+  // Language
   const lang = useTranslation();
 
   // Variables

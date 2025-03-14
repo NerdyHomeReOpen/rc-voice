@@ -22,15 +22,16 @@ interface AddChannelModalProps {
 
 const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
   (initialData: AddChannelModalProps) => {
+    // Socket
+    const socket = useSocket();
+
+    // Language
     const lang = useTranslation();
 
     // Variables
     const parentName = initialData.parent?.name || lang.none;
     const isRoot = !!initialData.parent;
     const serverId = initialData.serverId || '';
-
-    // Socket
-    const socket = useSocket();
 
     // Handlers
     const handleClose = () => {

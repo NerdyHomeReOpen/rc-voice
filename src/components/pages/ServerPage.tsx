@@ -35,6 +35,15 @@ const ServerPageComponent: React.FC = React.memo(() => {
   const server = useSelector((state: { server: Server }) => state.server);
   const channel = useSelector((state: { channel: Channel }) => state.channel);
 
+  // Language
+  const lang = useTranslation();
+
+  // Socket
+  const socket = useSocket();
+
+  // WebRTC
+  const webRTC = useWebRTC();
+
   // Variables
   const serverName = server.name;
   const serverAvatar = server.avatar;
@@ -58,15 +67,6 @@ const ServerPageComponent: React.FC = React.memo(() => {
     createdAt: 0,
   };
   const userPermissionLevel = userMember.permissionLevel;
-
-  // Language Control
-  const lang = useTranslation();
-
-  // Socket
-  const socket = useSocket();
-
-  // WebRTC
-  const webRTC = useWebRTC();
 
   // Sidebar Control
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
