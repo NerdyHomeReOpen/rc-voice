@@ -24,143 +24,16 @@
   border-bottom: 1px solid #e3e3e5;
 }
 
-/* .headerBox {
-  display: flex;
-  justify-content: space-between;
-  background-color: #0073c6;
-  -webkit-app-region: drag;
-  flex-direction: column;
-  width: 100%;
-}
-
-.header {
-  height: 30px;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  font-size: 16px;
-  width: 100%;
-  color: #fff;
-} */
-
-/* .header:before {
-  content: '';
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  background: url('../../../public/rc_logo_small.png') no-repeat center center;
-  vertical-align: middle;
-  background-size: contain;
-}
-
-.title {
-  margin-left: 5px;
-  font-size: 13px;
-} */
-
-/* .popupHeader {
-  background: #f0f0f0;
-  height: 40px;
-}
-
-.actionButtons {
-  width: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  -webkit-app-region: no-drag;
-} */
-
-/* .close {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  background: url(../../../public/Button_Close.png) no-repeat center center;
-  background-position: 0 0;
-  cursor: pointer;
-  background-size: cover;
-}
-
-.close:hover {
-  background-position: -20px 0;
-}
-
-.close:active {
-  background-position: -40px 0;
-} */
-/* 
-.popupMessageBox {
-  height: 100%;
-  display: flex;
-  font-family: 'SimSun', sans-serif;
-  flex-direction: column;
-  background: url(../../../public/dialog_body_bg.png) no-repeat center center;
-  background-size: cover;
-}
-
-.popupMessageContain {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 30px;
-}
-
-.popupMessageContain div {
-  font-size: 13px;
-}
-
-.popupMessage {
-  width: 100%;
-}
-
-.popupIcon {
-  margin-right: 1rem;
-  content: '';
-  display: inline-block;
-  width: 36px;
-  height: 36px;
-  background: url(../../../public/pic_alert.png) no-repeat center center;
-  vertical-align: middle;
-  background-size: contain;
-  min-width: 36px;
-}
-
-.popupIconAlert {
-  background: url(../../../public/pic_alert.png) no-repeat center center;
-}
-
-.popupIconAlert2 {
-  background: url(../../../public/pic_alert2.png) no-repeat center center;
-}
-
-.popupIconError {
-  background: url(../../../public/pic_error.png) no-repeat center center;
-}
-
-.popupIconWarning {
-  background: url(../../../public/pic_warning.png) no-repeat center center;
-}
-
-.popupIconInformation {
-  background: url(../../../public/pic_information.png) no-repeat center center;
-}
-
-.popupIconSuccess {
-  background: url(../../../public/pic_ok.png) no-repeat center center;
-} */
-
 .button {
   margin-right: 5px;
   min-width: 78px;
+  min-height: 24px;
   text-align: center;
-  font-size: 13px;
-  height: 24px;
-  align-items: center;
   display: flex;
+  align-items: center;
   justify-content: center;
   cursor: pointer;
   border: 1px solid #cbcccd;
-  width: auto;
   border-radius: 5px;
   background: #fff;
 }
@@ -171,34 +44,51 @@
   background: #f5f5f5;
 }
 
+.label {
+  min-width: 5rem;
+}
+.label.required:after {
+  content: '*';
+  color: red;
+}
+
 .inputBox {
   width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
-  font-size: 0.9rem;
 }
-.inputBox .label {
-  min-width: 5rem;
-}
-.inputBox .label.required:after {
-  content: '*';
-  color: red;
-}
-.inputBox .input {
+.inputBox input,
+.inputBox textarea,
+.inputBox select {
   border: 1px solid #ddd;
   padding: 2px;
   background: #fff;
   position: relative;
   display: inline-block;
   width: 100%;
+  max-height: 50px;
   resize: none;
+}
+
+.inputBox select {
+  width: 200px;
+}
+.inputBox select::before {
+  content: '';
+  background: url(../../../public/channel/spliter.png) no-repeat center center;
+  background-size: contain;
+  height: 20px;
+  width: 30px;
+  position: absolute;
+  right: 20px;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .inputBorder {
   border: 1px solid #ddd;
 }
-
 .inputBorder input,
 .inputBorder textarea,
 .inputBorder select {

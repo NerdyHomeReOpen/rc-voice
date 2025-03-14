@@ -227,6 +227,7 @@
 }
 
 .channelList .channelTab {
+  position: relative;
   padding: 0.125rem 20px 0.125rem 0.75rem;
   display: flex;
   align-items: center;
@@ -288,11 +289,6 @@
   font-size: 14px;
 }
 
-.userCurrentLocation,
-.userCurrentLocation .channelTabCount {
-  color: #ff0000 !important;
-}
-
 .channelList .subChannel:not(.lobby),
 .channelList .subChannel:not(.lobby) + .userList .userTab {
   padding: 0.125rem 20px 0.125rem 1.7rem;
@@ -325,11 +321,11 @@
   text-overflow: ellipsis;
 }
 
-.userIcon {
+.userList .userTab .userIcon {
   display: flex;
 }
 
-.userGrade {
+.userList .userTab .userGrade {
   width: 15px;
   height: 15px;
   background: url(../../public/usergrade.png) no-repeat center center;
@@ -338,7 +334,7 @@
   cursor: pointer;
 }
 
-.userState {
+.userList .userTab .userState {
   background: url(../../public/channel/mic_queue_state.png) no-repeat center
     center;
   height: 12px;
@@ -347,15 +343,15 @@
   left: 0;
 }
 
-.userState.play {
+.userList .userTab .userState.play {
   background-position: 0 0;
 }
 
-.userState.unplay {
+.userList .userTab .userState.unplay {
   background-position: -12px 0;
 }
 
-.userState.muted {
+.userList .userTab .userState.muted {
   background-position: -24px 0;
 }
 

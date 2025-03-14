@@ -18,7 +18,6 @@ import {
   type User,
   type Server,
   type Message,
-  type Permission,
   type Channel,
 } from '@/types';
 
@@ -126,10 +125,17 @@ const ServerPageComponent: React.FC = React.memo(() => {
   };
 
   const handleOpenServerSettings = () => {
-    ipcService.popup.open(popupType.EDIT_SERVER, 450, 600);
+    ipcService.popup.open(popupType.EDIT_SERVER);
     ipcService.initialData.onRequest(popupType.EDIT_SERVER, {
       server: server,
       mainUserId: userId,
+    });
+  };
+
+  const handleOpenApplyMember = () => {
+    ipcService.popup.open(popupType.APPLY_MEMBER);
+    ipcService.initialData.onRequest(popupType.APPLY_MEMBER, {
+      server: server,
     });
   };
 
@@ -163,11 +169,18 @@ const ServerPageComponent: React.FC = React.memo(() => {
               </div>
             </div>
             <div className={styles['optionBox']}>
-              <div className={styles['invitation']} />
+              <div
+                className={styles['invitation']}
+                onClick={() => {
+                  handleOpenApplyMember();
+                }}
+              />
               <div className={styles['saperator']} />
               <div
                 className={styles['setting']}
-                onClick={handleOpenServerSettings}
+                onClick={() => {
+                  handleOpenServerSettings();
+                }}
               />
             </div>
           </div>

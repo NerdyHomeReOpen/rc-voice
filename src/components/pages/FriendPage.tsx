@@ -13,7 +13,7 @@ import FriendListViewer from '@/components/viewers/FriendListViewer';
 import BadgeViewer from '@/components/viewers/BadgeViewer';
 
 // Types
-import { type User } from '@/types';
+import { popupType, type User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -32,9 +32,9 @@ const FriendPageComponent: React.FC = React.memo(() => {
   const userSignature = user.signature;
   const userLevel = user.level;
   const userGrade = Math.min(56, Math.ceil(userLevel / 5)); // 56 is max level
-  const userBadges = user?.badges || [];
-  const userFriends = user?.friends || [];
-  const userFriendGroups = user?.friendGroups || [];
+  const userBadges = user.badges || [];
+  const userFriends = user.friends || [];
+  const userFriendGroups = user.friendGroups || [];
 
   // Socket
   const socket = useSocket();

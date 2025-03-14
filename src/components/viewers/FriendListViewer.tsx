@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/display-name */
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Trash } from 'lucide-react';
 
 // CSS
@@ -8,7 +9,7 @@ import styles from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
 
 // Types
-import { popupType, type Friend, type FriendGroup } from '@/types';
+import { popupType, type User, type Friend, type FriendGroup } from '@/types';
 
 // Components
 import BadgeViewer from '@/components/viewers/BadgeViewer';
@@ -26,16 +27,15 @@ interface FriendGroupProps {
 
 const FriendGroup: React.FC<FriendGroupProps> = React.memo(
   ({ friendGroup, friends }) => {
+    // Variables
+    const groupName = friendGroup.name;
+    const groupFriends = friends.filter((fd) => fd.groupId == friendGroup.id);
+
     // Expanded Control
     const [expanded, setExpanded] = useState<boolean>(true);
 
     // Context Menu
     const contextMenu = useContextMenu();
-
-    const groupName = friendGroup.name;
-    const groupFriends = friends.filter(
-      (friend) => friend.groupId == friendGroup.id,
-    );
 
     return (
       <div key={friendGroup.id}>
@@ -86,15 +86,41 @@ interface FriendCardProps {
   friend: Friend;
 }
 const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
+  // Variables
+  const friendUser = friend.user || {
+    id: '',
+    name: '未知使用者',
+    avatar: '',
+    avatarUrl: '',
+    signature: '',
+    status: 'online',
+    gender: 'Male',
+    level: 0,
+    xp: 0,
+    requiredXp: 0,
+    progress: 0,
+    currentChannelId: '',
+    currentServerId: '',
+    lastActiveAt: 0,
+    createdAt: 0,
+  };
+  const friendAvatarUrl = friendUser.avatarUrl;
+  const friendName = friendUser.name;
+  const friendSignature = friendUser.signature;
+  const friendLevel = friendUser.level;
+  const friendGrade = Math.min(56, Math.ceil(friendLevel / 5)); // 56 is max level
+  const friendBadges = friendUser.badges || [];
+
   // Context Menu Control
   const contextMenu = useContextMenu();
 
-  const friendUser = friend.user;
-  const friendLevel = Math.min(56, Math.ceil((friendUser?.level ?? 0) / 5)); // 56 is max level
-  const friendAvatarUrl = friendUser?.avatarUrl;
-  const friendName = friendUser?.name;
-  const friendBadges = friendUser?.badges ?? [];
-  const friendSignature = friendUser?.signature ?? '';
+  // Handlers
+  const handleOpenDirectMessagePopup = () => {
+    ipcService.popup.open(popupType.DIRECT_MESSAGE);
+    ipcService.initialData.onRequest(popupType.DIRECT_MESSAGE, {
+      user: friendUser,
+    });
+  };
 
   return (
     <div key={friend.id}>
@@ -102,8 +128,6 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
       <div
         className={styles['friendCard']}
         onContextMenu={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
           contextMenu.showContextMenu(e.pageX, e.pageY, [
             {
               id: 'delete',
@@ -115,25 +139,19 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
             },
           ]);
         }}
-        onDoubleClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          ipcService.popup.open(popupType.DIRECT_MESSAGE, 600, 450);
+        onDoubleClick={() => {
+          handleOpenDirectMessagePopup();
         }}
       >
         <div
           className={styles['avatarPicture']}
-          style={
-            friendAvatarUrl
-              ? { backgroundImage: `url(${friendAvatarUrl})` }
-              : {}
-          }
+          style={{ backgroundImage: `url(${friendAvatarUrl})` }}
         />
         <div className={styles['baseInfoBox']}>
           <div className={styles['container']}>
             <div className={styles['name']}>{friendName}</div>
             <div
-              className={`${styles['userGrade']} ${grade[`lv-${friendLevel}`]}`}
+              className={`${styles['userGrade']} ${grade[`lv-${friendGrade}`]}`}
             />
             <BadgeViewer badges={friendBadges} />
           </div>
@@ -145,23 +163,35 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
 });
 
 interface FriendListViewerProps {
-  friendGroups: FriendGroup[] | null;
-  friends: Friend[] | null;
+  friendGroups: FriendGroup[];
+  friends: Friend[];
 }
 
 const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
   ({ friendGroups, friends }) => {
-    if (!friendGroups) return null;
+    // Redux
+    const user = useSelector((state: { user: User }) => state.user);
 
     // Search Control
     const [searchQuery, setSearchQuery] = useState<string>('');
 
     const filteredFriends =
-      friends?.filter((friend) => friend.user?.name.includes(searchQuery)) ??
-      [];
+      friends.filter((friend) => friend.user?.name.includes(searchQuery)) ?? [];
 
     // Tab Control
     const [selectedTabId, setSelectedTabId] = useState<number>(0);
+
+    // Handlers
+    const handleOpenApplyFriendPopup = () => {
+      ipcService.popup.open(popupType.APPLY_FRIEND);
+      ipcService.initialData.onRequest(popupType.APPLY_FRIEND, {
+        user: user,
+      });
+    };
+
+    // const handleOpenCreateGroupPopup = () => {
+    //   // ipcService.popup.open(popupType.CREATE_FRIEND_GROUP);
+    // };
 
     return (
       <>
@@ -213,10 +243,16 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
             {/* Bottom Buttons */}
             <div className={styles['bottomButtons']}>
               <div className={styles['button']} datatype="addGroup">
-                添加分組
+                {'添加分組'}
               </div>
-              <div className={styles['button']} datatype="addFriend">
-                新增好友
+              <div
+                className={styles['button']}
+                datatype="addFriend"
+                onClick={() => {
+                  handleOpenApplyFriendPopup();
+                }}
+              >
+                {'新增好友'}
               </div>
             </div>
           </div>

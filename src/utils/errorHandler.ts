@@ -24,12 +24,12 @@ export class errorHandler {
   show() {
     const errorMessage = `[錯誤][${this.error.tag}] ${this.error.message}，錯誤代碼: ${this.error.status_code} (${this.error.part})`;
 
-    ipcService.popup.open(popupType.DIALOG, 207, 412);
+    ipcService.popup.open(popupType.DIALOG_ERROR);
     ipcService.popup.onSubmit('error', () => {
       this.error.handler();
       console.log('Error handled.');
     });
-    ipcService.initialData.onRequest(popupType.DIALOG, {
+    ipcService.initialData.onRequest(popupType.DIALOG_ERROR, {
       iconType: 'error',
       title: errorMessage,
       submitTo: 'error',

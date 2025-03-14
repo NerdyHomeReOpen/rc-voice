@@ -1,136 +1,132 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
 
-// Redux
-import { useSelector } from 'react-redux';
+// CSS
+import popup from '@/styles/common/popup.module.css';
+import applyFriend from '@/styles/popups/applyFriend.module.css';
 
-// Components
-import Modal from '@/components/Modal';
-import Dialog from '@/components/modals/Dialog';
+// Types
+import { FriendApplication, popupType, User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
 
-// Types
-import { Server } from '@/types';
-
-// CSS
-import Popup from '../../styles/common/popup.module.css';
-import ApplyFriend from '../../styles/popups/applyFriend.module.css';
+// Services
+import { ipcService } from '@/services/ipc.service';
 
 interface ApplyFriendModalProps {
-  onClose: () => void;
-  server?: Server;
+  user: User | null;
+  targetUser: User | null;
 }
 
 const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
-  ({ onClose, server }) => {
+  (initialData: ApplyFriendModalProps) => {
+    // Variables
+    const targetUserId = initialData.targetUser?.id || '';
+    const targetUserName = initialData.targetUser?.name || '';
+    const targetUserAvatarUrl = initialData.targetUser?.avatarUrl || '';
+    const friendGroups = initialData.user?.friendGroups || [];
+
     // Socket
     const socket = useSocket();
 
     // State
     const [description, setDescription] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [isApplying, setIsApplying] = useState(false);
+    const [friendGroup, setFriendGroup] = useState('');
 
-    // Redux
-    const sessionId = useSelector(
-      (state: { sessionToken: string }) => state.sessionToken,
-    );
+    // const handleCreateFriendApplication = (application: FriendApplication) => {
+    //   // socket?.send.createFriendApplication({});
+    // };
 
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      // Emit application event
-      // socket?.emit('applyServerMembership', {
-      //   sessionId,
-      //   serverId: server?.id,
-      //   application: {
-      //     description: description.trim() || '',
-      //     timestamp: Date.now(),
-      //   },
-      // });
-      // Handle response
-      // socket?.once(
-      //   'applicationResponse',
-      //   (response: { success: boolean; message: string }) => {
-      //     if (response.success) {
-      //       onClose();
-      //     } else {
-      //       setError(response.message);
-      //     }
-      //   },
-      // );
-      onClose();
+    const handleOpenSuccessPopup = () => {
+      ipcService.popup.open(popupType.DIALOG_SUCCESS);
+      ipcService.initialData.onRequest(popupType.DIALOG_SUCCESS, {
+        title: '好友申請已發送，正等待對方的確認！',
+        submitTo: popupType.DIALOG_SUCCESS,
+      });
+      ipcService.popup.onSubmit(popupType.DIALOG_SUCCESS, () => {
+        handleClose();
+      });
+    };
+
+    const handleClose = () => {
+      ipcService.window.close();
     };
 
     return (
-      <form className={Popup['popupContainer']} onSubmit={handleSubmit}>
-        <div className={Popup['popupMessageWrapper']}>
-          <div
-            className={`${ApplyFriend['popupBody']} ${ApplyFriend['applyMember']}`}
-          >
-            <div className={ApplyFriend['header']}>
-              <div>您將添加以下聯絡人</div>
-              <div className={ApplyFriend['headerBox']}>
-                <div className={ApplyFriend['avatarWrapper']}>
-                  <div className={ApplyFriend['avatarPictureBorder']}></div>
-                  <div className={ApplyFriend['avatarPicture']}></div>
+      <div className={popup['popupContainer']}>
+        <div className={`${popup['popupBody']}`}>
+          <div className={applyFriend['body']}>
+            <div className={popup['label']}>{'您將添加以下聯絡人'}</div>
+            <div className={applyFriend['headerBox']}>
+              <div className={applyFriend['avatarWrapper']}>
+                <div className={applyFriend['avatarPicture']} />
+              </div>
+              <div className={applyFriend['userInfoWrapper']}>
+                <div className={applyFriend['userAccount']}>
+                  {`${targetUserName}`}
                 </div>
-                <div className={ApplyFriend['userInfoBox']}>
-                  <div className={ApplyFriend['userInfoAccount']}>
-                    helloworld@raidcall.com.tw
-                  </div>
-                  <div className={ApplyFriend['userInfoName']}>使用者名稱</div>
+                <div className={applyFriend['userName']}>
+                  {`${targetUserId}`}
                 </div>
               </div>
             </div>
-            <div className={ApplyFriend['body']}>
-              <div className={ApplyFriend['split']}></div>
-              <div className={ApplyFriend['userInfoBox']}>
-                <div className={ApplyFriend['userInfoText']}>選擇分組：</div>
-                <div className={ApplyFriend['userInfoButtonText']}>
-                  添加分組
-                </div>
-                <div className={ApplyFriend['userInfoSelectBox']}>
-                  <div className={ApplyFriend['userInfoSelectBorder']}>
-                    <select className={ApplyFriend['userInfoSelect']}>
-                      <option>我的好友</option>
-                      <option>閨密</option>
-                      <option>好朋友</option>
-                    </select>
-                    <div
-                      className={ApplyFriend['userInfoSelectDropDownIcon']}
-                    ></div>
-                  </div>
-                  <div className={ApplyFriend['userInfoTypeIcon']}></div>
-                </div>
+            <div className={applyFriend['split']} />
+            <div className={applyFriend['contentBox']}>
+              <div className={popup['label']}>{'選擇分組：'}</div>
+              <div className={popup['inputBox']}>
+                <select
+                  className={popup['select']}
+                  onChange={(e) => {
+                    setFriendGroup(e.target.value);
+                  }}
+                >
+                  {friendGroups.map((group) => (
+                    <option key={group.id} value={group.id}>
+                      {group.name}
+                    </option>
+                  ))}
+                </select>
+                <div className={applyFriend['linkText']}>{'添加分組'}</div>
               </div>
-              <div className={ApplyFriend['userInfoBox']}>
-                <div className={ApplyFriend['userInfoText']}>附言：</div>
-                <div className={Popup['inputBorder']}>
-                  <textarea rows={2}></textarea>
-                </div>
-                <div className={ApplyFriend['userInfoNoteText']}>
-                  最多只能輸入120個字元
-                </div>
+              <div className={popup['label']}>{'附言：'}</div>
+              <div className={popup['inputBox']}>
+                <textarea
+                  rows={2}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                  }}
+                />
+              </div>
+              <div className={applyFriend['noteText']}>
+                {'最多只能輸入120個字元'}
               </div>
             </div>
-          </div>
-          <div className={Popup['popupFooter']}>
-            <button
-              type="submit"
-              className={`${Popup['button']} ${
-                !description.trim() ? Popup['disabled'] : ''
-              }`}
-            >
-              傳送請求
-            </button>
-            <button type="button" className={Popup['button']} onClick={onClose}>
-              取消
-            </button>
           </div>
         </div>
-      </form>
+        <div className={popup['popupFooter']}>
+          <button
+            className={`${popup['button']} ${
+              !description.trim() ? popup['disabled'] : ''
+            }`}
+            disabled={!description.trim()}
+            onClick={() => {
+              // handleCreateFriendApplication();
+              handleOpenSuccessPopup();
+            }}
+          >
+            {'傳送請求'}
+          </button>
+          <button
+            className={popup['button']}
+            onClick={() => {
+              handleClose();
+            }}
+          >
+            {'取消'}
+          </button>
+        </div>
+      </div>
     );
   },
 );

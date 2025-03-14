@@ -23,6 +23,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   const socket = useSocket();
 
   const handleServerSelect = (serverId: string) => {
+    if (user.currentServerId === serverId) return;
     socket?.send.connectServer({ serverId });
   };
 
@@ -36,7 +37,9 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
     <>
       <div
         className={homePage['myGroupsRoomItemBox']}
-        onClick={() => handleServerSelect(server.id)}
+        onClick={() => {
+          handleServerSelect(server.id);
+        }}
       >
         <div
           className={homePage['myGroupsRoomAvatarPicture']}
@@ -78,7 +81,7 @@ const ServerListViewer: React.FC<ServerListViewerProps> = React.memo(
     return (
       <div className={homePage['myGroupsRoomItems']}>
         {servers.map((server) => (
-          <ServerCard key={server?.id} server={server} />
+          <ServerCard key={server.id} server={server} />
         ))}
       </div>
     );

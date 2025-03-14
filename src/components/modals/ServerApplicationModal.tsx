@@ -1,30 +1,29 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
 
-// Redux
-import { useSelector } from 'react-redux';
+// CSS
+import Popup from '@/styles/common/popup.module.css';
+import applyMember from '@/styles/popups/serverApplication.module.css';
 
-// Components
-import Modal from '@/components/Modal';
-import Dialog from '@/components/modals/Dialog';
+// Types
+import { popupType, type Server, type ServerApplication } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
 
-// Types
-import { Server } from '@/types';
-
-// CSS
-import Popup from '../../styles/common/popup.module.css';
-import ServerApplication from '../../styles/popups/serverApplication.module.css';
+// Services
+import { ipcService } from '@/services/ipc.service';
 
 interface ServerApplicationModalProps {
-  onClose: () => void;
-  server?: Server;
+  server: Server | null;
 }
 
 const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
-  React.memo(({ onClose, server }) => {
+  React.memo((initialData: ServerApplicationModalProps) => {
+    // Variables
+    const serverName = initialData.server?.name || '';
+    const serverDisplayId = initialData.server?.displayId || '';
+
     // Socket
     const socket = useSocket();
 
@@ -33,162 +32,145 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     const [error, setError] = useState<string | null>(null);
     const [isApplying, setIsApplying] = useState(false);
 
-    // Redux
-    const sessionId = useSelector(
-      (state: { sessionToken: string }) => state.sessionToken,
-    );
+    // Section Control
+    const [section, setSection] = useState<number>(0);
 
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      // Emit application event
-      // socket?.emit('applyServerMembership', {
-      //   sessionId,
-      //   serverId: server?.id,
-      //   application: {
-      //     description: description.trim() || '',
-      //     timestamp: Date.now(),
-      //   },
-      // });
-      // Handle response
-      // socket?.once(
-      //   'applicationResponse',
-      //   (response: { success: boolean; message: string }) => {
-      //     if (response.success) {
-      //       onClose();
-      //     } else {
-      //       setError(response.message);
-      //     }
-      //   },
-      // );
-      onClose();
+    const handleCreatMemberApplication = (application: ServerApplication) => {};
+
+    const handleOpenSuccessDialog = () => {
+      ipcService.popup.open(popupType.DIALOG_SUCCESS);
+      ipcService.initialData.onRequest(popupType.DIALOG_SUCCESS, {
+        title: '申請已送出，請等待管理員審核',
+        submitTo: popupType.DIALOG_SUCCESS,
+      });
+      ipcService.popup.onSubmit(popupType.DIALOG_SUCCESS, () => {
+        setSection(1);
+      });
     };
 
-    if (isApplying) {
-      return (
-        <form className={Popup['popupContainer']} onSubmit={handleSubmit}>
-          <div className={Popup['popupMessageWrapper']}>
-            <div
-              className={`${ServerApplication['popupBody']} ${ServerApplication['applyMember']}`}
-            >
-              <div className={ServerApplication['header']}>
-                <div className={ServerApplication['avatarWrapper']}>
-                  <div
-                    className={ServerApplication['avatarPictureBorder']}
-                  ></div>
-                  <div className={ServerApplication['avatarPicture']}></div>
-                </div>
-                <div className={ServerApplication['serverInfoBox']}>
-                  <div className={ServerApplication['serverInfoName']}>
-                    {server?.name}
+    const handleClose = () => {
+      ipcService.window.close();
+    };
+
+    switch (section) {
+      // Member Application Form
+      case 0:
+        return (
+          <div className={Popup['popupContainer']}>
+            <div className={`${Popup['popupBody']}`}>
+              <div className={applyMember['body']}>
+                <div className={applyMember['headerBox']}>
+                  <div className={applyMember['avatarWrapper']}>
+                    <div className={applyMember['avatarPicture']} />
                   </div>
-                  <div className={ServerApplication['serverInfoIDBox']}>
-                    <div className={ServerApplication['serverInfoIDTitle']}>
-                      ID:
+                  <div className={applyMember['serverInfoWrapper']}>
+                    <div className={applyMember['serverName']}>
+                      {serverName}
                     </div>
-                    <div className={ServerApplication['serverInfoID']}>
-                      {server?.id}
+                    <div className={applyMember['serverId']}>
+                      {`ID: ${serverDisplayId}`}
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className={ServerApplication['body']}>
-                <div className={ServerApplication['serverInfoBox']}>
-                  <div>申請須知</div>
-                  <div className={ServerApplication['instructions']}>
-                    申請須知內容
-                  </div>
+                <div className={Popup['label']}>{'申請須知'}</div>
+                <div className={applyMember['noteText']}>
+                  {'{server.settings.applicationNote}'}
                 </div>
-                <div className={ServerApplication['split']}></div>
-                <div className={ServerApplication['serverInfoBox']}>
-                  <div>申請說明</div>
-                  <div className={Popup['inputBorder']}>
+                <div className={applyMember['split']} />
+                <div className={applyMember['contentBox']}>
+                  <div className={Popup['label']}>{'申請說明'}</div>
+                  <div className={Popup['inputBox']}>
                     <textarea
-                      className={ServerApplication['instructionsInput']}
-                      onChange={(e) => setDescription(e.target.value)}
                       rows={2}
+                      onChange={(e) => setDescription(e.target.value)}
                       value={description}
-                    ></textarea>
+                    />
                   </div>
                 </div>
               </div>
             </div>
             <div className={Popup['popupFooter']}>
-              {isApplying ? (
-                <button
-                  type="submit"
-                  className={`${Popup['button']} ${
-                    !description.trim() ? Popup['disabled'] : ''
-                  }`}
-                >
-                  申請
-                </button>
-              ) : (
-                ''
-              )}
-              <button
-                type="button"
-                className={Popup['button']}
-                onClick={onClose}
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        </form>
-      );
-    }
-
-    return (
-      <div className={Popup['popupContainer']}>
-        <div className={Popup['popupMessageWrapper']}>
-          <div className={ServerApplication['popupBody']}>
-            {/* <Dialog
-              popupIcon="popupIconWarning"
-              textBorder={Popup['textBorder']}
-              title={
-                <>
-                  該群的管理員已設定只有會員才能訪問
-                  <br />
-                  如需訪問，請
-                  <span
-                    className={ServerApplication['applyText']}
-                    onClick={() => setIsApplying(true)}
-                    style={{ color: 'blue', cursor: 'pointer' }}
-                  >
-                    申請成為會員
-                  </span>
-                  。
-                </>
-              }
-              onSubmit={(e) => {
-                e.preventDefault();
-                setIsApplying(true);
-              }}
-              onClose={onClose}
-              iconType={'error'}
-              submitTo={''}
-            /> */}
-          </div>
-          <div className={Popup['popupFooter']}>
-            {isApplying ? (
               <button
                 type="submit"
                 className={`${Popup['button']} ${
                   !description.trim() ? Popup['disabled'] : ''
                 }`}
+                disabled={!description.trim()}
+                onClick={() => {
+                  // handleCreatMemberApplication({
+                  //   serverId: server?.id,
+                  //   description,
+                  // });
+                  handleOpenSuccessDialog();
+                }}
               >
-                申請
+                {'送出'}
               </button>
-            ) : (
-              ''
-            )}
-            <button type="button" className={Popup['button']} onClick={onClose}>
-              取消
-            </button>
+              <button
+                type="button"
+                className={Popup['button']}
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                {'取消'}
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
-    );
+        );
+
+      // Show Notification
+      case 1:
+        return (
+          <div className={Popup['popupContainer']}>
+            <div className={Popup['popupBody']}>
+              <div className={applyMember['body']}>
+                <div className={applyMember['headerBox']}>
+                  <div className={applyMember['avatarWrapper']}>
+                    <div className={applyMember['avatarPicture']} />
+                  </div>
+                  <div className={applyMember['serverInfoWrapper']}>
+                    <div className={applyMember['serverName']}>
+                      {serverName}
+                    </div>
+                    <div className={applyMember['serverId']}>
+                      {`ID: ${serverDisplayId}`}
+                    </div>
+                  </div>
+                </div>
+                <div className={Popup['label']}>{'申請須知'}</div>
+                <div className={applyMember['noteText']}>
+                  {'{server.settings.applicationNote}'}
+                </div>
+                <div className={applyMember['split']} />
+                <div className={applyMember['contentBox']}>
+                  <div className={applyMember['notificationText']}>
+                    {'申請已送出，請等待管理員審核'}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={Popup['popupFooter']}>
+              <button
+                className={Popup['button']}
+                onClick={() => {
+                  setSection(0);
+                }}
+              >
+                {'修改'}
+              </button>
+              <button
+                className={Popup['button']}
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                {'確認'}
+              </button>
+            </div>
+          </div>
+        );
+    }
   });
 
 ServerApplicationModal.displayName = 'ServerApplicationModal';

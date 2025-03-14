@@ -67,7 +67,7 @@ const HomePageComponent: React.FC = React.memo(() => {
   };
 
   const handleOpenCreateServerPopup = () => {
-    ipcService.popup.open(popupType.CREATE_SERVER, 407, 550);
+    ipcService.popup.open(popupType.CREATE_SERVER);
     ipcService.initialData.onRequest(popupType.CREATE_SERVER, { user: user });
   };
 

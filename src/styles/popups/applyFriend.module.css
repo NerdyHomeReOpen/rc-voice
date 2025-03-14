@@ -1,150 +1,80 @@
-.popupBody {
-  padding: 20px;
-  height: 150px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.applyMember {
-  height: 310px;
-  justify-content: flex-start;
-}
-
-.header {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  font-size: 13px;
+.body {
+  padding: 15px 30px;
 }
 
 .headerBox {
-  height: auto;
-  width: auto;
+  margin: 5;
   display: flex;
-  margin-top: 5;
   align-items: center;
 }
 
 .avatarWrapper {
   display: flex;
+  padding: 5px;
 }
-.avatarPictureBorder {
+.avatarPicture {
+  position: relative;
+  cursor: pointer;
+  object-fit: cover;
+  min-width: 50px;
+  min-height: 50px;
+  background: url(../../../public/logo_server_def.png) no-repeat center center;
+  background-size: contain;
+  background-position: 0 0;
+}
+.avatarPicture::before {
+  content: '';
   position: absolute;
-  z-index: 2;
-  width: 50px;
-  height: 52px;
+  top: -1px;
+  left: -1px;
+  z-index: 99;
+  min-width: 52px;
+  min-height: 52px;
   background: url(../../../public/channel/server_logo_border.png) no-repeat
     center center;
   background-size: cover;
-  cursor: pointer;
+  background-position: 0 0;
 }
 
-.avatarPicture {
-  max-height: 100px;
-  height: 50px;
-  width: 50px;
-  background: url(../../../public/logo_server_def.png);
-  background-size: cover;
-}
-
-.userInfoBox {
+.userInfoWrapper {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  width: 100%;
-  font-size: 13px;
-  height: 100%;
+  justify-content: space-between;
 }
-
-.userInfoAccount {
+.userAccount {
   margin-left: 10px;
 }
-
-.userInfoName {
+.userName {
   margin-left: 10px;
   color: #777;
-}
-
-.body {
-  margin-top: 5px;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
 }
 
 .split {
   width: 100%;
-  height: 0px;
+  height: 0%;
   border-bottom: 1px solid #e0e0e4;
-  margin: 10px;
-  margin-left: 0;
-  margin-right: 0;
+  margin: 10px 0;
 }
 
-.userInfoText {
-  margin-bottom: 10px;
-}
-
-.userInfoBox {
-  margin-bottom: 5px;
-  margin-top: 5px;
-}
-
-.userInfoSelectBox {
+.contentBox {
+  padding: 5px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.userInfoSelect {
-  border-radius: 3px;
-  flex: 1;
-  padding: 3px;
-  border: 1px solid #ffffff;
-  outline: none;
-  font-size: 12px;
-  width: 100%;
-  height: auto;
-  font-family: 'SimSun', sans-serif;
-  appearance: none;
-  min-width: 90px;
-}
-
-.userInfoSelectBorder {
-  height: auto;
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  background: #fff;
-  justify-content: flex-end;
-}
-
-.userInfoSelectBox .userInfoSelectBorder:has(.userInfoSelect):before {
-  background: url(../../../public/channel/spliter.png) no-repeat center center;
-  content: '';
-  background-size: contain;
-  height: 20px;
-  width: 30px;
-  position: absolute;
-  left: 5.2rem;
-  top: 14.2rem;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.userInfoSelectDropDownIcon {
-  width: 25px;
-  height: 10px;
-  background: url(../../../public/login_combobox_triangle.png) no-repeat center
-    center;
-  background-position: 0 0;
-  position: absolute;
-  pointer-events: none;
-}
-
-.userInfoNoteText {
+.noteText {
   color: #777;
   text-align: right;
-  margin-top: 10px;
+}
+
+.linkText {
+  color: #69a5ff;
+  text-align: right;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.linkText:hover {
+  text-decoration: underline;
 }

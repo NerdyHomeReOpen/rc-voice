@@ -212,6 +212,20 @@ export interface Emoji {
   path: string;
 }
 
+export interface discordPresence {
+  details: string;
+  state: string;
+  largeImageKey: string;
+  largeImageText: string;
+  smallImageKey: string;
+  smallImageText: string;
+  timestamp: number;
+  buttons: {
+    label: string;
+    url: string;
+  }[];
+}
+
 export enum SocketClientEvent {
   SEARCH_USER = 'searchUser',
   CONNECT_USER = 'connectUser',
@@ -270,19 +284,10 @@ export enum popupType {
   APPLY_MEMBER = 'applyMember',
   APPLY_FRIEND = 'applyFriend',
   DIRECT_MESSAGE = 'directMessage',
-  DIALOG = 'dialog',
-}
-
-export interface discordPresence {
-  details: string;
-  state: string;
-  largeImageKey: string;
-  largeImageText: string;
-  smallImageKey: string;
-  smallImageText: string;
-  timestamp: number;
-  buttons: {
-    label: string;
-    url: string;
-  }[];
+  DIALOG_ALERT = 'dialogAlert',
+  DIALOG_ALERT2 = 'dialogAlert2',
+  DIALOG_SUCCESS = 'dialogSuccess',
+  DIALOG_WARNING = 'dialogWarning',
+  DIALOG_ERROR = 'dialogError',
+  DIALOG_INFO = 'dialogInfo',
 }
