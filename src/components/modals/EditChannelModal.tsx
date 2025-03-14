@@ -9,6 +9,7 @@ import Modal from '@/components/Modal';
 import { Channel, Visibility } from '@/types';
 
 // Providers
+import { useTranslation } from '@/providers/LanguageProvider';
 import { useSocket } from '@/providers/SocketProvider';
 
 // CSS
@@ -22,6 +23,9 @@ interface EditChannelModalProps {
 
 const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
   ({ onClose, channel }) => {
+    // Language Control
+    const lang = useTranslation();
+
     // Socket
     const socket = useSocket();
 
@@ -45,7 +49,8 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
           <div className={EditChannel['popupBody']}>
             <div className={Popup['inputBox']}>
               <div className={Popup['title']}>
-                {`${channel?.isCategory ? '類別' : '頻道'}`}名稱
+                {`${channel?.isCategory ? lang.category : lang.channel}`}
+                {lang.name}
               </div>
               <div className={Popup['inputBorder']}>
                 <input
@@ -61,7 +66,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
               </div>
             </div>
             <div className={Popup['inputBox']}>
-              <div className={Popup['title']}>訪問受限</div>
+              <div className={Popup['title']}>{lang.channelPermission}</div>
               <div className={Popup['inputBorder']}>
                 <select
                   value={editedChannel?.settings?.visibility}
@@ -78,19 +83,19 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     })
                   }
                 >
-                  <option value="public">任何人可以訪問</option>
-                  <option value="private">禁止遊客訪問</option>
-                  <option value="readonly">唯讀</option>
+                  <option value="public">{lang.channelPublic}</option>
+                  <option value="private">{lang.channelPrivate}</option>
+                  <option value="readonly">{lang.channelReadonly}</option>
                 </select>
               </div>
             </div>
           </div>
           <div className={Popup['popupFooter']}>
             <button type="submit" className={Popup['button']}>
-              確定
+              {lang.confirm}
             </button>
             <button type="button" className={Popup['button']} onClick={onClose}>
-              取消
+              {lang.cancel}
             </button>
           </div>
         </div>

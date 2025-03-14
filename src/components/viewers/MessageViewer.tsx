@@ -15,6 +15,9 @@ import type { DirectMessage, Message, User } from '@/types';
 // Util
 import { formatTimestamp } from '@/utils/formatters';
 
+// Providers
+import { useTranslation, useLanguage } from '@/providers/LanguageProvider';
+
 interface MessageGroup {
   id: string;
   type: 'general' | 'info';
@@ -63,6 +66,10 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
   ({ messages }) => {
     if (!messages) return null;
 
+    // Language Control
+    const lang = useTranslation();
+    const { language } = useLanguage();
+
     const messageGroups = getGroupMessages(messages);
 
     // Auto Scroll Control
@@ -81,7 +88,11 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
           const senderGender = messageGroup.sender?.gender ?? 'Male';
           const senderName = messageGroup.sender?.name ?? 'Unknown';
           const messagePermission = messageGroup.permissionLevel ?? 0;
-          const messageTimestamp = formatTimestamp(messageGroup.timestamp);
+          const messageTimestamp = formatTimestamp(
+            messageGroup.timestamp,
+            language,
+            lang,
+          );
 
           return (
             <div key={messageGroup.id} className={styles['messageWrapper']}>

@@ -10,7 +10,13 @@ import { CircleX } from 'lucide-react';
 import header from '@/styles/common/header.module.css';
 
 // Types
-import { Channel, Server, User, SocketServerEvent, LanguageKeys } from '@/types';
+import {
+  Channel,
+  Server,
+  User,
+  SocketServerEvent,
+  LanguageKeys,
+} from '@/types';
 
 // Pages
 import FriendPage from '@/components/pages/FriendPage';
@@ -26,6 +32,7 @@ import { errorHandler, StandardizedError } from '@/utils/errorHandler';
 // Providers
 import WebRTCProvider from '@/providers/WebRTCProvider';
 import { useSocket } from '@/providers/SocketProvider';
+import { useLanguage, useTranslation } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -36,9 +43,6 @@ import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearChannel, setChannel } from '@/redux/channelSlice';
-
-import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
-import { useTranslation } from '@/utils/translations';
 
 interface HeaderProps {
   selectedId?: number;
@@ -69,7 +73,7 @@ const Header: React.FC<HeaderProps> = React.memo(
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
     // Tab Control
-    const { setLanguage, translations } = useLanguage();
+    const { setLanguage } = useLanguage();
     const lang = useTranslation();
 
     const MAIN_TABS = React.useMemo(() => {
@@ -97,10 +101,10 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     // Status Dropdown Control
     const STATUS_OPTIONS = [
-      { status: 'online', label: '上線' },
-      { status: 'dnd', label: '請勿打擾' },
-      { status: 'idle', label: '閒置' },
-      { status: 'gn', label: '離線' },
+      { status: 'online', label: lang.online },
+      { status: 'dnd', label: lang.dnd },
+      { status: 'idle', label: lang.idle },
+      { status: 'gn', label: lang.gn },
     ];
 
     // Handlers
@@ -273,19 +277,39 @@ const Header: React.FC<HeaderProps> = React.memo(
                 <div
                   className={`${header['menuDropDown']} ${header['hidden']}`}
                 >
-                  <div className={header['option']} data-lang="tw" onClick={() => handleLanguageChange('tw')}>
+                  <div
+                    className={header['option']}
+                    data-lang="tw"
+                    onClick={() => handleLanguageChange('tw')}
+                  >
                     繁體中文
                   </div>
-                  <div className={header['option']} data-lang="cn" onClick={() => handleLanguageChange('cn')}>
+                  <div
+                    className={header['option']}
+                    data-lang="cn"
+                    onClick={() => handleLanguageChange('cn')}
+                  >
                     简体中文
                   </div>
-                  <div className={header['option']} data-lang="en" onClick={() => handleLanguageChange('en')}>
+                  <div
+                    className={header['option']}
+                    data-lang="en"
+                    onClick={() => handleLanguageChange('en')}
+                  >
                     English
                   </div>
-                  <div className={header['option']} data-lang="jp" onClick={() => handleLanguageChange('jp')}>
+                  <div
+                    className={header['option']}
+                    data-lang="jp"
+                    onClick={() => handleLanguageChange('jp')}
+                  >
                     日本語
                   </div>
-                  <div className={header['option']} data-lang="ru" onClick={() => handleLanguageChange('ru')}>
+                  <div
+                    className={header['option']}
+                    data-lang="ru"
+                    onClick={() => handleLanguageChange('ru')}
+                  >
                     русский язык
                   </div>
                 </div>
@@ -446,18 +470,16 @@ const Home = () => {
   };
 
   return (
-    <LanguageProvider>
-      <div className="wrapper">
-        <WebRTCProvider>
-          <Header
-            selectedId={selectedTabId}
-            setSelectedTabId={setSelectedTabId}
-          />
-          {/* Main Content */}
-          <div className="content">{getMainContent()}</div>
-        </WebRTCProvider>
-      </div>
-    </LanguageProvider>
+    <div className="wrapper">
+      <WebRTCProvider>
+        <Header
+          selectedId={selectedTabId}
+          setSelectedTabId={setSelectedTabId}
+        />
+        {/* Main Content */}
+        <div className="content">{getMainContent()}</div>
+      </WebRTCProvider>
+    </div>
   );
 };
 

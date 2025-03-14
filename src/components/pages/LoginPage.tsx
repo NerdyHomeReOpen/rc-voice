@@ -12,6 +12,9 @@ import { authService } from '@/services/auth.service';
 // Components
 import InputField from '@/components/InputField';
 
+// Providers
+import { useTranslation } from '@/providers/LanguageProvider';
+
 interface FormErrors {
   general?: string;
   account?: string;
@@ -47,6 +50,9 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
     // Loading Control
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    // Language Control
+    const lang = useTranslation();
+
     // Handlers
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
       const { name, value, type, checked } = e.target;
@@ -78,7 +84,7 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
         if (await authService.login(formData)) onLoginSuccess();
       } catch (error) {
         setErrors({
-          general: error instanceof Error ? error.message : '未知錯誤',
+          general: error instanceof Error ? error.message : lang.unknownError,
         });
       } finally {
         setIsLoading(false);
@@ -95,17 +101,17 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
               <div className={styles['errorBox']}>{errors.general}</div>
             )}
             {isLoading && (
-              <div className={styles['loadingIndicator']}>登入中...</div>
+              <div className={styles['loadingIndicator']}>{lang.onLogin}</div>
             )}
             <div className={styles['inputBox']}>
-              <label className={styles['label']}>{'帳號'}</label>
+              <label className={styles['label']}>{lang.account}</label>
               <InputField
                 type="text"
                 name="account"
                 value={formData.account}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                placeholder="請輸入帳號"
+                placeholder={lang.pleaseInputAccount}
                 showFunctionButton={'account'}
                 style={{
                   borderColor: errors.account ? '#f87171' : '#d1d5db',
@@ -113,14 +119,14 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
               />
             </div>
             <div className={styles['inputBox']}>
-              <label className={styles['label']}>{'密碼'}</label>
+              <label className={styles['label']}>{lang.password}</label>
               <InputField
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                placeholder="請輸入密碼"
+                placeholder={lang.pleaseInputPassword}
                 showFunctionButton={'password'}
                 style={{
                   borderColor: errors.password ? '#f87171' : '#d1d5db',
@@ -136,7 +142,7 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
                   onChange={handleInputChange}
                   className={styles['check']}
                 />
-                記住帳號
+                {lang.rememberAccount}
               </label>
               <label className={styles['checkBox']}>
                 <input
@@ -146,20 +152,20 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(
                   onChange={handleInputChange}
                   className={styles['check']}
                 />
-                自動登入
+                {lang.autoLogin}
               </label>
             </div>
             <button type="submit" className={styles['button']}>
-              登入
+              {lang.login}
             </button>
           </form>
         </div>
         {/* Footer */}
         <div className={styles['loginFooter']}>
           <div className={styles['createAccount']} onClick={onRegisterClick}>
-            註冊帳號
+            {lang.registerAccount}
           </div>
-          <div className={styles['forgetPassword']}>忘記密碼</div>
+          <div className={styles['forgetPassword']}>{lang.forgotPassword}</div>
         </div>
       </div>
     );

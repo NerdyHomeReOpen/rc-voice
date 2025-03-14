@@ -18,6 +18,9 @@ import { authService } from '@/services/auth.service';
 // Components
 import InputField from '@/components/InputField';
 
+// Providers
+import { useTranslation } from '@/providers/LanguageProvider';
+
 interface FormErrors {
   general?: string;
   account?: string;
@@ -54,6 +57,9 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
 
     // Loading Control
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    // Language Control
+    const lang = useTranslation();
 
     const handleInputChange = (
       e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -103,7 +109,7 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
         if (await authService.register(formData)) onRegisterSuccess();
       } catch (error) {
         setErrors({
-          general: error instanceof Error ? error.message : '未知錯誤',
+          general: error instanceof Error ? error.message : lang.unknownError,
         });
       } finally {
         setIsLoading(false);
@@ -120,14 +126,14 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
             )}
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
-                <label className={styles['label']}>{'帳號'}</label>
+                <label className={styles['label']}>{lang.account}</label>
                 <InputField
                   type="text"
                   name="account"
                   value={formData.account}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder="請輸入帳號"
+                  placeholder={lang.pleaseInputAccount}
                   showFunctionButton={'account'}
                   style={{
                     borderColor: errors.account ? '#f87171' : '#d1d5db',
@@ -142,14 +148,14 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
             </div>
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
-                <label className={styles['label']}>{'密碼'}</label>
+                <label className={styles['label']}>{lang.password}</label>
                 <InputField
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder="請輸入密碼"
+                  placeholder={lang.pleaseInputPassword}
                   showFunctionButton={'password'}
                   style={{
                     borderColor: errors.password ? '#f87171' : '#d1d5db',
@@ -159,19 +165,21 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
               {errors.password ? (
                 <p className={styles['warning']}>{errors.password}</p>
               ) : (
-                <p className={styles['hint']}>{'6-20位，區分大小寫'}</p>
+                <p className={styles['hint']}>{lang.passwordHint}</p>
               )}
             </div>
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
-                <label className={styles['label']}>{'確認密碼'}</label>
+                <label className={styles['label']}>
+                  {lang.confirmPassword}
+                </label>
                 <InputField
                   type="password"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder="請再次輸入密碼"
+                  placeholder={lang.pleaseInputPasswordAgain}
                   showFunctionButton={'password'}
                   style={{
                     borderColor: errors.confirmPassword ? '#f87171' : '#d1d5db',
@@ -181,18 +189,18 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
               {errors.confirmPassword ? (
                 <p className={styles['warning']}>{errors.confirmPassword}</p>
               ) : (
-                <p className={styles['hint']}>{'重複輸入密碼'}</p>
+                <p className={styles['hint']}>{lang.repeatInputPassword}</p>
               )}
             </div>
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
-                <label className={styles['label']}>{'暱稱'}</label>
+                <label className={styles['label']}>{lang.nickname}</label>
                 <InputField
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder="請輸入暱稱"
+                  placeholder={lang.pleaseInputNickname}
                   showFunctionButton={'username'}
                   style={{
                     borderColor: errors.username ? '#f87171' : '#d1d5db',
@@ -202,11 +210,11 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
               {errors.username ? (
                 <p className={styles['warning']}>{errors.username}</p>
               ) : (
-                <p className={styles['hint']}>{'2-10位，支持中英文'}</p>
+                <p className={styles['hint']}>{lang.nicknameHint}</p>
               )}
             </div>
             <button type="submit" className={styles['button']}>
-              註冊
+              {lang.register}
             </button>
           </form>
         </div>

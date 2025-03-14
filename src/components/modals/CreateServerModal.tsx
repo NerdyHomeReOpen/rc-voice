@@ -11,6 +11,7 @@ import { type User, type Server, popupType } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -18,7 +19,6 @@ import { ipcService } from '@/services/ipc.service';
 // Validation
 export const validateName = (name: string): string => {
   if (!name?.trim()) return '請輸入群組名稱';
-  if (name.length < 6) return '群組名稱不能少於6個字符';
   if (name.length > 30) return '群組名稱不能超過30個字符';
   return '';
 };
@@ -45,6 +45,9 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const userOwnedServers = initialData.user?.ownedServers || [];
     const remainingGroups = maxGroups - userOwnedServers.length;
     const canCreate = remainingGroups > 0;
+
+    // Language Control
+    const lang = useTranslation();
 
     // Socket Control
     const socket = useSocket();
@@ -108,19 +111,19 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                 <div
                   className={`${createServer['item']} ${createServer['active']}`}
                 >
-                  {'選擇語音群類型'}
+                  {lang.selectGroupType}
                 </div>
-                <div className={`${createServer['item']}`}>{'填寫資料'}</div>
+                <div className={`${createServer['item']}`}>{lang.fillInfo}</div>
               </div>
               <div className={createServer['body']}>
                 <div className={`${createServer['message']}`}>
-                  {`您還可以創建${remainingGroups}個群，創建之後不能刪除或轉讓`}
+                  {`${lang.remainingGroup1}${remainingGroups}${lang.remainingGroup2}`}
                 </div>
                 <label className={createServer['typeLabel']} data-key="60030">
-                  {'請您選擇語音群類型'}
+                  {lang.selectGroupTypeDescription}
                 </label>
                 <div className={createServer['buttonGroup']}>
-                  {['遊戲', '娛樂', '其他'].map((type) => (
+                  {[lang.game, lang.entertainment, lang.other].map((type) => (
                     <div
                       key={type}
                       className={`${createServer['button']} ${
@@ -142,10 +145,10 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                 disabled={!server.type || !canCreate}
                 onClick={() => setSection(1)}
               >
-                下一步
+                {lang.next}
               </button>
               <button className={popup['button']} onClick={handleClose}>
-                取消
+                {lang.cancel}
               </button>
             </div>
           </div>
@@ -158,12 +161,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
             <div className={popup['popupBody']}>
               <div className={createServer['tab']}>
                 <div className={`${createServer['item']}`}>
-                  {'選擇語音群類型'}
+                  {lang.selectGroupType}
                 </div>
                 <div
                   className={`${createServer['item']} ${createServer['active']}`}
                 >
-                  {'填寫資料'}
+                  {lang.fillInfo}
                 </div>
               </div>
               <div className={createServer['body']}>
@@ -184,11 +187,11 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (!file) {
-                        handleOpenErrorDialog('無法讀取圖片');
+                        handleOpenErrorDialog(lang.canNotReadImage);
                         return;
                       }
                       if (file.size > 5 * 1024 * 1024) {
-                        handleOpenErrorDialog('圖片大小不能超過5MB');
+                        handleOpenErrorDialog(lang.imageTooLarge);
                         return;
                       }
                       const reader = new FileReader();
@@ -206,12 +209,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                     style={{ marginTop: '10px' }}
                     className={popup['button']}
                   >
-                    更換頭像
+                    {lang.uploadAvatar}
                   </label>
                 </div>
                 <div className={createServer['inputGroup']}>
                   <div className={popup['inputBox']}>
-                    <div className={popup['label']}>群類型</div>
+                    <div className={popup['label']}>{lang.groupType}</div>
                     <input
                       className={popup['input']}
                       disabled
@@ -220,7 +223,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                   </div>
                   <div className={popup['inputBox']}>
                     <div className={`${popup['label']} ${popup['required']}`}>
-                      群名稱
+                      {lang.groupName}
                     </div>
                     <input
                       className={popup['input']}
@@ -235,12 +238,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                           name: validateName(server.name),
                         })
                       }
-                      placeholder="6-30個字元組成，首尾輸入的空格無效，不能包含不雅詞彙。"
+                      placeholder={lang.groupNamePlaceholder}
                     />
                     {/* {errors.name && <p className="text-red-500">{errors.name}</p>} */}
                   </div>
                   <div className={popup['inputBox']}>
-                    <div className={popup['label']}>口號</div>
+                    <div className={popup['label']}>{lang.groupSlogan}</div>
                     <textarea
                       className={popup['input']}
                       value={server.description}
@@ -253,7 +256,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                           description: validateDescription(server.description),
                         })
                       }
-                      placeholder="0-30個字元，口號是您建立團隊的目標"
+                      placeholder={lang.groupSloganPlaceholder}
                     />
                     {/* {errors.description && (
                   <p className="text-red-500">{errors.description}</p>
@@ -264,7 +267,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
             </div>
             <div className={popup['popupFooter']}>
               <button className={popup['button']} onClick={() => setSection(0)}>
-                上一步
+                {lang.previous}
               </button>
               <button
                 className={`${popup['button']} ${
@@ -276,7 +279,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                   handleClose();
                 }}
               >
-                確定
+                {lang.confirm}
               </button>
             </div>
           </div>

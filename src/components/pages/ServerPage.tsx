@@ -21,7 +21,8 @@ import {
   type Channel,
 } from '@/types';
 
-// Socket
+// Providers
+import { useTranslation } from '@/providers/LanguageProvider';
 import { useSocket } from '@/providers/SocketProvider';
 
 // Services
@@ -57,6 +58,9 @@ const ServerPageComponent: React.FC = React.memo(() => {
     createdAt: 0,
   };
   const userPermissionLevel = userMember.permissionLevel;
+
+  // Language Control
+  const lang = useTranslation();
 
   // Socket
   const socket = useSocket();
@@ -103,16 +107,16 @@ const ServerPageComponent: React.FC = React.memo(() => {
   // Update Discord Presence
   useEffect(() => {
     ipcService.discord.updatePresence({
-      details: `在 ${serverName} 中`,
-      state: `與 ${serverUserCount} 位成員聊天`,
+      details: `${lang.in} ${serverName}`,
+      state: `${lang.with} ${serverUserCount} `,
       largeImageKey: 'app_icon',
       largeImageText: 'RC Voice',
       smallImageKey: 'home_icon',
-      smallImageText: '主頁',
+      smallImageText: lang.RPCServer,
       timestamp: Date.now(),
       buttons: [
         {
-          label: '加入我們的Discord伺服器',
+          label: lang.RPCJoinServer,
           url: 'https://discord.gg/adCWzv6wwS',
         },
       ],
@@ -216,7 +220,7 @@ const ServerPageComponent: React.FC = React.memo(() => {
           </div>
           <div className={styles['buttonArea']}>
             <div className={styles['buttons']}>
-              <div className={styles['voiceModeButton']}>自由發言</div>
+              <div className={styles['voiceModeButton']}>{lang.freeSpeech}</div>
             </div>
             <div
               className={`${styles['micButton']} ${
@@ -226,11 +230,11 @@ const ServerPageComponent: React.FC = React.memo(() => {
             >
               <div className={styles['micIcon']} />
               <div className={styles['micText']}>
-                {webRTC.isMute ? '拿麥發言' : '已拿麥'}
+                {webRTC.isMute ? lang.takeMic : lang.takenMic}
               </div>
             </div>
             <div className={styles['buttons']}>
-              <div className={styles['bkgModeButton']}>混音</div>
+              <div className={styles['bkgModeButton']}>{lang.mixing}</div>
               <div className={styles['saperator']} />
               <div
                 className={`${styles['micModeButton']} ${

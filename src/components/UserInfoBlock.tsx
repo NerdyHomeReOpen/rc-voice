@@ -17,6 +17,9 @@ import BadgeViewer from '@/components/viewers/BadgeViewer';
 import type { User, Server } from '@/types';
 import { getPermissionText } from '@/utils/formatters';
 
+// Providers
+import { useTranslation } from '@/providers/LanguageProvider';
+
 interface UserInfoBlockProps {
   user: User | null;
   server: Server | null;
@@ -27,6 +30,9 @@ interface UserInfoBlockProps {
 
 const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
   ({ onClose, x, y, user, server }) => {
+    // Language Control
+    const lang = useTranslation();
+
     if (!user) return null;
 
     const userGender = user.gender;
@@ -102,12 +108,12 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
               } ${Permission[`lv-${userPermission}`]}`}
             ></div>
             <div className={UserInfoCard['userInfoPermissionText']}>
-              {getPermissionText(userPermission)}
+              {getPermissionText(userPermission, lang)}
             </div>
             <div className={styles['saperator']}></div>
             <div className={UserInfoCard['userInfoContributionBox']}>
               <div className={UserInfoCard['userInfoContributionText']}>
-                貢獻：
+                {lang.contribution}:
               </div>
               <div className={UserInfoCard['userInfoContributionTextVal']}>
                 {userContributions}
@@ -118,19 +124,6 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
           {/* Badges Section */}
           <div className={UserInfoCard['userInfoBadges']}>
             <BadgeViewer badges={userBadges} maxDisplay={13} />
-            {/* <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" />
-            <img src="/badge/raidcall_2.png" alt="8-bit Yellow Cat Badge" /> */}
           </div>
         </div>
       </div>

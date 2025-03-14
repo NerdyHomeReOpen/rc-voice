@@ -26,6 +26,9 @@ import ApplyFriend from '@/components/modals/ApplyFriend';
 import { ipcService } from '@/services/ipc.service';
 import Dialog from '@/components/modals/Dialog';
 
+// Providers
+import { useTranslation } from '@/providers/LanguageProvider';
+
 interface HeaderProps {
   title?: string;
   buttons?: string[];
@@ -79,6 +82,8 @@ const Modal = React.memo(() => {
   const [type, setType] = useState<popupType | null>(null);
   const [initialData, setInitialData] = useState<any | null>(null);
 
+  const lang = useTranslation();
+
   useEffect(() => {
     if (window.location.search) {
       const params = new URLSearchParams(window.location.search);
@@ -96,36 +101,36 @@ const Modal = React.memo(() => {
   const getTitle = () => {
     switch (type) {
       case popupType.EDIT_USER:
-        return { title: '編輯個人資料', button: ['close'] };
+        return { title: lang.editUser, button: ['close'] };
       case popupType.CREATE_SERVER:
-        return { title: '創建語音群', button: ['close'] };
+        return { title: lang.createServer, button: ['close'] };
       case popupType.EDIT_SERVER:
-        return { title: '編輯語音群', button: ['close'] };
+        return { title: lang.editServer, button: ['close'] };
       case popupType.DELETE_SERVER:
-        return { title: '刪除語音群', button: ['close'] };
+        return { title: lang.deleteServer, button: ['close'] };
       case popupType.CREATE_CHANNEL:
-        return { title: '創建頻道', button: ['close'] };
+        return { title: lang.createChannel, button: ['close'] };
       case popupType.EDIT_CHANNEL:
-        return { title: `編輯頻道`, button: ['close'] };
+        return { title: lang.editChannel, button: ['close'] };
       case popupType.DELETE_CHANNEL:
-        return { title: '刪除頻道', button: ['close'] };
+        return { title: lang.deleteChannel, button: ['close'] };
       case popupType.APPLY_MEMBER:
-        return { title: '申請會員', button: ['close'] };
+        return { title: lang.applyMember, button: ['close'] };
       case popupType.APPLY_FRIEND:
-        return { title: '好友請求', button: ['close'] };
+        return { title: lang.applyFriend, button: ['close'] };
       case popupType.DIRECT_MESSAGE:
-        return { title: '私訊', button: ['close'] };
+        return { title: lang.directMessage, button: ['close'] };
       case popupType.DIALOG_ALERT:
       case popupType.DIALOG_ALERT2:
-        return { title: '警告', button: ['close'] };
+        return { title: lang.dialogAlert, button: ['close'] };
       case popupType.DIALOG_SUCCESS:
-        return { title: '成功', button: ['close'] };
+        return { title: lang.dialogSuccess, button: ['close'] };
       case popupType.DIALOG_WARNING:
-        return { title: '警告', button: ['close'] };
+        return { title: lang.dialogWarning, button: ['close'] };
       case popupType.DIALOG_ERROR:
-        return { title: '錯誤', button: ['close'] };
+        return { title: lang.dialogError, button: ['close'] };
       case popupType.DIALOG_INFO:
-        return { title: '資訊', button: ['close'] };
+        return { title: lang.dialogInfo, button: ['close'] };
       default:
         return undefined;
     }

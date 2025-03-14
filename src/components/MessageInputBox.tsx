@@ -6,6 +6,9 @@ import styles from '@/styles/serverPage.module.css';
 // Components
 import EmojiGrid from './EmojiGrid';
 
+// Providers
+import { useTranslation } from '@/providers/LanguageProvider';
+
 interface MessageInputBoxProps {
   onSendMessage?: (message: string) => void;
 }
@@ -16,6 +19,9 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
     const [messageInput, setMessageInput] = useState<string>('');
     const [isComposing, setIsComposing] = useState<boolean>(false);
     const MAXLENGTH = 2000;
+
+    // Language Control
+    const lang = useTranslation();
 
     // Emoji Picker Control
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -51,7 +57,7 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
                 [&::-webkit-scrollbar-thumb]:rounded-lg 
                 [&::-webkit-scrollbar-thumb]:hover:bg-gray-400"
           rows={2}
-          placeholder={'輸入訊息...'}
+          placeholder={lang.inputMessage}
           value={messageInput}
           onChange={(e) => {
             e.preventDefault();
@@ -76,7 +82,7 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
           maxLength={MAXLENGTH}
-          aria-label="訊息輸入框"
+          aria-label={lang.messageInputBox}
         />
         <div className="text-xs text-gray-400 self-end ml-2">
           {messageInput.length}/{MAXLENGTH}

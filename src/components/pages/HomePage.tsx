@@ -14,15 +14,10 @@ import { popupType, type Server, type User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
+import { useLanguage, useTranslation } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
-
-// Contexts
-import { useLanguage } from '@/contexts/LanguageContext';
-
-// Utils
-import { useTranslation } from '@/utils/translations';
 
 const HomePageComponent: React.FC = React.memo(() => {
   // Redux
@@ -41,27 +36,27 @@ const HomePageComponent: React.FC = React.memo(() => {
   const [searchResults, setSearchResults] = useState<Server[]>([]);
 
   // Language Control
-  const { language, translations } = useLanguage();
-    const lang = useTranslation();
+  const { language } = useLanguage();
+  const lang = useTranslation();
 
   // Update Discord Presence
   useEffect(() => {
     ipcService.discord.updatePresence({
-      details: `正在瀏覽主頁`,
-      state: `使用者: ${userName}`,
+      details: lang.RPCHomePage,
+      state: `${lang.RPCUser} ${userName}`,
       largeImageKey: 'app_icon',
       largeImageText: 'RC Voice',
       smallImageKey: 'home_icon',
-      smallImageText: '主頁',
+      smallImageText: lang.RPCHome,
       timestamp: Date.now(),
       buttons: [
         {
-          label: '加入我們的Discord伺服器',
+          label: lang.RPCJoinServer,
           url: 'https://discord.gg/adCWzv6wwS',
         },
       ],
     });
-  }, []);
+  }, [userName]);
 
   // Refresh User
   useEffect(() => {
@@ -118,11 +113,11 @@ const HomePageComponent: React.FC = React.memo(() => {
           </button>
           <button className={homePage['navegateItem']} data-key="40007">
             <div></div>
-            遊戲
+            {lang.game}
           </button>
           <button className={homePage['navegateItem']} data-key="30375">
             <div></div>
-            秀場
+            {lang.live}
           </button>
         </div>
         <div className={homePage['right']}>

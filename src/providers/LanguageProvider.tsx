@@ -7,19 +7,29 @@ interface LanguageContextProps {
   translations: Translations;
 }
 
-const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextProps | undefined>(
+  undefined,
+);
 
-class LanguageProvider extends Component<{ children: React.ReactNode }, { language: LanguageKeys }> {
+class LanguageProvider extends Component<
+  { children: React.ReactNode },
+  { language: LanguageKeys }
+> {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    const lang = (localStorage.getItem('language') as LanguageKeys) || 'tw';
+    let lang: LanguageKeys = 'tw';
+    if (typeof localStorage !== 'undefined') {
+      lang = (localStorage.getItem('language') as LanguageKeys) || 'tw';
+    }
     this.state = {
       language: lang,
     };
   }
 
   setLanguage = (lang: LanguageKeys) => {
-    localStorage.setItem('language', lang);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('language', lang);
+    }
     this.setState({ language: lang });
   };
 
@@ -28,7 +38,9 @@ class LanguageProvider extends Component<{ children: React.ReactNode }, { langua
     const lang = translations[language];
 
     return (
-      <LanguageContext.Provider value={{ language, setLanguage: this.setLanguage, translations: lang }}>
+      <LanguageContext.Provider
+        value={{ language, setLanguage: this.setLanguage, translations: lang }}
+      >
         {this.props.children}
       </LanguageContext.Provider>
     );
@@ -41,6 +53,11 @@ export const useLanguage = (): LanguageContextProps => {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
+};
+
+export const useTranslation = (): Translations => {
+  const { translations } = useLanguage();
+  return translations;
 };
 
 export { LanguageProvider };

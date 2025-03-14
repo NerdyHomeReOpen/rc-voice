@@ -17,6 +17,7 @@ import { popupType, type User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -46,6 +47,9 @@ const FriendPageComponent: React.FC = React.memo(() => {
   // Sidebar Control
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
   const [isResizing, setIsResizing] = useState<boolean>(false);
+
+  // Language Control
+  const lang = useTranslation();
 
   const startResizing = useCallback((mouseDownEvent: React.MouseEvent) => {
     mouseDownEvent.preventDefault();
@@ -82,21 +86,21 @@ const FriendPageComponent: React.FC = React.memo(() => {
   // Update Discord Presence
   useEffect(() => {
     ipcService.discord.updatePresence({
-      details: `正在瀏覽好友列表`,
-      state: `使用者: ${userName}`,
+      details: lang.RPCFriendPage,
+      state: `${lang.RPCUser} ${userName}`,
       largeImageKey: 'app_icon',
       largeImageText: 'RC Voice',
       smallImageKey: 'home_icon',
-      smallImageText: '好友列表',
+      smallImageText: lang.RPCFriend,
       timestamp: Date.now(),
       buttons: [
         {
-          label: '加入我們的Discord伺服器',
+          label: lang.RPCJoinServer,
           url: 'https://discord.gg/adCWzv6wwS',
         },
       ],
     });
-  }, []);
+  }, [userName]);
 
   // Refresh User
   useEffect(() => {
@@ -139,7 +143,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
           <textarea
             className={friendPage['signatureInput']}
             value={signatureInput}
-            placeholder="點擊更改簽名"
+            placeholder={lang.signaturePlaceholder}
             data-placeholder="30018"
             onChange={(e) => {
               if (signatureInput.length > MAXLENGTH) return;
@@ -178,7 +182,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
         <div className="resizeHandle" onMouseDown={startResizing} />
         {/* Right Content */}
         <div className={friendPage['mainContent']}>
-          <div className={friendPage['header']}>{'好友動態'}</div>
+          <div className={friendPage['header']}>{lang.friendActive}</div>
         </div>
       </main>
     </div>
