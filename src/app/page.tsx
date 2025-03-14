@@ -10,7 +10,7 @@ import { CircleX } from 'lucide-react';
 import header from '@/styles/common/header.module.css';
 
 // Types
-import { Channel, Server, User, SocketServerEvent } from '@/types';
+import { Channel, Server, User, SocketServerEvent, LanguageKeys } from '@/types';
 
 // Pages
 import FriendPage from '@/components/pages/FriendPage';
@@ -36,6 +36,9 @@ import store from '@/redux/store';
 import { clearServer, setServer } from '@/redux/serverSlice';
 import { clearUser, setUser } from '@/redux/userSlice';
 import { clearChannel, setChannel } from '@/redux/channelSlice';
+
+import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/utils/translations';
 
 interface HeaderProps {
   selectedId?: number;
@@ -66,16 +69,19 @@ const Header: React.FC<HeaderProps> = React.memo(
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
     // Tab Control
+    const { setLanguage, translations } = useLanguage();
+    const lang = useTranslation();
+
     const MAIN_TABS = React.useMemo(() => {
       const tabs = [
         {
           id: 1,
-          label: '首頁',
+          label: lang.home,
           onClick: () => {},
         },
         {
           id: 2,
-          label: '好友',
+          label: lang.friends,
           onClick: () => {},
         },
       ];
@@ -87,7 +93,7 @@ const Header: React.FC<HeaderProps> = React.memo(
         });
       }
       return tabs;
-    }, [user, server]);
+    }, [user, server, lang]);
 
     // Status Dropdown Control
     const STATUS_OPTIONS = [
@@ -134,6 +140,10 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     const handleOpenDevtool = () => {
       ipcService.window.openDevtool();
+    };
+
+    const handleLanguageChange = (lang: LanguageKeys) => {
+      setLanguage(lang);
     };
 
     return (
@@ -221,7 +231,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 data-key="30066"
                 onClick={() => handleOpenDevtool()}
               >
-                系統設定
+                {lang.systemSettings}
               </div>
               <div
                 className={`${header['option']} ${header['hasImage']}`}
@@ -239,43 +249,43 @@ const Header: React.FC<HeaderProps> = React.memo(
                   )
                 }
               >
-                訊息紀錄
+                {lang.messageHistory}
               </div>
               <div
                 className={`${header['option']} ${header['hasImage']}`}
                 data-type="change-theme"
                 data-key="60028"
               >
-                更換主題
+                {lang.changeTheme}
               </div>
               <div
                 className={header['option']}
                 data-type="feed-back"
                 data-key="30039"
               >
-                意見反饋
+                {lang.feedback}
               </div>
               <div
                 className={`${header['option']} ${header['hasImage']} ${header['hasSubmenu']}`}
                 data-type="language-select"
               >
-                <span data-key="30374">語言選擇</span>
+                <span data-key="30374">{lang.languageSelect}</span>
                 <div
                   className={`${header['menuDropDown']} ${header['hidden']}`}
                 >
-                  <div className={header['option']} data-lang="tw">
+                  <div className={header['option']} data-lang="tw" onClick={() => handleLanguageChange('tw')}>
                     繁體中文
                   </div>
-                  <div className={header['option']} data-lang="cn">
+                  <div className={header['option']} data-lang="cn" onClick={() => handleLanguageChange('cn')}>
                     简体中文
                   </div>
-                  <div className={header['option']} data-lang="en">
+                  <div className={header['option']} data-lang="en" onClick={() => handleLanguageChange('en')}>
                     English
                   </div>
-                  <div className={header['option']} data-lang="jp">
+                  <div className={header['option']} data-lang="jp" onClick={() => handleLanguageChange('jp')}>
                     日本語
                   </div>
-                  <div className={header['option']} data-lang="ru">
+                  <div className={header['option']} data-lang="ru" onClick={() => handleLanguageChange('ru')}>
                     русский язык
                   </div>
                 </div>
@@ -286,7 +296,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 data-key="30060"
                 onClick={() => handleLogout()}
               >
-                登出
+                {lang.logout}
               </div>
               <div
                 className={`${header['option']} ${header['hasImage']}`}
@@ -294,7 +304,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 data-key="30061"
                 onClick={() => handleClose()}
               >
-                退出
+                {lang.exit}
               </div>
             </div>
           </div>
@@ -346,6 +356,15 @@ const Home = () => {
       unsubscribe.forEach((unsub) => unsub());
     };
   }, [socket]);
+
+  useEffect(() => {
+    const lang = localStorage.getItem('language');
+    if (lang) {
+      // Apply the language setting to your application
+      // This could involve loading language-specific resources, etc.
+      console.log(`Language set to: ${lang}`);
+    }
+  }, []);
 
   // Tab Control
   const [selectedTabId, setSelectedTabId] = useState<number>(1);
@@ -427,16 +446,18 @@ const Home = () => {
   };
 
   return (
-    <div className="wrapper">
-      <WebRTCProvider>
-        <Header
-          selectedId={selectedTabId}
-          setSelectedTabId={setSelectedTabId}
-        />
-        {/* Main Content */}
-        <div className="content">{getMainContent()}</div>
-      </WebRTCProvider>
-    </div>
+    <LanguageProvider>
+      <div className="wrapper">
+        <WebRTCProvider>
+          <Header
+            selectedId={selectedTabId}
+            setSelectedTabId={setSelectedTabId}
+          />
+          {/* Main Content */}
+          <div className="content">{getMainContent()}</div>
+        </WebRTCProvider>
+      </div>
+    </LanguageProvider>
   );
 };
 

@@ -18,6 +18,12 @@ import { useSocket } from '@/providers/SocketProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
+// Contexts
+import { useLanguage } from '@/contexts/LanguageContext';
+
+// Utils
+import { useTranslation } from '@/utils/translations';
+
 const HomePageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
@@ -33,6 +39,10 @@ const HomePageComponent: React.FC = React.memo(() => {
 
   // Search Results Control
   const [searchResults, setSearchResults] = useState<Server[]>([]);
+
+  // Language Control
+  const { language, translations } = useLanguage();
+    const lang = useTranslation();
 
   // Update Discord Presence
   useEffect(() => {
@@ -58,6 +68,11 @@ const HomePageComponent: React.FC = React.memo(() => {
     socket?.send.refreshUser(null);
   }, []);
 
+  // Apply Language Setting
+  useEffect(() => {
+    console.log(`Current language: ${language}`);
+  }, [language]);
+
   // Handlers
   const handleSearch = (query: string) => {
     socket?.send.searchServer({ query });
@@ -81,7 +96,7 @@ const HomePageComponent: React.FC = React.memo(() => {
           <div className={homePage['searchBar']}>
             <input
               type="search"
-              placeholder="輸入群ID或群名稱"
+              placeholder={lang.searchPlaceholder}
               data-placeholder="60021"
               className={homePage['searchInput']}
               onKeyDown={(e) => {
@@ -99,7 +114,7 @@ const HomePageComponent: React.FC = React.memo(() => {
             data-key="60060"
           >
             <div></div>
-            主頁
+            {lang.home}
           </button>
           <button className={homePage['navegateItem']} data-key="40007">
             <div></div>
@@ -117,11 +132,11 @@ const HomePageComponent: React.FC = React.memo(() => {
             onClick={handleOpenCreateServerPopup}
           >
             <div></div>
-            創建語音群
+            {lang.createGroup}
           </button>
           <button className={homePage['navegateItem']} data-key="60004">
             <div></div>
-            個人專屬
+            {lang.personalExclusive}
           </button>
         </div>
       </header>
@@ -132,26 +147,26 @@ const HomePageComponent: React.FC = React.memo(() => {
             {searchResults.length > 0 && (
               <div className={homePage['myGroupsItem']}>
                 <div className={homePage['myGroupsTitle']} data-key="60005">
-                  搜尋結果
+                  {lang.recentVisits}
                 </div>
                 <ServerListViewer servers={searchResults} />
               </div>
             )}
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="60005">
-                最近訪問
+                {lang.recentVisits}
               </div>
               <ServerListViewer servers={userRecentServers} />
             </div>
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="30283">
-                我的語音群
+                {lang.myGroups}
               </div>
               <ServerListViewer servers={userOwnedServers} />
             </div>
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="60005">
-                收藏的語音群
+                {lang.favoriteGroups}
               </div>
               <ServerListViewer servers={userFavServers} />
             </div>

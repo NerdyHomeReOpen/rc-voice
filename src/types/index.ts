@@ -1,3 +1,111 @@
+export interface Translations {
+  home: string;
+  friends: string;
+  systemSettings: string;
+  messageHistory: string;
+  changeTheme: string;
+  feedback: string;
+  languageSelect: string;
+  logout: string;
+  exit: string;
+  searchPlaceholder: string;
+  recentVisits: string;
+  myGroups: string;
+  favoriteGroups: string;
+  createGroup: string;
+  personalExclusive: string;
+}
+
+export type LanguageKeys = 'tw' | 'cn' | 'en' | 'jp' | 'ru';
+
+export const translations: Record<LanguageKeys, Translations> = {
+  tw: {
+    home: '首頁',
+    friends: '好友',
+    systemSettings: '系統設定',
+    messageHistory: '訊息紀錄',
+    changeTheme: '更換主題',
+    feedback: '意見反饋',
+    languageSelect: '語言選擇',
+    logout: '登出',
+    exit: '退出',
+    searchPlaceholder: '輸入群ID或群名稱',
+    recentVisits: '最近訪問',
+    myGroups: '我的語音群',
+    favoriteGroups: '收藏的語音群',
+    createGroup: '創建語音群',
+    personalExclusive: '個人專屬',
+  },
+  cn: {
+    home: '首页',
+    friends: '好友',
+    systemSettings: '系统设置',
+    messageHistory: '消息记录',
+    changeTheme: '更换主题',
+    feedback: '意见反馈',
+    languageSelect: '语言选择',
+    logout: '登出',
+    exit: '退出',
+    searchPlaceholder: '输入群ID或群名称',
+    recentVisits: '最近访问',
+    myGroups: '我的语音群',
+    favoriteGroups: '收藏的语音群',
+    createGroup: '创建语音群',
+    personalExclusive: '个人专属',
+  },
+  en: {
+    home: 'Home',
+    friends: 'Friends',
+    systemSettings: 'System Settings',
+    messageHistory: 'Message History',
+    changeTheme: 'Change Theme',
+    feedback: 'Feedback',
+    languageSelect: 'Language Select',
+    logout: 'Logout',
+    exit: 'Exit',
+    searchPlaceholder: 'Enter group ID or name',
+    recentVisits: 'Recent Visits',
+    myGroups: 'My Voice Groups',
+    favoriteGroups: 'Favorite Voice Groups',
+    createGroup: 'Create Voice Group',
+    personalExclusive: 'Personal Exclusive',
+  },
+  jp: {
+    home: 'ホーム',
+    friends: '友達',
+    systemSettings: 'システム設定',
+    messageHistory: 'メッセージ履歴',
+    changeTheme: 'テーマを変更',
+    feedback: 'フィードバック',
+    languageSelect: '言語選択',
+    logout: 'ログアウト',
+    exit: '終了',
+    searchPlaceholder: 'グループIDまたは名前を入力',
+    recentVisits: '最近の訪問',
+    myGroups: '私のボイスグループ',
+    favoriteGroups: 'お気に入りのボイスグループ',
+    createGroup: 'ボイスグループを作成',
+    personalExclusive: '個人専用',
+  },
+  ru: {
+    home: 'Главная',
+    friends: 'Друзья',
+    systemSettings: 'Системные настройки',
+    messageHistory: 'История сообщений',
+    changeTheme: 'Сменить тему',
+    feedback: 'Обратная связь',
+    languageSelect: 'Выбор языка',
+    logout: 'Выйти',
+    exit: 'Выход',
+    searchPlaceholder: 'Введите ID группы или название',
+    recentVisits: 'Недавние посещения',
+    myGroups: 'Мои голосовые группы',
+    favoriteGroups: 'Избранные голосовые группы',
+    createGroup: 'Создать голосовую группу',
+    personalExclusive: 'Личное',
+  },
+};
+
 export type Visibility = 'public' | 'private' | 'readonly';
 export const enum Permission {
   Guest = 1,
