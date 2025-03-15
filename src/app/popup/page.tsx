@@ -17,7 +17,6 @@ import { popupType } from '@/types';
 import CreateServerModal from '@/components/modals/CreateServerModal';
 import EditServerModal from '@/components/modals/EditServerModal';
 import AddChannelModal from '@/components/modals/AddChannelModal';
-import DeleteChannelModal from '@/components/modals/DeleteChannelModal';
 import EditChannelModal from '@/components/modals/EditChannelModal';
 import ServerApplication from '@/components/modals/ServerApplicationModal';
 import ApplyFriend from '@/components/modals/ApplyFriend';
@@ -61,17 +60,19 @@ const Header: React.FC<HeaderProps> = React.memo(({ title, buttons }) => {
       </div>
       <div className={header['buttons']}>
         {buttons?.includes('minimize') && (
-          <div className={header['minimize']} onClick={handleMinimize} />
+          <div
+            className={header['minimize']}
+            onClick={() => handleMinimize()}
+          />
         )}
         {buttons?.includes('maxsize') && (
           <div
             className={isFullscreen ? header['restore'] : header['maxsize']}
-            onClick={handleFullscreen}
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            onClick={() => handleFullscreen()}
           />
         )}
         {buttons?.includes('close') && (
-          <div className={header['close']} onClick={handleClose} />
+          <div className={header['close']} onClick={() => handleClose()} />
         )}
       </div>
     </div>

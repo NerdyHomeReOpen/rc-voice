@@ -52,44 +52,35 @@ const Header: React.FC<HeaderProps> = React.memo(
     const userName = user.name;
     const userStatus = user.status;
 
-    // Socket
+    // Hooks
     const socket = useSocket();
-
-    // Language
     const lang = useLanguage();
 
-    // Fullscreen Control
+    // States
     const [isFullscreen, setIsFullscreen] = useState(false);
-
-    // Menu Control
     const [showMenu, setShowMenu] = useState(false);
-
-    // Status Dropdown Control
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
     // Tab Control
-    const MAIN_TABS = React.useMemo(() => {
-      const tabs = [
-        {
-          id: 1,
-          label: lang.tr.home,
-          onClick: () => {},
-        },
-        {
-          id: 2,
-          label: lang.tr.friends,
-          onClick: () => {},
-        },
-      ];
-      if (server.id) {
-        tabs.push({
-          id: 3,
-          label: server.name,
-          onClick: () => {},
-        });
-      }
-      return tabs;
-    }, [server, lang]);
+    const MAIN_TABS = [
+      {
+        id: 1,
+        label: lang.tr.home,
+        onClick: () => {},
+      },
+      {
+        id: 2,
+        label: lang.tr.friends,
+        onClick: () => {},
+      },
+      server.id
+        ? {
+            id: 3,
+            label: server.name,
+            onClick: () => {},
+          }
+        : null,
+    ].filter(Boolean);
 
     // Status Dropdown Control
     const STATUS_OPTIONS = [
@@ -141,6 +132,7 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     const handleLanguageChange = (language: LanguageKey) => {
       lang.set(language);
+      localStorage.setItem('language', language);
     };
 
     return (
@@ -180,6 +172,8 @@ const Header: React.FC<HeaderProps> = React.memo(
         {/* Main Tabs */}
         <div className={header['mainTabs']}>
           {MAIN_TABS.map((Tab) => {
+            if (!Tab) return null;
+
             const TabId = Tab.id;
             const TabLable = Tab.label;
 
@@ -334,7 +328,6 @@ const Header: React.FC<HeaderProps> = React.memo(
           <div
             className={isFullscreen ? header['restore'] : header['maxsize']}
             onClick={() => handleFullscreen()}
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           />
           <div className={header['close']} onClick={() => handleClose()} />
         </div>

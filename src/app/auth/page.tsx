@@ -40,13 +40,12 @@ const Header: React.FC = React.memo(() => {
       </div>
       {/* Buttons */}
       <div className={header['buttons']}>
-        <div className={header['minimize']} onClick={handleMinimize} />
+        <div className={header['minimize']} onClick={() => handleMinimize()} />
         <div
           className={isFullscreen ? header['restore'] : header['maxsize']}
-          onClick={handleFullscreen}
-          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          onClick={() => handleFullscreen()}
         />
-        <div className={header['close']} onClick={handleClose} />
+        <div className={header['close']} onClick={() => handleClose()} />
       </div>
     </div>
   );

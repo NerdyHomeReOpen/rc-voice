@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 // Types
 import { Translation, LanguageKey, translations } from '@/types';
@@ -18,16 +18,6 @@ interface LanguageProviderProps {
 const LanguageProvider = ({ children }: LanguageProviderProps) => {
   const [language, setLanguage] = useState<LanguageKey>('tw');
   const translation = translations[language];
-
-  useEffect(() => {
-    const lang = localStorage.getItem('language') as LanguageKey;
-    if (lang) setLanguage(lang);
-  }, []);
-
-  useEffect(() => {
-    if (typeof localStorage === undefined) return;
-    localStorage.setItem('language', language);
-  }, [language]);
 
   return (
     <LanguageContext.Provider
