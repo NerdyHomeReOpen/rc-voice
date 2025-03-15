@@ -1,19 +1,18 @@
-import { Permission, Translations } from '@/types';
-
-const langMap: Record<string, string> = {
-  tw: 'zh-TW',
-  cn: 'zh-CN',
-  en: 'en-US',
-  jp: 'ja-JP',
-  ru: 'ru-RU',
-};
+import { LanguageKey, Permission, Translation } from '@/types';
 
 export const formatTimestamp = (
   timestamp: number,
-  language = 'tw',
-  lang: Translations,
+  key: LanguageKey,
+  tr: Translation,
 ): string => {
-  const timezoneLang = langMap[language] || 'zh-TW';
+  const langMap: Record<LanguageKey, string> = {
+    tw: 'zh-TW',
+    cn: 'zh-CN',
+    en: 'en-US',
+    jp: 'ja-JP',
+    ru: 'ru-RU',
+  };
+  const timezoneLang = langMap[key] || 'zh-TW';
   const now = new Date();
   const messageDate = new Date(timestamp);
   const messageDay = new Date(
@@ -31,7 +30,7 @@ export const formatTimestamp = (
       minute: '2-digit',
     });
   } else if (messageDay.getTime() === yesterday.getTime()) {
-    return `${lang.yesterday} ${messageDate.toLocaleTimeString(timezoneLang, {
+    return `${tr.yesterday} ${messageDate.toLocaleTimeString(timezoneLang, {
       hour: '2-digit',
       minute: '2-digit',
     })}`;
@@ -46,17 +45,17 @@ export const formatTimestamp = (
 
 export const getPermissionText = (
   permission: number,
-  lang: Translations,
+  tr: Translation,
 ): string => {
   const permissionMap: Record<number, string> = {
-    [Permission.Guest]: lang.guest, // 1
-    [Permission.Member]: lang.member, // 2
-    [Permission.ChannelAdmin]: lang.channelAdmin, // 3
-    [Permission.ChannelManager]: lang.channelManager, // 4
-    [Permission.ServerAdmin]: lang.serverAdmin, // 5
-    [Permission.ServerOwner]: lang.serverOwner, // 6
-    [Permission.EventStaff]: lang.eventStaff, // 7
-    [Permission.Official]: lang.official, // 8
+    [Permission.Guest]: tr.guest, // 1
+    [Permission.Member]: tr.member, // 2
+    [Permission.ChannelAdmin]: tr.channelAdmin, // 3
+    [Permission.ChannelManager]: tr.channelManager, // 4
+    [Permission.ServerAdmin]: tr.serverAdmin, // 5
+    [Permission.ServerOwner]: tr.serverOwner, // 6
+    [Permission.EventStaff]: tr.eventStaff, // 7
+    [Permission.Official]: tr.official, // 8
   };
-  return permissionMap[permission] || '未知';
+  return permissionMap[permission] || tr.unknownUser;
 };

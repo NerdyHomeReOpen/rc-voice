@@ -17,7 +17,7 @@ import type { User, Server } from '@/types';
 import { getPermissionText } from '@/utils/formatters';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 interface UserInfoBlockProps {
   user: User | null;
@@ -30,7 +30,7 @@ interface UserInfoBlockProps {
 const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
   ({ onClose, x, y, user, server }) => {
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     if (!user) return null;
 
@@ -107,12 +107,12 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
               } ${Permission[`lv-${userPermission}`]}`}
             ></div>
             <div className={UserInfoCard['userInfoPermissionText']}>
-              {getPermissionText(userPermission, lang)}
+              {getPermissionText(userPermission, lang.tr)}
             </div>
             <div className={styles['saperator']}></div>
             <div className={UserInfoCard['userInfoContributionBox']}>
               <div className={UserInfoCard['userInfoContributionText']}>
-                {lang.contribution}:
+                {lang.tr.contribution}:
               </div>
               <div className={UserInfoCard['userInfoContributionTextVal']}>
                 {userContributions}

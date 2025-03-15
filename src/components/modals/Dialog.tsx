@@ -9,7 +9,7 @@ import dialog from '@/styles/popups/dialog.module.css';
 import { ipcService } from '@/services/ipc.service';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 enum DIALOG_ICON {
   ALERT = 'alert',
@@ -28,7 +28,7 @@ interface DialogProps {
 
 const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
   // Language
-  const lang = useTranslation();
+  const lang = useLanguage();
 
   // Variables
   const iconType = initialData.iconType || 'INFO';
@@ -65,7 +65,7 @@ const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
       </div>
       <div className={popup['popupFooter']}>
         <button className={popup['button']} onClick={handleSubmit}>
-          {lang.confirm}
+          {lang.tr.confirm}
         </button>
       </div>
     </div>

@@ -9,7 +9,7 @@ import applyMember from '@/styles/popups/serverApplication.module.css';
 import { popupType, type Server, type ServerApplication } from '@/types';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { useSocket } from '@/providers/SocketProvider';
 
 // Services
@@ -22,7 +22,7 @@ interface ServerApplicationModalProps {
 const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
   React.memo((initialData: ServerApplicationModalProps) => {
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Socket
     const socket = useSocket();
@@ -45,7 +45,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     const handleOpenSuccessDialog = () => {
       ipcService.popup.open(popupType.DIALOG_SUCCESS);
       ipcService.initialData.onRequest(popupType.DIALOG_SUCCESS, {
-        title: lang.serverApply,
+        title: lang.tr.serverApply,
         submitTo: popupType.DIALOG_SUCCESS,
       });
       ipcService.popup.onSubmit(popupType.DIALOG_SUCCESS, () => {
@@ -84,14 +84,16 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
                     </div>
                   </div>
                 </div>
-                <div className={Popup['label']}>{lang.serverApplyNotice}</div>
+                <div className={Popup['label']}>
+                  {lang.tr.serverApplyNotice}
+                </div>
                 <div className={applyMember['noteText']}>
                   {'{server.settings.applicationNote}'}
                 </div>
                 <div className={applyMember['split']} />
                 <div className={applyMember['contentBox']}>
                   <div className={Popup['label']}>
-                    {lang.serverApplyDescription}
+                    {lang.tr.serverApplyDescription}
                   </div>
                   <div className={Popup['inputBox']}>
                     <textarea
@@ -118,7 +120,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
                   handleOpenSuccessDialog();
                 }}
               >
-                {lang.submit}
+                {lang.tr.submit}
               </button>
               <button
                 type="button"
@@ -127,7 +129,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
                   handleClose();
                 }}
               >
-                {lang.cancel}
+                {lang.tr.cancel}
               </button>
             </div>
           </div>

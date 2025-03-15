@@ -1,15 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { FormEvent, useState } from 'react';
-import { useSelector } from 'react-redux';
-
-// Components
-import Modal from '@/components/Modal';
 
 // Types
 import { Channel, Visibility } from '@/types';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { useSocket } from '@/providers/SocketProvider';
 
 // CSS
@@ -24,7 +20,7 @@ interface EditChannelModalProps {
 const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
   ({ onClose, channel }) => {
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Socket
     const socket = useSocket();
@@ -50,8 +46,8 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
           <div className={EditChannel['popupBody']}>
             <div className={Popup['inputBox']}>
               <div className={Popup['title']}>
-                {`${channel?.isCategory ? lang.category : lang.channel}`}
-                {lang.name}
+                {`${channel?.isCategory ? lang.tr.category : lang.tr.channel}`}
+                {lang.tr.name}
               </div>
               <div className={Popup['inputBorder']}>
                 <input
@@ -67,7 +63,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
               </div>
             </div>
             <div className={Popup['inputBox']}>
-              <div className={Popup['title']}>{lang.channelPermission}</div>
+              <div className={Popup['title']}>{lang.tr.channelPermission}</div>
               <div className={Popup['inputBorder']}>
                 <select
                   value={editedChannel?.settings?.visibility}
@@ -84,19 +80,19 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     })
                   }
                 >
-                  <option value="public">{lang.channelPublic}</option>
-                  <option value="private">{lang.channelPrivate}</option>
-                  <option value="readonly">{lang.channelReadonly}</option>
+                  <option value="public">{lang.tr.channelPublic}</option>
+                  <option value="private">{lang.tr.channelPrivate}</option>
+                  <option value="readonly">{lang.tr.channelReadonly}</option>
                 </select>
               </div>
             </div>
           </div>
           <div className={Popup['popupFooter']}>
             <button type="submit" className={Popup['button']}>
-              {lang.confirm}
+              {lang.tr.confirm}
             </button>
             <button type="button" className={Popup['button']} onClick={onClose}>
-              {lang.cancel}
+              {lang.tr.cancel}
             </button>
           </div>
         </div>

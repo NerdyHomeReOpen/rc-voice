@@ -6,7 +6,7 @@ import Dialog from '@/components/modals/Dialog';
 
 import DeleteChannel from '../../styles/popups/deleteChannel.module.css';
 import Popup from '../../styles/common/popup.module.css';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 interface DeleteChannelModalProps {
   onClose: () => void;
@@ -18,7 +18,7 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = ({
   channel,
 }) => {
   // Language
-  const lang = useTranslation();
+  const lang = useLanguage();
 
   // Socket
   const socket = useSocket();
@@ -50,10 +50,10 @@ const DeleteChannelModal: React.FC<DeleteChannelModalProps> = ({
 
         <div className={Popup['popupFooter']}>
           <button type="submit" className={Popup['button']}>
-            {lang.confirm}
+            {lang.tr.confirm}
           </button>
           <button type="button" className={Popup['button']} onClick={onClose}>
-            {lang.cancel}
+            {lang.tr.cancel}
           </button>
         </div>
       </div>

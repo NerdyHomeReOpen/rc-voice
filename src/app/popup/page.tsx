@@ -27,7 +27,7 @@ import { ipcService } from '@/services/ipc.service';
 import Dialog from '@/components/modals/Dialog';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 interface HeaderProps {
   title?: string;
@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ title, buttons }) => {
 
 const Modal = React.memo(() => {
   // Language
-  const lang = useTranslation();
+  const lang = useLanguage();
 
   // Type Control
   const [type, setType] = useState<popupType | null>(null);
@@ -105,36 +105,36 @@ const Modal = React.memo(() => {
   const getTitle = () => {
     switch (type) {
       case popupType.EDIT_USER:
-        return { title: lang.editUser, button: ['close'] };
+        return { title: lang.tr.editUser, button: ['close'] };
       case popupType.CREATE_SERVER:
-        return { title: lang.createServer, button: ['close'] };
+        return { title: lang.tr.createServer, button: ['close'] };
       case popupType.EDIT_SERVER:
-        return { title: lang.editServer, button: ['close'] };
+        return { title: lang.tr.editServer, button: ['close'] };
       case popupType.DELETE_SERVER:
-        return { title: lang.deleteServer, button: ['close'] };
+        return { title: lang.tr.deleteServer, button: ['close'] };
       case popupType.CREATE_CHANNEL:
-        return { title: lang.createChannel, button: ['close'] };
+        return { title: lang.tr.createChannel, button: ['close'] };
       case popupType.EDIT_CHANNEL:
-        return { title: lang.editChannel, button: ['close'] };
+        return { title: lang.tr.editChannel, button: ['close'] };
       case popupType.DELETE_CHANNEL:
-        return { title: lang.deleteChannel, button: ['close'] };
+        return { title: lang.tr.deleteChannel, button: ['close'] };
       case popupType.APPLY_MEMBER:
-        return { title: lang.applyMember, button: ['close'] };
+        return { title: lang.tr.applyMember, button: ['close'] };
       case popupType.APPLY_FRIEND:
-        return { title: lang.applyFriend, button: ['close'] };
+        return { title: lang.tr.applyFriend, button: ['close'] };
       case popupType.DIRECT_MESSAGE:
-        return { title: lang.directMessage, button: ['close'] };
+        return { title: lang.tr.directMessage, button: ['close'] };
       case popupType.DIALOG_ALERT:
       case popupType.DIALOG_ALERT2:
-        return { title: lang.dialogAlert, button: ['close'] };
+        return { title: lang.tr.dialogAlert, button: ['close'] };
       case popupType.DIALOG_SUCCESS:
-        return { title: lang.dialogSuccess, button: ['close'] };
+        return { title: lang.tr.dialogSuccess, button: ['close'] };
       case popupType.DIALOG_WARNING:
-        return { title: lang.dialogWarning, button: ['close'] };
+        return { title: lang.tr.dialogWarning, button: ['close'] };
       case popupType.DIALOG_ERROR:
-        return { title: lang.dialogError, button: ['close'] };
+        return { title: lang.tr.dialogError, button: ['close'] };
       case popupType.DIALOG_INFO:
-        return { title: lang.dialogInfo, button: ['close'] };
+        return { title: lang.tr.dialogInfo, button: ['close'] };
       default:
         return undefined;
     }

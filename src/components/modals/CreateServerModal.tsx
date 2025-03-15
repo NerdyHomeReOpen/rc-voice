@@ -11,7 +11,7 @@ import { type User, type Server, popupType } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -40,7 +40,7 @@ interface CreateServerModalProps {
 const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
   (initialData: CreateServerModalProps) => {
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Socket
     const socket = useSocket();
@@ -111,29 +111,33 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                 <div
                   className={`${createServer['item']} ${createServer['active']}`}
                 >
-                  {lang.selectGroupType}
+                  {lang.tr.selectGroupType}
                 </div>
-                <div className={`${createServer['item']}`}>{lang.fillInfo}</div>
+                <div className={`${createServer['item']}`}>
+                  {lang.tr.fillInfo}
+                </div>
               </div>
               <div className={createServer['body']}>
                 <div className={`${createServer['message']}`}>
-                  {`${lang.remainingGroup1}${remainingGroups}${lang.remainingGroup2}`}
+                  {`${lang.tr.remainingGroup1}${remainingGroups}${lang.tr.remainingGroup2}`}
                 </div>
                 <label className={createServer['typeLabel']} data-key="60030">
-                  {lang.selectGroupTypeDescription}
+                  {lang.tr.selectGroupTypeDescription}
                 </label>
                 <div className={createServer['buttonGroup']}>
-                  {[lang.game, lang.entertainment, lang.other].map((type) => (
-                    <div
-                      key={type}
-                      className={`${createServer['button']} ${
-                        server.type === type ? createServer['selected'] : ''
-                      }`}
-                      onClick={() => setServer({ ...server, type })}
-                    >
-                      {type}
-                    </div>
-                  ))}
+                  {[lang.tr.game, lang.tr.entertainment, lang.tr.other].map(
+                    (type) => (
+                      <div
+                        key={type}
+                        className={`${createServer['button']} ${
+                          server.type === type ? createServer['selected'] : ''
+                        }`}
+                        onClick={() => setServer({ ...server, type })}
+                      >
+                        {type}
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             </div>
@@ -145,10 +149,10 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                 disabled={!server.type || !canCreate}
                 onClick={() => setSection(1)}
               >
-                {lang.next}
+                {lang.tr.next}
               </button>
               <button className={popup['button']} onClick={handleClose}>
-                {lang.cancel}
+                {lang.tr.cancel}
               </button>
             </div>
           </div>
@@ -161,12 +165,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
             <div className={popup['popupBody']}>
               <div className={createServer['tab']}>
                 <div className={`${createServer['item']}`}>
-                  {lang.selectGroupType}
+                  {lang.tr.selectGroupType}
                 </div>
                 <div
                   className={`${createServer['item']} ${createServer['active']}`}
                 >
-                  {lang.fillInfo}
+                  {lang.tr.fillInfo}
                 </div>
               </div>
               <div className={createServer['body']}>
@@ -187,11 +191,11 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (!file) {
-                        handleOpenErrorDialog(lang.canNotReadImage);
+                        handleOpenErrorDialog(lang.tr.canNotReadImage);
                         return;
                       }
                       if (file.size > 5 * 1024 * 1024) {
-                        handleOpenErrorDialog(lang.imageTooLarge);
+                        handleOpenErrorDialog(lang.tr.imageTooLarge);
                         return;
                       }
                       const reader = new FileReader();
@@ -209,12 +213,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                     style={{ marginTop: '10px' }}
                     className={popup['button']}
                   >
-                    {lang.uploadAvatar}
+                    {lang.tr.uploadAvatar}
                   </label>
                 </div>
                 <div className={createServer['inputGroup']}>
                   <div className={popup['inputBox']}>
-                    <div className={popup['label']}>{lang.groupType}</div>
+                    <div className={popup['label']}>{lang.tr.groupType}</div>
                     <input
                       className={popup['input']}
                       disabled
@@ -223,7 +227,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                   </div>
                   <div className={popup['inputBox']}>
                     <div className={`${popup['label']} ${popup['required']}`}>
-                      {lang.groupName}
+                      {lang.tr.groupName}
                     </div>
                     <input
                       className={popup['input']}
@@ -238,12 +242,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                           name: validateName(server.name),
                         })
                       }
-                      placeholder={lang.groupNamePlaceholder}
+                      placeholder={lang.tr.groupNamePlaceholder}
                     />
                     {/* {errors.name && <p className="text-red-500">{errors.name}</p>} */}
                   </div>
                   <div className={popup['inputBox']}>
-                    <div className={popup['label']}>{lang.groupSlogan}</div>
+                    <div className={popup['label']}>{lang.tr.groupSlogan}</div>
                     <textarea
                       className={popup['input']}
                       value={server.description}
@@ -256,7 +260,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                           description: validateDescription(server.description),
                         })
                       }
-                      placeholder={lang.groupSloganPlaceholder}
+                      placeholder={lang.tr.groupSloganPlaceholder}
                     />
                     {/* {errors.description && (
                   <p className="text-red-500">{errors.description}</p>
@@ -267,7 +271,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
             </div>
             <div className={popup['popupFooter']}>
               <button className={popup['button']} onClick={() => setSection(0)}>
-                {lang.previous}
+                {lang.tr.previous}
               </button>
               <button
                 className={`${popup['button']} ${
@@ -279,7 +283,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                   handleClose();
                 }}
               >
-                {lang.confirm}
+                {lang.tr.confirm}
               </button>
             </div>
           </div>

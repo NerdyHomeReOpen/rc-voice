@@ -10,13 +10,7 @@ import { CircleX } from 'lucide-react';
 import header from '@/styles/common/header.module.css';
 
 // Types
-import {
-  Channel,
-  Server,
-  User,
-  SocketServerEvent,
-  LanguageKeys,
-} from '@/types';
+import { Channel, Server, User, SocketServerEvent, LanguageKey } from '@/types';
 
 // Pages
 import FriendPage from '@/components/pages/FriendPage';
@@ -32,7 +26,7 @@ import { errorHandler, StandardizedError } from '@/utils/errorHandler';
 // Providers
 import WebRTCProvider from '@/providers/WebRTCProvider';
 import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage, useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -64,7 +58,7 @@ const Header: React.FC<HeaderProps> = React.memo(
     const socket = useSocket();
 
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Fullscreen Control
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -76,18 +70,16 @@ const Header: React.FC<HeaderProps> = React.memo(
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
     // Tab Control
-    const { setLanguage } = useLanguage();
-
     const MAIN_TABS = React.useMemo(() => {
       const tabs = [
         {
           id: 1,
-          label: lang.home,
+          label: lang.tr.home,
           onClick: () => {},
         },
         {
           id: 2,
-          label: lang.friends,
+          label: lang.tr.friends,
           onClick: () => {},
         },
       ];
@@ -103,10 +95,10 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     // Status Dropdown Control
     const STATUS_OPTIONS = [
-      { status: 'online', label: lang.online },
-      { status: 'dnd', label: lang.dnd },
-      { status: 'idle', label: lang.idle },
-      { status: 'gn', label: lang.gn },
+      { status: 'online', label: lang.tr.online },
+      { status: 'dnd', label: lang.tr.dnd },
+      { status: 'idle', label: lang.tr.idle },
+      { status: 'gn', label: lang.tr.gn },
     ];
 
     // Handlers
@@ -148,8 +140,8 @@ const Header: React.FC<HeaderProps> = React.memo(
       ipcService.window.openDevtool();
     };
 
-    const handleLanguageChange = (lang: LanguageKeys) => {
-      setLanguage(lang);
+    const handleLanguageChange = (language: LanguageKey) => {
+      lang.set(language);
     };
 
     return (
@@ -237,7 +229,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 data-key="30066"
                 onClick={() => handleOpenDevtool()}
               >
-                {lang.systemSettings}
+                {lang.tr.systemSettings}
               </div>
               <div
                 className={`${header['option']} ${header['hasImage']}`}
@@ -255,27 +247,27 @@ const Header: React.FC<HeaderProps> = React.memo(
                   )
                 }
               >
-                {lang.messageHistory}
+                {lang.tr.messageHistory}
               </div>
               <div
                 className={`${header['option']} ${header['hasImage']}`}
                 data-type="change-theme"
                 data-key="60028"
               >
-                {lang.changeTheme}
+                {lang.tr.changeTheme}
               </div>
               <div
                 className={header['option']}
                 data-type="feed-back"
                 data-key="30039"
               >
-                {lang.feedback}
+                {lang.tr.feedback}
               </div>
               <div
                 className={`${header['option']} ${header['hasImage']} ${header['hasSubmenu']}`}
                 data-type="language-select"
               >
-                <span data-key="30374">{lang.languageSelect}</span>
+                <span data-key="30374">{lang.tr.languageSelect}</span>
                 <div
                   className={`${header['menuDropDown']} ${header['hidden']}`}
                 >
@@ -322,7 +314,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 data-key="30060"
                 onClick={() => handleLogout()}
               >
-                {lang.logout}
+                {lang.tr.logout}
               </div>
               <div
                 className={`${header['option']} ${header['hasImage']}`}
@@ -330,7 +322,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 data-key="30061"
                 onClick={() => handleClose()}
               >
-                {lang.exit}
+                {lang.tr.exit}
               </div>
             </div>
           </div>

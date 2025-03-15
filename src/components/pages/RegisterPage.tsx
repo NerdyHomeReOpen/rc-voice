@@ -19,7 +19,7 @@ import { authService } from '@/services/auth.service';
 import InputField from '@/components/InputField';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 interface FormErrors {
   general?: string;
@@ -44,7 +44,7 @@ interface RegisterPageProps {
 const RegisterPage: React.FC<RegisterPageProps> = React.memo(
   ({ onRegisterSuccess }) => {
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Form Control
     const [formData, setFormData] = useState<RegisterPageData>({
@@ -109,7 +109,8 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
         if (await authService.register(formData)) onRegisterSuccess();
       } catch (error) {
         setErrors({
-          general: error instanceof Error ? error.message : lang.unknownError,
+          general:
+            error instanceof Error ? error.message : lang.tr.unknownError,
         });
       } finally {
         setIsLoading(false);
@@ -126,14 +127,14 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
             )}
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
-                <label className={styles['label']}>{lang.account}</label>
+                <label className={styles['label']}>{lang.tr.account}</label>
                 <InputField
                   type="text"
                   name="account"
                   value={formData.account}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder={lang.pleaseInputAccount}
+                  placeholder={lang.tr.pleaseInputAccount}
                   showFunctionButton={'account'}
                   style={{
                     borderColor: errors.account ? '#f87171' : '#d1d5db',
@@ -148,14 +149,14 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
             </div>
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
-                <label className={styles['label']}>{lang.password}</label>
+                <label className={styles['label']}>{lang.tr.password}</label>
                 <InputField
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder={lang.pleaseInputPassword}
+                  placeholder={lang.tr.pleaseInputPassword}
                   showFunctionButton={'password'}
                   style={{
                     borderColor: errors.password ? '#f87171' : '#d1d5db',
@@ -165,13 +166,13 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
               {errors.password ? (
                 <p className={styles['warning']}>{errors.password}</p>
               ) : (
-                <p className={styles['hint']}>{lang.passwordHint}</p>
+                <p className={styles['hint']}>{lang.tr.passwordHint}</p>
               )}
             </div>
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
                 <label className={styles['label']}>
-                  {lang.confirmPassword}
+                  {lang.tr.confirmPassword}
                 </label>
                 <InputField
                   type="password"
@@ -179,7 +180,7 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder={lang.pleaseInputPasswordAgain}
+                  placeholder={lang.tr.pleaseInputPasswordAgain}
                   showFunctionButton={'password'}
                   style={{
                     borderColor: errors.confirmPassword ? '#f87171' : '#d1d5db',
@@ -189,18 +190,18 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
               {errors.confirmPassword ? (
                 <p className={styles['warning']}>{errors.confirmPassword}</p>
               ) : (
-                <p className={styles['hint']}>{lang.repeatInputPassword}</p>
+                <p className={styles['hint']}>{lang.tr.repeatInputPassword}</p>
               )}
             </div>
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
-                <label className={styles['label']}>{lang.nickname}</label>
+                <label className={styles['label']}>{lang.tr.nickname}</label>
                 <InputField
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder={lang.pleaseInputNickname}
+                  placeholder={lang.tr.pleaseInputNickname}
                   showFunctionButton={'username'}
                   style={{
                     borderColor: errors.username ? '#f87171' : '#d1d5db',
@@ -210,11 +211,11 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
               {errors.username ? (
                 <p className={styles['warning']}>{errors.username}</p>
               ) : (
-                <p className={styles['hint']}>{lang.nicknameHint}</p>
+                <p className={styles['hint']}>{lang.tr.nicknameHint}</p>
               )}
             </div>
             <button type="submit" className={styles['button']}>
-              {lang.register}
+              {lang.tr.register}
             </button>
           </form>
         </div>

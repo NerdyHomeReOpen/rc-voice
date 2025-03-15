@@ -22,7 +22,7 @@ import {
 } from '@/types';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { useSocket } from '@/providers/SocketProvider';
 
 // Services
@@ -36,7 +36,7 @@ const ServerPageComponent: React.FC = React.memo(() => {
   const channel = useSelector((state: { channel: Channel }) => state.channel);
 
   // Language
-  const lang = useTranslation();
+  const lang = useLanguage();
 
   // Socket
   const socket = useSocket();
@@ -107,16 +107,16 @@ const ServerPageComponent: React.FC = React.memo(() => {
   // Update Discord Presence
   useEffect(() => {
     ipcService.discord.updatePresence({
-      details: `${lang.in} ${serverName}`,
-      state: `${lang.with} ${serverUserCount} `,
+      details: `${lang.tr.in} ${serverName}`,
+      state: `${lang.tr.with} ${serverUserCount} `,
       largeImageKey: 'app_icon',
       largeImageText: 'RC Voice',
       smallImageKey: 'home_icon',
-      smallImageText: lang.RPCServer,
+      smallImageText: lang.tr.RPCServer,
       timestamp: Date.now(),
       buttons: [
         {
-          label: lang.RPCJoinServer,
+          label: lang.tr.RPCJoinServer,
           url: 'https://discord.gg/adCWzv6wwS',
         },
       ],
@@ -220,7 +220,9 @@ const ServerPageComponent: React.FC = React.memo(() => {
           </div>
           <div className={styles['buttonArea']}>
             <div className={styles['buttons']}>
-              <div className={styles['voiceModeButton']}>{lang.freeSpeech}</div>
+              <div className={styles['voiceModeButton']}>
+                {lang.tr.freeSpeech}
+              </div>
             </div>
             <div
               className={`${styles['micButton']} ${
@@ -230,11 +232,11 @@ const ServerPageComponent: React.FC = React.memo(() => {
             >
               <div className={styles['micIcon']} />
               <div className={styles['micText']}>
-                {webRTC.isMute ? lang.takeMic : lang.takenMic}
+                {webRTC.isMute ? lang.tr.takeMic : lang.tr.takenMic}
               </div>
             </div>
             <div className={styles['buttons']}>
-              <div className={styles['bkgModeButton']}>{lang.mixing}</div>
+              <div className={styles['bkgModeButton']}>{lang.tr.mixing}</div>
               <div className={styles['saperator']} />
               <div
                 className={`${styles['micModeButton']} ${

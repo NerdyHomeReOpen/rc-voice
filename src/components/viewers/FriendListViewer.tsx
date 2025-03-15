@@ -16,7 +16,7 @@ import BadgeViewer from '@/components/viewers/BadgeViewer';
 
 // Providers
 import { useContextMenu } from '@/providers/ContextMenuProvider';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -29,7 +29,7 @@ interface FriendGroupProps {
 const FriendGroup: React.FC<FriendGroupProps> = React.memo(
   ({ friendGroup, friends }) => {
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Context Menu
     const contextMenu = useContextMenu();
@@ -54,7 +54,7 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(
               {
                 id: 'delete',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-                label: lang.delete,
+                label: lang.tr.delete,
                 onClick: () => {
                   // Open Delete Group Modal
                 },
@@ -91,7 +91,7 @@ interface FriendCardProps {
 }
 const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   // Language
-  const lang = useTranslation();
+  const lang = useLanguage();
 
   // Context Menu
   const contextMenu = useContextMenu();
@@ -99,7 +99,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   // Variables
   const friendUser = friend.user || {
     id: '',
-    name: lang.unknownUser,
+    name: lang.tr.unknownUser,
     avatar: '',
     avatarUrl: '',
     signature: '',
@@ -139,7 +139,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
             {
               id: 'delete',
               icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-              label: lang.deleteFriend,
+              label: lang.tr.deleteFriend,
               onClick: () => {
                 // Open Delete Friend Modal
               },
@@ -180,7 +180,7 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
     const user = useSelector((state: { user: User }) => state.user);
 
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Search Control
     const [searchQuery, setSearchQuery] = useState<string>('');
@@ -233,7 +233,7 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
               <div className={styles['searchIcon']} />
               <input
                 type="text"
-                placeholder={lang.searchFriend}
+                placeholder={lang.tr.searchFriend}
                 className={styles['searchInput']}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -253,7 +253,7 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
             {/* Bottom Buttons */}
             <div className={styles['bottomButtons']}>
               <div className={styles['button']} datatype="addGroup">
-                {lang.friendAddGroup}
+                {lang.tr.friendAddGroup}
               </div>
               <div
                 className={styles['button']}
@@ -262,7 +262,7 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
                   handleOpenApplyFriendPopup();
                 }}
               >
-                {lang.addFriend}
+                {lang.tr.addFriend}
               </div>
             </div>
           </div>

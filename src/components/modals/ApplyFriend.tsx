@@ -6,11 +6,11 @@ import popup from '@/styles/common/popup.module.css';
 import applyFriend from '@/styles/popups/applyFriend.module.css';
 
 // Types
-import { FriendApplication, popupType, User } from '@/types';
+import { popupType, User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -23,7 +23,7 @@ interface ApplyFriendModalProps {
 const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
   (initialData: ApplyFriendModalProps) => {
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Socket
     const socket = useSocket();
@@ -46,7 +46,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
     const handleOpenSuccessPopup = () => {
       ipcService.popup.open(popupType.DIALOG_SUCCESS);
       ipcService.initialData.onRequest(popupType.DIALOG_SUCCESS, {
-        title: lang.friendApply,
+        title: lang.tr.friendApply,
         submitTo: popupType.DIALOG_SUCCESS,
       });
       ipcService.popup.onSubmit(popupType.DIALOG_SUCCESS, () => {
@@ -62,7 +62,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
       <div className={popup['popupContainer']}>
         <div className={`${popup['popupBody']}`}>
           <div className={applyFriend['body']}>
-            <div className={popup['label']}>{lang.friendLabel}</div>
+            <div className={popup['label']}>{lang.tr.friendLabel}</div>
             <div className={applyFriend['headerBox']}>
               <div className={applyFriend['avatarWrapper']}>
                 <div className={applyFriend['avatarPicture']} />
@@ -78,7 +78,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
             </div>
             <div className={applyFriend['split']} />
             <div className={applyFriend['contentBox']}>
-              <div className={popup['label']}>{lang.friendSelectGroup}</div>
+              <div className={popup['label']}>{lang.tr.friendSelectGroup}</div>
               <div className={popup['inputBox']}>
                 <select
                   className={popup['select']}
@@ -93,10 +93,10 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
                   ))}
                 </select>
                 <div className={applyFriend['linkText']}>
-                  {lang.friendAddGroup}
+                  {lang.tr.friendAddGroup}
                 </div>
               </div>
-              <div className={popup['label']}>{lang.friendNote}</div>
+              <div className={popup['label']}>{lang.tr.friendNote}</div>
               <div className={popup['inputBox']}>
                 <textarea
                   rows={2}
@@ -106,7 +106,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
                 />
               </div>
               <div className={applyFriend['noteText']}>
-                {lang.max120content}
+                {lang.tr.max120content}
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
               handleOpenSuccessPopup();
             }}
           >
-            {lang.sendRequest}
+            {lang.tr.sendRequest}
           </button>
           <button
             className={popup['button']}
@@ -130,7 +130,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
               handleClose();
             }}
           >
-            {lang.cancel}
+            {lang.tr.cancel}
           </button>
         </div>
       </div>

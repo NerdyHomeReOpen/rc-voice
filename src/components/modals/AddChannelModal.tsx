@@ -6,7 +6,7 @@ import { Channel } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
@@ -26,10 +26,10 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     const socket = useSocket();
 
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Variables
-    const parentName = initialData.parent?.name || lang.none;
+    const parentName = initialData.parent?.name || lang.tr.none;
     const isRoot = !!initialData.parent;
     const serverId = initialData.serverId || '';
 
@@ -68,11 +68,11 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
           <div className={addChannel['body']}>
             <div className={addChannel['inputGroup']}>
               <div className={popup['inputBox']}>
-                <div className={popup['label']}>{lang.parentChannel}</div>
+                <div className={popup['label']}>{lang.tr.parentChannel}</div>
                 <input className={popup['input']} disabled value={parentName} />
               </div>
               <div className={popup['inputBox']}>
-                <div className={popup['label']}>{lang.channelName}</div>
+                <div className={popup['label']}>{lang.tr.channelName}</div>
                 <input
                   className={popup['input']}
                   type="text"
@@ -101,10 +101,10 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
               handleClose();
             }}
           >
-            {lang.confirm}
+            {lang.tr.confirm}
           </button>
           <button className={popup['button']} onClick={handleClose}>
-            {lang.cancel}
+            {lang.tr.cancel}
           </button>
         </div>
       </div>

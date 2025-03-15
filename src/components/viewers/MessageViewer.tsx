@@ -16,7 +16,7 @@ import type { DirectMessage, Message, User } from '@/types';
 import { formatTimestamp } from '@/utils/formatters';
 
 // Providers
-import { useTranslation, useLanguage } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 interface MessageGroup {
   id: string;
@@ -67,8 +67,7 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
     if (!messages) return null;
 
     // Language
-    const lang = useTranslation();
-    const { language } = useLanguage();
+    const lang = useLanguage();
 
     const messageGroups = getGroupMessages(messages);
 
@@ -90,8 +89,8 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
           const messagePermission = messageGroup.permissionLevel ?? 0;
           const messageTimestamp = formatTimestamp(
             messageGroup.timestamp,
-            language,
-            lang,
+            lang.key,
+            lang.tr,
           );
 
           return (

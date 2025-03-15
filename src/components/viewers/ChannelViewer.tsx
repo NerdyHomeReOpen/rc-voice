@@ -15,7 +15,7 @@ import permission from '@/styles/common/permission.module.css';
 import { popupType, type Channel, type Server, type User } from '@/types';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { useSocket } from '@/providers/SocketProvider';
 import { useContextMenu } from '@/providers/ContextMenuProvider';
 
@@ -33,7 +33,7 @@ interface CategoryTabProps {
 const CategoryTab: React.FC<CategoryTabProps> = React.memo(
   ({ category, canEdit }) => {
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Socket
     const socket = useSocket();
@@ -71,7 +71,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
       ipcService.popup.open(popupType.DIALOG_WARNING);
       ipcService.initialData.onRequest(popupType.DIALOG_WARNING, {
         iconType: 'warning',
-        title: lang.warningDeleteChannel,
+        title: lang.tr.warningDeleteChannel,
         submitTo: popupType.DIALOG_WARNING,
       });
       ipcService.popup.onSubmit(popupType.DIALOG_WARNING, () =>
@@ -99,21 +99,21 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
               {
                 id: 'edit',
                 icon: <Edit size={14} className="w-5 h-5 mr-2" />,
-                label: lang.edit,
+                label: lang.tr.edit,
                 show: canEdit,
                 onClick: handleOpenEditChannelPopup,
               },
               {
                 id: 'add',
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
-                label: lang.add,
+                label: lang.tr.add,
                 show: canEdit && !categoryIsLobby && categoryIsRoot,
                 onClick: handleOpenCreateChannelPopup,
               },
               {
                 id: 'delete',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-                label: lang.delete,
+                label: lang.tr.delete,
                 show: canEdit && !categoryIsLobby,
                 onClick: handleOpenWarningPopup,
               },
@@ -162,7 +162,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
     const server = useSelector((state: { server: Server }) => state.server);
 
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Socket
     const socket = useSocket();
@@ -204,7 +204,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
       ipcService.popup.open(popupType.DIALOG_WARNING);
       ipcService.initialData.onRequest(popupType.DIALOG_WARNING, {
         iconType: 'warning',
-        title: lang.warningDeleteChannel,
+        title: lang.tr.warningDeleteChannel,
         submitTo: popupType.DIALOG_WARNING,
       });
       ipcService.popup.onSubmit(popupType.DIALOG_WARNING, () =>
@@ -242,21 +242,21 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
               {
                 id: 'edit',
                 icon: <Edit size={14} className="w-5 h-5 mr-2" />,
-                label: lang.edit,
+                label: lang.tr.edit,
                 show: canEdit,
                 onClick: handleOpenEditChannelPopup,
               },
               {
                 id: 'add',
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
-                label: lang.add,
+                label: lang.tr.add,
                 show: canEdit && !channelIsLobby && channelIsRoot,
                 onClick: handleOpenCreateChannelPopup,
               },
               {
                 id: 'delete',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-                label: lang.delete,
+                label: lang.tr.delete,
                 show: canEdit && !channelIsLobby,
                 onClick: () => handleOpenWarningPopup,
               },
@@ -298,7 +298,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const server = useSelector((state: { server: Server }) => state.server);
 
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Context
     const contextMenu = useContextMenu();
@@ -349,7 +349,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
               {
                 id: 'kick',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
-                label: lang.kick,
+                label: lang.tr.kick,
                 show: canEdit && user.id != channelUser.id,
                 onClick: () => {
                   // handleKickUser(user.id);
@@ -358,7 +358,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
               {
                 id: 'addFriend',
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
-                label: lang.addFriend,
+                label: lang.tr.addFriend,
                 show: canEdit && user.id != channelUser.id,
                 onClick: () => {
                   handleOpenApplyFriendPopup();
@@ -401,7 +401,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
   const server = useSelector((state: { server: Server }) => state.server);
 
   // Language
-  const lang = useTranslation();
+  const lang = useLanguage();
 
   // Context
   const contextMenu = useContextMenu();
@@ -414,7 +414,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
     (ch) => ch.id === userCurrentChannelId,
   ) || {
     id: '',
-    name: lang.unknownChannel,
+    name: lang.tr.unknownChannel,
     isRoot: false,
     isCategory: false,
     isLobby: false,
@@ -469,7 +469,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
       {/* Mic Queue */}
       {userCurrentChannelVoiceMode === 'queue' && (
         <>
-          <div className={styles['sectionTitle']}>{lang.micOrder}</div>
+          <div className={styles['sectionTitle']}>{lang.tr.micOrder}</div>
           <div className={styles['micQueueBox']}>
             <div className={styles['userList']}>
               {/* {micQueueUsers.map((user) => (
@@ -495,14 +495,14 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
             {
               id: 'addChannel',
               icon: <Plus size={14} className="w-5 h-5 mr-2" />,
-              label: lang.add,
+              label: lang.tr.add,
               show: canEdit,
               onClick: handleOpenCreateChannelPopup,
             },
           ]);
         }}
       >
-        {lang.allChannel}
+        {lang.tr.allChannel}
       </div>
       {/* Channel List */}
       <div className={styles['channelList']}>

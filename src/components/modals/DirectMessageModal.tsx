@@ -12,7 +12,7 @@ import Modal from '@/components/Modal';
 import { User, Friend, DirectMessage } from '@/types';
 
 // Providers
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { useSocket } from '@/providers/SocketProvider';
 
 // Components
@@ -30,7 +30,7 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
     const user = useSelector((state: { user: User }) => state.user);
 
     // Language
-    const lang = useTranslation();
+    const lang = useLanguage();
 
     // Socket
     const socket = useSocket();
@@ -39,7 +39,7 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
     const userId = user.id;
     const friendUser = friend?.user || {
       id: '',
-      name: lang.unknownUser,
+      name: lang.tr.unknownUser,
       avatar: '',
       avatarUrl: '',
       signature: '',
@@ -73,7 +73,7 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
           <div className="flex flex-col p-4 w-40 bg-blue-50 text-sm">
             {/* <img src={friendAvatar} className="w-24 h-24" /> */}
             <div className="flex items-center gap-2">
-              <div className="">{`${lang.level}: ${friendLevel}`}</div>
+              <div className="">{`${lang.tr.level}: ${friendLevel}`}</div>
               {/* <img src={friendGradeUrl} className="select-none" /> */}
             </div>
           </div>

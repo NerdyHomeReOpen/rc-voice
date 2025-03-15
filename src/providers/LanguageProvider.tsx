@@ -1,42 +1,37 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 // Types
-import { Translations, LanguageKeys, translations } from '@/types';
+import { Translation, LanguageKey, translations } from '@/types';
 
 interface LanguageContextProps {
-  language: LanguageKeys;
-  setLanguage: (lang: LanguageKeys) => void;
-  translations: Translations;
+  key: LanguageKey;
+  set: (lang: LanguageKey) => void;
+  tr: Translation;
 }
 
-const LanguageContext = createContext<LanguageContextProps | undefined>(
-  undefined,
-);
+const LanguageContext = createContext<LanguageContextProps | null>(null);
 
 interface LanguageProviderProps {
   children: React.ReactNode;
 }
 
 const LanguageProvider = ({ children }: LanguageProviderProps) => {
-  const [language, setLanguageState] = useState<LanguageKeys>(() => {
-    if (typeof localStorage !== 'undefined') {
-      return (localStorage.getItem('language') as LanguageKeys) || 'tw';
-    }
-    return 'tw';
-  });
+  const [language, setLanguage] = useState<LanguageKey>('tw');
+  const translation = translations[language];
 
-  const setLanguage = (lang: LanguageKeys) => {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('language', lang);
-    }
-    setLanguageState(lang);
-  };
+  useEffect(() => {
+    const lang = localStorage.getItem('language') as LanguageKey;
+    if (lang) setLanguage(lang);
+  }, []);
 
-  const lang = translations[language];
+  useEffect(() => {
+    if (typeof localStorage === undefined) return;
+    localStorage.setItem('language', language);
+  }, [language]);
 
   return (
     <LanguageContext.Provider
-      value={{ language, setLanguage, translations: lang }}
+      value={{ set: setLanguage, tr: translation, key: language }}
     >
       {children}
     </LanguageContext.Provider>
@@ -45,15 +40,9 @@ const LanguageProvider = ({ children }: LanguageProviderProps) => {
 
 export const useLanguage = (): LanguageContextProps => {
   const context = useContext(LanguageContext);
-  if (!context) {
+  if (!context)
     throw new Error('useLanguage must be used within a LanguageProvider');
-  }
   return context;
-};
-
-export const useTranslation = (): Translations => {
-  const { translations } = useLanguage();
-  return translations;
 };
 
 LanguageProvider.displayName = 'LanguageProvider';

@@ -1,4 +1,4 @@
-export interface Translations {
+export interface Translation {
   RPCHomePage: string;
   RPCFriendPage: string;
   RPCFriend: string;
@@ -176,9 +176,9 @@ export interface Translations {
   yesterday: string;
 }
 
-export type LanguageKeys = 'tw' | 'cn' | 'en' | 'jp' | 'ru';
+export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp' | 'ru';
 
-export const translations: Record<LanguageKeys, Translations> = {
+export const translations: Record<LanguageKey, Translation> = {
   tw: {
     RPCHomePage: '正在瀏覽主頁',
     RPCFriendPage: '正在瀏覽好友列表',

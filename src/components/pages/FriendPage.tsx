@@ -17,7 +17,7 @@ import { popupType, type User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -30,7 +30,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
   const socket = useSocket();
 
   // Language
-  const lang = useTranslation();
+  const lang = useLanguage();
 
   // Variables
   const MAXLENGTH = 300;
@@ -86,16 +86,16 @@ const FriendPageComponent: React.FC = React.memo(() => {
   // Update Discord Presence
   useEffect(() => {
     ipcService.discord.updatePresence({
-      details: lang.RPCFriendPage,
-      state: `${lang.RPCUser} ${userName}`,
+      details: lang.tr.RPCFriendPage,
+      state: `${lang.tr.RPCUser} ${userName}`,
       largeImageKey: 'app_icon',
       largeImageText: 'RC Voice',
       smallImageKey: 'home_icon',
-      smallImageText: lang.RPCFriend,
+      smallImageText: lang.tr.RPCFriend,
       timestamp: Date.now(),
       buttons: [
         {
-          label: lang.RPCJoinServer,
+          label: lang.tr.RPCJoinServer,
           url: 'https://discord.gg/adCWzv6wwS',
         },
       ],
@@ -143,7 +143,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
           <textarea
             className={friendPage['signatureInput']}
             value={signatureInput}
-            placeholder={lang.signaturePlaceholder}
+            placeholder={lang.tr.signaturePlaceholder}
             data-placeholder="30018"
             onChange={(e) => {
               if (signatureInput.length > MAXLENGTH) return;
@@ -182,7 +182,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
         <div className="resizeHandle" onMouseDown={startResizing} />
         {/* Right Content */}
         <div className={friendPage['mainContent']}>
-          <div className={friendPage['header']}>{lang.friendActive}</div>
+          <div className={friendPage['header']}>{lang.tr.friendActive}</div>
         </div>
       </main>
     </div>

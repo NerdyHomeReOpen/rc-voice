@@ -14,7 +14,7 @@ import { popupType, type Server, type User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage, useTranslation } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 // Services
 import { ipcService } from '@/services/ipc.service';
@@ -27,8 +27,7 @@ const HomePageComponent: React.FC = React.memo(() => {
   const socket = useSocket();
 
   // Language
-  const { language } = useLanguage();
-  const lang = useTranslation();
+  const lang = useLanguage();
 
   // Variables
   const userName = user.name;
@@ -42,16 +41,16 @@ const HomePageComponent: React.FC = React.memo(() => {
   // Update Discord Presence
   useEffect(() => {
     ipcService.discord.updatePresence({
-      details: lang.RPCHomePage,
-      state: `${lang.RPCUser} ${userName}`,
+      details: lang.tr.RPCHomePage,
+      state: `${lang.tr.RPCUser} ${userName}`,
       largeImageKey: 'app_icon',
       largeImageText: 'RC Voice',
       smallImageKey: 'home_icon',
-      smallImageText: lang.RPCHome,
+      smallImageText: lang.tr.RPCHome,
       timestamp: Date.now(),
       buttons: [
         {
-          label: lang.RPCJoinServer,
+          label: lang.tr.RPCJoinServer,
           url: 'https://discord.gg/adCWzv6wwS',
         },
       ],
@@ -62,11 +61,6 @@ const HomePageComponent: React.FC = React.memo(() => {
   useEffect(() => {
     socket?.send.refreshUser(null);
   }, []);
-
-  // Apply Language Setting
-  useEffect(() => {
-    console.log(`Current language: ${language}`);
-  }, [language]);
 
   // Handlers
   const handleSearch = (query: string) => {
@@ -91,7 +85,7 @@ const HomePageComponent: React.FC = React.memo(() => {
           <div className={homePage['searchBar']}>
             <input
               type="search"
-              placeholder={lang.searchPlaceholder}
+              placeholder={lang.tr.searchPlaceholder}
               data-placeholder="60021"
               className={homePage['searchInput']}
               onKeyDown={(e) => {
@@ -109,15 +103,15 @@ const HomePageComponent: React.FC = React.memo(() => {
             data-key="60060"
           >
             <div></div>
-            {lang.home}
+            {lang.tr.home}
           </button>
           <button className={homePage['navegateItem']} data-key="40007">
             <div></div>
-            {lang.game}
+            {lang.tr.game}
           </button>
           <button className={homePage['navegateItem']} data-key="30375">
             <div></div>
-            {lang.live}
+            {lang.tr.live}
           </button>
         </div>
         <div className={homePage['right']}>
@@ -127,11 +121,11 @@ const HomePageComponent: React.FC = React.memo(() => {
             onClick={handleOpenCreateServerPopup}
           >
             <div></div>
-            {lang.createGroup}
+            {lang.tr.createGroup}
           </button>
           <button className={homePage['navegateItem']} data-key="60004">
             <div></div>
-            {lang.personalExclusive}
+            {lang.tr.personalExclusive}
           </button>
         </div>
       </header>
@@ -142,26 +136,26 @@ const HomePageComponent: React.FC = React.memo(() => {
             {searchResults.length > 0 && (
               <div className={homePage['myGroupsItem']}>
                 <div className={homePage['myGroupsTitle']} data-key="60005">
-                  {lang.recentVisits}
+                  {lang.tr.recentVisits}
                 </div>
                 <ServerListViewer servers={searchResults} />
               </div>
             )}
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="60005">
-                {lang.recentVisits}
+                {lang.tr.recentVisits}
               </div>
               <ServerListViewer servers={userRecentServers} />
             </div>
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="30283">
-                {lang.myGroups}
+                {lang.tr.myGroups}
               </div>
               <ServerListViewer servers={userOwnedServers} />
             </div>
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="60005">
-                {lang.favoriteGroups}
+                {lang.tr.favoriteGroups}
               </div>
               <ServerListViewer servers={userFavServers} />
             </div>
