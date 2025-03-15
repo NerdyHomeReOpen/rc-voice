@@ -1,4 +1,3 @@
-// Code Generated with love
 import React from 'react';
 import { useSelector } from 'react-redux';
 
@@ -6,7 +5,7 @@ import { useSelector } from 'react-redux';
 import homePage from '@/styles/homePage.module.css';
 
 // Type
-import { type Server, type User } from '@/types';
+import { Server, User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -19,12 +18,14 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
 
-  // Socket Control
+  // Hooks
   const socket = useSocket();
 
+  // Handlers
   const handleServerSelect = (serverId: string) => {
+    if (!socket) return;
     if (user.currentServerId === serverId) return;
-    socket?.send.connectServer({ serverId });
+    socket.send.connectServer({ serverId });
   };
 
   // Variables

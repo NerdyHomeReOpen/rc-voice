@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable react/display-name */
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Edit, Plus, Trash } from 'lucide-react';
@@ -32,13 +28,9 @@ interface CategoryTabProps {
 
 const CategoryTab: React.FC<CategoryTabProps> = React.memo(
   ({ category, canEdit }) => {
-    // Language
+    // Hooks
     const lang = useLanguage();
-
-    // Socket
     const socket = useSocket();
-
-    // Context Menu
     const contextMenu = useContextMenu();
 
     // Variables
@@ -48,7 +40,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
     const categoryVisibility = category.settings.visibility;
     const categoryChannels = category.subChannels || [];
 
-    // Expanded Control
+    // States
     const [expanded, setExpanded] = useState<boolean>(true);
 
     // Handlers
@@ -80,7 +72,8 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
     };
 
     const handleDeleteChannel = (channelId: string) => {
-      socket?.send.deleteChannel({ channelId });
+      if (!socket) return;
+      socket.send.deleteChannel({ channelId });
     };
 
     return (
@@ -101,21 +94,21 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                 icon: <Edit size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.edit,
                 show: canEdit,
-                onClick: handleOpenEditChannelPopup,
+                onClick: () => handleOpenEditChannelPopup(),
               },
               {
                 id: 'add',
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.add,
                 show: canEdit && !categoryIsLobby && categoryIsRoot,
-                onClick: handleOpenCreateChannelPopup,
+                onClick: () => handleOpenCreateChannelPopup(),
               },
               {
                 id: 'delete',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.delete,
                 show: canEdit && !categoryIsLobby,
-                onClick: handleOpenWarningPopup,
+                onClick: () => handleOpenWarningPopup(),
               },
             ]);
           }}
@@ -128,7 +121,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
           <div className={styles['channelList']}>
             {categoryChannels
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-              .map((channel, index) =>
+              .map((channel) =>
                 channel.isCategory ? (
                   <CategoryTab
                     key={channel.id}
@@ -150,6 +143,8 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
   },
 );
 
+CategoryTab.displayName = 'CategoryTab';
+
 interface ChannelTabProps {
   channel: Channel;
   canEdit: boolean;
@@ -161,13 +156,9 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
     const user = useSelector((state: { user: User }) => state.user);
     const server = useSelector((state: { server: Server }) => state.server);
 
-    // Language
+    // Hooks
     const lang = useLanguage();
-
-    // Socket
     const socket = useSocket();
-
-    // Context Menu
     const contextMenu = useContextMenu();
 
     // Variables
@@ -213,11 +204,13 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
     };
 
     const handleDeleteChannel = (channelId: string) => {
-      socket?.send.deleteChannel({ channelId });
+      if (!socket) return;
+      socket.send.deleteChannel({ channelId });
     };
 
     const handleJoinChannel = (channelId: string) => {
-      socket?.send.connectChannel({ channelId });
+      if (!socket) return;
+      socket.send.connectChannel({ channelId });
     };
 
     return (
@@ -244,21 +237,21 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                 icon: <Edit size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.edit,
                 show: canEdit,
-                onClick: handleOpenEditChannelPopup,
+                onClick: () => handleOpenEditChannelPopup(),
               },
               {
                 id: 'add',
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.add,
                 show: canEdit && !channelIsLobby && channelIsRoot,
-                onClick: handleOpenCreateChannelPopup,
+                onClick: () => handleOpenCreateChannelPopup(),
               },
               {
                 id: 'delete',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.delete,
                 show: canEdit && !channelIsLobby,
-                onClick: () => handleOpenWarningPopup,
+                onClick: () => handleOpenWarningPopup(),
               },
             ]);
           }}
@@ -286,6 +279,8 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
   },
 );
 
+ChannelTab.displayName = 'ChannelTab';
+
 interface UserTabProps {
   channelUser: User;
   canEdit: boolean;
@@ -297,10 +292,8 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const user = useSelector((state: { user: User }) => state.user);
     const server = useSelector((state: { server: Server }) => state.server);
 
-    // Language
+    // Hooks
     const lang = useLanguage();
-
-    // Context
     const contextMenu = useContextMenu();
 
     // Variables
@@ -360,9 +353,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.addFriend,
                 show: canEdit && user.id != channelUser.id,
-                onClick: () => {
-                  handleOpenApplyFriendPopup();
-                },
+                onClick: () => handleOpenApplyFriendPopup(),
               },
             ]);
           }}
@@ -391,6 +382,8 @@ const UserTab: React.FC<UserTabProps> = React.memo(
   },
 );
 
+UserTab.displayName = 'UserTab';
+
 interface ChannelViewerProps {
   channels: Channel[];
 }
@@ -400,10 +393,8 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
   const user = useSelector((state: { user: User }) => state.user);
   const server = useSelector((state: { server: Server }) => state.server);
 
-  // Language
+  // Hooks
   const lang = useLanguage();
-
-  // Context
   const contextMenu = useContextMenu();
 
   // Variables
@@ -497,7 +488,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
               icon: <Plus size={14} className="w-5 h-5 mr-2" />,
               label: lang.tr.add,
               show: canEdit,
-              onClick: handleOpenCreateChannelPopup,
+              onClick: () => handleOpenCreateChannelPopup(),
             },
           ]);
         }}
@@ -509,7 +500,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
         {channels
           .filter((c) => c.isRoot)
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-          .map((channel, index) =>
+          .map((channel) =>
             channel.isCategory ? (
               <CategoryTab
                 key={channel.id}

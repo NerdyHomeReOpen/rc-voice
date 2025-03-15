@@ -405,7 +405,8 @@ function connectSocket(token) {
 }
 
 function disconnectSocket(socket) {
-  socket?.disconnect();
+  if (!socket) return null;
+  socket.disconnect();
   return null;
 }
 

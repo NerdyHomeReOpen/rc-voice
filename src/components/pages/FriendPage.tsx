@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react/display-name */
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
@@ -13,7 +11,7 @@ import FriendListViewer from '@/components/viewers/FriendListViewer';
 import BadgeViewer from '@/components/viewers/BadgeViewer';
 
 // Types
-import { popupType, type User } from '@/types';
+import { User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -26,11 +24,9 @@ const FriendPageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
 
-  // Socket
-  const socket = useSocket();
-
-  // Language
+  // Hooks
   const lang = useLanguage();
+  const socket = useSocket();
 
   // Variables
   const MAXLENGTH = 300;
@@ -43,16 +39,20 @@ const FriendPageComponent: React.FC = React.memo(() => {
   const userFriends = user.friends || [];
   const userFriendGroups = user.friendGroups || [];
 
-  // Input Control
+  // States
   const [signatureInput, setSignatureInput] = useState<string>(userSignature);
   const [isComposing, setIsComposing] = useState<boolean>(false);
-
-  // Sidebar Control
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
   const [isResizing, setIsResizing] = useState<boolean>(false);
 
-  const startResizing = useCallback((mouseDownEvent: React.MouseEvent) => {
-    mouseDownEvent.preventDefault();
+  // Handlers
+  const handleChangeSignature = (signature: User['signature']) => {
+    if (!socket) return;
+    socket.send.updateUser({ user: { signature } });
+  };
+
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
     setIsResizing(true);
   }, []);
 
@@ -61,30 +61,18 @@ const FriendPageComponent: React.FC = React.memo(() => {
   }, []);
 
   const resize = useCallback(
-    (mouseMoveEvent: MouseEvent) => {
-      if (isResizing) {
-        const maxWidth = window.innerWidth * 0.3;
-        const newWidth = Math.max(
-          250,
-          Math.min(mouseMoveEvent.clientX, maxWidth),
-        );
-        setSidebarWidth(newWidth);
-      }
+    (e: MouseEvent) => {
+      if (!isResizing) return;
+      const maxWidth = window.innerWidth * 0.3;
+      const newWidth = Math.max(250, Math.min(e.clientX, maxWidth));
+      setSidebarWidth(newWidth);
     },
     [isResizing],
   );
 
+  // Effects
   useEffect(() => {
-    window.addEventListener('mousemove', resize);
-    window.addEventListener('mouseup', stopResizing);
-    return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
-    };
-  }, [resize, stopResizing]);
-
-  // Update Discord Presence
-  useEffect(() => {
+    if (!lang) return;
     ipcService.discord.updatePresence({
       details: lang.tr.RPCFriendPage,
       state: `${lang.tr.RPCUser} ${userName}`,
@@ -100,17 +88,21 @@ const FriendPageComponent: React.FC = React.memo(() => {
         },
       ],
     });
-  }, [userName]);
+  }, [lang, userName]);
 
-  // Refresh User
   useEffect(() => {
-    socket?.send.refreshUser(null);
-  }, []);
+    if (!socket) return;
+    socket.send.refreshUser(null);
+  }, [socket]);
 
-  // Handlers
-  const handleChangeSignature = (signature: User['signature']) => {
-    socket?.send.updateUser({ user: { signature } });
-  };
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
 
   return (
     <div className={friendPage['friendWrapper']}>
@@ -147,8 +139,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
             data-placeholder="30018"
             onChange={(e) => {
               if (signatureInput.length > MAXLENGTH) return;
-              const input = e.target.value;
-              setSignatureInput(input);
+              setSignatureInput(e.target.value);
             }}
             onKeyDown={(e) => {
               if (e.shiftKey) return;
@@ -156,7 +147,7 @@ const FriendPageComponent: React.FC = React.memo(() => {
               if (isComposing) return;
               e.currentTarget.blur();
             }}
-            onBlur={(e) => {
+            onBlur={() => {
               if (signatureInput == userSignature) return;
               if (signatureInput.length > MAXLENGTH) return;
               handleChangeSignature(signatureInput);
@@ -179,7 +170,11 @@ const FriendPageComponent: React.FC = React.memo(() => {
           />
         </div>
         {/* Resize Handle */}
-        <div className="resizeHandle" onMouseDown={startResizing} />
+        <div
+          className="resizeHandle"
+          onMouseDown={startResizing}
+          onMouseUp={stopResizing}
+        />
         {/* Right Content */}
         <div className={friendPage['mainContent']}>
           <div className={friendPage['header']}>{lang.tr.friendActive}</div>

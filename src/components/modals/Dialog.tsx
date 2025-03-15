@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 
 // CSS
@@ -27,7 +26,7 @@ interface DialogProps {
 }
 
 const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
-  // Language
+  // Hooks
   const lang = useLanguage();
 
   // Variables
@@ -64,7 +63,7 @@ const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
         </div>
       </div>
       <div className={popup['popupFooter']}>
-        <button className={popup['button']} onClick={handleSubmit}>
+        <button className={popup['button']} onClick={() => handleSubmit()}>
           {lang.tr.confirm}
         </button>
       </div>

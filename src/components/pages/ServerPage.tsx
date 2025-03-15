@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
@@ -13,13 +12,7 @@ import ChannelViewer from '@/components/viewers/ChannelViewer';
 import MessageInputBox from '@/components/MessageInputBox';
 
 // Types
-import {
-  popupType,
-  type User,
-  type Server,
-  type Message,
-  type Channel,
-} from '@/types';
+import { popupType, User, Server, Message, Channel } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -35,13 +28,9 @@ const ServerPageComponent: React.FC = React.memo(() => {
   const server = useSelector((state: { server: Server }) => state.server);
   const channel = useSelector((state: { channel: Channel }) => state.channel);
 
-  // Language
+  // Hooks
   const lang = useLanguage();
-
-  // Socket
   const socket = useSocket();
-
-  // WebRTC
   const webRTC = useWebRTC();
 
   // Variables
@@ -68,64 +57,14 @@ const ServerPageComponent: React.FC = React.memo(() => {
   };
   const userPermissionLevel = userMember.permissionLevel;
 
-  // Sidebar Control
+  // States
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
   const [isResizing, setIsResizing] = useState<boolean>(false);
 
-  const startResizing = useCallback((mouseDownEvent: React.MouseEvent) => {
-    mouseDownEvent.preventDefault();
-    setIsResizing(true);
-  }, []);
-
-  const stopResizing = useCallback(() => {
-    setIsResizing(false);
-  }, []);
-
-  const resize = useCallback(
-    (mouseMoveEvent: MouseEvent) => {
-      if (isResizing) {
-        const maxWidth = window.innerWidth * 0.3;
-        const newWidth = Math.max(
-          250,
-          Math.min(mouseMoveEvent.clientX, maxWidth),
-        );
-        setSidebarWidth(newWidth);
-      }
-    },
-    [isResizing],
-  );
-
-  useEffect(() => {
-    window.addEventListener('mousemove', resize);
-    window.addEventListener('mouseup', stopResizing);
-    return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
-    };
-  }, [resize, stopResizing]);
-
-  // Update Discord Presence
-  useEffect(() => {
-    ipcService.discord.updatePresence({
-      details: `${lang.tr.in} ${serverName}`,
-      state: `${lang.tr.with} ${serverUserCount} `,
-      largeImageKey: 'app_icon',
-      largeImageText: 'RC Voice',
-      smallImageKey: 'home_icon',
-      smallImageText: lang.tr.RPCServer,
-      timestamp: Date.now(),
-      buttons: [
-        {
-          label: lang.tr.RPCJoinServer,
-          url: 'https://discord.gg/adCWzv6wwS',
-        },
-      ],
-    });
-  }, [serverName, serverUserCount]);
-
   // Handlers
   const handleSendMessage = (message: Message): void => {
-    socket?.send.message({ message });
+    if (!socket) return;
+    socket.send.message({ message });
   };
 
   const handleOpenServerSettings = () => {
@@ -142,6 +81,53 @@ const ServerPageComponent: React.FC = React.memo(() => {
       server: server,
     });
   };
+
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing) return;
+      const maxWidth = window.innerWidth * 0.3;
+      const newWidth = Math.max(250, Math.min(e.clientX, maxWidth));
+      setSidebarWidth(newWidth);
+    },
+    [isResizing],
+  );
+
+  // Effects
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
+
+  useEffect(() => {
+    ipcService.discord.updatePresence({
+      details: `${lang.tr.in} ${serverName}`,
+      state: `${lang.tr.with} ${serverUserCount} `,
+      largeImageKey: 'app_icon',
+      largeImageText: 'RC Voice',
+      smallImageKey: 'home_icon',
+      smallImageText: lang.tr.RPCServer,
+      timestamp: Date.now(),
+      buttons: [
+        {
+          label: lang.tr.RPCJoinServer,
+          url: 'https://discord.gg/adCWzv6wwS',
+        },
+      ],
+    });
+  }, [lang, serverName, serverUserCount]);
 
   return (
     <div className={styles['serverWrapper']}>
@@ -193,7 +179,11 @@ const ServerPageComponent: React.FC = React.memo(() => {
           <ChannelViewer channels={serverChannels} />
         </div>
         {/* Resize Handle */}
-        <div className="resizeHandle" onMouseDown={startResizing} />
+        <div
+          className="resizeHandle"
+          onMouseDown={startResizing}
+          onMouseUp={stopResizing}
+        />
         {/* Right Content */}
         <div className={styles['mainContent']}>
           <div className={styles['announcementArea']}>

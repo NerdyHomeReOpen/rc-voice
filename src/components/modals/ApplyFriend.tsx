@@ -22,10 +22,8 @@ interface ApplyFriendModalProps {
 
 const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
   (initialData: ApplyFriendModalProps) => {
-    // Language
+    // Hooks
     const lang = useLanguage();
-
-    // Socket
     const socket = useSocket();
 
     // Variables
@@ -82,9 +80,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
               <div className={popup['inputBox']}>
                 <select
                   className={popup['select']}
-                  onChange={(e) => {
-                    setFriendGroup(e.target.value);
-                  }}
+                  onChange={(e) => setFriendGroup(e.target.value)}
                 >
                   {friendGroups.map((group) => (
                     <option key={group.id} value={group.id}>
@@ -100,9 +96,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
               <div className={popup['inputBox']}>
                 <textarea
                   rows={2}
-                  onChange={(e) => {
-                    setDescription(e.target.value);
-                  }}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
               <div className={applyFriend['noteText']}>
@@ -124,12 +118,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
           >
             {lang.tr.sendRequest}
           </button>
-          <button
-            className={popup['button']}
-            onClick={() => {
-              handleClose();
-            }}
-          >
+          <button className={popup['button']} onClick={() => handleClose()}>
             {lang.tr.cancel}
           </button>
         </div>

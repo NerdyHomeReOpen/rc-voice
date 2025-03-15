@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
 
 // CSS
@@ -7,7 +6,7 @@ import popup from '@/styles/common/popup.module.css';
 import createServer from '@/styles/popups/createServer.module.css';
 
 // Types
-import { type User, type Server, popupType } from '@/types';
+import { User, Server, popupType } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -39,10 +38,8 @@ interface CreateServerModalProps {
 
 const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
   (initialData: CreateServerModalProps) => {
-    // Language
+    // Hooks
     const lang = useLanguage();
-
-    // Socket
     const socket = useSocket();
 
     // Variables
@@ -52,16 +49,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const remainingGroups = maxGroups - userOwnedServers.length;
     const canCreate = remainingGroups > 0;
 
-    // Section Control
+    // States
     const [section, setSection] = useState<number>(0);
-
-    // Error Control
     const [errors, setErrors] = useState<{ [key: string]: string }>({
       name: '',
       description: '',
     });
-
-    // Form Control
     const [server, setServer] = useState<Server>({
       id: '',
       name: '',
@@ -90,7 +83,8 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     };
 
     const handleCreateServer = (server: Server) => {
-      socket?.send.createServer({ server: server });
+      if (!socket) return;
+      socket.send.createServer({ server: server });
     };
 
     const handleOpenErrorDialog = (message: string) => {
@@ -132,7 +126,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                         className={`${createServer['button']} ${
                           server.type === type ? createServer['selected'] : ''
                         }`}
-                        onClick={() => setServer({ ...server, type })}
+                        onClick={() => setServer((prev) => ({ ...prev, type }))}
                       >
                         {type}
                       </div>
@@ -151,7 +145,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
               >
                 {lang.tr.next}
               </button>
-              <button className={popup['button']} onClick={handleClose}>
+              <button className={popup['button']} onClick={() => handleClose()}>
                 {lang.tr.cancel}
               </button>
             </div>
@@ -234,13 +228,16 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                       type="text"
                       value={server.name}
                       onChange={(e) =>
-                        setServer({ ...server, name: e.target.value })
+                        setServer((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
                       }
                       onBlur={() =>
-                        setErrors({
-                          ...errors,
+                        setErrors((prev) => ({
+                          ...prev,
                           name: validateName(server.name),
-                        })
+                        }))
                       }
                       placeholder={lang.tr.groupNamePlaceholder}
                     />
@@ -252,13 +249,16 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                       className={popup['input']}
                       value={server.description}
                       onChange={(e) =>
-                        setServer({ ...server, description: e.target.value })
+                        setServer((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
                       }
                       onBlur={() =>
-                        setErrors({
-                          ...errors,
+                        setErrors((prev) => ({
+                          ...prev,
                           description: validateDescription(server.description),
-                        })
+                        }))
                       }
                       placeholder={lang.tr.groupSloganPlaceholder}
                     />

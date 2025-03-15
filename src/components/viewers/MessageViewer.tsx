@@ -66,14 +66,16 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
   ({ messages }) => {
     if (!messages) return null;
 
-    // Language
+    // Hooks
     const lang = useLanguage();
 
+    // Variables
     const messageGroups = getGroupMessages(messages);
 
-    // Auto Scroll Control
+    // Refs
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    // Effects
     useLayoutEffect(() => {
       messagesEndRef.current?.scrollIntoView({
         behavior: 'auto',

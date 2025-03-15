@@ -20,37 +20,37 @@ interface MarkdownProps {
   markdownText: string;
 }
 
+const PURIFY_CONFIG: PurifyConfig = {
+  ALLOWED_TAGS: [
+    'img',
+    'p',
+    'h1',
+    'h2',
+    'h3',
+    'ul',
+    'ol',
+    'li',
+    'blockquote',
+    'a',
+    'table',
+    'thead',
+    'tbody',
+    'tr',
+    'th',
+    'td',
+    'hr',
+    'br',
+    'strong',
+    'em',
+    'code',
+    'pre',
+  ],
+  ALLOWED_ATTR: ['src', 'alt', 'class', 'href'],
+  ALLOWED_URI_REGEXP: /^\/smiles\//,
+};
+
 const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
   const safeMarkdownText = typeof markdownText === 'string' ? markdownText : '';
-
-  const purifyConfig: PurifyConfig = {
-    ALLOWED_TAGS: [
-      'img',
-      'p',
-      'h1',
-      'h2',
-      'h3',
-      'ul',
-      'ol',
-      'li',
-      'blockquote',
-      'a',
-      'table',
-      'thead',
-      'tbody',
-      'tr',
-      'th',
-      'td',
-      'hr',
-      'br',
-      'strong',
-      'em',
-      'code',
-      'pre',
-    ],
-    ALLOWED_ATTR: ['src', 'alt', 'class', 'href'],
-    ALLOWED_URI_REGEXP: /^\/smiles\//,
-  };
 
   const processEmojis = (text: string): string => {
     return text.replace(/\[emoji_(\d+)\]/g, (match: string, id: string) => {
@@ -63,8 +63,7 @@ const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
   };
 
   const withEmojis = processEmojis(safeMarkdownText);
-  const sanitized = DOMPurify.sanitize(withEmojis, purifyConfig);
-
+  const sanitized = DOMPurify.sanitize(withEmojis, PURIFY_CONFIG);
   const components: Components = {
     h1: ({ node, ...props }) => (
       <h1 className="text-2xl font-bold mb-2 text-gray-900" {...props} />

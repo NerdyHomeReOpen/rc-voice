@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable react/display-name */
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Trash } from 'lucide-react';
@@ -9,7 +7,7 @@ import styles from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
 
 // Types
-import { popupType, type User, type Friend, type FriendGroup } from '@/types';
+import { popupType, User, Friend, FriendGroup } from '@/types';
 
 // Components
 import BadgeViewer from '@/components/viewers/BadgeViewer';
@@ -21,24 +19,22 @@ import { useLanguage } from '@/providers/LanguageProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
-interface FriendGroupProps {
+interface FriendGroupTabProps {
   friendGroup: FriendGroup;
   friends: Friend[];
 }
 
-const FriendGroup: React.FC<FriendGroupProps> = React.memo(
+const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
   ({ friendGroup, friends }) => {
-    // Language
+    // Hooks
     const lang = useLanguage();
-
-    // Context Menu
     const contextMenu = useContextMenu();
 
     // Variables
     const groupName = friendGroup.name;
     const groupFriends = friends.filter((fd) => fd.groupId == friendGroup.id);
 
-    // Expanded Control
+    // States
     const [expanded, setExpanded] = useState<boolean>(true);
 
     return (
@@ -48,8 +44,6 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(
           className={styles['tab']}
           onClick={() => setExpanded(!expanded)}
           onContextMenu={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
             contextMenu.showContextMenu(e.pageX, e.pageY, [
               {
                 id: 'delete',
@@ -86,14 +80,15 @@ const FriendGroup: React.FC<FriendGroupProps> = React.memo(
   },
 );
 
+FriendGroupTab.displayName = 'FriendGroupTab';
+
 interface FriendCardProps {
   friend: Friend;
 }
-const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
-  // Language
-  const lang = useLanguage();
 
-  // Context Menu
+const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
+  // Hooks
+  const lang = useLanguage();
   const contextMenu = useContextMenu();
 
   // Variables
@@ -169,6 +164,8 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   );
 });
 
+FriendCard.displayName = 'FriendCard';
+
 interface FriendListViewerProps {
   friendGroups: FriendGroup[];
   friends: Friend[];
@@ -179,16 +176,15 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
     // Redux
     const user = useSelector((state: { user: User }) => state.user);
 
-    // Language
+    // Hooks
     const lang = useLanguage();
 
-    // Search Control
-    const [searchQuery, setSearchQuery] = useState<string>('');
-
+    // Variables
     const filteredFriends =
       friends.filter((friend) => friend.user?.name.includes(searchQuery)) ?? [];
 
-    // Tab Control
+    // States
+    const [searchQuery, setSearchQuery] = useState<string>('');
     const [selectedTabId, setSelectedTabId] = useState<number>(0);
 
     // Handlers
@@ -243,7 +239,7 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
             {/* Friend Groups */}
             <div className={styles['friendGroups']}>
               {friendGroups.map((group) => (
-                <FriendGroup
+                <FriendGroupTab
                   key={group.id}
                   friendGroup={group}
                   friends={filteredFriends}

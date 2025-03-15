@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { FormEvent, useState } from 'react';
 
 // Types
@@ -9,8 +8,8 @@ import { useLanguage } from '@/providers/LanguageProvider';
 import { useSocket } from '@/providers/SocketProvider';
 
 // CSS
-import EditChannel from '../../styles/popups/editChannel.module.css';
-import Popup from '../../styles/common/popup.module.css';
+import EditChannel from '@/styles/popups/editChannel.module.css';
+import Popup from '@/styles/common/popup.module.css';
 
 interface EditChannelModalProps {
   onClose: () => void;

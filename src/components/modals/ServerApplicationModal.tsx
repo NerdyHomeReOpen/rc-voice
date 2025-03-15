@@ -6,7 +6,7 @@ import Popup from '@/styles/common/popup.module.css';
 import applyMember from '@/styles/popups/serverApplication.module.css';
 
 // Types
-import { popupType, type Server, type ServerApplication } from '@/types';
+import { popupType, User, Server, ServerApplication } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -17,30 +17,37 @@ import { ipcService } from '@/services/ipc.service';
 
 interface ServerApplicationModalProps {
   server: Server | null;
+  user: User | null;
 }
 
 const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
   React.memo((initialData: ServerApplicationModalProps) => {
-    // Language
+    // Hooks
     const lang = useLanguage();
-
-    // Socket
     const socket = useSocket();
 
     // Variables
+    const userId = initialData.user?.id || '';
+    const serverId = initialData.server?.id || '';
     const serverName = initialData.server?.name || '';
     const serverDisplayId = initialData.server?.displayId || '';
     const serverAvatar = initialData.server?.avatar || null;
 
     // State
-    const [description, setDescription] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [isApplying, setIsApplying] = useState(false);
+    const [application, setApplication] = useState<ServerApplication>({
+      id: '',
+      userId: '',
+      serverId: '',
+      description: '',
+      createdAt: 0,
+    });
 
     // Section Control
     const [section, setSection] = useState<number>(0);
 
-    const handleCreatMemberApplication = (application: ServerApplication) => {};
+    const handleCreatMemberApplication = (application: ServerApplication) => {
+      // socket?.send.createServerApplication({ application: application });
+    };
 
     const handleOpenSuccessDialog = () => {
       ipcService.popup.open(popupType.DIALOG_SUCCESS);
@@ -98,8 +105,13 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
                   <div className={Popup['inputBox']}>
                     <textarea
                       rows={2}
-                      onChange={(e) => setDescription(e.target.value)}
-                      value={description}
+                      onChange={(e) =>
+                        setApplication((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      value={application.description}
                     />
                   </div>
                 </div>
@@ -109,14 +121,15 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
               <button
                 type="submit"
                 className={`${Popup['button']} ${
-                  !description.trim() ? Popup['disabled'] : ''
+                  !application.description.trim() ? Popup['disabled'] : ''
                 }`}
-                disabled={!description.trim()}
+                disabled={!application.description.trim()}
                 onClick={() => {
-                  // handleCreatMemberApplication({
-                  //   serverId: server?.id,
-                  //   description,
-                  // });
+                  handleCreatMemberApplication({
+                    ...application,
+                    serverId: serverId,
+                    userId: userId,
+                  });
                   handleOpenSuccessDialog();
                 }}
               >
@@ -125,9 +138,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
               <button
                 type="button"
                 className={Popup['button']}
-                onClick={() => {
-                  handleClose();
-                }}
+                onClick={() => handleClose()}
               >
                 {lang.tr.cancel}
               </button>
@@ -167,20 +178,10 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
               </div>
             </div>
             <div className={Popup['popupFooter']}>
-              <button
-                className={Popup['button']}
-                onClick={() => {
-                  setSection(0);
-                }}
-              >
+              <button className={Popup['button']} onClick={() => setSection(0)}>
                 {'修改'}
               </button>
-              <button
-                className={Popup['button']}
-                onClick={() => {
-                  handleClose();
-                }}
-              >
+              <button className={Popup['button']} onClick={() => handleClose()}>
                 {'確認'}
               </button>
             </div>

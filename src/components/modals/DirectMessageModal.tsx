@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable jsx-a11y/alt-text */
 import React from 'react';
 import { useSelector } from 'react-redux';
 
@@ -63,7 +60,8 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
 
     // Handlers
     const handleSendMessage = (directMessage: DirectMessage) => {
-      socket?.send.directMessage({ directMessage });
+      if (!socket) return;
+      socket.send.directMessage({ directMessage });
     };
 
     return (

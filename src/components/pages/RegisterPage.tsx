@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { ChangeEvent, FocusEvent, FormEvent, useState } from 'react';
+import React, { useState } from 'react';
 
 // CSS
 import styles from '@/styles/registerPage.module.css';
@@ -29,7 +28,7 @@ interface FormErrors {
   username?: string;
 }
 
-interface RegisterPageData {
+interface FormDatas {
   account: string;
   password: string;
   confirmPassword: string;
@@ -38,32 +37,26 @@ interface RegisterPageData {
 }
 
 interface RegisterPageProps {
-  onRegisterSuccess: () => void;
+  setSection: (section: 'login' | 'register') => void;
 }
 
 const RegisterPage: React.FC<RegisterPageProps> = React.memo(
-  ({ onRegisterSuccess }) => {
-    // Language
+  ({ setSection }) => {
+    // Hooks
     const lang = useLanguage();
 
-    // Form Control
-    const [formData, setFormData] = useState<RegisterPageData>({
+    // States
+    const [formData, setFormData] = useState<FormDatas>({
       account: '',
       password: '',
       confirmPassword: '',
       username: '',
       gender: 'Male',
     });
-
-    // Error Control
     const [errors, setErrors] = useState<FormErrors>({});
-
-    // Loading Control
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const handleInputChange = (
-      e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    ): void => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
       setFormData((prev) => ({
         ...prev,
@@ -71,9 +64,7 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
       }));
     };
 
-    const handleBlur = (
-      e: FocusEvent<HTMLInputElement | HTMLSelectElement>,
-    ): void => {
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
       if (name === 'account') {
         setErrors((prev) => ({
@@ -98,7 +89,7 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
       }
     };
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       setIsLoading(true);
       try {
@@ -106,7 +97,7 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
         if (errors.password) return;
         if (errors.confirmPassword) return;
         if (errors.username) return;
-        if (await authService.register(formData)) onRegisterSuccess();
+        if (await authService.register(formData)) setSection('login');
       } catch (error) {
         setErrors({
           general:
@@ -120,10 +111,15 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
     return (
       <div className={styles['loginWrapper']}>
         <div className={styles['loginContent']}>
-          <div className={styles['appLogo']}></div>
-          <form onSubmit={handleSubmit} className={styles['formWrapper']}>
+          <div className={styles['appLogo']} />
+          <div className={styles['formWrapper']}>
             {errors.general && (
               <div className={styles['errorBox']}>{errors.general}</div>
+            )}
+            {isLoading && (
+              <div className={styles['loadingIndicator']}>
+                {lang.tr.onLogin}
+              </div>
             )}
             <div className={styles['inputWrapper']}>
               <div className={styles['inputBox']}>
@@ -214,10 +210,10 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
                 <p className={styles['hint']}>{lang.tr.nicknameHint}</p>
               )}
             </div>
-            <button type="submit" className={styles['button']}>
+            <button className={styles['button']} onClick={handleSubmit}>
               {lang.tr.register}
             </button>
-          </form>
+          </div>
         </div>
       </div>
     );

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState } from 'react';
 
 // Types
@@ -22,10 +21,8 @@ interface AddChannelModalProps {
 
 const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
   (initialData: AddChannelModalProps) => {
-    // Socket
+    // Hooks
     const socket = useSocket();
-
-    // Language
     const lang = useLanguage();
 
     // Variables
@@ -39,10 +36,11 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     };
 
     const handleCreateChannel = (channel: Channel) => {
-      socket?.send.createChannel({ channel: channel });
+      if (!socket) return;
+      socket.send.createChannel({ channel: channel });
     };
 
-    // Form Control
+    // States
     const [channel, setChannel] = useState<Channel>({
       id: '',
       name: '',
@@ -103,7 +101,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
           >
             {lang.tr.confirm}
           </button>
-          <button className={popup['button']} onClick={handleClose}>
+          <button className={popup['button']} onClick={() => handleClose()}>
             {lang.tr.cancel}
           </button>
         </div>

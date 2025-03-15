@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useRef } from 'react';
 
@@ -8,22 +7,22 @@ import styles from '@/styles/badgeViewer.module.css';
 // Types
 import type { Badge } from '@/types';
 
-const getInitialColor = (badge: Badge) => {
-  const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-yellow-500',
-    'bg-red-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-  ];
-  const index =
-    Math.abs(
-      badge.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0),
-    ) % colors.length;
-  return colors[index];
-};
+// const getInitialColor = (badge: Badge) => {
+//   const colors = [
+//     'bg-blue-500',
+//     'bg-green-500',
+//     'bg-yellow-500',
+//     'bg-red-500',
+//     'bg-purple-500',
+//     'bg-pink-500',
+//     'bg-indigo-500',
+//   ];
+//   const index =
+//     Math.abs(
+//       badge.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0),
+//     ) % colors.length;
+//   return colors[index];
+// };
 
 const getDisplayText = (badge: Badge) => {
   const name = badge.name || badge.id;

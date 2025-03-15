@@ -54,104 +54,88 @@ interface WebRTCProviderProps {
 }
 
 const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
-  // RTC State
-  const peerStreams = useRef<{ [id: string]: MediaStream }>({});
-  const localStream = useRef<MediaStream | null>(null);
+  // States
   const [channelId, setChannelId] = useState<string | null>(null); // Not used
   const [isMute, setIsMute] = useState<boolean>(false);
+
+  // Refs
+  const localStream = useRef<MediaStream | null>(null);
+  const peerStreams = useRef<{ [id: string]: MediaStream }>({});
   const peerAudioRefs = useRef<{ [id: string]: HTMLAudioElement }>({});
   const peerConnections = useRef<{ [id: string]: RTCPeerConnection }>({});
 
-  // Socket
+  // Hooks
   const socket = useSocket();
 
   const handleChannelConnect = (channel: Channel) => {
     setChannelId(channel.id);
   };
+
   const handleChannelDisconnect = () => {
     setChannelId(null);
   };
+
   const handleRTCJoin = async (rtcConnection: string) => {
-    console.log('WebRTC: handle join:', rtcConnection);
-    try {
-      if (peerConnections.current[rtcConnection])
-        removePeerConnection(rtcConnection);
-      // Create peer connection
-      await createPeerConnection(rtcConnection);
-      // Create offer
-      const offer = await peerConnections.current[rtcConnection].createOffer();
-      await peerConnections.current[rtcConnection].setLocalDescription(offer);
-      // Send offer
-      handleSendRTCOffer(rtcConnection, offer);
-    } catch (error) {
-      console.error('WebRTC: handle join error:', error);
-    }
+    if (peerConnections.current[rtcConnection])
+      removePeerConnection(rtcConnection);
+    // Create peer connection
+    await createPeerConnection(rtcConnection);
+    // Create offer
+    const offer = await peerConnections.current[rtcConnection].createOffer();
+    await peerConnections.current[rtcConnection].setLocalDescription(offer);
+    // Send offer
+    handleSendRTCOffer(rtcConnection, offer);
   };
+
   const handleRTCLeave = async (rtcConnection: string) => {
-    console.log('WebRTC: handle leave:', rtcConnection);
-    try {
-      if (!peerConnections.current[rtcConnection]) return;
-      // Remove peer connection
-      await removePeerConnection(rtcConnection);
-    } catch (error) {
-      console.error('WebRTC: handle leave error:', error);
-    }
+    if (!peerConnections.current[rtcConnection]) return;
+    // Remove peer connection
+    await removePeerConnection(rtcConnection);
   };
+
   const handleRTCOffer = async ({ from, offer }: RTCOfferProps) => {
-    console.log('WebRTC: receive offer from', from);
-    try {
-      if (!peerConnections.current[from]) await createPeerConnection(from);
-      // Receive offer
-      const offerDes = new RTCSessionDescription({
-        type: offer.type,
-        sdp: offer.sdp,
-      });
-      await peerConnections.current[from].setRemoteDescription(offerDes);
-      // Create answer
-      const answer = await peerConnections.current[from].createAnswer();
-      await peerConnections.current[from].setLocalDescription(answer);
-      // Send answer
-      handleSendRTCAnswer(from, answer);
-    } catch (error) {
-      console.error('WebRTC: handle Offer error:', error);
-    }
+    if (!peerConnections.current[from]) await createPeerConnection(from);
+    // Receive offer
+    const offerDes = new RTCSessionDescription({
+      type: offer.type,
+      sdp: offer.sdp,
+    });
+    await peerConnections.current[from].setRemoteDescription(offerDes);
+    // Create answer
+    const answer = await peerConnections.current[from].createAnswer();
+    await peerConnections.current[from].setLocalDescription(answer);
+    // Send answer
+    handleSendRTCAnswer(from, answer);
   };
+
   const handleRTCAnswer = async ({ from, answer }: RTCAnswerProps) => {
-    console.log('WebRTC: receive answer from', from);
-    try {
-      if (!peerConnections.current[from]) return;
-      // Receive answer
-      const answerDes = new RTCSessionDescription({
-        type: answer.type,
-        sdp: answer.sdp,
-      });
-      await peerConnections.current[from].setRemoteDescription(answerDes);
-    } catch (error) {
-      console.error('WebRTC: handle Answer error:', error);
-    }
+    if (!peerConnections.current[from]) return;
+    // Receive answer
+    const answerDes = new RTCSessionDescription({
+      type: answer.type,
+      sdp: answer.sdp,
+    });
+    await peerConnections.current[from].setRemoteDescription(answerDes);
   };
+
   const handleRTCIceCandidate = async ({
     from,
     candidate,
   }: RTCIceCandidateProps) => {
-    console.log('WebRTC: receive ICE candidate from', from);
-    try {
-      if (!peerConnections.current[from]) return;
-      // Receive ICE candidate
-      const iceCandidate = new RTCIceCandidate({
-        candidate: candidate.candidate,
-        sdpMid: candidate.sdpMid,
-        sdpMLineIndex: candidate.sdpMLineIndex,
-        usernameFragment: candidate.usernameFragment,
-      });
-      await peerConnections.current[from].addIceCandidate(iceCandidate);
-    } catch (error) {
-      console.error('WebRTC: add ICE Candidate failed:', error);
-    }
+    if (!peerConnections.current[from]) return;
+    // Receive ICE candidate
+    const iceCandidate = new RTCIceCandidate({
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      usernameFragment: candidate.usernameFragment,
+    });
+    await peerConnections.current[from].addIceCandidate(iceCandidate);
   };
+
   const handleSendRTCOffer = (to: string, offer: RTCSessionDescriptionInit) => {
-    console.log('WebRTC: send offer to', to);
-    socket?.send.RTCOffer({
+    if (!socket) return;
+    socket.send.RTCOffer({
       to: to,
       offer: {
         type: offer.type,
@@ -159,12 +143,13 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       },
     });
   };
+
   const handleSendRTCAnswer = (
     to: string,
     answer: RTCSessionDescriptionInit,
   ) => {
-    console.log('WebRTC: send answer to', to);
-    socket?.send.RTCAnswer({
+    if (!socket) return;
+    socket.send.RTCAnswer({
       to: to,
       answer: {
         type: answer.type,
@@ -172,12 +157,13 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       },
     });
   };
+
   const handleSendRTCIceCandidate = (
     to: string,
     candidate: RTCIceCandidate,
   ) => {
-    console.log('WebRTC: send ICE candidate to', to);
-    socket?.send.RTCIceCandidate({
+    if (!socket) return;
+    socket.send.RTCIceCandidate({
       to: to,
       candidate: {
         candidate: candidate.candidate,
@@ -200,7 +186,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       [SocketServerEvent.RTC_ANSWER]: handleRTCAnswer,
       [SocketServerEvent.RTC_ICE_CANDIDATE]: handleRTCIceCandidate,
     };
-
     const unsubscribe: (() => void)[] = [];
 
     Object.entries(eventHandlers).map(([event, handler]) => {
@@ -287,18 +272,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     peerConnections.current[rtcConnection].close();
     delete peerConnections.current[rtcConnection];
     delete peerAudioRefs.current[rtcConnection];
-  };
-
-  // Not used
-  const joinVoiceChannel = (channelId: string) => {
-    socket?.send.connectChannel({ channelId });
-  };
-
-  // Not used
-  const leaveVoiceChannel = () => {
-    if (channelId) {
-      socket?.send.disconnectChannel({ channelId });
-    }
   };
 
   const toggleMute = () => {

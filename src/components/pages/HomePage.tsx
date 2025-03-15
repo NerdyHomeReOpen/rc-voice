@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -10,7 +9,7 @@ import homePage from '@/styles/homePage.module.css';
 import ServerListViewer from '@/components/viewers/ServerListViewer';
 
 // Type
-import { popupType, type Server, type User } from '@/types';
+import { popupType, Server, SocketServerEvent, User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -23,11 +22,9 @@ const HomePageComponent: React.FC = React.memo(() => {
   // Redux
   const user = useSelector((state: { user: User }) => state.user);
 
-  // Socket
-  const socket = useSocket();
-
-  // Language
+  // Hooks
   const lang = useLanguage();
+  const socket = useSocket();
 
   // Variables
   const userName = user.name;
@@ -35,11 +32,45 @@ const HomePageComponent: React.FC = React.memo(() => {
   const userRecentServers = user.recentServers || [];
   const userFavServers = user.favServers || [];
 
-  // Search Results Control
+  // States
   const [searchResults, setSearchResults] = useState<Server[]>([]);
 
-  // Update Discord Presence
+  // Handlers
+  const handleSearchServer = (query: string) => {
+    if (!socket) return;
+    socket.send.searchServer({ query });
+  };
+
+  const handleServerSearch = (servers: Server[]) => {
+    setSearchResults(servers);
+  };
+
+  const handleOpenCreateServerPopup = () => {
+    ipcService.popup.open(popupType.CREATE_SERVER);
+    ipcService.initialData.onRequest(popupType.CREATE_SERVER, { user: user });
+  };
+
+  // Effects
   useEffect(() => {
+    if (!socket) return;
+
+    const eventHandlers = {
+      [SocketServerEvent.SERVER_SEARCH]: handleServerSearch,
+    };
+    const unsubscribe: (() => void)[] = [];
+
+    Object.entries(eventHandlers).map(([event, handler]) => {
+      const unsub = socket.on[event as SocketServerEvent](handler);
+      unsubscribe.push(unsub);
+    });
+
+    return () => {
+      unsubscribe.forEach((unsub) => unsub());
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!lang) return;
     ipcService.discord.updatePresence({
       details: lang.tr.RPCHomePage,
       state: `${lang.tr.RPCUser} ${userName}`,
@@ -55,25 +86,12 @@ const HomePageComponent: React.FC = React.memo(() => {
         },
       ],
     });
-  }, [userName]);
+  }, [lang, userName]);
 
-  // Refresh User
   useEffect(() => {
-    socket?.send.refreshUser(null);
-  }, []);
-
-  // Handlers
-  const handleSearch = (query: string) => {
-    socket?.send.searchServer({ query });
-    socket?.on.serverSearch((results: Server[]) => {
-      setSearchResults(results);
-    });
-  };
-
-  const handleOpenCreateServerPopup = () => {
-    ipcService.popup.open(popupType.CREATE_SERVER);
-    ipcService.initialData.onRequest(popupType.CREATE_SERVER, { user: user });
-  };
+    if (!socket) return;
+    socket.send.refreshUser(null);
+  }, [socket]);
 
   return (
     <div className={homePage['homeWrapper']}>
@@ -91,7 +109,7 @@ const HomePageComponent: React.FC = React.memo(() => {
               onKeyDown={(e) => {
                 if (e.key != 'Enter') return;
                 if (e.currentTarget.value.trim() === '') return;
-                handleSearch(e.currentTarget.value);
+                handleSearchServer(e.currentTarget.value);
               }}
             />
             <div className={homePage['searchIcon']} />
@@ -118,7 +136,7 @@ const HomePageComponent: React.FC = React.memo(() => {
           <button
             className={homePage['navegateItem']}
             data-key="30014"
-            onClick={handleOpenCreateServerPopup}
+            onClick={() => handleOpenCreateServerPopup()}
           >
             <div></div>
             {lang.tr.createGroup}

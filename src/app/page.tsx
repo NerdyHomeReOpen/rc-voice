@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -39,8 +37,8 @@ import { clearUser, setUser } from '@/redux/userSlice';
 import { clearChannel, setChannel } from '@/redux/channelSlice';
 
 interface HeaderProps {
-  selectedId?: number;
-  setSelectedTabId?: (tabId: number) => void;
+  selectedId: number;
+  setSelectedTabId: (tabId: number) => void;
 }
 
 const Header: React.FC<HeaderProps> = React.memo(
@@ -91,7 +89,7 @@ const Header: React.FC<HeaderProps> = React.memo(
         });
       }
       return tabs;
-    }, [user, server, lang]);
+    }, [server, lang]);
 
     // Status Dropdown Control
     const STATUS_OPTIONS = [
@@ -110,11 +108,13 @@ const Header: React.FC<HeaderProps> = React.memo(
     };
 
     const handleLeaveServer = (serverId: string) => {
-      socket?.send.disconnectServer({ serverId: serverId });
+      if (!socket) return;
+      socket.send.disconnectServer({ serverId: serverId });
     };
 
     const handleUpdateStatus = (status: User['status']) => {
-      socket?.send.updateUser({ user: { status } });
+      if (!socket) return;
+      socket.send.updateUser({ user: { status } });
     };
 
     const handleCreateError = (error: StandardizedError) => {
@@ -122,9 +122,8 @@ const Header: React.FC<HeaderProps> = React.memo(
     };
 
     const handleFullscreen = () => {
-      isFullscreen
-        ? ipcService.window.unmaximize()
-        : ipcService.window.maximize();
+      if (isFullscreen) ipcService.window.unmaximize();
+      else ipcService.window.maximize();
       setIsFullscreen(!isFullscreen);
     };
 
@@ -153,7 +152,9 @@ const Header: React.FC<HeaderProps> = React.memo(
           <div className={header['nameDisplay']}>{userName}</div>
           <div
             className={header['statusBox']}
-            onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+            onClick={() => {
+              setShowStatusDropdown(!showStatusDropdown);
+            }}
           >
             <div className={header['statusDisplay']} datatype={userStatus} />
             <div className={header['statusTriangle']} />
@@ -189,7 +190,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                   TabId === selectedId ? header['selected'] : ''
                 }`}
                 onClick={() => {
-                  setSelectedTabId?.(TabId);
+                  setSelectedTabId(TabId);
                   Tab.onClick();
                 }}
               >
@@ -326,13 +327,16 @@ const Header: React.FC<HeaderProps> = React.memo(
               </div>
             </div>
           </div>
-          <div className={header['minimize']} onClick={handleMinimize} />
+          <div
+            className={header['minimize']}
+            onClick={() => handleMinimize()}
+          />
           <div
             className={isFullscreen ? header['restore'] : header['maxsize']}
-            onClick={handleFullscreen}
+            onClick={() => handleFullscreen()}
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           />
-          <div className={header['close']} onClick={handleClose} />
+          <div className={header['close']} onClick={() => handleClose()} />
         </div>
       </div>
     );
@@ -342,9 +346,14 @@ const Header: React.FC<HeaderProps> = React.memo(
 Header.displayName = 'Header';
 
 const Home = () => {
-  // Socket
+  // Hooks
   const socket = useSocket();
+  const lang = useLanguage();
 
+  // States
+  const [selectedTabId, setSelectedTabId] = useState<number>(1);
+
+  // Effects
   useEffect(() => {
     if (!socket) return;
 
@@ -362,7 +371,6 @@ const Home = () => {
       [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
       [SocketServerEvent.ERROR]: handleError,
     };
-
     const unsubscribe: (() => void)[] = [];
 
     Object.entries(eventHandlers).map(([event, handler]) => {
@@ -376,16 +384,10 @@ const Home = () => {
   }, [socket]);
 
   useEffect(() => {
-    const lang = localStorage.getItem('language');
-    if (lang) {
-      // Apply the language setting to your application
-      // This could involve loading language-specific resources, etc.
-      console.log(`Language set to: ${lang}`);
-    }
-  }, []);
-
-  // Tab Control
-  const [selectedTabId, setSelectedTabId] = useState<number>(1);
+    if (!lang) return;
+    const language = localStorage.getItem('language');
+    if (language) lang.set(language as LanguageKey);
+  }, [lang]);
 
   // Handlers
   const handleConnect = () => {
@@ -400,7 +402,7 @@ const Home = () => {
     new errorHandler(error).show();
   };
 
-  const handleUserConnect = (user: any) => {
+  const handleUserConnect = (user: User) => {
     console.log('User connected: ', user);
     store.dispatch(setUser(user));
     setSelectedTabId(1);
