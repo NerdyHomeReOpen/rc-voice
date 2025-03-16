@@ -15,8 +15,8 @@ import addChannel from '@/styles/popups/addChannel.module.css';
 import { ipcService } from '@/services/ipc.service';
 
 interface AddChannelModalProps {
-  serverId: string | null;
   parent: Channel | null;
+  serverId: string | null;
 }
 
 const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
@@ -26,8 +26,26 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     const lang = useLanguage();
 
     // Variables
-    const parentName = initialData.parent?.name || lang.tr.none;
     const isRoot = !!initialData.parent;
+    const parent = initialData.parent || {
+      id: '',
+      name: '無',
+      isRoot: false,
+      isCategory: false,
+      isLobby: false,
+      voiceMode: 'free',
+      chatMode: 'free',
+      order: 0,
+      serverId: '',
+      settings: {
+        bitrate: 0,
+        slowmode: false,
+        userLimit: -1,
+        visibility: 'public',
+      },
+      createdAt: 0,
+    };
+    const parentName = parent.name;
     const serverId = initialData.serverId || '';
 
     // Handlers
@@ -67,7 +85,12 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
             <div className={addChannel['inputGroup']}>
               <div className={popup['inputBox']}>
                 <div className={popup['label']}>{lang.tr.parentChannel}</div>
-                <input className={popup['input']} disabled value={parentName} />
+                <input
+                  className={popup['input']}
+                  type="text"
+                  value={parentName}
+                  disabled
+                />
               </div>
               <div className={popup['inputBox']}>
                 <div className={popup['label']}>{lang.tr.channelName}</div>

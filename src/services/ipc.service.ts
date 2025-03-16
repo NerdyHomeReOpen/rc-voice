@@ -144,7 +144,7 @@ export const ipcService = {
         [popupType.EDIT_SERVER]: { height: 450, width: 600 },
         [popupType.DELETE_SERVER]: { height: 300, width: 200 },
         [popupType.CREATE_CHANNEL]: { height: 220, width: 320 },
-        [popupType.EDIT_CHANNEL]: { height: 300, width: 200 },
+        [popupType.EDIT_CHANNEL]: { height: 220, width: 320 },
         [popupType.DELETE_CHANNEL]: { height: 300, width: 200 },
         [popupType.APPLY_FRIEND]: { height: 420, width: 540 },
         [popupType.APPLY_MEMBER]: { height: 420, width: 540 },

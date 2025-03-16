@@ -215,6 +215,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                     <div className={popup['label']}>{lang.tr.groupType}</div>
                     <input
                       className={popup['input']}
+                      type="text"
                       disabled
                       value={server.type}
                     />

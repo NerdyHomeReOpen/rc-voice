@@ -13,7 +13,7 @@ import { popupType } from '@/types';
 import CreateServerModal from '@/components/modals/CreateServerModal';
 import EditServerModal from '@/components/modals/EditServerModal';
 import AddChannelModal from '@/components/modals/AddChannelModal';
-// import EditChannelModal from '@/components/modals/EditChannelModal';
+import EditChannelModal from '@/components/modals/EditChannelModal';
 import ServerApplication from '@/components/modals/ServerApplicationModal';
 import ApplyFriend from '@/components/modals/ApplyFriend';
 import Dialog from '@/components/modals/Dialog';
@@ -112,9 +112,7 @@ const Modal = React.memo(() => {
           setContent(<EditServerModal {...initialData} />);
           break;
         case popupType.DELETE_SERVER:
-          setHeader(
-            <Header title={lang.tr.deleteServer} buttons={['close']} />,
-          );
+          // This doesn't exist lol
           break;
         case popupType.CREATE_CHANNEL:
           setHeader(
@@ -124,11 +122,10 @@ const Modal = React.memo(() => {
           break;
         case popupType.EDIT_CHANNEL:
           setHeader(<Header title={lang.tr.editChannel} buttons={['close']} />);
-          // setContent(<EditChannelModal onClose={() => {}} channel={} />);
+          setContent(<EditChannelModal {...initialData} />);
           break;
         case popupType.DELETE_CHANNEL:
-          // setHeader(<Header title={lang.tr.deleteChannel} buttons={['close']} />);
-          // setContent(<DeleteChannelModal onClose={() => {}} channel={} />);
+          // This doesn't exist lol
           break;
         case popupType.APPLY_MEMBER:
           setHeader(<Header title={lang.tr.applyMember} buttons={['close']} />);

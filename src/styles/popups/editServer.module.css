@@ -1,64 +1,130 @@
-.serverSettingContent {
+.body {
+  height: 100%;
+  width: 100%;
+  padding: 15px;
   display: flex;
+  flex-direction: column;
 }
 
-.serverSettingLeft {
-  height: auto;
+.left {
+  display: flex;
+  height: 100%;
   width: 100%;
+  max-width: 145px;
+  min-height: 0;
   background: url(../../../public/setting_left_bg.png) no-repeat center center;
   background-size: cover;
   border-right: 1px solid #b4dbec;
-  max-width: 145px;
 }
 
-.serverSettingTabsBox {
+.tabs {
   height: 100%;
   width: 145px;
   display: flex;
   flex-direction: column;
 }
-
-.serverSettingTab {
-  height: auto;
-  min-height: 28px;
+.tabs .item {
   width: 100%;
-  text-align: center;
+  min-height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   cursor: pointer;
   border-top: 1px solid #ffffff00;
   border-bottom: 1px solid #ffffff00;
   border-right: 1px solid #ffffff00;
   font-size: 13px;
 }
-
-.serverSettingTab:first-child {
+.tabs .item:first-child {
   margin-top: 15px;
 }
-.serverSettingTab.active {
+.tabs .item.active {
   border-top: 1px solid #b4dbec;
   border-bottom: 1px solid #b4dbec;
   border-right: 1px solid #ffffff00;
   background-color: #f7f7f7;
 }
 
-.serverSettingRight {
+.right {
   height: 100%;
   width: 100%;
 }
 
-.server-setting-page {
-  height: 100%;
-  width: auto;
-  padding: 10px;
-  min-height: 350px;
+.inputGroup {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+.inputGroup.col {
+  flex-direction: column;
+}
+.inputGroup.row {
+  flex-direction: row;
 }
 
-.serverSettingPageBox {
-  font-size: 13px;
+.search {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-width: 1px;
+  border-radius: 0.375rem;
+  padding-left: 20px;
 }
 
+.hintText {
+  color: #777;
+  text-align: right;
+}
+
+/* Basic Info Section */
+
+.avatarWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+  width: 100%;
+}
+.avatarPicture {
+  position: relative;
+  cursor: pointer;
+  object-fit: cover;
+  min-width: 100px;
+  min-height: 100px;
+  background-image: url(../../../public/logo_server_def.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+}
+.avatarPicture::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  z-index: 99;
+  min-width: 102px;
+  min-height: 102px;
+  background: url(../../../public/channel/server_logo_border.png) no-repeat
+    center center;
+  background-size: cover;
+  background-position: 0 0;
+}
+
+.wealthCoinIcon::after {
+  height: 16px;
+  width: 16px;
+  background: url(../../../public/golden_pea.png);
+  background-size: cover;
+  margin-left: 3px;
+}
+
+/* Announcement Section */
+
+/* Member Manage Section */
+
+/* 
 .serverSettingItemWrapper {
   display: flex;
 }
@@ -195,15 +261,7 @@
 .serverSettingRichCoinTitle {
   display: flex;
   align-items: center;
-}
-
-.serverSettingRichCoin {
-  height: 16px;
-  width: 16px;
-  background: url(../../../public/golden_pea.png);
-  background-size: cover;
-  margin-left: 3px;
-}
+} */
 
 .server-setting-about .serverSettingInput {
   height: 40px;
