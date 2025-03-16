@@ -254,9 +254,7 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
               <div
                 className={styles['button']}
                 datatype="addFriend"
-                onClick={() => {
-                  handleOpenApplyFriendPopup();
-                }}
+                onClick={() => handleOpenApplyFriendPopup()}
               >
                 {lang.tr.addFriend}
               </div>

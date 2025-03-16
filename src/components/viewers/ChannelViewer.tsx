@@ -475,7 +475,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
           </div>
         </>
       )}
-
       {/* Saperator */}
       <div className={styles['saperator-2']} />
       {/* All Channels */}

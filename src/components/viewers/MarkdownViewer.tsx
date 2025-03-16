@@ -2,7 +2,7 @@
 /* eslint-disable react/display-name */
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import type { Components } from 'react-markdown';
+import { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import DOMPurify from 'dompurify';
@@ -14,10 +14,6 @@ interface PurifyConfig {
   ALLOWED_TAGS: string[];
   ALLOWED_ATTR: string[];
   ALLOWED_URI_REGEXP: RegExp;
-}
-
-interface MarkdownProps {
-  markdownText: string;
 }
 
 const PURIFY_CONFIG: PurifyConfig = {
@@ -49,20 +45,22 @@ const PURIFY_CONFIG: PurifyConfig = {
   ALLOWED_URI_REGEXP: /^\/smiles\//,
 };
 
+interface MarkdownProps {
+  markdownText: string;
+}
+
 const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
   const safeMarkdownText = typeof markdownText === 'string' ? markdownText : '';
-
-  const processEmojis = (text: string): string => {
-    return text.replace(/\[emoji_(\d+)\]/g, (match: string, id: string) => {
+  const withEmojis = safeMarkdownText.replace(
+    /\[emoji_(\d+)\]/g,
+    (match: string, id: string) => {
       const emojiId = parseInt(id);
       if (!emojis.find((emoji) => emoji.id === emojiId)) return match;
       return `<img src="/smiles/${
         emojiId + 1
       }.gif" alt="[emoji_${id}]" class="inline-block w-5 h-5 align-text-bottom" />`;
-    });
-  };
-
-  const withEmojis = processEmojis(safeMarkdownText);
+    },
+  );
   const sanitized = DOMPurify.sanitize(withEmojis, PURIFY_CONFIG);
   const components: Components = {
     h1: ({ node, ...props }) => (
@@ -135,12 +133,11 @@ const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
 });
 
 interface MarkdownViewerProps {
-  markdownText: string | null;
+  markdownText: string;
 }
 
 const MarkdownViewer: React.FC<MarkdownViewerProps> = React.memo(
   ({ markdownText }) => {
-    if (!markdownText) return null;
     return (
       <div className="flex-1 overflow-x-hidden">
         <div className="max-w-full overflow-x-auto">

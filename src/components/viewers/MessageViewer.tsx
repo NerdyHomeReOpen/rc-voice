@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useLayoutEffect, useRef } from 'react';
 
 // CSS
@@ -10,7 +9,7 @@ import permission from '@/styles/common/permission.module.css';
 import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 
 // Types
-import type { DirectMessage, Message, User } from '@/types';
+import type { DirectMessage, Message } from '@/types';
 
 // Util
 import { formatTimestamp } from '@/utils/formatters';
@@ -18,59 +17,124 @@ import { formatTimestamp } from '@/utils/formatters';
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
 
+interface MessageTabProps {
+  messageGroup: MessageGroup;
+}
+
+const MessageTab: React.FC<MessageTabProps> = React.memo(({ messageGroup }) => {
+  // Hooks
+  const lang = useLanguage();
+
+  // Variables
+  const senderGender = messageGroup.gender;
+  const senderName = messageGroup.name;
+  const messagePermission = messageGroup.permissionLevel;
+  const messageContents = messageGroup.contents;
+  const messageTimestamp = formatTimestamp(
+    messageGroup.timestamp,
+    lang.key,
+    lang.tr,
+  );
+
+  return (
+    <>
+      <div
+        className={`${styles['senderIcon']} ${permission[senderGender]} ${
+          permission[`lv-${messagePermission}`]
+        }`}
+      />
+      <div className={styles['messageBox']}>
+        <div className={styles['header']}>
+          <span className={styles['name']}>{senderName}</span>
+          <span className={styles['timestamp']}>{messageTimestamp}</span>
+        </div>
+        {messageContents.map((content, index) => (
+          <div key={index} className={styles['content']}>
+            <MarkdownViewer markdownText={content} />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+});
+
+MessageTab.displayName = 'MessageTab';
+
+interface InfoTabProps {
+  messageGroup: MessageGroup;
+}
+
+const InfoTab: React.FC<InfoTabProps> = React.memo(({ messageGroup }) => {
+  // Variables
+  const messageContents = messageGroup.contents;
+
+  return (
+    <>
+      <img
+        src={'/channel/NT_NOTIFY.png'}
+        alt={'NT_NOTIFY'}
+        className="select-none flex-shrink-0 mt-1"
+      />
+      <div className="flex-1 min-w-0">
+        <div className="text-gray-700">
+          {messageContents.map((content, index) => (
+            <div key={index} className="break-words">
+              <MarkdownViewer markdownText={content} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+});
+
+InfoTab.displayName = 'InfoTab';
+
 interface MessageGroup {
   id: string;
   type: 'general' | 'info';
   contents: string[];
+  gender: string;
+  name: string;
   permissionLevel: number | null;
   senderId: string;
   timestamp: number;
-  sender?: User | null;
 }
 
-const getGroupMessages = (
-  messages: Message[] | DirectMessage[],
-): MessageGroup[] => {
-  const sorted = [...messages].sort(
-    (a, b) => Number(a.timestamp) - Number(b.timestamp),
-  );
-  const grouped = sorted.reduce<MessageGroup[]>((acc, message) => {
-    const lastGroup = acc[acc.length - 1];
-    const currentTime = Number(message.timestamp);
-    const lastTime = lastGroup ? Number(lastGroup.timestamp) : 0;
-    const timeDiff = currentTime - lastTime;
-    const nearTime = lastGroup && timeDiff <= 5 * 60 * 1000;
-    const sameSender = lastGroup && message.senderId === lastGroup.senderId;
-    const isInfoMsg = message.type == 'info';
-
-    if (sameSender && nearTime && !isInfoMsg) {
-      lastGroup.contents.push(message.content);
-    } else {
-      acc.push({
-        ...message,
-        contents: [message.content],
-        permissionLevel:
-          'permissionLevel' in message ? message.permissionLevel : null,
-      });
-    }
-    return acc;
-  }, []);
-  return grouped;
-};
-
 interface MessageViewerProps {
-  messages: Message[] | DirectMessage[] | null;
+  messages: Message[] | DirectMessage[];
 }
 
 const MessageViewer: React.FC<MessageViewerProps> = React.memo(
   ({ messages }) => {
-    if (!messages) return null;
-
-    // Hooks
-    const lang = useLanguage();
-
     // Variables
-    const messageGroups = getGroupMessages(messages);
+    const sortedMessages = [...messages].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
+    const messageGroups = sortedMessages.reduce<MessageGroup[]>(
+      (acc, message) => {
+        const lastGroup = acc[acc.length - 1];
+        const timeDiff = lastGroup && message.timestamp - lastGroup.timestamp;
+        const nearTime = lastGroup && timeDiff <= 5 * 60 * 1000;
+        const sameSender = lastGroup && message.senderId === lastGroup.senderId;
+        const isInfoMsg = message.type == 'info';
+
+        if (sameSender && nearTime && !isInfoMsg) {
+          lastGroup.contents.push(message.content);
+        } else {
+          acc.push({
+            ...message,
+            contents: [message.content],
+            permissionLevel:
+              'permissionLevel' in message ? message.permissionLevel : null,
+            gender: message.sender?.gender || 'Male',
+            name: message.sender?.name || 'Unknown',
+          });
+        }
+        return acc;
+      },
+      [],
+    );
 
     // Refs
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -86,55 +150,12 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
     return (
       <div className={styles['messageViewerWrapper']}>
         {messageGroups.map((messageGroup) => {
-          const senderGender = messageGroup.sender?.gender ?? 'Male';
-          const senderName = messageGroup.sender?.name ?? 'Unknown';
-          const messagePermission = messageGroup.permissionLevel ?? 0;
-          const messageTimestamp = formatTimestamp(
-            messageGroup.timestamp,
-            lang.key,
-            lang.tr,
-          );
-
           return (
             <div key={messageGroup.id} className={styles['messageWrapper']}>
               {messageGroup.type === 'info' ? (
-                <>
-                  <img
-                    src={'/channel/NT_NOTIFY.png'}
-                    alt={'NT_NOTIFY'}
-                    className="select-none flex-shrink-0 mt-1"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-gray-700">
-                      {messageGroup.contents.map((content, index) => (
-                        <div key={index} className="break-words">
-                          <MarkdownViewer markdownText={content} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
+                <InfoTab messageGroup={messageGroup} />
               ) : (
-                <>
-                  <div
-                    className={`${styles['senderIcon']} ${
-                      permission[senderGender]
-                    } ${permission[`lv-${messagePermission}`]}`}
-                  />
-                  <div className={styles['messageBox']}>
-                    <div className={styles['header']}>
-                      <span className={styles['name']}>{senderName}</span>
-                      <span className={styles['timestamp']}>
-                        {messageTimestamp}
-                      </span>
-                    </div>
-                    {messageGroup.contents.map((content, index) => (
-                      <div key={index} className={styles['content']}>
-                        <MarkdownViewer markdownText={content} />
-                      </div>
-                    ))}
-                  </div>
-                </>
+                <MessageTab messageGroup={messageGroup} />
               )}
             </div>
           );

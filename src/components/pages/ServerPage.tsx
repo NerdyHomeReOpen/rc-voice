@@ -82,16 +82,16 @@ const ServerPageComponent: React.FC = React.memo(() => {
     });
   };
 
-  const startResizing = useCallback((e: React.MouseEvent) => {
+  const handleStartResizing = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
   }, []);
 
-  const stopResizing = useCallback(() => {
+  const handleStopResizing = useCallback(() => {
     setIsResizing(false);
   }, []);
 
-  const resize = useCallback(
+  const handleResize = useCallback(
     (e: MouseEvent) => {
       if (!isResizing) return;
       const maxWidth = window.innerWidth * 0.3;
@@ -103,13 +103,13 @@ const ServerPageComponent: React.FC = React.memo(() => {
 
   // Effects
   useEffect(() => {
-    window.addEventListener('mousemove', resize);
-    window.addEventListener('mouseup', stopResizing);
+    window.addEventListener('mousemove', handleResize);
+    window.addEventListener('mouseup', handleStopResizing);
     return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
+      window.removeEventListener('mousemove', handleResize);
+      window.removeEventListener('mouseup', handleStopResizing);
     };
-  }, [resize, stopResizing]);
+  }, [handleResize, handleStopResizing]);
 
   useEffect(() => {
     ipcService.discord.updatePresence({
@@ -181,8 +181,8 @@ const ServerPageComponent: React.FC = React.memo(() => {
         {/* Resize Handle */}
         <div
           className="resizeHandle"
-          onMouseDown={startResizing}
-          onMouseUp={stopResizing}
+          onMouseDown={handleStartResizing}
+          onMouseUp={handleStopResizing}
         />
         {/* Right Content */}
         <div className={styles['mainContent']}>

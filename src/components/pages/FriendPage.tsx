@@ -51,16 +51,16 @@ const FriendPageComponent: React.FC = React.memo(() => {
     socket.send.updateUser({ user: { signature } });
   };
 
-  const startResizing = useCallback((e: React.MouseEvent) => {
+  const handleStartResizing = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
   }, []);
 
-  const stopResizing = useCallback(() => {
+  const handleStopResizing = useCallback(() => {
     setIsResizing(false);
   }, []);
 
-  const resize = useCallback(
+  const handleResize = useCallback(
     (e: MouseEvent) => {
       if (!isResizing) return;
       const maxWidth = window.innerWidth * 0.3;
@@ -96,13 +96,13 @@ const FriendPageComponent: React.FC = React.memo(() => {
   }, [socket]);
 
   useEffect(() => {
-    window.addEventListener('mousemove', resize);
-    window.addEventListener('mouseup', stopResizing);
+    window.addEventListener('mousemove', handleResize);
+    window.addEventListener('mouseup', handleStopResizing);
     return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
+      window.removeEventListener('mousemove', handleResize);
+      window.removeEventListener('mouseup', handleStopResizing);
     };
-  }, [resize, stopResizing]);
+  }, [handleResize, handleStopResizing]);
 
   return (
     <div className={friendPage['friendWrapper']}>
@@ -172,8 +172,8 @@ const FriendPageComponent: React.FC = React.memo(() => {
         {/* Resize Handle */}
         <div
           className="resizeHandle"
-          onMouseDown={startResizing}
-          onMouseUp={stopResizing}
+          onMouseDown={handleStartResizing}
+          onMouseUp={handleStopResizing}
         />
         {/* Right Content */}
         <div className={friendPage['mainContent']}>
