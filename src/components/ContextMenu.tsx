@@ -6,11 +6,11 @@ import { ContextMenuItem } from '@/types';
 interface ContextMenuProps {
   x: number;
   y: number;
-  onClose: () => void;
   items: ContextMenuItem[];
+  onClose: () => void;
 }
 
-const ContextMenu = ({ x, y, onClose, items }: ContextMenuProps) => {
+const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
   return (
     <div
       className="fixed bg-white shadow-lg rounded border z-50"

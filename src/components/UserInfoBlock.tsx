@@ -20,10 +20,10 @@ import { getPermissionText } from '@/utils/formatters';
 import { useLanguage } from '@/providers/LanguageProvider';
 
 interface UserInfoBlockProps {
-  user: User;
-  server: Server;
   x: number;
   y: number;
+  user: User;
+  server: Server;
 }
 
 const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
