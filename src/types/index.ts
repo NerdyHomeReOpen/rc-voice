@@ -1115,7 +1115,9 @@ export interface User {
   lastActiveAt: number;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  members?: Member[];
+  members?: {
+    [serverId: string]: Member;
+  };
   badges?: Badge[];
   friends?: Friend[];
   friendGroups?: FriendGroup[];

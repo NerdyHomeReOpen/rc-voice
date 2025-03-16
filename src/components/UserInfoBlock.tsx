@@ -20,31 +20,32 @@ import { getPermissionText } from '@/utils/formatters';
 import { useLanguage } from '@/providers/LanguageProvider';
 
 interface UserInfoBlockProps {
-  user: User | null;
-  server: Server | null;
+  user: User;
+  server: Server;
   x: number;
   y: number;
-  onClose: () => void;
 }
 
 const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
-  ({ onClose, x, y, user, server }) => {
+  ({ x, y, user, server }) => {
     // Language
     const lang = useLanguage();
 
-    if (!user) return null;
-
-    const userGender = user.gender;
-    const userMember = server?.members?.[user.id];
-    const userPermission = userMember?.permissionLevel ?? 1;
-    const userContributions = userMember?.contribution ?? 0;
-    const userLevel = Math.min(56, Math.ceil(user.level / 5));
-    const userXp = user.xp ?? 0;
-    const userXpProgress = user.progress ?? 0;
-    const userRequiredXp = user.requiredXp ?? 0;
-    const userBadges = user.badges ?? [];
     const userName = user.name;
-    const userAvatar = user.avatarUrl ?? '/pfp/default.png';
+    const userAvatar = user.avatarUrl;
+    const userGender = user.gender;
+    const userLevel = user.level;
+    const userGrade = Math.min(56, Math.ceil(userLevel / 5));
+    const userXp = user.xp;
+    const userXpProgress = user.progress;
+    const userRequiredXp = user.requiredXp;
+    const userBadges = user.badges || [];
+    const userMember = user.members?.[server.id] || {
+      permissionLevel: 1,
+      contribution: 0,
+    };
+    const userPermission = userMember.permissionLevel;
+    const userContributions = userMember.contribution;
 
     return (
       <div
@@ -59,7 +60,7 @@ const UserInfoBlock: React.FC<UserInfoBlockProps> = React.memo(
             <div className={UserInfoCard['userInfoUsername']}>{userName}</div>
             <div
               className={`${styles['userGrade']} ${UserInfoCard['userGrade']} ${
-                Grade[`lv-${userLevel}`]
+                Grade[`lv-${userGrade}`]
               }`}
             ></div>
             <div className={`${Vip['vipIconBig']} ${Vip['vip-big-5']}`}></div>
