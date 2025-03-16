@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 // Components
-import Modal from '@/components/Modal';
+// import Modal from '@/components/Modal';
 
 // Types
-import type { User, ModalTabItem } from '@/types';
+import type { User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -174,40 +174,39 @@ const UserSettingModal: React.FC<UserSettingModalProps> = ({ onClose }) => {
     }
   };
 
-  return (
-    <Modal
-      title="個人資料設定"
-      onClose={onClose}
-      onSubmit={handleSubmit}
-      tabs={[
-        {
-          id: '基本資料',
-          label: '基本資料',
-          onClick: () => setActiveTabIndex(0),
-        },
-      ]}
-      buttons={[
-        {
-          label: '取消',
-          style: 'secondary',
-          onClick: onClose,
-        },
-        {
-          label: '確定',
-          style: 'primary',
-          type: 'submit',
-          onClick: () => {},
-        },
-      ]}
-    >
-      {error && (
-        <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
-          {error}
-        </div>
-      )}
-      {renderContent()}
-    </Modal>
-  );
+  return null;
+  // <Modal
+  //   title="個人資料設定"
+  //   onClose={onClose}
+  //   onSubmit={handleSubmit}
+  //   tabs={[
+  //     {
+  //       id: '基本資料',
+  //       label: '基本資料',
+  //       onClick: () => setActiveTabIndex(0),
+  //     },
+  //   ]}
+  //   buttons={[
+  //     {
+  //       label: '取消',
+  //       style: 'secondary',
+  //       onClick: onClose,
+  //     },
+  //     {
+  //       label: '確定',
+  //       style: 'primary',
+  //       type: 'submit',
+  //       onClick: () => {},
+  //     },
+  //   ]}
+  // >
+  //   {error && (
+  //     <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+  //       {error}
+  //     </div>
+  //   )}
+  //   {renderContent()}
+  // </Modal>
 };
 
 UserSettingModal.displayName = 'UserSettingModal';

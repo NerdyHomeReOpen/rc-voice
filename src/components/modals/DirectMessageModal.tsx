@@ -3,7 +3,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 // Components
-import Modal from '@/components/Modal';
+// import Modal from '@/components/Modal';
 
 // Types
 import { User, Friend, DirectMessage } from '@/types';
@@ -64,42 +64,41 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
       socket.send.directMessage({ directMessage });
     };
 
-    return (
-      <Modal title={friendName} onClose={onClose} width="600px" height="600px">
-        <div className="flex h-full">
-          {/* Side Menu */}
-          <div className="flex flex-col p-4 w-40 bg-blue-50 text-sm">
-            {/* <img src={friendAvatar} className="w-24 h-24" /> */}
-            <div className="flex items-center gap-2">
-              <div className="">{`${lang.tr.level}: ${friendLevel}`}</div>
-              {/* <img src={friendGradeUrl} className="select-none" /> */}
-            </div>
-          </div>
-          {/* Main Content */}
-          <div className="flex flex-col flex-1 overflow-y-auto">
-            {/* Messages Area */}
-            <div className="flex flex-[5] p-3">
-              <MessageViewer messages={friendDirectMessages} />
-            </div>
-            {/* Input Area */}
-            <div className="flex flex-[1] p-3">
-              <MessageInputBox
-                onSendMessage={(msg) => {
-                  handleSendMessage({
-                    id: '',
-                    type: 'general',
-                    content: msg,
-                    senderId: userId,
-                    friendId: friendId,
-                    timestamp: 0,
-                  });
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </Modal>
-    );
+    return null;
+    // <Modal title={friendName} onClose={onClose} width="600px" height="600px">
+    //   <div className="flex h-full">
+    //     {/* Side Menu */}
+    //     <div className="flex flex-col p-4 w-40 bg-blue-50 text-sm">
+    //       {/* <img src={friendAvatar} className="w-24 h-24" /> */}
+    //       <div className="flex items-center gap-2">
+    //         <div className="">{`${lang.tr.level}: ${friendLevel}`}</div>
+    //         {/* <img src={friendGradeUrl} className="select-none" /> */}
+    //       </div>
+    //     </div>
+    //     {/* Main Content */}
+    //     <div className="flex flex-col flex-1 overflow-y-auto">
+    //       {/* Messages Area */}
+    //       <div className="flex flex-[5] p-3">
+    //         <MessageViewer messages={friendDirectMessages} />
+    //       </div>
+    //       {/* Input Area */}
+    //       <div className="flex flex-[1] p-3">
+    //         <MessageInputBox
+    //           onSendMessage={(msg) => {
+    //             handleSendMessage({
+    //               id: '',
+    //               type: 'general',
+    //               content: msg,
+    //               senderId: userId,
+    //               friendId: friendId,
+    //               timestamp: 0,
+    //             });
+    //           }}
+    //         />
+    //       </div>
+    //     </div>
+    //   </div>
+    // </Modal>
   },
 );
 
