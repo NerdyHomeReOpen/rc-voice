@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 // CSS
 import homePage from '@/styles/homePage.module.css';
 
 // Type
-import { Server, User } from '@/types';
+import { Server, SocketServerEvent, User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
+import { ipcService } from '@/services/ipc.service';
+import { popupType } from '@/types';
+import { StandardizedError } from '@/utils/errorHandler';
 
 interface ServerCardProps {
   server: Server;
@@ -25,8 +28,38 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
   const handleServerSelect = (serverId: string) => {
     if (!socket) return;
     if (user.currentServerId === serverId) return;
+
     socket.send.connectServer({ serverId });
   };
+
+  const handleError = (error: StandardizedError) => {
+    if (error.tag === 'VISIBILITY') {
+      ipcService.popup.open(popupType.APPLY_MEMBER);
+      ipcService.initialData.onRequest(popupType.APPLY_MEMBER, {
+        server: server,
+        user: user,
+      });
+    }
+  };
+
+  // Effects
+  useEffect(() => {
+    if (!socket) return;
+
+    const eventHandlers = {
+      [SocketServerEvent.ERROR]: handleError,
+    };
+    const unsubscribe: (() => void)[] = [];
+
+    Object.entries(eventHandlers).map(([event, handler]) => {
+      const unsub = socket.on[event as SocketServerEvent](handler);
+      unsubscribe.push(unsub);
+    });
+
+    return () => {
+      unsubscribe.forEach((unsub) => unsub());
+    };
+  }, [socket]);
 
   // Variables
   const serverName = server.name;

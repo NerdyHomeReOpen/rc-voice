@@ -97,18 +97,18 @@ const func = {
   },
   validateServerName: (value) => {
     value = value?.trim();
-    if (!value) return '伺服器名稱為必填';
-    if (value.length > 30) return '伺服器名稱不能超過30個字符';
+    if (!value) return '群組名稱為必填';
+    if (value.length > 30) return '群組名稱不能超過30個字符';
     return '';
   },
   validateServerDescription: (value) => {
     if (!value?.trim()) return '';
-    if (value.length > 200) return '伺服器描述不能超過200個字符';
+    if (value.length > 200) return '群組描述不能超過200個字符';
     return '';
   },
   validateServerSlogan: (value) => {
     if (!value?.trim()) return '';
-    if (value.length > 30) return '伺服器口號不能超過30個字符';
+    if (value.length > 30) return '群組口號不能超過30個字符';
     return '';
   },
   validateServerAvatar: async (avatar) => {
@@ -175,7 +175,7 @@ const func = {
   },
   validateServerVisibility: (value) => {
     if (!['public', 'private', 'invisible'].includes(value))
-      return '無效的伺服器可見度設定';
+      return '無效的群組可見度設定';
     return '';
   },
 };

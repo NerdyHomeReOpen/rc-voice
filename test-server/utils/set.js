@@ -139,6 +139,18 @@ const set = {
     await db.set(`directMessages.${id}`, directMessages[id]);
     return directMessages[id];
   },
+  serverApplications: async (id, data) => {
+    const applications = await db.get('serverApplications');
+    applications[id] = {
+      userId: '',
+      serverId: '',
+      description: '',
+      createdAt: 0,
+      ...applications[id],
+      ...data,
+      id,
+    };
+  },
 };
 
 module.exports = { ...set };

@@ -40,7 +40,27 @@ const UserSettingModal: React.FC<UserSettingModalProps> = React.memo(
     // Error Control
     const [error, setError] = useState('');
 
-    const [formData, setFormData] = useState<Partial<User>>({});
+    // 生成年份選項 (例如從1900年到當前年份)
+    const currentYear = new Date().getFullYear();
+    const years = Array.from(
+      { length: currentYear - 1900 + 1 },
+      (_, i) => currentYear - i,
+    );
+
+    // 生成月份選項 (1-12)
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+    // 生成日期選項 (1-31)
+    const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+    const [formData, setFormData] = useState<Partial<User>>({
+      name: user?.name || '',
+      gender: user?.gender || 'Male',
+      signature: user?.signature || '',
+      // birthYear: user?.birthYear || currentYear,
+      // birthMonth: user?.birthMonth || 1,
+      // birthDay: user?.birthDay || 1,
+    });
 
     useEffect(() => {
       if (user) {
@@ -226,31 +246,43 @@ const UserSettingModal: React.FC<UserSettingModalProps> = React.memo(
                     <div className={UserSetting['select-wrapper']}>
                       <select
                         className={UserSetting.select}
-                        id="year"
-                        value={'2025'}
+                        id="birthYear"
+                        // value={formData.birthYear}
                         onChange={handleChange}
                       >
-                        <option value="2025">2025</option>
+                        {years.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className={UserSetting['select-wrapper']}>
                       <select
                         className={UserSetting.select}
-                        id="month"
-                        value={'10'}
+                        id="birthMonth"
+                        // value={formData.birthMonth}
                         onChange={handleChange}
                       >
-                        <option value="10">10</option>
+                        {months.map((month) => (
+                          <option key={month} value={month}>
+                            {month.toString().padStart(2, '0')}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className={UserSetting['select-wrapper']}>
                       <select
                         className={UserSetting.select}
-                        id="day"
-                        value={'05'}
+                        id="birthDay"
+                        // value={formData.birthDay}
                         onChange={handleChange}
                       >
-                        <option value="05">05</option>
+                        {days.map((day) => (
+                          <option key={day} value={day}>
+                            {day.toString().padStart(2, '0')}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>

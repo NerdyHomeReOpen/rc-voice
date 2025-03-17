@@ -67,7 +67,7 @@ module.exports = (io) => {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `驗證時發生無法預期的錯誤: ${error.message}`,
+          `驗證時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'AUTH',
           'EXCEPTION_ERROR',
@@ -101,6 +101,9 @@ module.exports = (io) => {
     );
     socket.on('updateServer', async (data) =>
       serverHandler.updateServer(io, socket, data),
+    );
+    socket.on('createServerApplication', async (data) =>
+      serverHandler.createServerApplication(io, socket, data),
     );
     socket.on('searchServer', async (data) =>
       serverHandler.searchServer(io, socket, data),

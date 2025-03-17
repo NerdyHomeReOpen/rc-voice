@@ -8,7 +8,14 @@ import { CircleX } from 'lucide-react';
 import header from '@/styles/common/header.module.css';
 
 // Types
-import { popupType,Channel, Server, User, SocketServerEvent, LanguageKey } from '@/types';
+import {
+  popupType,
+  Channel,
+  Server,
+  User,
+  SocketServerEvent,
+  LanguageKey,
+} from '@/types';
 
 // Pages
 import FriendPage from '@/components/pages/FriendPage';
@@ -148,11 +155,14 @@ const Header: React.FC<HeaderProps> = React.memo(
         <div className={`${header['titleBox']} ${header['big']}`}></div>
         {/* User Status */}
         <div className={header['userStatus']}>
-          <div className={header['nameDisplay']} onClick={() => 
-            {
+          <div
+            className={header['nameDisplay']}
+            onClick={() => {
               handleShowEditUser();
-            }
-          }>{userName}</div>
+            }}
+          >
+            {userName}
+          </div>
           <div
             className={header['statusBox']}
             onClick={() => {

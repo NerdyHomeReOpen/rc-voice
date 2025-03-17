@@ -78,7 +78,7 @@ const rtcHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `傳送 RTC offer 時發生無法預期的錯誤: ${error.message}`,
+          `傳送 RTC offer 時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'SENDRTCOFFER',
           'EXCEPTION_ERROR',
@@ -90,7 +90,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC offer to user(socket-id: ${to}): ${error.message}`,
+        `Error sending RTC offer to user(socket-id: ${to}): ${error.error_message}`,
       );
     }
   },
@@ -157,7 +157,7 @@ const rtcHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `傳送 RTC answer 時發生無法預期的錯誤: ${error.message}`,
+          `傳送 RTC answer 時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'SENDRTCANSWER',
           'EXCEPTION_ERROR',
@@ -169,7 +169,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC answer to user(socket-id: ${to}): ${error.message}`,
+        `Error sending RTC answer to user(socket-id: ${to}): ${error.error_message}`,
       );
     }
   },
@@ -236,7 +236,7 @@ const rtcHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `傳送 RTC ICE candidate 時發生無法預期的錯誤: ${error.message}`,
+          `傳送 RTC ICE candidate 時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'SENDRTCICECANDIDATE',
           'EXCEPTION_ERROR',
@@ -248,7 +248,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC ICE candidate user(socket-id: ${to}): ${error.message}`,
+        `Error sending RTC ICE candidate user(socket-id: ${to}): ${error.error_message}`,
       );
     }
   },
@@ -316,7 +316,7 @@ const rtcHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `加入 RTC 頻道時發生無法預期的錯誤: ${error.message}`,
+          `加入 RTC 頻道時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'JOINRTCCHANNEL',
           'EXCEPTION_ERROR',
@@ -328,7 +328,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error joining RTC channel(${channelId}): ${error.message}`,
+        `Error joining RTC channel(${channelId}): ${error.error_message}`,
       );
     }
   },
@@ -399,7 +399,7 @@ const rtcHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `離開 RTC 頻道時發生無法預期的錯誤: ${error.message}`,
+          `離開 RTC 頻道時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'LEAVERTCCHANNEL',
           'EXCEPTION_ERROR',
@@ -411,7 +411,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error leaving RTC channel(${channelId}): ${error.message}`,
+        `Error leaving RTC channel(${channelId}): ${error.error_message}`,
       );
     }
   },

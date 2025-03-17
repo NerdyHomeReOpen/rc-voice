@@ -8,7 +8,7 @@ const serverSlice = createSlice({
   name: 'serverSlice',
   initialState: {
     id: '',
-    name: '未知伺服器',
+    name: '未知群組',
     avatar: '',
     avatarUrl: '/logo_server_def.png',
     announcement: '',
@@ -34,7 +34,7 @@ const serverSlice = createSlice({
     clearServer: (state) => {
       return {
         id: '',
-        name: '未知伺服器',
+        name: '未知群組',
         avatar: '',
         avatarUrl: '/logo_server_def.png',
         announcement: '',

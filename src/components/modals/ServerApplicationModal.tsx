@@ -46,7 +46,11 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     const [section, setSection] = useState<number>(0);
 
     const handleCreatMemberApplication = (application: ServerApplication) => {
-      // socket?.send.createServerApplication({ application: application });
+      socket?.send.createServerApplication({ application: application });
+
+      socket?.on.createServerApplication((data) => {
+        if (data) handleOpenSuccessDialog();
+      });
     };
 
     const handleOpenSuccessDialog = () => {
@@ -120,17 +124,13 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
             <div className={Popup['popupFooter']}>
               <button
                 type="submit"
-                className={`${Popup['button']} ${
-                  !application.description.trim() ? Popup['disabled'] : ''
-                }`}
-                disabled={!application.description.trim()}
+                className={Popup['button']}
                 onClick={() => {
                   handleCreatMemberApplication({
                     ...application,
                     serverId: serverId,
                     userId: userId,
                   });
-                  handleOpenSuccessDialog();
                 }}
               >
                 {lang.tr.submit}
@@ -154,7 +154,14 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
               <div className={applyMember['body']}>
                 <div className={applyMember['headerBox']}>
                   <div className={applyMember['avatarWrapper']}>
-                    <div className={applyMember['avatarPicture']} />
+                    <div
+                      className={applyMember['avatarPicture']}
+                      style={
+                        serverAvatar
+                          ? { backgroundImage: `url(${serverAvatar})` }
+                          : {}
+                      }
+                    />
                   </div>
                   <div className={applyMember['serverInfoWrapper']}>
                     <div className={applyMember['serverName']}>

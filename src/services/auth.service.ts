@@ -93,7 +93,6 @@ export const authService = {
 
     if (!autoLogin || !token) return false;
 
-    console.log('Auto login with token:', token);
     ipcService.auth.login(token);
 
     return true;

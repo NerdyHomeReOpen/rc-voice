@@ -17,7 +17,7 @@ const jwtUtil = {
       const decoded = jwt.verify(token, JWT_SECRET);
       return { valid: true, ...decoded };
     } catch (error) {
-      return { valid: false, error: error.message };
+      return { valid: false, error: error.error_message };
     }
   },
 };

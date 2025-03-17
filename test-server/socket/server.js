@@ -95,7 +95,7 @@ const serverHandler = {
       const server = servers[serverId];
       if (!server) {
         throw new StandardizedError(
-          `伺服器(${serverId})不存在`,
+          `群組(${serverId})不存在`,
           'ValidationError',
           'CONNECTSERVER',
           'SERVER',
@@ -108,7 +108,7 @@ const serverHandler = {
         !(member?.permissionLevel > 1)
       ) {
         throw new StandardizedError(
-          '該伺服器為私人伺服器',
+          '該群組為私人群組',
           'ValidationError',
           'CONNECTSERVER',
           'VISIBILITY',
@@ -117,7 +117,7 @@ const serverHandler = {
       }
       if (member?.isBlocked) {
         throw new StandardizedError(
-          '您已被該伺服器封鎖',
+          '您已被該群組封鎖',
           'ValidationError',
           'CONNECTSERVER',
           'BLOCKED',
@@ -176,7 +176,7 @@ const serverHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `連接伺服器時發生無法預期的錯誤: ${error.message}`,
+          `連接群組時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'CONNECTSERVER',
           'EXCEPTION_ERROR',
@@ -189,7 +189,7 @@ const serverHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('WebSocket').error(
-        `Error connecting server: ${error.message}`,
+        `Error connecting server: ${error.error_message}`,
       );
     }
   },
@@ -268,7 +268,7 @@ const serverHandler = {
       const server = servers[serverId];
       if (!server) {
         throw new StandardizedError(
-          `伺服器(${serverId})不存在`,
+          `群組(${serverId})不存在`,
           'ValidationError',
           'DISCONNECTSERVER',
           'SERVER',
@@ -303,7 +303,7 @@ const serverHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `斷開伺服器時發生無法預期的錯誤: ${error.message}`,
+          `斷開群組時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'DISCONNECTSERVER',
           'EXCEPTION_ERROR',
@@ -315,7 +315,7 @@ const serverHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('WebSocket').error(
-        `Error disconnecting from server: ${error.message}`,
+        `Error disconnecting from server: ${error.error_message}`,
       );
     }
   },
@@ -394,7 +394,7 @@ const serverHandler = {
       }
       if (!server.name || server.name.length > 30 || !server.name.trim()) {
         throw new StandardizedError(
-          '無效的伺服器名稱',
+          '無效的群組名稱',
           'ValidationError',
           'CREATESERVER',
           'NAME',
@@ -404,7 +404,7 @@ const serverHandler = {
       const userOwnedServers = await Get.userOwnedServers(userId);
       if (userOwnedServers.length >= 3) {
         throw new StandardizedError(
-          '您已達到可創建伺服器上限',
+          '您已達到可創建群組上限',
           'ValidationError',
           'CREATESERVER',
           'LIMIT',
@@ -502,7 +502,7 @@ const serverHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `創建伺服器時發生無法預期的錯誤: ${error.message}`,
+          `創建群組時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'CREATESERVER',
           'EXCEPTION_ERROR',
@@ -513,7 +513,9 @@ const serverHandler = {
       // Emit error data (only to the user)
       io.to(socket.id).emit('error', error);
 
-      new Logger('Server').error(`Error creating server: ${error.message}`);
+      new Logger('Server').error(
+        `Error creating server: ${error.error_message}`,
+      );
     }
   },
   updateServer: async (io, socket, data) => {
@@ -562,7 +564,6 @@ const serverHandler = {
         );
       }
       const { server: editedServer } = data;
-      console.log(editedServer);
       if (!editedServer) {
         throw new StandardizedError(
           '無效的資料',
@@ -595,7 +596,7 @@ const serverHandler = {
       const server = servers[editedServer.id];
       if (!server) {
         throw new StandardizedError(
-          `伺服器(${editedServer.id})不存在`,
+          `群組(${editedServer.id})不存在`,
           'ValidationError',
           'UPDATESERVER',
           'SERVER',
@@ -605,17 +606,17 @@ const serverHandler = {
       const member = members[`mb_${user.id}-${server.id}`];
       if (!member) {
         throw new StandardizedError(
-          `使用者(${user.id})不在伺服器(${server.id})中`,
+          `使用者(${user.id})不在群組(${server.id})中`,
           'ValidationError',
           'UPDATECHANNEL',
           'MEMBER',
           404,
         );
       }
-      const userPermission = member.permission;
-      if (userPermission < 4) {
+      const userPermission = member.permissionLevel;
+      if (!userPermission || userPermission < 4) {
         throw new StandardizedError(
-          '您沒有權限更新伺服器',
+          '您沒有權限更新群組',
           'ValidationError',
           'UPDATECHANNEL',
           'USER_PERMISSION',
@@ -628,7 +629,7 @@ const serverHandler = {
         (editedServer.name.length > 30 || !editedServer.name.trim())
       ) {
         throw new StandardizedError(
-          '無效的伺服器名稱',
+          '無效的群組名稱',
           'ValidationError',
           'UPDATESERVER',
           'NAME',
@@ -637,7 +638,7 @@ const serverHandler = {
       }
       if (editedServer.description && editedServer.description.length > 200) {
         throw new StandardizedError(
-          '伺服器描述過長',
+          '群組描述過長',
           'ValidationError',
           'UPDATESERVER',
           'DESCRIPTION',
@@ -728,7 +729,7 @@ const serverHandler = {
     } catch (error) {
       if (!error instanceof StandardizedError) {
         error = new StandardizedError(
-          `更新伺服器時發生無法預期的錯誤: ${error.message}`,
+          `更新群組時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',
           'UPDATESERVER',
           'EXCEPTION_ERROR',
@@ -739,7 +740,9 @@ const serverHandler = {
       // Emit error data (only to the user)
       io.to(socket.id).emit('error', error);
 
-      new Logger('Server').error(`Error updating server: ${error.message}`);
+      new Logger('Server').error(
+        `Error updating server: ${error.error_message}`,
+      );
     }
   },
   searchServer: async (io, socket, data) => {
@@ -851,7 +854,7 @@ const serverHandler = {
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `搜尋伺服器時發生錯誤: ${error.message}`,
+          `搜尋群組時發生錯誤: ${error.error_message}`,
           'ServerError',
           'SEARCHSERVER',
           'EXCEPTION_ERROR',
@@ -860,7 +863,155 @@ const serverHandler = {
       }
       io.to(socket.id).emit('error', error);
       new Logger('WebSocket').error(
-        `Error searching servers: ${error.message}`,
+        `Error searching servers: ${error.error_message}`,
+      );
+    }
+  },
+  createServerApplication: async (io, socket, data) => {
+    const users = (await db.get('users')) || {};
+    const servers = (await db.get('servers')) || {};
+    const members = (await db.get('members')) || {};
+
+    try {
+      const jwt = socket.jwt;
+      if (!jwt) {
+        throw new StandardizedError(
+          '無可用的 JWT',
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'TOKEN_MISSING',
+          401,
+        );
+      }
+      const sessionId = socket.sessionId;
+      if (!sessionId) {
+        throw new StandardizedError(
+          '無可用的 session ID',
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'SESSION_MISSING',
+          401,
+        );
+      }
+      const result = JWT.verifyToken(jwt);
+      if (!result.valid) {
+        throw new StandardizedError(
+          '無效的 token',
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'TOKEN_INVALID',
+          401,
+        );
+      }
+      const { application } = data;
+      if (!application || typeof application !== 'object') {
+        throw new StandardizedError(
+          '無效的申請資料',
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'APPLICATION_INVALID',
+          400,
+        );
+      }
+      const userId = Map.sessionToUser.get(sessionId);
+      if (!userId) {
+        throw new StandardizedError(
+          `無效的 session ID(${sessionId})`,
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'SESSION_EXPIRED',
+          401,
+        );
+      }
+      const user = users[userId];
+      if (!user) {
+        throw new StandardizedError(
+          `使用者(${userId})不存在`,
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'USER',
+          404,
+        );
+      }
+      const server = servers[application.serverId];
+      if (!server) {
+        throw new StandardizedError(
+          `群組(${application.serverId})不存在`,
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'SERVER',
+          404,
+        );
+      }
+      const member = members[`mb_${userId}-${server.id}`];
+      if (member && member.permissionLevel > 1) {
+        throw new StandardizedError(
+          '您已是群組成員',
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'MEMBER',
+          400,
+        );
+      }
+      if (member.isBlocked) {
+        throw new StandardizedError(
+          '您已被該群組封鎖',
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'BLOCKED',
+          403,
+        );
+      }
+      const existingApplication = await Get.serverApplications(server.id)
+        .then((applications) =>
+          Object.values(applications).find((app) => app.userId === userId),
+        )
+        .catch(() => null);
+      if (existingApplication) {
+        throw new StandardizedError(
+          '您已申請加入此群組',
+          'ValidationError',
+          'CREATESERVERAPPLICATION',
+          'EXISTING_APPLICATION',
+          400,
+        );
+      }
+
+      // Create application
+      const applicationId = uuidv4();
+      await Set.serverApplications(applicationId, {
+        userId: userId,
+        serverId: server.id,
+        description: application.description,
+        createdAt: Date.now(),
+      });
+
+      io.to(socket.id).emit('createServerApplication', {
+        id: applicationId,
+        userId: userId,
+        serverId: server.id,
+        description: application.description,
+        createdAt: Date.now(),
+      });
+
+      new Logger('Server').success(
+        `Server application(${applicationId}) created by user(${userId})`,
+      );
+    } catch (error) {
+      if (!(error instanceof StandardizedError)) {
+        error = new StandardizedError(
+          `申請加入群組時發生錯誤: ${error.error_message}`,
+          'ServerError',
+          'CREATESERVERAPPLICATION',
+          'EXCEPTION_ERROR',
+          500,
+        );
+      }
+      io.to(socket.id).emit('error', error);
+
+      console.log(error);
+      new Logger('WebSocket').error(
+        `Error creating server application: ${error.error_message}`,
       );
     }
   },
