@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Edit, Plus, Trash } from 'lucide-react';
 
 // CSS
@@ -8,7 +7,7 @@ import grade from '@/styles/common/grade.module.css';
 import permission from '@/styles/common/permission.module.css';
 
 // Types
-import { popupType, type Channel, type Server, type User } from '@/types';
+import { PopupType, ServerMember, Channel, Server, User } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -22,12 +21,14 @@ import BadgeViewer from '@/components/viewers/BadgeViewer';
 import { ipcService } from '@/services/ipc.service';
 
 interface CategoryTabProps {
+  user: User;
+  server: Server;
   category: Channel;
   canEdit: boolean;
 }
 
 const CategoryTab: React.FC<CategoryTabProps> = React.memo(
-  ({ category, canEdit }) => {
+  ({ user, server, category, canEdit }) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
@@ -38,35 +39,35 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
     const categoryIsRoot = category.isRoot;
     const categoryIsLobby = category.isLobby;
     const categoryVisibility = category.settings.visibility;
-    const categoryChannels = category.subChannels || [];
+    const categoryChannel = category.subChannels || [];
 
     // States
     const [expanded, setExpanded] = useState<boolean>(true);
 
     // Handlers
     const handleOpenEditChannelPopup = () => {
-      ipcService.popup.open(popupType.EDIT_CHANNEL);
-      ipcService.initialData.onRequest(popupType.EDIT_CHANNEL, {
+      ipcService.popup.open(PopupType.EDIT_CHANNEL);
+      ipcService.initialData.onRequest(PopupType.EDIT_CHANNEL, {
         channel: category,
       });
     };
 
     const handleOpenCreateChannelPopup = () => {
-      ipcService.popup.open(popupType.CREATE_CHANNEL);
-      ipcService.initialData.onRequest(popupType.CREATE_CHANNEL, {
+      ipcService.popup.open(PopupType.CREATE_CHANNEL);
+      ipcService.initialData.onRequest(PopupType.CREATE_CHANNEL, {
         serverId: category.serverId,
         parent: category,
       });
     };
 
     const handleOpenWarningPopup = () => {
-      ipcService.popup.open(popupType.DIALOG_WARNING);
-      ipcService.initialData.onRequest(popupType.DIALOG_WARNING, {
+      ipcService.popup.open(PopupType.DIALOG_WARNING);
+      ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
         iconType: 'warning',
         title: lang.tr.warningDeleteChannel,
-        submitTo: popupType.DIALOG_WARNING,
+        submitTo: PopupType.DIALOG_WARNING,
       });
-      ipcService.popup.onSubmit(popupType.DIALOG_WARNING, () =>
+      ipcService.popup.onSubmit(PopupType.DIALOG_WARNING, () =>
         handleDeleteChannel(category.id),
       );
     };
@@ -119,23 +120,17 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
         {/* Expanded Sections */}
         {expanded && (
           <div className={styles['channelList']}>
-            {categoryChannels
+            {categoryChannel
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-              .map((channel) =>
-                channel.isCategory ? (
-                  <CategoryTab
-                    key={channel.id}
-                    category={channel}
-                    canEdit={canEdit}
-                  />
-                ) : (
-                  <ChannelTab
-                    key={channel.id}
-                    channel={channel}
-                    canEdit={canEdit}
-                  />
-                ),
-              )}
+              .map((channel) => (
+                <ChannelTab
+                  key={channel.id}
+                  user={user}
+                  server={server}
+                  channel={channel}
+                  canEdit={canEdit}
+                />
+              ))}
           </div>
         )}
       </div>
@@ -146,16 +141,14 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
 CategoryTab.displayName = 'CategoryTab';
 
 interface ChannelTabProps {
+  user: User;
+  server: Server;
   channel: Channel;
   canEdit: boolean;
 }
 
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(
-  ({ channel, canEdit }) => {
-    // Redux
-    const user = useSelector((state: { user: User }) => state.user);
-    const server = useSelector((state: { server: Server }) => state.server);
-
+  ({ user, server, channel, canEdit }) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
@@ -167,6 +160,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
     const channelIsRoot = channel.isRoot;
     const channelIsLobby = channel.isLobby;
     const channelVisibility = channel.settings.visibility;
+    // TODO: Change this logic
     const channelUsers = serverUsers.filter(
       (u) => u.currentChannelId === channel.id,
     );
@@ -177,28 +171,28 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
 
     // Handlers
     const handleOpenEditChannelPopup = () => {
-      ipcService.popup.open(popupType.EDIT_CHANNEL);
-      ipcService.initialData.onRequest(popupType.EDIT_CHANNEL, {
+      ipcService.popup.open(PopupType.EDIT_CHANNEL);
+      ipcService.initialData.onRequest(PopupType.EDIT_CHANNEL, {
         channel: channel,
       });
     };
 
     const handleOpenCreateChannelPopup = () => {
-      ipcService.popup.open(popupType.CREATE_CHANNEL);
-      ipcService.initialData.onRequest(popupType.CREATE_CHANNEL, {
+      ipcService.popup.open(PopupType.CREATE_CHANNEL);
+      ipcService.initialData.onRequest(PopupType.CREATE_CHANNEL, {
         serverId: channel.serverId,
         parent: channel,
       });
     };
 
     const handleOpenWarningPopup = () => {
-      ipcService.popup.open(popupType.DIALOG_WARNING);
-      ipcService.initialData.onRequest(popupType.DIALOG_WARNING, {
+      ipcService.popup.open(PopupType.DIALOG_WARNING);
+      ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
         iconType: 'warning',
         title: lang.tr.warningDeleteChannel,
-        submitTo: popupType.DIALOG_WARNING,
+        submitTo: PopupType.DIALOG_WARNING,
       });
-      ipcService.popup.onSubmit(popupType.DIALOG_WARNING, () =>
+      ipcService.popup.onSubmit(PopupType.DIALOG_WARNING, () =>
         handleDeleteChannel(channel.id),
       );
     };
@@ -269,8 +263,13 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
           <div className={styles['userList']}>
             {channelUsers
               .sort((a, b) => a.name.localeCompare(b.name))
-              .map((user: User) => (
-                <UserTab key={user.id} channelUser={user} canEdit={canEdit} />
+              .map((channelUser) => (
+                <UserTab
+                  key={channelUser.id}
+                  user={user}
+                  channelUser={channelUser}
+                  canEdit={canEdit}
+                />
               ))}
           </div>
         )}
@@ -282,33 +281,20 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
 ChannelTab.displayName = 'ChannelTab';
 
 interface UserTabProps {
-  channelUser: User;
+  user: User;
+  channelUser: ServerMember;
   canEdit: boolean;
 }
 
 const UserTab: React.FC<UserTabProps> = React.memo(
-  ({ channelUser, canEdit }) => {
-    // Redux
-    const user = useSelector((state: { user: User }) => state.user);
-    const server = useSelector((state: { server: Server }) => state.server);
-
+  ({ user, channelUser, canEdit }) => {
     // Hooks
     const lang = useLanguage();
     const contextMenu = useContextMenu();
 
     // Variables
-    const serverMembers = server.members || {};
-    const channelUserMember = serverMembers[channelUser.id] || {
-      id: '',
-      isBlocked: false,
-      nickname: '',
-      permissionLevel: 0,
-      userId: '',
-      serverId: '',
-      createdAt: 0,
-    };
-    const channelUserPermission = channelUserMember.permissionLevel;
-    const channelUserNickname = channelUserMember.nickname;
+    const channelUserPermission = channelUser.permissionLevel;
+    const channelUserNickname = channelUser.nickname || channelUser.name;
     const channelUserLevel = channelUser.level;
     const channelUserGrade = Math.min(56, Math.ceil(channelUserLevel / 5)); // 56 is max level
     const channelUserGender = channelUser.gender;
@@ -317,8 +303,8 @@ const UserTab: React.FC<UserTabProps> = React.memo(
 
     // Handlers
     const handleOpenApplyFriendPopup = () => {
-      ipcService.popup.open(popupType.APPLY_FRIEND);
-      ipcService.initialData.onRequest(popupType.APPLY_FRIEND, {
+      ipcService.popup.open(PopupType.APPLY_FRIEND);
+      ipcService.initialData.onRequest(PopupType.APPLY_FRIEND, {
         user: user,
         targetUser: channelUser,
       });
@@ -330,12 +316,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         <div
           className={`${styles['userTab']}`}
           onDoubleClick={(e) => {
-            contextMenu.showUserInfoBlock(
-              e.pageX,
-              e.pageY,
-              channelUser,
-              server,
-            );
+            contextMenu.showUserInfoBlock(e.pageX, e.pageY, channelUser);
           }}
           onContextMenu={(e) => {
             contextMenu.showContextMenu(e.pageX, e.pageY, [
@@ -385,60 +366,35 @@ const UserTab: React.FC<UserTabProps> = React.memo(
 UserTab.displayName = 'UserTab';
 
 interface ChannelViewerProps {
-  channels: Channel[];
+  user: User;
+  server: Server;
+  currentChannel: Channel;
 }
 
-const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
-  // Redux
-  const user = useSelector((state: { user: User }) => state.user);
-  const server = useSelector((state: { server: Server }) => state.server);
-
+const ChannelViewer: React.FC<ChannelViewerProps> = ({
+  user,
+  server,
+  currentChannel,
+}) => {
   // Hooks
   const lang = useLanguage();
   const contextMenu = useContextMenu();
 
   // Variables
   const connectStatus = 3;
-  const serverMembers = server.members || {};
-  const userCurrentChannelId = user.currentChannelId;
-  const userCurrentChannel = channels.find(
-    (ch) => ch.id === userCurrentChannelId,
-  ) || {
-    id: '',
-    name: lang.tr.unknownChannel,
-    isRoot: false,
-    isCategory: false,
-    isLobby: false,
-    voiceMode: 'free',
-    chatMode: 'free',
-    order: 0,
-    serverId: '',
-    settings: {
-      bitrate: 0,
-      slowmode: false,
-      userLimit: -1,
-      visibility: 'public',
-    },
-    createdAt: 0,
-  };
-  const userCurrentChannelName = userCurrentChannel.name;
-  const userCurrentChannelVoiceMode = userCurrentChannel.voiceMode;
-  const userMember = serverMembers[user.id] || {
-    id: '',
-    isBlocked: false,
-    nickname: '',
-    permissionLevel: 0,
-    userId: '',
-    serverId: '',
-    createdAt: 0,
-  };
-  const userPermission = userMember.permissionLevel;
-  const canEdit = userPermission >= 5;
+  const userCurrentChannelName = currentChannel.name;
+  const userCurrentChannelVoiceMode = currentChannel.voiceMode;
+  const serverChannels = server.channels || [];
+  const serverUsers = server.users || [];
+  const serverMember =
+    serverUsers.find((u) => u.id === user.id) || ({} as ServerMember);
+  const memberPermission = serverMember.permissionLevel;
+  const canEdit = memberPermission >= 5;
 
   // Handlers
   const handleOpenCreateChannelPopup = () => {
-    ipcService.popup.open(popupType.CREATE_CHANNEL);
-    ipcService.initialData.onRequest(popupType.CREATE_CHANNEL, {
+    ipcService.popup.open(PopupType.CREATE_CHANNEL);
+    ipcService.initialData.onRequest(PopupType.CREATE_CHANNEL, {
       serverId: server.id,
       parent: null,
     });
@@ -496,19 +452,23 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({ channels }) => {
       </div>
       {/* Channel List */}
       <div className={styles['channelList']}>
-        {channels
+        {serverChannels
           .filter((c) => c.isRoot)
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
           .map((channel) =>
-            channel.isCategory ? (
+            channel.subChannels && channel.subChannels.length > 0 ? (
               <CategoryTab
                 key={channel.id}
+                user={user}
+                server={server}
                 category={channel}
                 canEdit={canEdit}
               />
             ) : (
               <ChannelTab
                 key={channel.id}
+                user={user}
+                server={server}
                 channel={channel}
                 canEdit={canEdit}
               />

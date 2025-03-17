@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 // CSS
@@ -12,7 +12,7 @@ import permission from '@/styles/common/permission.module.css';
 import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 
 // Types
-import { ServerApplication, Server, Member, popupType } from '@/types';
+import { ServerApplication, Server, PopupType, ServerMember } from '@/types';
 
 // Utils
 import { getPermissionText } from '@/utils/formatters';
@@ -37,10 +37,6 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const socket = useSocket();
     const contextMenu = useContextMenu();
 
-    // Variables
-    const serverId = initialData.serverId;
-    const userId = initialData.userId;
-
     // States
     const [server, setServer] = useState<Server>({
       id: '',
@@ -63,16 +59,14 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       },
       createdAt: 0,
     });
-    const [serverMembers, setserverMembers] = useState<Member[]>([]);
-    const [serverApplications, setserverApplications] = useState<
-      ServerApplication[]
-    >([]);
 
-    const [sortedMembers, setSortedMembers] = useState<Member[]>([]);
+    const [sortedMembers, setSortedMembers] = useState<ServerMember[]>([]);
     const [sortedApplications, setSortedApplications] = useState<
       ServerApplication[]
     >([]);
-    const [sortedBlockMembers, setSortedBlockMembers] = useState<Member[]>([]);
+    const [sortedBlockMembers, setSortedBlockMembers] = useState<
+      ServerMember[]
+    >([]);
 
     const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
 
@@ -81,6 +75,24 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const [sortState, setSortState] = useState<number>(-1);
     const [sortField, setSortField] = useState<string>('name');
 
+    // Variables
+    const serverId = initialData.serverId;
+    const userId = initialData.userId;
+    const serverName = server.name;
+    const serverAvatar = server.avatar;
+    const serverAnnouncement = server.announcement;
+    const serverDescription = server.description;
+    const serverType = server.type;
+    const serverDisplayId = server.displayId;
+    const serverSlogan = server.slogan;
+    const serverLevel = server.level;
+    const serverWealth = server.wealth;
+    const serverCreatedAt = server.createdAt;
+    const serverUsers = server.users || [];
+    const serverApplications = server.memberApplications || [];
+    const serverSettings = server.settings;
+
+    // Handlers
     const handleSort = (field: string, array: any[], direction: number) => {
       setSortField(field);
       setSortState(direction);
@@ -88,14 +100,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     };
 
     const handleOpenErrorDialog = (message: string) => {
-      ipcService.popup.open(popupType.DIALOG_ERROR);
-      ipcService.initialData.onRequest(popupType.DIALOG_ERROR, {
+      ipcService.popup.open(PopupType.DIALOG_ERROR);
+      ipcService.initialData.onRequest(PopupType.DIALOG_ERROR, {
         title: message,
-        submitTo: popupType.DIALOG_ERROR,
+        submitTo: PopupType.DIALOG_ERROR,
       });
     };
-
-    const handleApplicationAction = (action: 'accept' | 'reject') => {};
 
     const handleClose = () => {
       ipcService.window.close();
@@ -107,11 +117,18 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       handleClose();
     };
 
-    const handleUserMove = (target: Member) => {};
+    const handleApplicationAction = (action: 'accept' | 'reject') => {};
 
-    const handleKickServer = (target: Member) => {};
+    const handleUserMove = () => {};
 
-    const handleBlockUser = (target: Member) => {};
+    const handleKickServer = () => {};
+
+    const handleBlockUser = () => {};
+
+    // Effects
+    useEffect(() => {
+      // GET SERVER DATA
+    }, [serverId]);
 
     return (
       <div className={Popup['popupContainer']}>
@@ -160,7 +177,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                             <div className={Popup['label']}>{lang.tr.name}</div>
                             <input
                               type="text"
-                              value={server?.name ?? server?.name}
+                              value={serverName}
                               onChange={(e) => {
                                 setServer((prev) => ({
                                   ...prev,
@@ -175,7 +192,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                             <div className={Popup['label']}>{lang.tr.id}</div>
                             <input
                               type="text"
-                              value={server?.displayId || server?.id}
+                              value={serverDisplayId}
                               disabled
                             />
                           </div>
@@ -184,7 +201,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           <div className={Popup['label']}>{lang.tr.slogan}</div>
                           <input
                             type="text"
-                            value={server.slogan}
+                            value={serverSlogan}
                             onChange={(e) => {
                               setServer((prev) => ({
                                 ...prev,
@@ -195,7 +212,15 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                         </div>
                         <div className={`${Popup['inputBox']} ${Popup['col']}`}>
                           <div className={Popup['label']}>{lang.tr.type}</div>
-                          <select>
+                          <select
+                            value={serverType}
+                            onChange={(e) => {
+                              setServer((prev) => ({
+                                ...prev,
+                                type: e.target.value,
+                              }));
+                            }}
+                          >
                             <option>{lang.tr.other}</option>
                             <option>{lang.tr.game}</option>
                             <option>{lang.tr.entertainment}</option>
@@ -206,7 +231,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                         <div
                           className={EditServer['avatarPicture']}
                           style={{
-                            backgroundImage: `url(${'/logo_server_def.png'})`,
+                            backgroundImage: `url(${serverAvatar})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                           }}
@@ -259,11 +284,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                       >
                         <div className={`${Popup['inputBox']} ${Popup['col']}`}>
                           <div className={Popup['label']}>{lang.tr.level}</div>
-                          <input
-                            type="text"
-                            value={server?.level || 0}
-                            disabled
-                          />
+                          <input type="text" value={serverLevel} disabled />
                         </div>
                         <div className={`${Popup['inputBox']} ${Popup['col']}`}>
                           <div className={Popup['label']}>
@@ -271,7 +292,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           </div>
                           <input
                             type="text"
-                            value={new Date(server?.createdAt).toLocaleString()}
+                            value={new Date(serverCreatedAt).toLocaleString()}
                             disabled
                           />
                         </div>
@@ -281,11 +302,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           >
                             {lang.tr.wealth}
                           </div>
-                          <input
-                            type="text"
-                            value={server?.wealth || 0}
-                            disabled
-                          />
+                          <input type="text" value={serverWealth} disabled />
                         </div>
                       </div>
                       <div className={`${Popup['inputBox']} ${Popup['col']}`}>
@@ -293,7 +310,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           {lang.tr.description}
                         </div>
                         <textarea
-                          value={server?.description ?? server?.description}
+                          value={serverDescription}
                           onChange={(e) =>
                             setServer((prev) => ({
                               ...prev,
@@ -312,7 +329,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                       </div>
                       <textarea
                         style={{ minHeight: '200px' }}
-                        value={server?.announcement}
+                        value={serverAnnouncement}
                         onChange={(e) =>
                           setServer((prev) => ({
                             ...prev,
@@ -360,12 +377,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                 <th
                                   key={field}
                                   onClick={() => {
-                                    const _sortedMember = handleSort(
+                                    const _ = handleSort(
                                       field,
-                                      Object.values(server.members || {}),
+                                      serverUsers,
                                       sortState,
                                     );
-                                    setSortedMembers(_sortedMember);
+                                    setSortedMembers(_);
                                   }}
                                 >
                                   {field}
@@ -384,15 +401,11 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                         </thead>
                         <tbody>
                           {sortedMembers.map((member) => {
-                            const memberUser = member.user;
-                            const userGender = memberUser?.gender ?? 'Male';
+                            const userGender = member.gender;
                             const userNickname = member.nickname;
                             const userPermission = member.permissionLevel;
                             const userContributions = member.contribution;
-                            const userJoinDate = new Date(
-                              member.createdAt,
-                            ).toLocaleString();
-
+                            const userJoinDate = member.createdAt;
                             return (
                               <tr
                                 key={member?.id}
@@ -430,7 +443,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                       {
                                         label: lang.tr.moveToMyChannel,
                                         disabled: isCurrentUser,
-                                        onClick: () => handleUserMove(member),
+                                        onClick: () => handleUserMove(),
                                       },
                                       {
                                         label: '禁止此人語音',
@@ -445,12 +458,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                       {
                                         label: lang.tr.kickOut,
                                         disabled: isCurrentUser,
-                                        onClick: () => handleKickServer(member),
+                                        onClick: () => handleKickServer(),
                                       },
                                       {
                                         label: lang.tr.block,
                                         disabled: isCurrentUser,
-                                        onClick: () => handleBlockUser(member),
+                                        onClick: () => handleBlockUser(),
                                       },
                                       {
                                         label: lang.tr.memberManagement,
@@ -478,7 +491,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                   {getPermissionText(userPermission, lang.tr)}
                                 </td>
                                 <td>{userContributions}</td>
-                                <td>{userJoinDate}</td>
+                                <td>
+                                  {new Date(userJoinDate).toLocaleString()}
+                                </td>
                               </tr>
                             );
                           })}
@@ -504,16 +519,16 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="public"
                           className="mr-3"
-                          checked={server.settings.visibility === 'public'}
+                          checked={serverSettings.visibility === 'public'}
                           onChange={(e) => {
                             if (e.target.checked)
-                              setServer({
-                                ...server,
+                              setServer((prev) => ({
+                                ...prev,
                                 settings: {
-                                  ...server.settings,
+                                  ...prev.settings,
                                   visibility: 'public',
                                 },
-                              });
+                              }));
                           }}
                         />
                         <div className={Popup['label']}>
@@ -527,16 +542,16 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="members"
                           className="mr-3"
-                          checked={server.settings.visibility === 'private'}
+                          checked={serverSettings.visibility === 'private'}
                           onChange={(e) => {
                             if (e.target.checked)
-                              setServer({
-                                ...server,
+                              setServer((prev) => ({
+                                ...prev,
                                 settings: {
-                                  ...server.settings,
+                                  ...prev.settings,
                                   visibility: 'private',
                                 },
-                              });
+                              }));
                           }}
                         />
                         <div>
@@ -555,16 +570,16 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="private"
                           className="mr-3"
-                          checked={server.settings.visibility === 'invisible'}
+                          checked={serverSettings.visibility === 'invisible'}
                           onChange={(e) => {
                             if (e.target.checked)
-                              setServer({
-                                ...server,
+                              setServer((prev) => ({
+                                ...prev,
                                 settings: {
-                                  ...server.settings,
+                                  ...prev.settings,
                                   visibility: 'invisible',
                                 },
-                              });
+                              }));
                           }}
                         />
                         <div>
@@ -603,12 +618,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                   <th
                                     key={field}
                                     onClick={() => {
-                                      const _sortedMember = handleSort(
+                                      const _ = handleSort(
                                         field,
-                                        Object.values(server.members || {}),
+                                        serverApplications,
                                         sortState,
                                       );
-                                      setSortedMembers(_sortedMember);
+                                      setSortedApplications(_);
                                     }}
                                   >
                                     {field}
@@ -628,6 +643,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                         </thead>
                         <tbody>
                           {sortedApplications.map((application) => {
+                            const userName = application.name;
+                            // const userContribution = application.contribution; // FIXME
+                            const userDescription = application.description;
                             return (
                               <tr
                                 key={application.id}
@@ -639,10 +657,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                   );
                                 }}
                               >
-                                {/* FIXME */}
-                                {/* <td>{application.user.name}</td> */}
-                                {/* <td>{application.contribution}</td> */}
-                                {/* <td>{application.description}</td> */}
+                                <td>{userName}</td>
+                                {/* <td>{userContribution}</td> */}
+                                <td>{userDescription}</td>
                               </tr>
                             );
                           })}
@@ -678,12 +695,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                   <th
                                     key={field}
                                     onClick={() => {
-                                      const _sortedMember = handleSort(
+                                      const _ = handleSort(
                                         field,
-                                        Object.values(server.members || {}),
+                                        sortedBlockMembers,
                                         sortState,
                                       );
-                                      setSortedMembers(_sortedMember);
+                                      setSortedBlockMembers(_);
                                     }}
                                   >
                                     {field}
@@ -703,6 +720,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                         </thead>
                         <tbody>
                           {sortedBlockMembers.map((blockMember) => {
+                            const userName = blockMember.name;
+                            const userContribution = blockMember.contribution;
                             return (
                               <tr
                                 key={blockMember.id}
@@ -714,10 +733,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                   );
                                 }}
                               >
-                                {/* FIXME */}
-                                {/* <td>{blockMember.user.name}</td> */}
-                                {/* <td>{blockMember.contribution}</td> */}
-                                {/* <td>{blockMember.description}</td> */}
+                                <td>{userName}</td>
+                                <td>{userContribution}</td>
                               </tr>
                             );
                           })}

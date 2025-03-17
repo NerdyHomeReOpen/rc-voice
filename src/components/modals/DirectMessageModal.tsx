@@ -1,12 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React from 'react';
-import { useSelector } from 'react-redux';
-
-// Components
-// import Modal from '@/components/Modal';
+import React, { useState } from 'react';
 
 // Types
-import { User, Friend, DirectMessage } from '@/types';
+import { User, UserFriend, DirectMessage } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -17,26 +13,20 @@ import MessageViewer from '@/components/viewers/MessageViewer';
 import MessageInputBox from '@/components/MessageInputBox';
 
 interface DirectMessageModalProps {
-  friend: Friend;
-  onClose: () => void;
+  friendId: string | null;
+  userId: string | null;
 }
 
 const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
-  ({ onClose, friend }) => {
-    // Redux
-    const user = useSelector((state: { user: User }) => state.user);
-
-    // Language
+  (initialData: DirectMessageModalProps) => {
+    // Hooks
     const lang = useLanguage();
-
-    // Socket
     const socket = useSocket();
 
-    // Variables
-    const userId = user.id;
-    const friendUser = friend?.user || {
+    // States
+    const [user, setUser] = useState<User>({
       id: '',
-      name: lang.tr.unknownUser,
+      name: '未知使用者',
       avatar: '',
       avatarUrl: '',
       signature: '',
@@ -50,11 +40,35 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
       currentServerId: '',
       lastActiveAt: 0,
       createdAt: 0,
-    };
-    const friendId = friendUser.id;
-    const friendAvatar = friendUser.avatarUrl;
-    const friendName = friendUser.name;
-    const friendLevel = friendUser.level;
+    });
+    const [friend, setFriend] = useState<UserFriend>({
+      id: '',
+      name: '未知使用者',
+      avatar: '',
+      avatarUrl: '',
+      signature: '',
+      status: 'online',
+      gender: 'Male',
+      level: 0,
+      xp: 0,
+      requiredXp: 0,
+      progress: 0,
+      currentChannelId: '',
+      currentServerId: '',
+      lastActiveAt: 0,
+      createdAt: 0,
+      isBlocked: false,
+      friendGroupId: '',
+      user1Id: '',
+      user2Id: '',
+    });
+
+    // Variables
+    const userId = user.id;
+    const friendId = friend.id;
+    const friendAvatar = friend.avatar;
+    const friendName = friend.name;
+    const friendLevel = friend.level;
     const friendGrade = Math.min(56, Math.ceil(friendLevel / 5)); // 56 is max level
     const friendDirectMessages = friend.directMessages || [];
 

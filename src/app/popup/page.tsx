@@ -7,7 +7,7 @@ import React, { useEffect, useState, ReactNode } from 'react';
 import header from '@/styles/common/header.module.css';
 
 // Types
-import { popupType } from '@/types';
+import { PopupType } from '@/types';
 
 // Components
 import CreateServerModal from '@/components/modals/CreateServerModal';
@@ -90,7 +90,7 @@ const Modal = React.memo(() => {
   useEffect(() => {
     if (window.location.search) {
       const params = new URLSearchParams(window.location.search);
-      const type = params.get('type') as popupType;
+      const type = params.get('type') as PopupType;
       if (!type) return;
 
       ipcService.initialData.request(type, (data) => {
@@ -98,70 +98,70 @@ const Modal = React.memo(() => {
       });
 
       switch (type) {
-        case popupType.EDIT_USER:
+        case PopupType.EDIT_USER:
           setHeader(<Header title={lang.tr.editUser} buttons={['close']} />);
           setContent(<UserSettingModal {...initialData} />);
           break;
-        case popupType.CREATE_SERVER:
+        case PopupType.CREATE_SERVER:
           setHeader(
             <Header title={lang.tr.createServer} buttons={['close']} />,
           );
           setContent(<CreateServerModal {...initialData} />);
           break;
-        case popupType.EDIT_SERVER:
+        case PopupType.EDIT_SERVER:
           setHeader(<Header title={lang.tr.editServer} buttons={['close']} />);
           setContent(<EditServerModal {...initialData} />);
           break;
-        case popupType.DELETE_SERVER:
+        case PopupType.DELETE_SERVER:
           // This doesn't exist lol
           break;
-        case popupType.CREATE_CHANNEL:
+        case PopupType.CREATE_CHANNEL:
           setHeader(
             <Header title={lang.tr.createChannel} buttons={['close']} />,
           );
           setContent(<AddChannelModal {...initialData} />);
           break;
-        case popupType.EDIT_CHANNEL:
+        case PopupType.EDIT_CHANNEL:
           setHeader(<Header title={lang.tr.editChannel} buttons={['close']} />);
           setContent(<EditChannelModal {...initialData} />);
           break;
-        case popupType.DELETE_CHANNEL:
+        case PopupType.DELETE_CHANNEL:
           // This doesn't exist lol
           break;
-        case popupType.APPLY_MEMBER:
+        case PopupType.APPLY_MEMBER:
           setHeader(<Header title={lang.tr.applyMember} buttons={['close']} />);
           setContent(<ServerApplication {...initialData} />);
           break;
-        case popupType.APPLY_FRIEND:
+        case PopupType.APPLY_FRIEND:
           setHeader(<Header title={lang.tr.applyFriend} buttons={['close']} />);
           setContent(<ApplyFriend {...initialData} />);
           break;
-        case popupType.DIRECT_MESSAGE:
+        case PopupType.DIRECT_MESSAGE:
           // setHeader(<Header title={lang.tr.directMessage} buttons={['close']} />);
           // setContent(<DirectMessageModal onClose={() => {}} />);
           break;
-        case popupType.DIALOG_ALERT:
-        case popupType.DIALOG_ALERT2:
+        case PopupType.DIALOG_ALERT:
+        case PopupType.DIALOG_ALERT2:
           setHeader(<Header title={lang.tr.dialogAlert} buttons={['close']} />);
           setContent(<Dialog {...{ ...initialData, iconType: 'ALERT' }} />);
           break;
-        case popupType.DIALOG_SUCCESS:
+        case PopupType.DIALOG_SUCCESS:
           setHeader(
             <Header title={lang.tr.dialogSuccess} buttons={['close']} />,
           );
           setContent(<Dialog {...{ ...initialData, iconType: 'SUCCESS' }} />);
           break;
-        case popupType.DIALOG_WARNING:
+        case PopupType.DIALOG_WARNING:
           setHeader(
             <Header title={lang.tr.dialogWarning} buttons={['close']} />,
           );
           setContent(<Dialog {...{ ...initialData, iconType: 'WARNING' }} />);
           break;
-        case popupType.DIALOG_ERROR:
+        case PopupType.DIALOG_ERROR:
           setHeader(<Header title={lang.tr.dialogError} buttons={['close']} />);
           setContent(<Dialog {...{ ...initialData, iconType: 'ERROR' }} />);
           break;
-        case popupType.DIALOG_INFO:
+        case PopupType.DIALOG_INFO:
           setHeader(<Header title={lang.tr.dialogInfo} buttons={['close']} />);
           setContent(<Dialog {...{ ...initialData, iconType: 'INFO' }} />);
           break;

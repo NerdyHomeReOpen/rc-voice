@@ -127,8 +127,8 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
             contents: [message.content],
             permissionLevel:
               'permissionLevel' in message ? message.permissionLevel : null,
-            gender: message.sender?.gender || 'Male',
-            name: message.sender?.name || 'Unknown',
+            gender: message.gender,
+            name: message.name,
           });
         }
         return acc;

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Trash } from 'lucide-react';
 
 // CSS
@@ -7,7 +6,7 @@ import styles from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
 
 // Types
-import { popupType, User, Friend, FriendGroup } from '@/types';
+import { PopupType, User, FriendGroup, UserFriend } from '@/types';
 
 // Components
 import BadgeViewer from '@/components/viewers/BadgeViewer';
@@ -21,7 +20,7 @@ import { ipcService } from '@/services/ipc.service';
 
 interface FriendGroupTabProps {
   friendGroup: FriendGroup;
-  friends: Friend[];
+  friends: UserFriend[];
 }
 
 const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
@@ -30,12 +29,14 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
     const lang = useLanguage();
     const contextMenu = useContextMenu();
 
-    // Variables
-    const groupName = friendGroup.name;
-    const groupFriends = friends.filter((fd) => fd.groupId == friendGroup.id);
-
     // States
     const [expanded, setExpanded] = useState<boolean>(true);
+
+    // Variables
+    const friendGroupName = friendGroup.name;
+    const friendGroupFriends = friends.filter(
+      (fd) => fd.friendGroupId === friendGroup.id,
+    );
 
     return (
       <div key={friendGroup.id}>
@@ -61,16 +62,14 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
               expanded ? styles['expanded'] : ''
             }`}
           />
-          <span className={styles['tabLable']}>{groupName}</span>
-          <span
-            className={styles['tabCount']}
-          >{`(${groupFriends.length})`}</span>
+          <span className={styles['tabLable']}>{friendGroupName}</span>
+          <span className={styles['tabCount']}>{`(${friends.length})`}</span>
         </div>
 
         {/* Expanded Sections */}
-        {expanded && groupFriends && (
+        {expanded && friends && (
           <div className={styles['tabContent']}>
-            {groupFriends.map((friend) => (
+            {friendGroupFriends.map((friend) => (
               <FriendCard key={friend.id} friend={friend} />
             ))}
           </div>
@@ -83,7 +82,7 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
 FriendGroupTab.displayName = 'FriendGroupTab';
 
 interface FriendCardProps {
-  friend: Friend;
+  friend: UserFriend;
 }
 
 const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
@@ -92,35 +91,18 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   const contextMenu = useContextMenu();
 
   // Variables
-  const friendUser = friend.user || {
-    id: '',
-    name: lang.tr.unknownUser,
-    avatar: '',
-    avatarUrl: '',
-    signature: '',
-    status: 'online',
-    gender: 'Male',
-    level: 0,
-    xp: 0,
-    requiredXp: 0,
-    progress: 0,
-    currentChannelId: '',
-    currentServerId: '',
-    lastActiveAt: 0,
-    createdAt: 0,
-  };
-  const friendAvatarUrl = friendUser.avatarUrl;
-  const friendName = friendUser.name;
-  const friendSignature = friendUser.signature;
-  const friendLevel = friendUser.level;
+  const friendName = friend.name;
+  const friendAvatar = friend.avatar;
+  const friendSignature = friend.signature;
+  const friendLevel = friend.level;
   const friendGrade = Math.min(56, Math.ceil(friendLevel / 5)); // 56 is max level
-  const friendBadges = friendUser.badges || [];
+  const friendBadges = friend.badges || [];
 
   // Handlers
   const handleOpenDirectMessagePopup = () => {
-    ipcService.popup.open(popupType.DIRECT_MESSAGE);
-    ipcService.initialData.onRequest(popupType.DIRECT_MESSAGE, {
-      user: friendUser,
+    ipcService.popup.open(PopupType.DIRECT_MESSAGE);
+    ipcService.initialData.onRequest(PopupType.DIRECT_MESSAGE, {
+      user: friend,
     });
   };
 
@@ -147,7 +129,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
       >
         <div
           className={styles['avatarPicture']}
-          style={{ backgroundImage: `url(${friendAvatarUrl})` }}
+          style={{ backgroundImage: `url(${friendAvatar})` }}
         />
         <div className={styles['baseInfoBox']}>
           <div className={styles['container']}>
@@ -167,21 +149,20 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
 FriendCard.displayName = 'FriendCard';
 
 interface FriendListViewerProps {
-  friendGroups: FriendGroup[];
-  friends: Friend[];
+  user: User;
 }
 
 const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
-  ({ friendGroups, friends }) => {
-    // Redux
-    const user = useSelector((state: { user: User }) => state.user);
-
+  ({ user }) => {
     // Hooks
     const lang = useLanguage();
 
     // Variables
-    const filteredFriends =
-      friends.filter((friend) => friend.user?.name.includes(searchQuery)) ?? [];
+    const userFriends = user.friends || [];
+    const userFriendGroups = user.friendGroups || [];
+    const filteredFriends = userFriends.filter((fd) =>
+      fd.name.includes(searchQuery),
+    );
 
     // States
     const [searchQuery, setSearchQuery] = useState<string>('');
@@ -189,14 +170,14 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
 
     // Handlers
     const handleOpenApplyFriendPopup = () => {
-      ipcService.popup.open(popupType.APPLY_FRIEND);
-      ipcService.initialData.onRequest(popupType.APPLY_FRIEND, {
+      ipcService.popup.open(PopupType.APPLY_FRIEND);
+      ipcService.initialData.onRequest(PopupType.APPLY_FRIEND, {
         user: user,
       });
     };
 
     // const handleOpenCreateGroupPopup = () => {
-    //   // ipcService.popup.open(popupType.CREATE_FRIEND_GROUP);
+    //   // ipcService.popup.open(PopupType.CREATE_FRIEND_GROUP);
     // };
 
     return (
@@ -238,10 +219,10 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
             </div>
             {/* Friend Groups */}
             <div className={styles['friendGroups']}>
-              {friendGroups.map((group) => (
+              {userFriendGroups.map((friendGroup) => (
                 <FriendGroupTab
-                  key={group.id}
-                  friendGroup={group}
+                  key={friendGroup.id}
+                  friendGroup={friendGroup}
                   friends={filteredFriends}
                 />
               ))}

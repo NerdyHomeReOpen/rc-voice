@@ -1145,16 +1145,13 @@ export interface User {
   lastActiveAt: number;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  members?: {
-    [serverId: string]: Member;
-  };
   badges?: Badge[];
-  friends?: Friend[];
+  friends?: UserFriend[];
   friendGroups?: FriendGroup[];
   friendApplications?: FriendApplication[];
-  recentServers?: Server[];
-  ownedServers?: Server[];
-  favServers?: Server[];
+  recentServers?: UserMember[];
+  ownedServers?: UserMember[];
+  favServers?: UserMember[];
 }
 
 export interface Badge {
@@ -1164,18 +1161,6 @@ export interface Badge {
   order: number;
 }
 
-export interface Friend {
-  id: string;
-  isBlocked: boolean;
-  groupId: string;
-  user1Id: string;
-  user2Id: string;
-  createdAt: number;
-  // THESE WERE NOT SAVE IN THE DATABASE
-  user?: User;
-  directMessages?: DirectMessage[];
-}
-
 export interface FriendGroup {
   id: string;
   name: string;
@@ -1183,20 +1168,17 @@ export interface FriendGroup {
   userId: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  friends?: Friend[];
+  friends?: UserFriend[];
 }
 
-export interface FriendApplication {
-  id: string;
+export interface FriendApplication extends User {
   senderId: string;
   receiverId: string;
   description: string;
   createdAt: number;
-  // THESE WERE NOT SAVE IN THE DATABASE
 }
 
-export interface Member {
-  id: string;
+export interface UserMember extends Server {
   isBlocked: boolean;
   nickname: string;
   contribution: number;
@@ -1204,8 +1186,16 @@ export interface Member {
   userId: string;
   serverId: string;
   createdAt: number;
+}
+
+export interface UserFriend extends User {
+  isBlocked: boolean;
+  friendGroupId: string;
+  user1Id: string;
+  user2Id: string;
+  createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  user: User | null;
+  directMessages?: DirectMessage[];
 }
 
 export interface Server {
@@ -1219,7 +1209,7 @@ export interface Server {
   displayId: string;
   slogan: string;
   level: number;
-  wealth: number; // 財富值，但不知道是做什麼用的
+  wealth: number;
   lobbyId: string;
   ownerId: string;
   settings: {
@@ -1230,23 +1220,26 @@ export interface Server {
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   lobby?: Channel;
-  owner?: User;
-  users?: User[];
+  owner?: ServerMember;
+  rootChannels?: Channel[];
   channels?: Channel[];
-  applications?: ServerApplication[];
-  members?: {
-    [userId: string]: Member;
-  };
+  users?: ServerMember[];
+  memberApplications?: ServerApplication[];
 }
 
-export interface ServerApplication {
-  id: string;
+export interface ServerMember extends User {
+  isBlocked: boolean;
+  nickname: string;
+  contribution: number;
+  permissionLevel: Permission;
+  serverId: string;
+}
+
+export interface ServerApplication extends User {
   description: string;
   userId: string;
   serverId: string;
   createdAt: number;
-  // THESE WERE NOT SAVE IN THE DATABASE
-  user?: User | null;
 }
 
 export interface Channel {
@@ -1269,51 +1262,22 @@ export interface Channel {
   // THESE WERE NOT SAVE IN THE DATABASE
   subChannels?: Channel[];
   messages?: Message[];
-  users?: User[];
-  rtcConnections?: string[];
 }
 
-export interface voicePresences {
-  id: string;
-  username: string;
-  isSpeaker: boolean;
-  isSpeaking: boolean;
-  isMuted: boolean;
-}
-
-export interface Message {
-  id: string;
+export interface Message extends ServerMember {
   content: string;
   type: 'general' | 'info';
-  permissionLevel: Permission;
   senderId: string;
   channelId: string;
   timestamp: number;
-  // THESE WERE NOT SAVE IN THE DATABASE
-  sender?: User | null;
 }
 
-export interface DirectMessage {
-  id: string;
+export interface DirectMessage extends UserFriend {
   content: string;
   type: 'general' | 'info';
   senderId: string;
   friendId: string;
   timestamp: number;
-  // THESE WERE NOT SAVE IN THE DATABASE
-  sender?: User | null;
-}
-
-export interface ModalTabItem {
-  id: string;
-  label: string;
-  onClick: () => void;
-}
-export interface ModalButton {
-  label: string;
-  type?: 'submit';
-  style: 'primary' | 'secondary' | 'danger';
-  onClick: () => void;
 }
 
 export interface ContextMenuItem {
@@ -1332,7 +1296,7 @@ export interface Emoji {
   path: string;
 }
 
-export interface discordPresence {
+export interface DiscordPresence {
   details: string;
   state: string;
   largeImageKey: string;
@@ -1396,7 +1360,7 @@ export enum SocketServerEvent {
   RTC_LEAVE = 'RTCLeave',
 }
 
-export enum popupType {
+export enum PopupType {
   CREATE_SERVER = 'createServer',
   EDIT_SERVER = 'editServer',
   DELETE_SERVER = 'deleteServer',

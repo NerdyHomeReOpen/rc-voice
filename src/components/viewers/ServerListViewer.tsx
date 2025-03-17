@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 
 // CSS
 import homePage from '@/styles/homePage.module.css';
@@ -10,17 +9,15 @@ import { Server, SocketServerEvent, User } from '@/types';
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
 import { ipcService } from '@/services/ipc.service';
-import { popupType } from '@/types';
+import { PopupType } from '@/types';
 import { StandardizedError } from '@/utils/errorHandler';
 
 interface ServerCardProps {
+  user: User;
   server: Server;
 }
 
-const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
-  // Redux
-  const user = useSelector((state: { user: User }) => state.user);
-
+const ServerCard: React.FC<ServerCardProps> = React.memo(({ user, server }) => {
   // Hooks
   const socket = useSocket();
 
@@ -34,8 +31,8 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ server }) => {
 
   const handleError = (error: StandardizedError) => {
     if (error.tag === 'VISIBILITY') {
-      ipcService.popup.open(popupType.APPLY_MEMBER);
-      ipcService.initialData.onRequest(popupType.APPLY_MEMBER, {
+      ipcService.popup.open(PopupType.APPLY_MEMBER);
+      ipcService.initialData.onRequest(PopupType.APPLY_MEMBER, {
         server: server,
         user: user,
       });
@@ -105,15 +102,16 @@ ServerCard.displayName = 'ServerCard';
 
 // ServerGrid Component
 interface ServerListViewerProps {
+  user: User;
   servers: Server[];
 }
 
 const ServerListViewer: React.FC<ServerListViewerProps> = React.memo(
-  ({ servers }) => {
+  ({ user, servers }) => {
     return (
       <div className={homePage['myGroupsRoomItems']}>
         {servers.map((server) => (
-          <ServerCard key={server.id} server={server} />
+          <ServerCard key={server.id} user={user} server={server} />
         ))}
       </div>
     );

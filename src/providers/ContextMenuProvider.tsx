@@ -2,7 +2,7 @@
 import React, { useEffect, useContext, createContext, ReactNode } from 'react';
 
 // Types
-import { ContextMenuItem, Server, User } from '@/types';
+import { ContextMenuItem, ServerMember } from '@/types';
 
 // Components
 import ContextMenu from '@/components/ContextMenu';
@@ -10,7 +10,7 @@ import UserInfoBlock from '@/components/UserInfoBlock';
 
 interface ContextMenuContextType {
   showContextMenu: (x: number, y: number, items: ContextMenuItem[]) => void;
-  showUserInfoBlock: (x: number, y: number, user: User, server: Server) => void;
+  showUserInfoBlock: (x: number, y: number, member: ServerMember) => void;
   closeContextMenu: () => void;
 }
 
@@ -63,13 +63,8 @@ const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     setIsVisible(true);
   };
 
-  const showUserInfoBlock = (
-    x: number,
-    y: number,
-    user: User,
-    server: Server,
-  ) => {
-    setContent(<UserInfoBlock x={x} y={y} user={user} server={server} />);
+  const showUserInfoBlock = (x: number, y: number, member: ServerMember) => {
+    setContent(<UserInfoBlock x={x} y={y} member={member} />);
     setIsVisible(true);
   };
 

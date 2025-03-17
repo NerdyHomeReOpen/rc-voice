@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  discordPresence,
-  popupType,
+  DiscordPresence,
+  PopupType,
   SocketClientEvent,
   SocketServerEvent,
 } from '@/types';
@@ -136,25 +136,25 @@ export const ipcService = {
   },
 
   popup: {
-    open: (type: popupType) => {
+    open: (type: PopupType) => {
       const PopupSize = {
-        // [popupType.CREATE_FRIEND_GROUP]: { height: 600, width: 450 },
-        [popupType.EDIT_USER]: { height: 650, width: 500 },
-        [popupType.CREATE_SERVER]: { height: 430, width: 520 },
-        [popupType.EDIT_SERVER]: { height: 450, width: 600 },
-        [popupType.DELETE_SERVER]: { height: 300, width: 200 },
-        [popupType.CREATE_CHANNEL]: { height: 220, width: 320 },
-        [popupType.EDIT_CHANNEL]: { height: 220, width: 320 },
-        [popupType.DELETE_CHANNEL]: { height: 300, width: 200 },
-        [popupType.APPLY_FRIEND]: { height: 420, width: 540 },
-        [popupType.APPLY_MEMBER]: { height: 420, width: 540 },
-        [popupType.DIRECT_MESSAGE]: { height: 200, width: 300 },
-        [popupType.DIALOG_ALERT]: { height: 200, width: 400 },
-        [popupType.DIALOG_ALERT2]: { height: 200, width: 400 },
-        [popupType.DIALOG_SUCCESS]: { height: 200, width: 400 },
-        [popupType.DIALOG_WARNING]: { height: 200, width: 400 },
-        [popupType.DIALOG_ERROR]: { height: 200, width: 400 },
-        [popupType.DIALOG_INFO]: { height: 200, width: 400 },
+        // [PopupType.CREATE_FRIEND_GROUP]: { height: 600, width: 450 },
+        [PopupType.EDIT_USER]: { height: 650, width: 500 },
+        [PopupType.CREATE_SERVER]: { height: 430, width: 520 },
+        [PopupType.EDIT_SERVER]: { height: 450, width: 600 },
+        [PopupType.DELETE_SERVER]: { height: 300, width: 200 },
+        [PopupType.CREATE_CHANNEL]: { height: 220, width: 320 },
+        [PopupType.EDIT_CHANNEL]: { height: 220, width: 320 },
+        [PopupType.DELETE_CHANNEL]: { height: 300, width: 200 },
+        [PopupType.APPLY_FRIEND]: { height: 420, width: 540 },
+        [PopupType.APPLY_MEMBER]: { height: 420, width: 540 },
+        [PopupType.DIRECT_MESSAGE]: { height: 200, width: 300 },
+        [PopupType.DIALOG_ALERT]: { height: 200, width: 400 },
+        [PopupType.DIALOG_ALERT2]: { height: 200, width: 400 },
+        [PopupType.DIALOG_SUCCESS]: { height: 200, width: 400 },
+        [PopupType.DIALOG_WARNING]: { height: 200, width: 400 },
+        [PopupType.DIALOG_ERROR]: { height: 200, width: 400 },
+        [PopupType.DIALOG_INFO]: { height: 200, width: 400 },
       };
 
       if (isElectron) {
@@ -197,7 +197,7 @@ export const ipcService = {
   },
 
   discord: {
-    updatePresence: (presence: discordPresence) => {
+    updatePresence: (presence: DiscordPresence) => {
       if (isElectron) {
         ipcRenderer.send('update-discord-presence', presence);
       }

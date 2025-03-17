@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useEffect, useState } from 'react';
 
 // Types
 import { Channel } from '@/types';
@@ -15,7 +16,7 @@ import addChannel from '@/styles/popups/addChannel.module.css';
 import { ipcService } from '@/services/ipc.service';
 
 interface AddChannelModalProps {
-  parent: Channel | null;
+  parentId: string | null;
   serverId: string | null;
 }
 
@@ -25,40 +26,25 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     const socket = useSocket();
     const lang = useLanguage();
 
-    // Variables
-    const isRoot = !!initialData.parent;
-    const parent = initialData.parent || {
+    // States
+    const [parent, setParent] = useState<Channel>({
       id: '',
-      name: '無',
-      isRoot: false,
-      isCategory: false,
+      name: '',
       isLobby: false,
+      isCategory: false,
+      isRoot: false,
+      serverId: '',
       voiceMode: 'free',
       chatMode: 'free',
       order: 0,
-      serverId: '',
       settings: {
         bitrate: 0,
-        slowmode: false,
-        userLimit: -1,
         visibility: 'public',
+        slowmode: false,
+        userLimit: 0,
       },
       createdAt: 0,
-    };
-    const parentName = parent.name;
-    const serverId = initialData.serverId || '';
-
-    // Handlers
-    const handleClose = () => {
-      ipcService.window.close();
-    };
-
-    const handleCreateChannel = (channel: Channel) => {
-      if (!socket) return;
-      socket.send.createChannel({ channel: channel });
-    };
-
-    // States
+    });
     const [channel, setChannel] = useState<Channel>({
       id: '',
       name: '',
@@ -77,6 +63,28 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
       },
       createdAt: 0,
     });
+
+    // Variables
+    const parentId = initialData.parentId || '';
+    const serverId = initialData.serverId || '';
+    const parentName = parent.name;
+    const channelName = channel.name;
+    const isRoot = !!parentId;
+
+    // Handlers
+    const handleClose = () => {
+      ipcService.window.close();
+    };
+
+    const handleCreateChannel = (channel: Channel) => {
+      if (!socket) return;
+      socket.send.createChannel({ channel: channel });
+    };
+
+    // Effects
+    useEffect(() => {
+      // GET PARENT CHANNEL DATA
+    }, [parentId]);
 
     return (
       <div className={popup['popupContainer']}>
@@ -97,7 +105,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
                 <input
                   className={popup['input']}
                   type="text"
-                  value={channel.name}
+                  value={channelName}
                   onChange={(e) =>
                     setChannel((prev) => ({ ...prev, name: e.target.value }))
                   }
@@ -110,9 +118,9 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
         <div className={popup['popupFooter']}>
           <button
             className={`${popup['button']} ${
-              !channel.name.trim() ? popup['disabled'] : ''
+              !channelName.trim() ? popup['disabled'] : ''
             }`}
-            disabled={!channel.name.trim()}
+            disabled={!channelName.trim()}
             onClick={() => {
               handleCreateChannel({
                 ...channel,

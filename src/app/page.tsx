@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { CircleX } from 'lucide-react';
 
 // CSS
@@ -9,7 +8,7 @@ import header from '@/styles/common/header.module.css';
 
 // Types
 import {
-  popupType,
+  PopupType,
   Channel,
   Server,
   User,
@@ -39,23 +38,21 @@ import authService from '@/services/auth.service';
 
 // Redux
 import store from '@/redux/store';
-import { clearServer, setServer } from '@/redux/serverSlice';
-import { clearUser, setUser } from '@/redux/userSlice';
+import { clearServer } from '@/redux/serverSlice';
+import { clearUser } from '@/redux/userSlice';
 import { clearChannel, setChannel } from '@/redux/channelSlice';
 
 interface HeaderProps {
+  user: User;
+  server: Server;
   selectedId: number;
   setSelectedTabId: (tabId: number) => void;
 }
 
 const Header: React.FC<HeaderProps> = React.memo(
-  ({ selectedId = 1, setSelectedTabId }) => {
-    // Redux
-    const user = useSelector((state: { user: User }) => state.user);
-    const server = useSelector((state: { server: Server }) => state.server);
-
+  ({ user, server, selectedId = 1, setSelectedTabId }) => {
     // Variables
-    const userCurrentServerId = user.currentServerId;
+    const serverId = server.id;
     const userName = user.name;
     const userStatus = user.status;
 
@@ -68,28 +65,12 @@ const Header: React.FC<HeaderProps> = React.memo(
     const [showMenu, setShowMenu] = useState(false);
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
-    // Tab Control
+    // Constants
     const MAIN_TABS = [
-      {
-        id: 1,
-        label: lang.tr.home,
-        onClick: () => {},
-      },
-      {
-        id: 2,
-        label: lang.tr.friends,
-        onClick: () => {},
-      },
-      server.id
-        ? {
-            id: 3,
-            label: server.name,
-            onClick: () => {},
-          }
-        : null,
-    ].filter(Boolean);
-
-    // Status Dropdown Control
+      { id: 1, label: lang.tr.home },
+      { id: 2, label: lang.tr.friends },
+      { id: 3, label: server.name },
+    ];
     const STATUS_OPTIONS = [
       { status: 'online', label: lang.tr.online },
       { status: 'dnd', label: lang.tr.dnd },
@@ -143,8 +124,8 @@ const Header: React.FC<HeaderProps> = React.memo(
     };
 
     const handleShowEditUser = () => {
-      ipcService.popup.open(popupType.EDIT_USER);
-      ipcService.initialData.onRequest(popupType.EDIT_USER, {
+      ipcService.popup.open(PopupType.EDIT_USER);
+      ipcService.initialData.onRequest(PopupType.EDIT_USER, {
         user: user,
       });
     };
@@ -193,29 +174,21 @@ const Header: React.FC<HeaderProps> = React.memo(
         {/* Main Tabs */}
         <div className={header['mainTabs']}>
           {MAIN_TABS.map((Tab) => {
-            if (!Tab) return null;
-
             const TabId = Tab.id;
             const TabLable = Tab.label;
-
             return (
               <div
                 key={`Tabs-${TabId}`}
                 className={`${header['tab']} ${
                   TabId === selectedId ? header['selected'] : ''
                 }`}
-                onClick={() => {
-                  setSelectedTabId(TabId);
-                  Tab.onClick();
-                }}
+                onClick={() => setSelectedTabId(TabId)}
               >
                 <div className={header['tabLable']}>{TabLable}</div>
                 <div className={header['tabBg']}></div>
-                {TabId > 2 && (
+                {TabId > 2 && serverId && (
                   <CircleX
-                    onClick={() => {
-                      handleLeaveServer(userCurrentServerId);
-                    }}
+                    onClick={() => handleLeaveServer(serverId)}
                     size={16}
                     className={header['tabClose']}
                   />
@@ -365,6 +338,44 @@ const Home = () => {
   const lang = useLanguage();
 
   // States
+  const [user, setUser] = useState<User>({
+    id: '',
+    name: '未知使用者',
+    avatar: '',
+    avatarUrl: '',
+    signature: '',
+    status: 'online',
+    gender: 'Male',
+    level: 0,
+    xp: 0,
+    requiredXp: 0,
+    progress: 0,
+    currentChannelId: '',
+    currentServerId: '',
+    lastActiveAt: 0,
+    createdAt: 0,
+  });
+  const [server, setServer] = useState<Server>({
+    id: '',
+    name: '未知伺服器',
+    avatar: '',
+    avatarUrl: '/logo_server_def.png',
+    announcement: '',
+    description: '',
+    type: 'other',
+    displayId: '00000000',
+    slogan: '',
+    level: 0,
+    wealth: 0,
+    lobbyId: '',
+    ownerId: '',
+    settings: {
+      allowDirectMessage: false,
+      visibility: 'public',
+      defaultChannelId: '',
+    },
+    createdAt: 0,
+  });
   const [selectedTabId, setSelectedTabId] = useState<number>(1);
 
   // Effects
@@ -418,7 +429,7 @@ const Home = () => {
 
   const handleUserConnect = (user: User) => {
     console.log('User connected: ', user);
-    store.dispatch(setUser(user));
+    setUser(user);
     setSelectedTabId(1);
   };
 
@@ -432,12 +443,12 @@ const Home = () => {
 
   const handleUserUpdate = (data: Partial<User>) => {
     console.log('User update: ', data);
-    store.dispatch(setUser(data));
+    setUser({ ...user, ...data });
   };
 
   const handleServerConnect = (server: Server) => {
     console.log('Server connected: ', server);
-    store.dispatch(setServer(server));
+    setServer(server);
     setSelectedTabId(3);
   };
 
@@ -449,7 +460,7 @@ const Home = () => {
 
   const handleServerUpdate = (data: Partial<Server>) => {
     console.log('Server update: ', data);
-    store.dispatch(setServer(data));
+    setServer({ ...server, ...data });
   };
 
   const handleChannelConnect = (channel: Channel) => {
@@ -471,11 +482,11 @@ const Home = () => {
     if (!socket) return <LoadingSpinner />;
     switch (selectedTabId) {
       case 1:
-        return <HomePage />;
+        return <HomePage user={user} />;
       case 2:
-        return <FriendPage />;
+        return <FriendPage user={user} />;
       case 3:
-        return <ServerPage />;
+        return <ServerPage user={user} server={server} />;
     }
   };
 
@@ -483,6 +494,8 @@ const Home = () => {
     <div className="wrapper">
       <WebRTCProvider>
         <Header
+          user={user}
+          server={server}
           selectedId={selectedTabId}
           setSelectedTabId={setSelectedTabId}
         />

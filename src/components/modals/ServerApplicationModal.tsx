@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // CSS
 import Popup from '@/styles/common/popup.module.css';
 import applyMember from '@/styles/popups/serverApplication.module.css';
 
 // Types
-import { popupType, User, Server, ServerApplication } from '@/types';
+import { PopupType, User, Server, ServerApplication } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -16,8 +16,8 @@ import { useSocket } from '@/providers/SocketProvider';
 import { ipcService } from '@/services/ipc.service';
 
 interface ServerApplicationModalProps {
-  server: Server | null;
-  user: User | null;
+  serverId: string | null;
+  userId: string | null;
 }
 
 const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
@@ -26,21 +26,73 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     const lang = useLanguage();
     const socket = useSocket();
 
-    // Variables
-    const userId = initialData.user?.id || '';
-    const serverId = initialData.server?.id || '';
-    const serverName = initialData.server?.name || '';
-    const serverDisplayId = initialData.server?.displayId || '';
-    const serverAvatar = initialData.server?.avatar || null;
-
     // State
-    const [application, setApplication] = useState<ServerApplication>({
+    const [user, setUser] = useState<User>({
       id: '',
-      userId: '',
-      serverId: '',
-      description: '',
+      name: '未知使用者',
+      avatar: '',
+      avatarUrl: '',
+      signature: '',
+      status: 'online',
+      gender: 'Male',
+      level: 0,
+      xp: 0,
+      requiredXp: 0,
+      progress: 0,
+      currentChannelId: '',
+      currentServerId: '',
+      lastActiveAt: 0,
       createdAt: 0,
     });
+    const [server, setServer] = useState<Server>({
+      id: '',
+      name: '未知伺服器',
+      avatar: '',
+      avatarUrl: '/logo_server_def.png',
+      announcement: '',
+      description: '',
+      type: 'other',
+      displayId: '00000000',
+      slogan: '',
+      level: 0,
+      wealth: 0,
+      lobbyId: '',
+      ownerId: '',
+      settings: {
+        allowDirectMessage: false,
+        visibility: 'public',
+        defaultChannelId: '',
+      },
+      createdAt: 0,
+    });
+    const [application, setApplication] = useState<ServerApplication>({
+      id: '',
+      name: '未知使用者',
+      avatar: '',
+      avatarUrl: '',
+      signature: '',
+      status: 'online',
+      gender: 'Male',
+      level: 0,
+      xp: 0,
+      requiredXp: 0,
+      progress: 0,
+      currentChannelId: '',
+      currentServerId: '',
+      lastActiveAt: 0,
+      createdAt: 0,
+      description: '',
+      userId: '',
+      serverId: '',
+    });
+
+    // Variables
+    const userId = initialData.userId || '';
+    const serverId = initialData.serverId || '';
+    const serverName = server.name;
+    const serverDisplayId = server.displayId;
+    const serverAvatar = server.avatar;
+    const applicationDescription = application.description;
 
     // Section Control
     const [section, setSection] = useState<number>(0);
@@ -54,12 +106,12 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     };
 
     const handleOpenSuccessDialog = () => {
-      ipcService.popup.open(popupType.DIALOG_SUCCESS);
-      ipcService.initialData.onRequest(popupType.DIALOG_SUCCESS, {
+      ipcService.popup.open(PopupType.DIALOG_SUCCESS);
+      ipcService.initialData.onRequest(PopupType.DIALOG_SUCCESS, {
         title: lang.tr.serverApply,
-        submitTo: popupType.DIALOG_SUCCESS,
+        submitTo: PopupType.DIALOG_SUCCESS,
       });
-      ipcService.popup.onSubmit(popupType.DIALOG_SUCCESS, () => {
+      ipcService.popup.onSubmit(PopupType.DIALOG_SUCCESS, () => {
         setSection(1);
       });
     };
@@ -67,6 +119,11 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     const handleClose = () => {
       ipcService.window.close();
     };
+
+    // UseEffect
+    useEffect(() => {
+      // GET USER, SERVRE, APPLICATION
+    }, []);
 
     switch (section) {
       // Member Application Form
@@ -115,7 +172,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
                           description: e.target.value,
                         }))
                       }
-                      value={application.description}
+                      value={applicationDescription}
                     />
                   </div>
                 </div>

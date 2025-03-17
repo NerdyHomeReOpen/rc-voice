@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
 import createServer from '@/styles/popups/createServer.module.css';
 
 // Types
-import { User, Server, popupType } from '@/types';
+import { User, Server, PopupType } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -33,7 +33,7 @@ export const validateSlogan = (slogan: string): string => {
 };
 
 interface CreateServerModalProps {
-  user: User | null;
+  userId: string | null;
 }
 
 const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
@@ -42,18 +42,29 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const lang = useLanguage();
     const socket = useSocket();
 
-    // Variables
-    const maxGroups = 3;
-    const userId = initialData.user?.id || '';
-    const userOwnedServers = initialData.user?.ownedServers || [];
-    const remainingGroups = maxGroups - userOwnedServers.length;
-    const canCreate = remainingGroups > 0;
-
     // States
     const [section, setSection] = useState<number>(0);
     const [errors, setErrors] = useState<{ [key: string]: string }>({
       name: '',
       description: '',
+    });
+
+    const [user, setUser] = useState<User>({
+      id: '',
+      name: '未知使用者',
+      avatar: '',
+      avatarUrl: '',
+      signature: '',
+      status: 'online',
+      gender: 'Male',
+      level: 0,
+      xp: 0,
+      requiredXp: 0,
+      progress: 0,
+      currentChannelId: '',
+      currentServerId: '',
+      lastActiveAt: 0,
+      createdAt: 0,
     });
     const [server, setServer] = useState<Server>({
       id: '',
@@ -77,6 +88,13 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       createdAt: 0,
     });
 
+    // Variables
+    const maxGroups = 3;
+    const userId = initialData.userId || '';
+    const userOwnedServers = user.ownedServers || [];
+    const remainingGroups = maxGroups - userOwnedServers.length;
+    const canCreate = remainingGroups > 0;
+
     // Handlers
     const handleClose = () => {
       ipcService.window.close();
@@ -88,12 +106,17 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     };
 
     const handleOpenErrorDialog = (message: string) => {
-      ipcService.popup.open(popupType.DIALOG_ERROR);
-      ipcService.initialData.onRequest(popupType.DIALOG_ERROR, {
+      ipcService.popup.open(PopupType.DIALOG_ERROR);
+      ipcService.initialData.onRequest(PopupType.DIALOG_ERROR, {
         title: message,
-        submitTo: popupType.DIALOG_ERROR,
+        submitTo: PopupType.DIALOG_ERROR,
       });
     };
+
+    // Effects
+    useEffect(() => {
+      // GET USER DATA
+    }, [userId]);
 
     switch (section) {
       // Server Type Selection Section

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 // CSS
 import Popup from '@/styles/common/popup.module.css';
-import editChannel from '@/styles/popups/editChannel.module.css';
+import editChannel from '@/styles/popups/editchannel.module.css';
 
 // Types
 import { Channel, Visibility } from '@/types';
@@ -15,7 +15,7 @@ import { useSocket } from '@/providers/SocketProvider';
 import { ipcService } from '@/services/ipc.service';
 
 interface EditChannelModalProps {
-  channel: Channel | null;
+  channelId: string | null;
 }
 
 const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
@@ -24,41 +24,31 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     const lang = useLanguage();
     const socket = useSocket();
 
-    // Variables
-    const channel = React.useMemo(
-      () =>
-        initialData.channel || {
-          id: '',
-          name: '未知頻道',
-          isRoot: false,
-          isCategory: false,
-          isLobby: false,
-          voiceMode: 'free',
-          chatMode: 'free',
-          order: 0,
-          serverId: '',
-          settings: {
-            bitrate: 0,
-            slowmode: false,
-            userLimit: -1,
-            visibility: 'public' as Visibility,
-          },
-          createdAt: 0,
-        },
-      [initialData.channel],
-    );
-
     // States
-    const [editedChannel, setEditedChannel] = useState<Partial<Channel>>({
+    const [channel, setChannel] = useState<Channel>({
       id: '',
       name: '',
+      isLobby: false,
+      isCategory: false,
+      isRoot: false,
+      serverId: '',
+      voiceMode: 'free',
+      chatMode: 'free',
+      order: 0,
       settings: {
         bitrate: 0,
-        slowmode: false,
-        userLimit: -1,
         visibility: 'public',
+        slowmode: false,
+        userLimit: 0,
       },
+      createdAt: 0,
     });
+
+    // Variables
+    const channelId = initialData.channelId || '';
+    const channelName = channel.name;
+    const channelSettings = channel.settings;
+    const isCategory = channel.isCategory;
 
     // Handlers
     const handleClose = () => {
@@ -67,16 +57,13 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
 
     const handleUpdateChannel = async () => {
       if (!socket) return;
-      socket.send.updateChannel({ channel: editedChannel });
+      socket.send.updateChannel({ channel: channel });
     };
 
+    // Effects
     useEffect(() => {
-      setEditedChannel({
-        id: channel.id,
-        name: channel.name,
-        settings: channel.settings,
-      });
-    }, [channel]);
+      // GET CHANNEL DATA
+    }, [channelId]);
 
     return (
       <div className={Popup['popupContainer']}>
@@ -85,16 +72,16 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
             <div className={editChannel['inputGroup']}>
               <div className={Popup['inputBox']}>
                 <div className={Popup['label']}>
-                  {`${
-                    channel?.isCategory ? lang.tr.category : lang.tr.channel
-                  }${lang.tr.name}`}
+                  {`${isCategory ? lang.tr.category : lang.tr.channel}${
+                    lang.tr.name
+                  }`}
                 </div>
                 <div className={Popup['input']}>
                   <input
                     type="text"
-                    value={editedChannel.name}
+                    value={channelName}
                     onChange={(e) =>
-                      setEditedChannel((prev) => ({
+                      setChannel((prev) => ({
                         ...prev,
                         name: e.target.value,
                       }))
@@ -108,14 +95,13 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                 </div>
                 <select
                   className={Popup['input']}
-                  value={editedChannel.settings?.visibility}
+                  value={channelSettings.visibility}
                   onChange={(e) =>
-                    setEditedChannel((prev) => {
-                      const settings = prev.settings ?? channel.settings;
+                    setChannel((prev) => {
                       return {
                         ...prev,
                         settings: {
-                          ...settings,
+                          ...prev.settings,
                           visibility: e.target.value as Visibility,
                         },
                       };

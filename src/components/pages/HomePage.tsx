@@ -1,6 +1,5 @@
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 
 // CSS
 import homePage from '@/styles/homePage.module.css';
@@ -9,7 +8,7 @@ import homePage from '@/styles/homePage.module.css';
 import ServerListViewer from '@/components/viewers/ServerListViewer';
 
 // Type
-import { popupType, Server, SocketServerEvent, User } from '@/types';
+import { PopupType, Server, SocketServerEvent, User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -18,10 +17,11 @@ import { useLanguage } from '@/providers/LanguageProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
-const HomePageComponent: React.FC = React.memo(() => {
-  // Redux
-  const user = useSelector((state: { user: User }) => state.user);
+interface HomePageProps {
+  user: User;
+}
 
+const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
   // Hooks
   const lang = useLanguage();
   const socket = useSocket();
@@ -46,8 +46,8 @@ const HomePageComponent: React.FC = React.memo(() => {
   };
 
   const handleOpenCreateServerPopup = () => {
-    ipcService.popup.open(popupType.CREATE_SERVER);
-    ipcService.initialData.onRequest(popupType.CREATE_SERVER, { user: user });
+    ipcService.popup.open(PopupType.CREATE_SERVER);
+    ipcService.initialData.onRequest(PopupType.CREATE_SERVER, { user: user });
   };
 
   // Effects
@@ -70,6 +70,11 @@ const HomePageComponent: React.FC = React.memo(() => {
   }, [socket]);
 
   useEffect(() => {
+    if (!socket) return;
+    socket.send.refreshUser(null);
+  }, [socket]);
+
+  useEffect(() => {
     if (!lang) return;
     ipcService.discord.updatePresence({
       details: lang.tr.RPCHomePage,
@@ -87,11 +92,6 @@ const HomePageComponent: React.FC = React.memo(() => {
       ],
     });
   }, [lang, userName]);
-
-  useEffect(() => {
-    if (!socket) return;
-    socket.send.refreshUser(null);
-  }, [socket]);
 
   return (
     <div className={homePage['homeWrapper']}>
@@ -156,26 +156,26 @@ const HomePageComponent: React.FC = React.memo(() => {
                 <div className={homePage['myGroupsTitle']} data-key="60005">
                   {lang.tr.recentVisits}
                 </div>
-                <ServerListViewer servers={searchResults} />
+                <ServerListViewer user={user} servers={searchResults} />
               </div>
             )}
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="60005">
                 {lang.tr.recentVisits}
               </div>
-              <ServerListViewer servers={userRecentServers} />
+              <ServerListViewer user={user} servers={userRecentServers} />
             </div>
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="30283">
                 {lang.tr.myGroups}
               </div>
-              <ServerListViewer servers={userOwnedServers} />
+              <ServerListViewer user={user} servers={userOwnedServers} />
             </div>
             <div className={homePage['myGroupsItem']}>
               <div className={homePage['myGroupsTitle']} data-key="60005">
                 {lang.tr.favoriteGroups}
               </div>
-              <ServerListViewer servers={userFavServers} />
+              <ServerListViewer user={user} servers={userFavServers} />
             </div>
           </div>
         </div>
