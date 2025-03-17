@@ -1311,53 +1311,71 @@ export interface DiscordPresence {
 }
 
 export enum SocketClientEvent {
+  // User
   SEARCH_USER = 'searchUser',
-  CONNECT_USER = 'connectUser',
-  DISCONNECT_USER = 'disconnectUser',
   REFRESH_USER = 'refreshUser',
   UPDATE_USER = 'updateUser',
+  // Server
   SEARCH_SERVER = 'searchServer',
+  REFRESH_SERVER = 'refreshServer',
   CONNECT_SERVER = 'connectServer',
   DISCONNECT_SERVER = 'disconnectServer',
   CREATE_SERVER = 'createServer',
   UPDATE_SERVER = 'updateServer',
   DELETE_SERVER = 'deleteServer',
-  CREATE_SERVER_APPLICATION = 'createServerApplication',
-  UPDATE_MEMBER = 'updateMember',
+  // Channel
   CONNECT_CHANNEL = 'connectChannel',
   DISCONNECT_CHANNEL = 'disconnectChannel',
   CREATE_CHANNEL = 'createChannel',
   UPDATE_CHANNEL = 'updateChannel',
   DELETE_CHANNEL = 'deleteChannel',
+  // Friend Group
+  CREATE_FRIEND_GROUP = 'createFriendGroup',
+  UPDATE_FRIEND_GROUP = 'updateFriendGroup',
+  DELETE_FRIEND_GROUP = 'deleteFriendGroup',
+  // Member
+  UPDATE_MEMBER = 'updateMember',
+  // Friend
+  UPDATE_FRIEND = 'updateFriend',
+  // Member Application
+  CREATE_MEMBER_APPLICATION = 'createMemberApplication',
+  UPDATE_MEMBER_APPLICATION = 'updateMemberApplication',
+  DELETE_MEMBER_APPLICATION = 'deleteMemberApplication',
+  // Friend Application
+  CREATE_FRIEND_APPLICATION = 'createFriendApplication',
+  UPDATE_FRIEND_APPLICATION = 'updateFriendApplication',
+  DELETE_FRIEND_APPLICATION = 'deleteFriendApplication',
+  // Message
   SEND_MESSAGE = 'message',
   SEND_DIRECT_MESSAGE = 'directMessage',
+  // RTC
   RTC_OFFER = 'RTCOffer',
   RTC_ANSWER = 'RTCAnswer',
   RTC_ICE_CANDIDATE = 'RTCIceCandidate',
 }
 
 export enum SocketServerEvent {
+  // Socket
   CONNECT = 'connect',
   DISCONNECT = 'disconnect',
+  // Notification
   NOTIFICATION = 'notification', // not used yet
-  USER_CONNECT = 'userConnect', // deprecated
-  USER_DISCONNECT = 'userDisconnect', // deprecated
+  // User
+  USER_SEARCH = 'userSearch',
   USER_UPDATE = 'userUpdate',
+  // Server
   SERVER_SEARCH = 'serverSearch',
-  SERVER_CONNECT = 'serverConnect',
-  SERVER_DISCONNECT = 'serverDisconnect',
   SERVER_UPDATE = 'serverUpdate',
-  CREATE_SERVER_APPLICATION = 'createServerApplication',
-  CHANNEL_CONNECT = 'channelConnect',
-  CHANNEL_DISCONNECT = 'channelDisconnect',
+  // Channel
   CHANNEL_UPDATE = 'channelUpdate',
-  ERROR = 'error',
-  RTC_CONNECT = 'RTCConnect',
+  // RTC
   RTC_OFFER = 'RTCOffer',
   RTC_ANSWER = 'RTCAnswer',
   RTC_ICE_CANDIDATE = 'RTCIceCandidate',
   RTC_JOIN = 'RTCJoin',
   RTC_LEAVE = 'RTCLeave',
+  // Error
+  ERROR = 'error',
 }
 
 export enum PopupType {
