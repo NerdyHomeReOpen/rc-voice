@@ -174,6 +174,11 @@ export interface Translation {
   eventStaff: string;
   official: string;
   yesterday: string;
+  gender: string;
+  country: string;
+  birthdate: string;
+  signature: string;
+  about: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp' | 'ru';
@@ -358,6 +363,11 @@ export const translations: Record<LanguageKey, Translation> = {
     eventStaff: '官方客服',
     official: '超級管理員',
     yesterday: '昨天',
+    gender: '性別',
+    country: '國家',
+    birthdate: '生日',
+    signature: '簽名',
+    about: '關於我',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -538,6 +548,11 @@ export const translations: Record<LanguageKey, Translation> = {
     eventStaff: '官方客服',
     official: '超级管理员',
     yesterday: '昨天',
+    gender: '性别',
+    country: '国家',
+    birthdate: '生日',
+    signature: '签名',
+    about: '关于我',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -720,6 +735,11 @@ export const translations: Record<LanguageKey, Translation> = {
     eventStaff: 'Event staff',
     official: 'Official',
     yesterday: 'Yesterday',
+    gender: 'Gender',
+    country: 'Country',
+    birthdate: 'Birthdate',
+    signature: 'Signature',
+    about: 'About',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -900,6 +920,11 @@ export const translations: Record<LanguageKey, Translation> = {
     eventStaff: '公式カスタマーサービス',
     official: 'スーパー管理者',
     yesterday: '昨日',
+    gender: '性別',
+    country: '国',
+    birthdate: '誕生日',
+    signature: '署名',
+    about: '自己紹介',
   },
   ru: {
     RPCHomePage: 'Просмотр главной страницы',
@@ -1083,6 +1108,11 @@ export const translations: Record<LanguageKey, Translation> = {
     eventStaff: 'Официальная поддержка',
     official: 'Супер администратор',
     yesterday: 'Вчера',
+    gender: 'Пол',
+    country: 'Страна',
+    birthdate: 'Дата рождения',
+    signature: 'Подпись',
+    about: 'О себе',
   },
 };
 

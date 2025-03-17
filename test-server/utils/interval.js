@@ -1,15 +1,5 @@
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
-const fs = require('fs').promises;
-const path = require('path');
 // Constants
-const {
-  XP_SYSTEM,
-  UPLOADS_DIR,
-  MIME_TYPES,
-  CLEANUP_INTERVAL_MS,
-  SERVER_AVATAR_DIR,
-} = require('../constant');
+const { XP_SYSTEM } = require('../constant');
 // Utils
 const Logger = require('./logger');
 const Map = require('./map');

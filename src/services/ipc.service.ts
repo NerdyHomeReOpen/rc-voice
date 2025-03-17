@@ -139,7 +139,7 @@ export const ipcService = {
     open: (type: popupType) => {
       const PopupSize = {
         // [popupType.CREATE_FRIEND_GROUP]: { height: 600, width: 450 },
-        [popupType.EDIT_USER]: { height: 200, width: 300 },
+        [popupType.EDIT_USER]: { height: 650, width: 500 },
         [popupType.CREATE_SERVER]: { height: 430, width: 520 },
         [popupType.EDIT_SERVER]: { height: 450, width: 600 },
         [popupType.DELETE_SERVER]: { height: 300, width: 200 },

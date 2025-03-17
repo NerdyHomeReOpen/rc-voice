@@ -13,6 +13,7 @@ const JWT = utils.jwt;
 const StandardizedError = require('../standardizedError');
 // Handlers
 const rtcHandler = require('./rtc');
+const Func = require('../utils/func');
 
 const channelHandler = {
   connectChannel: async (io, socket, data) => {
@@ -387,6 +388,18 @@ const channelHandler = {
         );
       }
 
+      // Validate channel name
+      const nameError = Func.validateChannelName(channel.name);
+      if (nameError) {
+        throw new StandardizedError(
+          nameError,
+          'ValidationError',
+          'CREATECHANNEL',
+          'NAME',
+          400,
+        );
+      }
+
       // Create new channel
       const channelId = uuidv4();
       await Set.channel(channelId, {
@@ -528,6 +541,50 @@ const channelHandler = {
           'USER_PERMISSION',
           403,
         );
+      }
+
+      // Validate channel name
+      const nameError = Func.validateChannelName(editedChannel.name);
+      if (nameError) {
+        throw new StandardizedError(
+          nameError,
+          'ValidationError',
+          'UPDATECHANNEL',
+          'NAME',
+          400,
+        );
+      }
+
+      // Validate channel visibility
+      if (editedChannel.settings?.visibility) {
+        const visibilityError = Func.validateChannelVisibility(
+          editedChannel.settings.visibility,
+        );
+        if (visibilityError) {
+          throw new StandardizedError(
+            visibilityError,
+            'ValidationError',
+            'UPDATECHANNEL',
+            'VISIBILITY',
+            400,
+          );
+        }
+      }
+
+      // Validate user limit
+      if (typeof editedChannel.settings?.userLimit !== 'undefined') {
+        const userLimitError = Func.validateUserLimit(
+          editedChannel.settings.userLimit,
+        );
+        if (userLimitError) {
+          throw new StandardizedError(
+            userLimitError,
+            'ValidationError',
+            'UPDATECHANNEL',
+            'USER_LIMIT',
+            400,
+          );
+        }
       }
 
       // Update channel

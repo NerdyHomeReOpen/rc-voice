@@ -99,6 +99,18 @@ const messageHandler = {
         );
       }
 
+      // Validate message content
+      const messageError = Func.validateMessage(message.content);
+      if (messageError) {
+        throw new StandardizedError(
+          messageError,
+          'ValidationError',
+          'SENDMESSAGE',
+          'CONTENT',
+          400,
+        );
+      }
+
       // Create new message
       const messageId = uuidv4();
       await Set.message(messageId, {

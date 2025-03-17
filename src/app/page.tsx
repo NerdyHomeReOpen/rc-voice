@@ -8,7 +8,7 @@ import { CircleX } from 'lucide-react';
 import header from '@/styles/common/header.module.css';
 
 // Types
-import { Channel, Server, User, SocketServerEvent, LanguageKey } from '@/types';
+import { popupType,Channel, Server, User, SocketServerEvent, LanguageKey } from '@/types';
 
 // Pages
 import FriendPage from '@/components/pages/FriendPage';
@@ -135,13 +135,24 @@ const Header: React.FC<HeaderProps> = React.memo(
       localStorage.setItem('language', language);
     };
 
+    const handleShowEditUser = () => {
+      ipcService.popup.open(popupType.EDIT_USER);
+      ipcService.initialData.onRequest(popupType.EDIT_USER, {
+        user: user,
+      });
+    };
+
     return (
       <div className={header['header']}>
         {/* Title */}
         <div className={`${header['titleBox']} ${header['big']}`}></div>
         {/* User Status */}
         <div className={header['userStatus']}>
-          <div className={header['nameDisplay']}>{userName}</div>
+          <div className={header['nameDisplay']} onClick={() => 
+            {
+              handleShowEditUser();
+            }
+          }>{userName}</div>
           <div
             className={header['statusBox']}
             onClick={() => {

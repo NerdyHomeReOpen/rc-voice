@@ -645,6 +645,36 @@ const serverHandler = {
         );
       }
 
+      if (editedServer.announcement) {
+        const announcementError = Func.validateAnnouncement(
+          editedServer.announcement,
+        );
+        if (announcementError) {
+          throw new StandardizedError(
+            announcementError,
+            'ValidationError',
+            'UPDATESERVER',
+            'ANNOUNCEMENT',
+            400,
+          );
+        }
+      }
+
+      if (editedServer.settings?.visibility) {
+        const visibilityError = Func.validateServerVisibility(
+          editedServer.settings.visibility,
+        );
+        if (visibilityError) {
+          throw new StandardizedError(
+            visibilityError,
+            'ValidationError',
+            'UPDATESERVER',
+            'VISIBILITY',
+            400,
+          );
+        }
+      }
+
       let avatarData = null;
       if (editedServer.avatar) {
         const matches = editedServer.avatar.match(/^data:image\/(.*?);base64,/);

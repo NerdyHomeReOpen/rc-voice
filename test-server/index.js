@@ -9,6 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const utils = require('./utils');
 const Logger = utils.logger;
+const Func = utils.func;
 const Set = utils.set;
 const Get = utils.get;
 const JWT = utils.jwt;
@@ -167,6 +168,19 @@ const server = http.createServer((req, res) => {
         const exists = accountPasswords[data.account];
         if (exists) {
           throw new Error('帳號已存在');
+        }
+
+        const accountError = Func.validateAccount(account);
+        if (accountError) {
+          throw new Error(accountError);
+        }
+        const passwordError = Func.validatePassword(password);
+        if (passwordError) {
+          throw new Error(passwordError);
+        }
+        const usernameError = Func.validateUsername(username);
+        if (usernameError) {
+          throw new Error(usernameError);
         }
 
         // Create user data

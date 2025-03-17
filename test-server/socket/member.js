@@ -147,6 +147,35 @@ const memberHandler = {
         );
       }
 
+      // Validate additional data
+      if (targetMember.nickname) {
+        const nicknameError = Func.validateNickname(targetMember.nickname);
+        if (nicknameError) {
+          throw new StandardizedError(
+            nicknameError,
+            'ValidationError',
+            'UPDATEMEMBER',
+            'NICKNAME',
+            400,
+          );
+        }
+      }
+
+      if (typeof targetMember.permissionLevel !== 'undefined') {
+        const permissionError = Func.validatePermissionLevel(
+          targetMember.permissionLevel,
+        );
+        if (permissionError) {
+          throw new StandardizedError(
+            permissionError,
+            'ValidationError',
+            'UPDATEMEMBER',
+            'PERMISSION',
+            400,
+          );
+        }
+      }
+
       // Update member
       await Set.member(`${targetMember.id}`, targetMember);
 

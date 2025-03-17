@@ -14,6 +14,7 @@ import CreateServerModal from '@/components/modals/CreateServerModal';
 import EditServerModal from '@/components/modals/EditServerModal';
 import AddChannelModal from '@/components/modals/AddChannelModal';
 import EditChannelModal from '@/components/modals/EditChannelModal';
+import UserSettingModal from '@/components/modals/UserSettingModal';
 import ServerApplication from '@/components/modals/ServerApplicationModal';
 import ApplyFriend from '@/components/modals/ApplyFriend';
 import Dialog from '@/components/modals/Dialog';
@@ -99,7 +100,7 @@ const Modal = React.memo(() => {
       switch (type) {
         case popupType.EDIT_USER:
           setHeader(<Header title={lang.tr.editUser} buttons={['close']} />);
-          // setContent(<EditUserModal {...initialData} />);
+          setContent(<UserSettingModal {...initialData} />);
           break;
         case popupType.CREATE_SERVER:
           setHeader(

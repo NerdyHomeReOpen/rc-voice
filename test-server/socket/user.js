@@ -286,6 +286,31 @@ const userHandler = {
         );
       }
 
+      if (editedUser.name) {
+        const nameError = Func.validateUsername(editedUser.name);
+        if (nameError) {
+          throw new StandardizedError(
+            nameError,
+            'ValidationError',
+            'UPDATEUSER',
+            'USERNAME',
+            401,
+          );
+        }
+      }
+      if (editedUser.signature) {
+        const signatureError = Func.validateSignature(editedUser.signature);
+        if (signatureError) {
+          throw new StandardizedError(
+            signatureError,
+            'ValidationError',
+            'UPDATEUSER',
+            'SIGNATURE',
+            401,
+          );
+        }
+      }
+
       // Update user data
       await Set.user(userId, editedUser);
 
