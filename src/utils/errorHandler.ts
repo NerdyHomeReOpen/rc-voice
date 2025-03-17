@@ -1,5 +1,5 @@
 import { ipcService } from '@/services/ipc.service';
-import { popupType } from '@/types';
+import { PopupType } from '@/types';
 
 export class StandardizedError extends Error {
   constructor(
@@ -26,12 +26,12 @@ export class errorHandler {
   show() {
     const errorMessage = `[錯誤][${this.error.tag}] ${this.error.error_message}，錯誤代碼: ${this.error.status_code} (${this.error.part})`;
 
-    ipcService.popup.open(popupType.DIALOG_ERROR);
+    ipcService.popup.open(PopupType.DIALOG_ERROR);
     ipcService.popup.onSubmit('error', () => {
       this.error.handler();
       console.log('Error handled.');
     });
-    ipcService.initialData.onRequest(popupType.DIALOG_ERROR, {
+    ipcService.initialData.onRequest(PopupType.DIALOG_ERROR, {
       iconType: 'error',
       title: errorMessage,
       submitTo: 'error',
