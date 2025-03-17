@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 // CSS
@@ -13,7 +12,7 @@ import permission from '@/styles/common/permission.module.css';
 import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 
 // Types
-import { ServerApplication, Server, Member, popupType, User } from '@/types';
+import { ServerApplication, Server, Member, popupType } from '@/types';
 
 // Utils
 import { getPermissionText } from '@/utils/formatters';
@@ -26,19 +25,9 @@ import { useLanguage } from '@/providers/LanguageProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
-interface SortState {
-  field:
-    | 'name'
-    | 'permission'
-    | 'contribution'
-    | 'joinDate'
-    | 'applyContribution';
-  direction: 'asc' | 'desc';
-}
-
 interface ServerSettingModalProps {
-  server: Server;
-  user: User;
+  serverId: string;
+  userId: string;
 }
 
 const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
@@ -49,11 +38,11 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const contextMenu = useContextMenu();
 
     // Variables
-    const server = initialData.server;
-    const user = initialData.user;
+    const serverId = initialData.serverId;
+    const userId = initialData.userId;
 
     // States
-    const [editedServerData, seteditedServerData] = useState<Server>({
+    const [server, setServer] = useState<Server>({
       id: '',
       name: '未知伺服器',
       avatar: '',
@@ -74,128 +63,39 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       },
       createdAt: 0,
     });
-
-    const [markdownContent, setMarkdownContent] = useState<string>('');
-    const setServerIcon = useRef<HTMLInputElement>(null);
-    const [pendingIconFile, setPendingIconFile] = useState<{
-      data: string;
-      type: string;
-    } | null>(null);
-
-    const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
-    const [applications, setApplications] = useState<ServerApplication[]>([]);
-    const [applicationContextMenu, setApplicationContextMenu] = useState<{
-      x: number;
-      y: number;
-      application: any;
-    } | null>(null);
-    const [members, setMembers] = useState<Member[]>([]);
-    const [searchText, setSearchText] = useState<string>('');
-    const [blockPage, setBlockPage] = useState<number>(1);
-
-    const [originalServerData, setOriginalServerData] = useState<Server>({
-      ...server,
-    });
-
-    const [changeState, setChangeState] = useState<string[]>([]);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-
-    const [sortState, setSortState] = useState<SortState>({
-      field: 'permission',
-      direction: 'desc',
-    });
+    const [serverMembers, setserverMembers] = useState<Member[]>([]);
+    const [serverApplications, setserverApplications] = useState<
+      ServerApplication[]
+    >([]);
 
     const [sortedMembers, setSortedMembers] = useState<Member[]>([]);
     const [sortedApplications, setSortedApplications] = useState<
       ServerApplication[]
     >([]);
-    const [sortedBlockAccounts, setSortedBlockAccounts] = useState<Member[]>(
-      [],
-    );
+    const [sortedBlockMembers, setSortedBlockMembers] = useState<Member[]>([]);
 
-    const handleSort = (
-      field: string,
-      array: any[],
-      direction: 'desc' | 'asc',
-    ) => {
-      return array.sort(
-        (a, b) => (direction === 'asc' ? 1 : -1) * (a[field] - b[field]),
-      );
+    const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
+
+    const setServerIcon = useRef<HTMLInputElement>(null);
+
+    const [sortState, setSortState] = useState<number>(-1);
+    const [sortField, setSortField] = useState<string>('name');
+
+    const handleSort = (field: string, array: any[], direction: number) => {
+      setSortField(field);
+      setSortState(direction);
+      return array.sort((a, b) => direction * (a[field] - b[field]));
     };
 
-    const handleServerIconChange = async (
-      event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-      if (!event.target.files || !event.target.files[0]) return;
-
-      const file = event.target.files[0];
-
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        console.error(lang.tr.fileSizeError);
-        return;
-      }
-
-      // Validate file type
-      if (
-        !['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(
-          file.type,
-        )
-      ) {
-        console.error(lang.tr.fileTypeError);
-        return;
-      }
-
-      try {
-        // Read file as base64 for preview and later upload
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64Data = e.target?.result?.toString();
-
-          if (base64Data) {
-            setPendingIconFile({
-              data: base64Data.split(',')[1],
-              type: file.type,
-            });
-
-            // Update editing state for change detection
-            seteditedServerData((prev) => ({
-              ...prev,
-              pendingIconUpdate: true, // Flag for change detection
-            }));
-          }
-        };
-        reader.readAsDataURL(file);
-      } catch (error) {
-        console.error('讀取檔案時發生錯誤:', error);
-      }
+    const handleOpenErrorDialog = (message: string) => {
+      ipcService.popup.open(popupType.DIALOG_ERROR);
+      ipcService.initialData.onRequest(popupType.DIALOG_ERROR, {
+        title: message,
+        submitTo: popupType.DIALOG_ERROR,
+      });
     };
 
-    useEffect(() => {
-      if (!socket) return;
-      const ObjectToArray = (obj: Record<string, any>): any[] => {
-        return Object.keys(obj).map((key) => obj[key]);
-      };
-
-      if (activeTabIndex === 2) {
-        const filteredMembers = ObjectToArray(server?.members || {}).filter(
-          (member) => member.createdAt !== 0,
-        );
-        setMembers(filteredMembers);
-      }
-    }, [activeTabIndex, socket]);
-
-    const handleApplicationAction = (action: 'accept' | 'reject') => {
-      if (!applicationContextMenu?.application) return;
-
-      // 這裡需修改
-      // socket?.emit('handleApplication', {
-      //   sessionId: sessionId,
-      //   serverId: server?.id,
-      //   applicationId: applicationContextMenu.application?.id,
-      //   action: action,
-      // });
-    };
+    const handleApplicationAction = (action: 'accept' | 'reject') => {};
 
     const handleClose = () => {
       ipcService.window.close();
@@ -203,186 +103,15 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
 
     const handleSubmit = () => {
       if (!socket) return;
-      socket.send.updateServer({ server: editedServerData });
+      socket.send.updateServer({ server: server });
       handleClose();
     };
 
-    // const findDifferencesDeep = (
-    //   obj1: Record<string, any>,
-    //   obj2: Record<string, any>,
-    //   prefix = '',
-    // ): string[] => {
-    //   const allKeys = new Set([
-    //     ...Object.keys(obj1 || {}),
-    //     ...Object.keys(obj2 || {}),
-    //   ]);
+    const handleUserMove = (target: Member) => {};
 
-    //   return Array.from(allKeys).reduce((acc, key) => {
-    //     const fullKey = prefix ? `${prefix}.${key}` : key;
-    //     const value1 = obj1[key];
-    //     const value2 = obj2[key];
+    const handleKickServer = (target: Member) => {};
 
-    //     if (typeof value1 === 'string' && typeof value2 === 'string') {
-    //       if (value1.trim() !== value2.trim()) {
-    //         acc.push(fullKey);
-    //       }
-    //     } else if (
-    //       value1 &&
-    //       value2 &&
-    //       typeof value1 === 'object' &&
-    //       typeof value2 === 'object'
-    //     ) {
-    //       acc.push(...findDifferencesDeep(value1, value2, fullKey));
-    //     } else if (value1 !== value2) {
-    //       acc.push(fullKey);
-    //     }
-
-    //     return acc;
-    //   }, [] as string[]);
-    // };
-
-    // useEffect(() => {
-    //   const findDifferencesDeep = (
-    //     obj1: Record<string, any> = {},
-    //     obj2: Record<string, any> = {},
-    //     prefix = '',
-    //   ): string[] => {
-    //     const allKeys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
-
-    //     return Array.from(allKeys).reduce((acc, key) => {
-    //       const fullKey = prefix ? `${prefix}.${key}` : key;
-    //       const value1 = obj1[key];
-    //       const value2 = obj2[key];
-
-    //       if (typeof value1 === 'string' && typeof value2 === 'string') {
-    //         if (value1.trim() !== value2.trim()) acc.push(fullKey);
-    //       } else if (
-    //         value1 &&
-    //         value2 &&
-    //         typeof value1 === 'object' &&
-    //         typeof value2 === 'object'
-    //       ) {
-    //         acc.push(...findDifferencesDeep(value1, value2, fullKey));
-    //       } else if (value1 !== value2) {
-    //         acc.push(fullKey);
-    //       }
-
-    //       return acc;
-    //     }, [] as string[]);
-    //   };
-
-    //   const dif = findDifferencesDeep(server, editedServerData);
-
-    //   if (markdownContent.trim() !== (server?.announcement || '').trim())
-    //     dif.push('announcement');
-    //   if (pendingIconFile) dif.push('avatar');
-
-    //   setChangeState(
-    //     dif
-    //       .map((key) => {
-    //         switch (key) {
-    //           case 'name':
-    //             return lang.tr.name;
-    //           case 'slogan':
-    //             return lang.tr.slogan;
-    //           case 'type':
-    //             return lang.tr.type;
-    //           case 'description':
-    //             return lang.tr.description;
-    //           case 'settings.visibility':
-    //             return lang.tr.accessPermission;
-    //           case 'avatar':
-    //             return lang.tr.avatar;
-    //           case 'announcement':
-    //             return lang.tr.announcement;
-    //           default:
-    //             return '';
-    //         }
-    //       })
-    //       .filter(Boolean),
-    //   );
-    // }, [editedServerData, pendingIconFile, markdownContent]);
-
-    const sortFunctions: Record<string, any> = {
-      name: (a: Member, b: Member, direction: number): number => {
-        const nameA = (a.nickname || '未知').toLowerCase();
-        const nameB = (b.nickname || '未知').toLowerCase();
-        return direction * nameA.localeCompare(nameB);
-      },
-      permission: (a: Member, b: Member, direction: number): number => {
-        const permissionA = a.permissionLevel ?? 1;
-        const permissionB = b.permissionLevel ?? 1;
-        return direction * (permissionA - permissionB);
-      },
-      contribution: (a: Member, b: Member, direction: number): number => {
-        const contribA = a.contribution ?? 0;
-        const contribB = b.contribution ?? 0;
-        return direction * (contribA - contribB);
-      },
-      joinDate: (a: Member, b: Member, direction: number): number => {
-        const dateA = a?.createdAt ?? 0;
-        const dateB = b?.createdAt ?? 0;
-        return direction * (dateA - dateB);
-      },
-    };
-
-    const handleUserMove = (target: Member) => {
-      // 這裡需修改
-      // socket?.emit('ManageUserAction', {
-      //   sessionId: sessionId,
-      //   serverId: server?.id,
-      //   targetId: target.userId,
-      //   type: 'move',
-      // });
-    };
-
-    const handleKickServer = (target: Member) => {
-      ipcService.popup.open(popupType.DIALOG_WARNING);
-      ipcService.initialData.onRequest(popupType.DIALOG_WARNING, {
-        iconType: 'warning',
-        title: `確定要踢出 ${target.nickname} 嗎？使用者可以再次申請加入。`,
-        submitTo: popupType.DIALOG_WARNING,
-      });
-      ipcService.popup.onSubmit(popupType.DIALOG_WARNING, () => {
-        setMembers((prev) =>
-          prev.filter((member) => member?.id !== target?.id),
-        );
-
-        socket?.send.updateMember({
-          serverId: server?.id,
-          targetMember: {
-            ...target,
-            permissionLevel: 0,
-            createdAt: 0,
-            nickname: '',
-          },
-        });
-      });
-    };
-
-    const handleBlockUser = (target: Member) => {
-      ipcService.popup.open(popupType.DIALOG_WARNING);
-      ipcService.initialData.onRequest(popupType.DIALOG_WARNING, {
-        iconType: 'warning',
-        title: `確定要封鎖 ${target.nickname} 嗎？使用者將無法再次申請加入。`,
-        submitTo: popupType.DIALOG_WARNING,
-      });
-      ipcService.popup.onSubmit(popupType.DIALOG_WARNING, () => {
-        setMembers((prev) =>
-          prev.filter((member) => member?.id !== target?.id),
-        );
-
-        socket?.send.updateMember({
-          member: {
-            ...target,
-            permissionLevel: 0,
-            createdAt: 0,
-            nickname: '',
-            isBlocked: true,
-          },
-        });
-      });
-    };
+    const handleBlockUser = (target: Member) => {};
 
     return (
       <div className={Popup['popupContainer']}>
@@ -431,9 +160,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                             <div className={Popup['label']}>{lang.tr.name}</div>
                             <input
                               type="text"
-                              value={editedServerData?.name ?? server?.name}
+                              value={server?.name ?? server?.name}
                               onChange={(e) => {
-                                seteditedServerData((prev) => ({
+                                setServer((prev) => ({
                                   ...prev,
                                   name: e.target.value,
                                 }));
@@ -455,9 +184,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           <div className={Popup['label']}>{lang.tr.slogan}</div>
                           <input
                             type="text"
-                            value={editedServerData.slogan}
+                            value={server.slogan}
                             onChange={(e) => {
-                              seteditedServerData((prev) => ({
+                              setServer((prev) => ({
                                 ...prev,
                                 slogan: e.target.value,
                               }));
@@ -488,7 +217,25 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           className="hidden"
                           accept="image/jpeg,image/png,image/gif,image/webp"
                           ref={setServerIcon}
-                          onChange={(e) => handleServerIconChange(e)}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) {
+                              handleOpenErrorDialog(lang.tr.canNotReadImage);
+                              return;
+                            }
+                            if (file.size > 5 * 1024 * 1024) {
+                              handleOpenErrorDialog(lang.tr.imageTooLarge);
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setServer((prev) => ({
+                                ...prev,
+                                avatar: reader.result as string,
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }}
                         />
                         <label
                           htmlFor="avatar-upload"
@@ -546,11 +293,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           {lang.tr.description}
                         </div>
                         <textarea
-                          value={
-                            editedServerData?.description ?? server?.description
-                          }
+                          value={server?.description ?? server?.description}
                           onChange={(e) =>
-                            seteditedServerData((prev) => ({
+                            setServer((prev) => ({
                               ...prev,
                               description: e.target.value,
                             }))
@@ -567,9 +312,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                       </div>
                       <textarea
                         style={{ minHeight: '200px' }}
-                        value={editedServerData?.announcement}
+                        value={server?.announcement}
                         onChange={(e) =>
-                          seteditedServerData((prev) => ({
+                          setServer((prev) => ({
                             ...prev,
                             announcement: e.target.value,
                           }))
@@ -618,15 +363,15 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                     const _sortedMember = handleSort(
                                       field,
                                       Object.values(server.members || {}),
-                                      sortState.direction,
+                                      sortState,
                                     );
                                     setSortedMembers(_sortedMember);
                                   }}
                                 >
                                   {field}
                                   <span className="absolute right-0">
-                                    {sortState.field === 'name' &&
-                                      (sortState.direction === 'asc' ? (
+                                    {sortField === field &&
+                                      (sortState === 1 ? (
                                         <ChevronUp size={16} />
                                       ) : (
                                         <ChevronDown size={16} />
@@ -653,7 +398,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                 key={member?.id}
                                 onContextMenu={(e) => {
                                   const isCurrentUser =
-                                    member.userId === user.id;
+                                    // member.userId === user.id; // FIXME
+                                    false;
                                   contextMenu.showContextMenu(
                                     e.pageX,
                                     e.pageY,
@@ -758,17 +504,13 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="public"
                           className="mr-3"
-                          checked={
-                            editedServerData?.settings?.visibility ===
-                              'public' ||
-                            server.settings.visibility === 'public'
-                          }
+                          checked={server.settings.visibility === 'public'}
                           onChange={(e) => {
                             if (e.target.checked)
-                              seteditedServerData({
-                                ...editedServerData,
+                              setServer({
+                                ...server,
                                 settings: {
-                                  ...editedServerData.settings,
+                                  ...server.settings,
                                   visibility: 'public',
                                 },
                               });
@@ -785,17 +527,13 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="members"
                           className="mr-3"
-                          checked={
-                            editedServerData?.settings?.visibility ===
-                              'private' ||
-                            server.settings.visibility === 'private'
-                          }
+                          checked={server.settings.visibility === 'private'}
                           onChange={(e) => {
                             if (e.target.checked)
-                              seteditedServerData({
-                                ...editedServerData,
+                              setServer({
+                                ...server,
                                 settings: {
-                                  ...editedServerData.settings,
+                                  ...server.settings,
                                   visibility: 'private',
                                 },
                               });
@@ -817,17 +555,13 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="private"
                           className="mr-3"
-                          checked={
-                            editedServerData?.settings?.visibility ===
-                              'invisible' ||
-                            server.settings.visibility === 'invisible'
-                          }
+                          checked={server.settings.visibility === 'invisible'}
                           onChange={(e) => {
                             if (e.target.checked)
-                              seteditedServerData({
-                                ...editedServerData,
+                              setServer({
+                                ...server,
                                 settings: {
-                                  ...editedServerData.settings,
+                                  ...server.settings,
                                   visibility: 'invisible',
                                 },
                               });
@@ -872,15 +606,15 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                       const _sortedMember = handleSort(
                                         field,
                                         Object.values(server.members || {}),
-                                        sortState.direction,
+                                        sortState,
                                       );
                                       setSortedMembers(_sortedMember);
                                     }}
                                   >
                                     {field}
                                     <span className="absolute right-0">
-                                      {sortState.field === 'name' &&
-                                        (sortState.direction === 'asc' ? (
+                                      {sortField === field &&
+                                        (sortState === 1 ? (
                                           <ChevronUp size={16} />
                                         ) : (
                                           <ChevronDown size={16} />
@@ -894,19 +628,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                         </thead>
                         <tbody>
                           {sortedApplications.map((application) => {
-                            const applicationUser = application.user;
-                            const member =
-                              server.members?.[applicationUser?.id || ''] ??
-                              null;
-                            const userNickname =
-                              member?.nickname ?? user?.name ?? '未知使用者';
-                            const userContributions = member?.contribution ?? 0;
-                            const applicationDesc =
-                              application.description || '該使用者未填寫訊息';
-
                             return (
                               <tr
-                                key={member?.id}
+                                key={application.id}
                                 onContextMenu={(e) => {
                                   contextMenu.showContextMenu(
                                     e.pageX,
@@ -915,9 +639,10 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                   );
                                 }}
                               >
-                                <td>{userNickname}</td>
-                                <td>{userContributions}</td>
-                                <td>{applicationDesc}</td>
+                                {/* FIXME */}
+                                {/* <td>{application.user.name}</td> */}
+                                {/* <td>{application.contribution}</td> */}
+                                {/* <td>{application.description}</td> */}
                               </tr>
                             );
                           })}
@@ -932,7 +657,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                   <>
                     <div className={`${Popup['inputBox']} ${Popup['col']}`}>
                       <div className={Popup['label']}>
-                        {lang.tr.blacklist}: {sortedBlockAccounts.length}
+                        {lang.tr.blacklist}: {sortedBlockMembers.length}
                       </div>
                       {/* <div className={EditServer['search']}>
                         <input
@@ -956,15 +681,15 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                       const _sortedMember = handleSort(
                                         field,
                                         Object.values(server.members || {}),
-                                        sortState.direction,
+                                        sortState,
                                       );
                                       setSortedMembers(_sortedMember);
                                     }}
                                   >
                                     {field}
                                     <span className="absolute right-0">
-                                      {sortState.field === 'name' &&
-                                        (sortState.direction === 'asc' ? (
+                                      {sortField === field &&
+                                        (sortState === 1 ? (
                                           <ChevronUp size={16} />
                                         ) : (
                                           <ChevronDown size={16} />
@@ -977,20 +702,10 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           </tr>
                         </thead>
                         <tbody>
-                          {sortedApplications.map((application) => {
-                            const applicationUser = application.user;
-                            const member =
-                              server.members?.[applicationUser?.id || ''] ??
-                              null;
-                            const userNickname =
-                              member?.nickname ?? user?.name ?? '未知使用者';
-                            const userContributions = member?.contribution ?? 0;
-                            const applicationDesc =
-                              application.description || '該使用者未填寫訊息';
-
+                          {sortedBlockMembers.map((blockMember) => {
                             return (
                               <tr
-                                key={member?.id}
+                                key={blockMember.id}
                                 onContextMenu={(e) => {
                                   contextMenu.showContextMenu(
                                     e.pageX,
@@ -999,9 +714,10 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                   );
                                 }}
                               >
-                                <td>{userNickname}</td>
-                                <td>{userContributions}</td>
-                                <td>{applicationDesc}</td>
+                                {/* FIXME */}
+                                {/* <td>{blockMember.user.name}</td> */}
+                                {/* <td>{blockMember.contribution}</td> */}
+                                {/* <td>{blockMember.description}</td> */}
                               </tr>
                             );
                           })}
