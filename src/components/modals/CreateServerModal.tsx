@@ -138,7 +138,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
 
     useEffect(() => {
       if (!socket) return;
-      socket.send.refreshUser({ userId: userId });
+      if (userId) socket.send.refreshUser({ userId: userId });
     }, [socket, userId]);
 
     switch (section) {

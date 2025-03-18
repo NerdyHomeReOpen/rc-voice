@@ -150,8 +150,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
 
     useEffect(() => {
       if (!socket) return;
-      // socket.send.refreshServer(server.id);
-    }, [socket]);
+      if (server.id) socket.send.refreshServer({ serverId: server.id });
+      if (currentChannel.id)
+        socket.send.refreshChannel({ channelId: currentChannel.id });
+    }, [socket, server, currentChannel]);
 
     useEffect(() => {
       ipcService.discord.updatePresence({
@@ -184,11 +186,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
               <div className={styles['avatarBox']}>
                 <div
                   className={styles['avatarPicture']}
-                  style={
-                    serverAvatar
-                      ? { backgroundImage: `url(${serverAvatar})` }
-                      : {}
-                  }
+                  style={{ backgroundImage: `url(${serverAvatar})` }}
                 />
               </div>
               <div className={styles['baseInfoBox']}>

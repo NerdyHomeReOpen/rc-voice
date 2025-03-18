@@ -29,6 +29,14 @@ const FriendPageComponent: React.FC<FriendPageProps> = React.memo(
     const lang = useLanguage();
     const socket = useSocket();
 
+    // States
+    const [signatureInput, setSignatureInput] = useState<string>(
+      user.signature,
+    );
+    const [isComposing, setIsComposing] = useState<boolean>(false);
+    const [sidebarWidth, setSidebarWidth] = useState<number>(256);
+    const [isResizing, setIsResizing] = useState<boolean>(false);
+
     // Variables
     const MAXLENGTH = 300;
     const userName = user.name;
@@ -37,12 +45,6 @@ const FriendPageComponent: React.FC<FriendPageProps> = React.memo(
     const userLevel = user.level;
     const userGrade = Math.min(56, Math.ceil(userLevel / 5)); // 56 is max level
     const userBadges = user.badges || [];
-
-    // States
-    const [signatureInput, setSignatureInput] = useState<string>(userSignature);
-    const [isComposing, setIsComposing] = useState<boolean>(false);
-    const [sidebarWidth, setSidebarWidth] = useState<number>(256);
-    const [isResizing, setIsResizing] = useState<boolean>(false);
 
     // Handlers
     const handleChangeSignature = (signature: User['signature']) => {
@@ -100,8 +102,8 @@ const FriendPageComponent: React.FC<FriendPageProps> = React.memo(
 
     useEffect(() => {
       if (!socket) return;
-      socket.send.refreshUser(null);
-    }, [socket]);
+      if (user.id) socket.send.refreshUser({ userId: user.id });
+    }, [socket, user]);
 
     return (
       <div className={friendPage['friendWrapper']}>

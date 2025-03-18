@@ -7,7 +7,80 @@ const net = require('net');
 const DiscordRPC = require('discord-rpc');
 const { io } = require('socket.io-client');
 const { autoUpdater } = require('electron-updater');
-const { SocketClientEvent, SocketServerEvent } = require('./src/types');
+
+const SocketClientEvent = {
+  // User
+  SEARCH_USER: 'searchUser',
+  REFRESH_USER: 'refreshUser',
+  UPDATE_USER: 'updateUser',
+  // Server
+  SEARCH_SERVER: 'searchServer',
+  REFRESH_SERVER: 'refreshServer',
+  CONNECT_SERVER: 'connectServer',
+  DISCONNECT_SERVER: 'disconnectServer',
+  CREATE_SERVER: 'createServer',
+  UPDATE_SERVER: 'updateServer',
+  DELETE_SERVER: 'deleteServer',
+  // Channel
+  REFRESH_CHANNEL: 'refreshChannel',
+  CONNECT_CHANNEL: 'connectChannel',
+  DISCONNECT_CHANNEL: 'disconnectChannel',
+  CREATE_CHANNEL: 'createChannel',
+  UPDATE_CHANNEL: 'updateChannel',
+  DELETE_CHANNEL: 'deleteChannel',
+  // Friend Group
+  REFRESH_FRIEND_GROUP: 'refreshFriendGroup',
+  CREATE_FRIEND_GROUP: 'createFriendGroup',
+  UPDATE_FRIEND_GROUP: 'updateFriendGroup',
+  DELETE_FRIEND_GROUP: 'deleteFriendGroup',
+  // Member
+  REFRESH_MEMBER: 'refreshMember',
+  UPDATE_MEMBER: 'updateMember',
+  // Friend
+  REFRESH_FRIEND: 'refreshFriend',
+  UPDATE_FRIEND: 'updateFriend',
+  // Member Application
+  REFRESH_MEMBER_APPLICATION: 'refreshMemberApplication',
+  CREATE_MEMBER_APPLICATION: 'createMemberApplication',
+  UPDATE_MEMBER_APPLICATION: 'updateMemberApplication',
+  DELETE_MEMBER_APPLICATION: 'deleteMemberApplication',
+  // Friend Application
+  REFRESH_FRIEND_APPLICATION: 'refreshFriendApplication',
+  CREATE_FRIEND_APPLICATION: 'createFriendApplication',
+  UPDATE_FRIEND_APPLICATION: 'updateFriendApplication',
+  DELETE_FRIEND_APPLICATION: 'deleteFriendApplication',
+  // Message
+  SEND_MESSAGE: 'message',
+  SEND_DIRECT_MESSAGE: 'directMessage',
+  // RTC
+  RTC_OFFER: 'RTCOffer',
+  RTC_ANSWER: 'RTCAnswer',
+  RTC_ICE_CANDIDATE: 'RTCIceCandidate',
+};
+
+const SocketServerEvent = {
+  // Socket
+  CONNECT: 'connect',
+  DISCONNECT: 'disconnect',
+  // Notification
+  NOTIFICATION: 'notification', // not used yet
+  // User
+  USER_SEARCH: 'userSearch',
+  USER_UPDATE: 'userUpdate',
+  // Server
+  SERVER_SEARCH: 'serverSearch',
+  SERVER_UPDATE: 'serverUpdate',
+  // Channel
+  CHANNEL_UPDATE: 'channelUpdate',
+  // RTC
+  RTC_OFFER: 'RTCOffer',
+  RTC_ANSWER: 'RTCAnswer',
+  RTC_ICE_CANDIDATE: 'RTCIceCandidate',
+  RTC_JOIN: 'RTCJoin',
+  RTC_LEAVE: 'RTCLeave',
+  // Error
+  ERROR: 'error',
+};
 
 let isDev = process.argv.includes('--dev');
 
@@ -259,16 +332,13 @@ function connectSocket(token) {
     },
   });
 
-  socket.on('connect', () => {
-    // 定義所有 IPC 處理器
-    const ipcHandlers = Object.values(SocketClientEvent).reduce(
-      (acc, event) => {
-        acc[event] = (_, data) => socket.emit(event, data);
-        return acc;
-      },
-      {},
-    );
+  // 定義所有 IPC 處理器
+  const ipcHandlers = Object.values(SocketClientEvent).reduce((acc, event) => {
+    acc[event] = (_, data) => socket.emit(event, data);
+    return acc;
+  }, {});
 
+  socket.on('connect', () => {
     // 註冊 IPC 處理器
     Object.entries(ipcHandlers).forEach(([event, handler]) => {
       ipcMain.on(event, handler);

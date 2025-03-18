@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 // Constants
 const { XP_SYSTEM } = require('../constant');
+// Utils
+const StandardizedError = require('./standardizedError');
+const Map = require('./map');
+const JWT = require('./jwt');
 
 const func = {
   calculateRequiredXP: (level) => {
@@ -177,6 +182,73 @@ const func = {
     if (!['public', 'private', 'invisible'].includes(value))
       return '無效的群組可見度設定';
     return '';
+  },
+
+  validate: {
+    socket: (socket) => {
+      if (!socket) {
+        throw new StandardizedError(
+          '無可用的 socket',
+          'ValidationError',
+          'SOCKET',
+          'SOCKET_MISSING',
+          401,
+        );
+      }
+      if (!socket.jwt) {
+        throw new StandardizedError(
+          '無可用的 JWT',
+          'ValidationError',
+          'SOCKET',
+          'JWT_MISSING',
+        );
+      }
+      if (!socket.sessionId) {
+        throw new StandardizedError(
+          '無可用的 session ID',
+          'ValidationError',
+          'SOCKET',
+          'SESSION_MISSING',
+          401,
+        );
+      }
+      if (!Map.sessionToUser.get(socket.sessionId)) {
+        throw new StandardizedError(
+          `無效的 session ID(${socket.sessionId})`,
+          'ValidationError',
+          'SOCKET',
+          'SESSION_INVALID',
+        );
+      }
+      const result = JWT.verifyToken(socket.jwt);
+      if (!result) {
+        throw new StandardizedError(
+          '無效的 JWT',
+          'ValidationError',
+          'SOCKET',
+          'JWT_INVALID',
+        );
+      }
+      const valid = result.valid;
+      if (!valid) {
+        throw new StandardizedError(
+          '無效的 JWT',
+          'ValidationError',
+          'SOCKET',
+          'JWT_INVALID',
+        );
+      }
+      const userId = result.userId;
+      if (!userId) {
+        throw new StandardizedError(
+          '無效的 JWT',
+          'ValidationError',
+          'SOCKET',
+          'JWT_INVALID',
+        );
+      }
+      return userId;
+    },
   },
 };
 

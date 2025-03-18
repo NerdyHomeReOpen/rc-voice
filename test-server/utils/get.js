@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
+// Utils
 const Func = require('./func');
+
+// TODO:
+// - fix get server avatar logic
 
 const get = {
   // User

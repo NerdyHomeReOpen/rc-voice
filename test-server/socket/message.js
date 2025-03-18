@@ -1,17 +1,14 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { v4: uuidv4 } = require('uuid');
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 // Utils
 const utils = require('../utils');
+const StandardizedError = utils.standardizedError;
 const Logger = utils.logger;
-const Map = utils.map;
 const Get = utils.get;
-const Interval = utils.interval;
-const Func = utils.func;
 const Set = utils.set;
-const JWT = utils.jwt;
-// Socket error
-const StandardizedError = require('../standardizedError');
+const Func = utils.func;
 
 const messageHandler = {
   sendMessage: async (io, socket, data) => {
@@ -28,34 +25,15 @@ const messageHandler = {
       // console.log(data);
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
-          'SENDMESSAGE',
+          `無效的操作`,
           'ValidationError',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
           'SENDMESSAGE',
-          'ValidationError',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'SENDMESSAGE',
-          'ValidationError',
-          'TOKEN_INVALID',
-          401,
+          'OPERATOR_NOT_FOUND',
+          404,
         );
       }
       const { message } = data;
@@ -68,20 +46,10 @@ const messageHandler = {
           401,
         );
       }
-      const userId = Map.sessionToUser.get(sessionId);
-      if (!userId) {
-        throw new StandardizedError(
-          `無效的 session ID(${sessionId})`,
-          'ValidationError',
-          'SENDMESSAGE',
-          'SESSION_EXPIRED',
-          401,
-        );
-      }
-      const user = users[userId];
+      const user = users[message.senderId];
       if (!user) {
         throw new StandardizedError(
-          `使用者(${userId})不存在`,
+          `使用者(${message.senderId})不存在`,
           'ValidationError',
           'SENDMESSAGE',
           'USER',
@@ -115,7 +83,6 @@ const messageHandler = {
       const messageId = uuidv4();
       await Set.message(messageId, {
         content: message.content,
-        permissionLevel: message.permissionLevel,
         channelId: message.channelId,
         senderId: message.senderId,
         timestamp: Date.now().valueOf(),
@@ -130,9 +97,9 @@ const messageHandler = {
         `User(${user.id}) sent ${message.content} to channel(${channel.id})`,
       );
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `傳送訊息時發生無法預期的錯誤: ${error.error_message}`,
+          `傳送訊息時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'SENDMESSAGE',
           'EXCEPTION_ERROR',
@@ -162,38 +129,19 @@ const messageHandler = {
       // console.log(data);
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
-          'SENDDIRECTMESSAGE',
+          `無效的操作`,
           'ValidationError',
-          'TOKEN_MISSING',
-          401,
+          'SENDDIRECTMESSAGE',
+          'OPERATOR_NOT_FOUND',
+          404,
         );
       }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
-          'SENDDIRECTMESSAGE',
-          'ValidationError',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'SENDDIRECTMESSAGE',
-          'ValidationError',
-          'TOKEN_INVALID',
-          401,
-        );
-      }
-      const { message } = data;
-      if (!message) {
+      const { directMessage } = data;
+      if (!directMessage) {
         throw new StandardizedError(
           '無效的資料',
           'SENDDIRECTMESSAGE',
@@ -202,20 +150,10 @@ const messageHandler = {
           401,
         );
       }
-      const userId = Map.sessionToUser.get(sessionId);
-      if (!userId) {
-        throw new StandardizedError(
-          `無效的 session ID(${sessionId})`,
-          'ValidationError',
-          'SENDDIRECTMESSAGE',
-          'SESSION_EXPIRED',
-          401,
-        );
-      }
-      const user = users[userId];
+      const user = users[directMessage.senderId];
       if (!user) {
         throw new StandardizedError(
-          `使用者(${userId})不存在`,
+          `使用者(${directMessage.senderId})不存在`,
           'ValidationError',
           'SENDDIRECTMESSAGE',
           'USER',
@@ -246,9 +184,9 @@ const messageHandler = {
         `User(${user.id}) sent ${directMessage.content} to direct message(${friend.id})`,
       );
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `傳送私訊時發生無法預期的錯誤: ${error.error_message}`,
+          `傳送私訊時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'SENDDIRECTMESSAGE',
           'EXCEPTION_ERROR',

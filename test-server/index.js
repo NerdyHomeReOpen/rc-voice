@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const http = require('http');
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
 const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
-// const fs = require('fs').promises;
-// const path = require('path');
-
+const { QuickDB } = require('quick.db');
+const db = new QuickDB();
+// Utils
 const utils = require('./utils');
+const StandardizedError = utils.standardizedError;
 const Logger = utils.logger;
 const Func = utils.func;
 const Set = utils.set;
@@ -66,20 +65,44 @@ const server = http.createServer((req, res) => {
         const account = data.account;
         const password = data.password;
         if (!account || !password) {
-          throw new Error('無效的帳號或密碼');
+          throw new StandardizedError(
+            '無效的帳號或密碼',
+            'ValidationError',
+            'LOGIN',
+            'INVALID_ACCOUNT_OR_PASSWORD',
+            401,
+          );
         }
         const exist = accountPasswords[account];
         if (!exist) {
-          throw new Error('帳號或密碼錯誤');
+          throw new StandardizedError(
+            '帳號或密碼錯誤',
+            'ValidationError',
+            'LOGIN',
+            'INVALID_ACCOUNT_OR_PASSWORD',
+            401,
+          );
         }
         if (password !== accountPasswords[account]) {
-          throw new Error('帳號或密碼錯誤');
+          throw new StandardizedError(
+            '帳號或密碼錯誤',
+            'ValidationError',
+            'LOGIN',
+            'INVALID_ACCOUNT_OR_PASSWORD',
+            401,
+          );
         }
         const user = Object.values(users).find(
           (user) => user.id === accountUserIds[account],
         );
         if (!user) {
-          throw new Error('用戶不存在');
+          throw new StandardizedError(
+            '用戶不存在',
+            'ValidationError',
+            'LOGIN',
+            'USER_NOT_FOUND',
+            404,
+          );
         }
 
         // Update user
@@ -89,53 +112,63 @@ const server = http.createServer((req, res) => {
         });
 
         // Generate JWT token
-        const jwt = JWT.generateToken({
+        const token = JWT.generateToken({
           userId: user.id,
         });
 
         sendSuccess(res, {
           message: '登入成功',
           data: {
-            token: jwt,
+            token: token,
             user: await Get.user(user.id),
           },
         });
         new Logger('Auth').success(`User logged in: ${account}`);
       } catch (error) {
-        sendError(res, 500, `登入時發生錯誤: ${error.error_message}`);
+        if (!(error instanceof StandardizedError)) {
+          error = new StandardizedError(
+            `登入時發生預期外的錯誤: ${error.message}`,
+            'ServerError',
+            'LOGIN',
+            'SERVER_ERROR',
+            500,
+          );
+        }
+
+        sendError(res, error.statusCode, error.error_message);
         new Logger('Auth').error(`Login error: ${error.error_message}`);
       }
     });
     return;
   }
 
-  if (req.method == 'GET' && req.url == '/refresh-token') {
-    // Get the authorization header
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return sendError(res, 401, 'No token provided');
-    }
+  // if (req.method == 'GET' && req.url == '/refresh-token') {
+  //   // Get the authorization header
+  //   const authHeader = req.headers.authorization;
+  //   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  //     return sendError(res, 401, 'No token provided');
+  //   }
 
-    const sessionId = authHeader.split(' ')[1];
+  //   const sessionId = authHeader.split(' ')[1];
 
-    // Verify current token
-    const result = JWT.verifyToken(sessionId);
-    if (!result.valid) {
-      return sendError(res, 401, 'Invalid token');
-    }
+  //   // Verify current token
+  //   const result = JWT.verifyToken(sessionId);
+  //   if (!result.valid) {
+  //     return sendError(res, 401, 'Invalid token');
+  //   }
 
-    const newToken = JWT.generateToken(result.userId);
+  //   const newToken = JWT.generateToken(result.userId);
 
-    // Update the user sessions map
-    utils.map.sessionToUser.set(newToken, result.userId);
+  //   // Update the user sessions map
+  //   utils.map.sessionToUser.set(newToken, result.userId);
 
-    sendSuccess(res, {
-      message: 'Token refreshed',
-      data: {
-        sessionId: newToken,
-      },
-    });
-  }
+  //   sendSuccess(res, {
+  //     message: 'Token refreshed',
+  //     data: {
+  //       sessionId: newToken,
+  //     },
+  //   });
+  // }
 
   if (req.method == 'POST' && req.url == '/register') {
     let body = '';
@@ -159,28 +192,64 @@ const server = http.createServer((req, res) => {
         const account = data.account.trim();
         const password = data.password.trim();
         if (!account || !password) {
-          throw new Error('無效的帳號或密碼');
+          throw new StandardizedError(
+            '無效的帳號或密碼',
+            'ValidationError',
+            'REGISTER',
+            'INVALID_ACCOUNT_OR_PASSWORD',
+            401,
+          );
         }
         const username = data.username;
         if (!username) {
-          throw new Error('無效的使用者名稱');
+          throw new StandardizedError(
+            '無效的使用者名稱',
+            'ValidationError',
+            'REGISTER',
+            'INVALID_USERNAME',
+            401,
+          );
         }
         const exists = accountPasswords[data.account];
         if (exists) {
-          throw new Error('帳號已存在');
+          throw new StandardizedError(
+            '帳號已存在',
+            'ValidationError',
+            'REGISTER',
+            'ACCOUNT_ALREADY_EXISTS',
+            401,
+          );
         }
 
         const accountError = Func.validateAccount(account);
         if (accountError) {
-          throw new Error(accountError);
+          throw new StandardizedError(
+            accountError,
+            'ValidationError',
+            'REGISTER',
+            'INVALID_ACCOUNT',
+            401,
+          );
         }
         const passwordError = Func.validatePassword(password);
         if (passwordError) {
-          throw new Error(passwordError);
+          throw new StandardizedError(
+            passwordError,
+            'ValidationError',
+            'REGISTER',
+            'INVALID_PASSWORD',
+            401,
+          );
         }
         const usernameError = Func.validateUsername(username);
         if (usernameError) {
-          throw new Error(usernameError);
+          throw new StandardizedError(
+            usernameError,
+            'ValidationError',
+            'REGISTER',
+            'INVALID_USERNAME',
+            401,
+          );
         }
 
         // Create user data
@@ -199,7 +268,17 @@ const server = http.createServer((req, res) => {
         });
         new Logger('Auth').success(`User registered: ${account}`);
       } catch (error) {
-        sendError(res, 500, `註冊時發生錯誤: ${error.error_message}`);
+        if (!(error instanceof StandardizedError)) {
+          error = new StandardizedError(
+            `註冊時發生預期外的錯誤: ${error.message}`,
+            'ServerError',
+            'REGISTER',
+            'SERVER_ERROR',
+            500,
+          );
+        }
+
+        sendError(res, error.statusCode, error.error_message);
         new Logger('Auth').error(`Register error: ${error.error_message}`);
       }
     });
@@ -222,12 +301,36 @@ require('./socket/index')(io, db);
 
 // Error Handling
 server.on('error', (error) => {
+  if (!(error instanceof StandardizedError)) {
+    error = new StandardizedError(
+      `伺服器發生預期外的錯誤: ${error.message}`,
+      'ServerError',
+      'SERVER_ERROR',
+      'SERVER_ERROR',
+    );
+  }
   new Logger('Server').error(`Server error: ${error.error_message}`);
 });
 process.on('uncaughtException', (error) => {
+  if (!(error instanceof StandardizedError)) {
+    error = new StandardizedError(
+      `未處理的例外: ${error.message}`,
+      'ServerError',
+      'UNCAUGHT_EXCEPTION',
+      'SERVER_ERROR',
+    );
+  }
   new Logger('Server').error(`Uncaught Exception: ${error.error_message}`);
 });
 process.on('unhandledRejection', (error) => {
+  if (!(error instanceof StandardizedError)) {
+    error = new StandardizedError(
+      `未處理的拒絕: ${error.message}`,
+      'ServerError',
+      'UNHANDLED_REJECTION',
+      'SERVER_ERROR',
+    );
+  }
   new Logger('Server').error(`Unhandled Rejection: ${error.error_message}`);
 });
 

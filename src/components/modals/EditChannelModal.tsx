@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 // CSS
 import Popup from '@/styles/common/popup.module.css';
-import editChannel from '@/styles/popups/editchannel.module.css';
+import editChannel from '@/styles/popups/editChannel.module.css';
 
 // Types
 import { Channel, SocketServerEvent, Visibility } from '@/types';

@@ -9,11 +9,10 @@ import header from '@/styles/common/header.module.css';
 // Types
 import {
   PopupType,
-  Channel,
-  Server,
-  User,
   SocketServerEvent,
   LanguageKey,
+  Server,
+  User,
 } from '@/types';
 
 // Pages
@@ -36,12 +35,6 @@ import { useLanguage } from '@/providers/LanguageProvider';
 import { ipcService } from '@/services/ipc.service';
 import authService from '@/services/auth.service';
 
-// Redux
-import store from '@/redux/store';
-import { clearServer } from '@/redux/serverSlice';
-import { clearUser } from '@/redux/userSlice';
-import { clearChannel, setChannel } from '@/redux/channelSlice';
-
 interface HeaderProps {
   user: User;
   server: Server;
@@ -51,11 +44,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = React.memo(
   ({ user, server, selectedId = 1, setSelectedTabId }) => {
-    // Variables
-    const serverId = server.id;
-    const userName = user.name;
-    const userStatus = user.status;
-
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
@@ -64,6 +52,11 @@ const Header: React.FC<HeaderProps> = React.memo(
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+
+    // Variables
+    const serverId = server.id;
+    const userName = user.name;
+    const userStatus = user.status;
 
     // Constants
     const MAIN_TABS = [
@@ -80,9 +73,6 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     // Handlers
     const handleLogout = () => {
-      store.dispatch(clearChannel());
-      store.dispatch(clearServer());
-      store.dispatch(clearUser());
       authService.logout();
     };
 
@@ -399,7 +389,7 @@ const Home = () => {
     return () => {
       unsubscribe.forEach((unsub) => unsub());
     };
-  }, [socket]);
+  }, [socket, user, server]);
 
   useEffect(() => {
     if (!lang) return;
@@ -420,56 +410,13 @@ const Home = () => {
     new errorHandler(error).show();
   };
 
-  // const handleUserConnect = (user: User) => {
-  //   console.log('User connected: ', user);
-  //   setUser(user);
-  //   setSelectedTabId(1);
-  // };
-
-  // const handleUserDisconnect = () => {
-  //   console.log('User disconnected');
-  //   store.dispatch(clearChannel());
-  //   store.dispatch(clearServer());
-  //   store.dispatch(clearUser());
-  //   authService.logout();
-  // };
-
   const handleUserUpdate = (data: Partial<User>) => {
-    console.log('User update: ', data);
-    setUser({ ...user, ...data });
+    setUser((prev) => ({ ...prev, ...data }));
   };
-
-  // const handleServerConnect = (server: Server) => {
-  //   console.log('Server connected: ', server);
-  //   setServer(server);
-  //   setSelectedTabId(3);
-  // };
-
-  // const handleServerDisconnect = () => {
-  //   console.log('Server disconnected');
-  //   store.dispatch(clearServer());
-  //   setSelectedTabId(1);
-  // };
 
   const handleServerUpdate = (data: Partial<Server>) => {
-    console.log('Server update: ', data);
-    setServer({ ...server, ...data });
+    setServer((prev) => ({ ...prev, ...data }));
   };
-
-  // const handleChannelConnect = (channel: Channel) => {
-  //   console.log('Channel connected: ', channel);
-  //   store.dispatch(setChannel(channel));
-  // };
-
-  // const handleChannelDisconnect = () => {
-  //   console.log('Channel disconnected');
-  //   store.dispatch(clearChannel());
-  // };
-
-  // const handleChannelUpdate = (data: Partial<Channel>) => {
-  //   console.log('Channel update: ', data);
-  //   store.dispatch(setChannel(data));
-  // };
 
   const getMainContent = () => {
     if (!socket) return <LoadingSpinner />;

@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {
   useEffect,
   useRef,
@@ -10,7 +8,7 @@ import React, {
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
-import { Channel, SocketServerEvent } from '@/types';
+import { SocketServerEvent } from '@/types';
 
 interface RTCOfferProps {
   from: string;
@@ -55,7 +53,6 @@ interface WebRTCProviderProps {
 
 const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   // States
-  const [channelId, setChannelId] = useState<string | null>(null); // Not used
   const [isMute, setIsMute] = useState<boolean>(false);
 
   // Refs
@@ -66,14 +63,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
 
   // Hooks
   const socket = useSocket();
-
-  const handleChannelConnect = (channel: Channel) => {
-    setChannelId(channel.id);
-  };
-
-  const handleChannelDisconnect = () => {
-    setChannelId(null);
-  };
 
   const handleRTCJoin = async (rtcConnection: string) => {
     if (peerConnections.current[rtcConnection])
@@ -178,8 +167,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     if (!socket) return;
 
     const eventHandlers = {
-      [SocketServerEvent.CHANNEL_CONNECT]: handleChannelConnect,
-      [SocketServerEvent.CHANNEL_DISCONNECT]: handleChannelDisconnect,
       [SocketServerEvent.RTC_JOIN]: handleRTCJoin,
       [SocketServerEvent.RTC_LEAVE]: handleRTCLeave,
       [SocketServerEvent.RTC_OFFER]: handleRTCOffer,

@@ -1,16 +1,14 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 // Utils
 const utils = require('../utils');
+const StandardizedError = utils.standardizedError;
 const Logger = utils.logger;
 const Map = utils.map;
 const Get = utils.get;
-const Interval = utils.interval;
-const Func = utils.func;
 const Set = utils.set;
-const JWT = utils.jwt;
-// Socket error
-const StandardizedError = require('../standardizedError');
+const Func = utils.func;
 // Handlers
 const serverHandler = require('./server');
 const channelHandler = require('./channel');
@@ -18,6 +16,56 @@ const channelHandler = require('./channel');
 const userHandler = {
   searchUser: async (io, socket, data) => {
     const users = (await db.get('users')) || {};
+
+    try {
+      // data = {
+      //   query:
+      // }
+
+      // Validate data
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
+        throw new StandardizedError(
+          `無效的操作`,
+          'ValidationError',
+          'SEARCHUSER',
+          'OPERATOR_INVALID',
+          404,
+        );
+      }
+      const { query } = data;
+      if (!query) {
+        throw new StandardizedError(
+          '無效的資料',
+          'ValidationError',
+          'SEARCHUSER',
+          'DATA_INVALID',
+          401,
+        );
+      }
+      // TODO: implement search results
+
+      // Emit data (only to the user)
+      io.to(socket.id).emit('userSearch', {});
+    } catch (error) {
+      if (!(error instanceof StandardizedError)) {
+        error = new StandardizedError(
+          `搜尋使用者時發生無法預期的錯誤: ${error.message}`,
+          'ServerError',
+          'SEARCHUSER',
+          'EXCEPTION_ERROR',
+          500,
+        );
+      }
+
+      // Emit data (only to the user)
+      io.to(socket.id).emit('error', error);
+
+      new Logger('WebSocket').error(
+        `Error searching user: ${error.error_message}`,
+      );
+    }
   },
   refreshUser: async (io, socket, data) => {
     const users = (await db.get('users')) || {};
@@ -28,44 +76,15 @@ const userHandler = {
       // }
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
+          `無效的操作`,
           'ValidationError',
           'REFRESHUSER',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
-          'ValidationError',
-          'REFRESHUSER',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'ValidationError',
-          'REFRESHUSER',
-          'TOKEN_INVALID',
-          401,
-        );
-      }
-      const _ = Map.sessionToUser.get(sessionId);
-      if (!_) {
-        throw new StandardizedError(
-          `無效的 session ID(${sessionId})`,
-          'ValidationError',
-          'REFRESHUSER',
-          'SESSION_EXPIRED',
-          401,
+          'OPERATOR_INVALID',
+          404,
         );
       }
       const { userId } = data;
@@ -89,11 +108,11 @@ const userHandler = {
       }
 
       // Emit data (only to the user)
-      io.to(socket.id).emit('userUpdate', await Get.user(userId));
+      io.to(socket.id).emit('userUpdate', await Get.user(user.id));
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `刷新使用者時發生無法預期的錯誤: ${error.error_message}`,
+          `刷新使用者時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'REFRESHUSER',
           'EXCEPTION_ERROR',
@@ -115,46 +134,7 @@ const userHandler = {
 
     try {
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
-        throw new StandardizedError(
-          '無可用的 JWT',
-          'ValidationError',
-          'CONNECTUSER',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
-          'ValidationError',
-          'CONNECTUSER',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'ValidationError',
-          'CONNECTUSER',
-          'TOKEN_INVALID',
-          401,
-        );
-      }
-      const userId = result.userId;
-      if (!userId) {
-        throw new StandardizedError(
-          '無效的 token',
-          'ValidationError',
-          'CONNECTUSER',
-          'TOKEN_INVALID',
-          401,
-        );
-      }
+      const userId = Func.validate.socket(socket);
       const user = users[userId];
       if (!user) {
         throw new StandardizedError(
@@ -174,12 +154,6 @@ const userHandler = {
         }
       }
 
-      // Save user session connection
-      Map.createUserIdSessionIdMap(user.id, sessionId);
-
-      // Save user socket connection
-      Map.createUserIdSocketIdMap(user.id, socket.id);
-
       // Emit data (only to the user)
       io.to(socket.id).emit('userUpdate', await Get.user(user.id));
 
@@ -187,9 +161,9 @@ const userHandler = {
         `User(${user.id}) connected with socket(${socket.id})`,
       );
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `取得使用者時發生無法預期的錯誤: ${error.error_message}`,
+          `連接使用者時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'CONNECTUSER',
           'EXCEPTION_ERROR',
@@ -209,51 +183,10 @@ const userHandler = {
   disconnectUser: async (io, socket) => {
     // Get database
     const users = (await db.get('users')) || {};
-    const servers = (await db.get('servers')) || {};
-    const channels = (await db.get('channels')) || {};
 
     try {
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
-        throw new StandardizedError(
-          '無可用的 JWT',
-          'ValidationError',
-          'DISCONNECTUSER',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
-          'ValidationError',
-          'DISCONNECTUSER',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'ValidationError',
-          'DISCONNECTUSER',
-          'TOKEN_INVALID',
-          401,
-        );
-      }
-      const userId = Map.sessionToUser.get(sessionId);
-      if (!userId) {
-        throw new StandardizedError(
-          `無效的 session ID(${sessionId})`,
-          'ValidationError',
-          'UPDATEUSER',
-          'SESSION_EXPIRED',
-          401,
-        );
-      }
+      const userId = Func.validate.socket(socket);
       const user = users[userId];
       if (!user) {
         throw new StandardizedError(
@@ -265,6 +198,7 @@ const userHandler = {
         );
       }
 
+      // Disconnect server or channel
       if (user.currentServerId) {
         await serverHandler.disconnectServer(io, socket, {
           serverId: user.currentServerId,
@@ -275,10 +209,8 @@ const userHandler = {
         });
       }
 
-      // Remove user session connection
-      Map.deleteUserIdSessionIdMap(userId, sessionId);
-
-      // Remove user socket connection
+      // Remove maps
+      Map.deleteUserIdSessionIdMap(userId, socket.sessionId);
       Map.deleteUserIdSocketIdMap(userId, socket.id);
 
       // Update user
@@ -292,9 +224,9 @@ const userHandler = {
 
       new Logger('WebSocket').success(`User(${userId}) disconnected`);
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `斷開使用者時發生無法預期的錯誤: ${error.error_message}`,
+          `斷開使用者時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'DISCONNECTUSER',
           'EXCEPTION_ERROR',
@@ -323,34 +255,15 @@ const userHandler = {
       // }
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
+          `無效的操作`,
           'ValidationError',
           'UPDATEUSER',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
-          'ValidationError',
-          'UPDATEUSER',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'ValidationError',
-          'UPDATEUSER',
-          'TOKEN_INVALID',
-          401,
+          'OPERATOR_INVALID',
+          404,
         );
       }
       const { user: editedUser } = data;
@@ -363,27 +276,17 @@ const userHandler = {
           401,
         );
       }
-      const userId = Map.sessionToUser.get(sessionId);
-      if (!userId) {
-        throw new StandardizedError(
-          `無效的 session ID(${sessionId})`,
-          'ValidationError',
-          'UPDATEUSER',
-          'SESSION_EXPIRED',
-          401,
-        );
-      }
-      const user = users[userId];
+      const user = users[editedUser.id];
       if (!user) {
         throw new StandardizedError(
-          `使用者(${userId})不存在`,
+          `使用者(${editedUser.id})不存在`,
           'ValidationError',
           'UPDATEUSER',
           'USER',
           404,
         );
       }
-
+      // TODO: change to use Func.validate.user
       if (editedUser.name) {
         const nameError = Func.validateUsername(editedUser.name);
         if (nameError) {
@@ -410,16 +313,16 @@ const userHandler = {
       }
 
       // Update user data
-      await Set.user(userId, editedUser);
+      await Set.user(user.id, editedUser);
 
       // Emit data (only to the user)
       io.to(socket.id).emit('userUpdate', editedUser);
 
-      new Logger('WebSocket').success(`User(${userId}) updated`);
+      new Logger('WebSocket').success(`User(${user.id}) updated`);
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `更新使用者時發生無法預期的錯誤: ${error.error_message}`,
+          `更新使用者時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'UPDATEUSER',
           'EXCEPTION_ERROR',

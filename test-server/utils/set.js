@@ -1,7 +1,6 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
-// Utils
-const func = require('./func');
 
 const set = {
   user: async (id, data) => {
@@ -15,19 +14,21 @@ const set = {
       gender: 'Male',
       level: 1,
       xp: 0,
-      requiredXp: func.calculateRequiredXP(1),
+      requiredXp: 0,
       progress: 0,
-      currentChannelId: null,
-      currentServerId: null,
-      lastActiveAt: Date.now(),
+      currentChannelId: '',
+      currentServerId: '',
+      lastActiveAt: 0,
       createdAt: 0,
       ...users[id],
       ...data,
+      lastActiveAt: Date.now(),
       id,
     };
     await db.set(`users.${id}`, users[id]);
     return users[id];
   },
+  // `us_${userId}_${serverId}`
   userServer: async (id, data) => {
     const userServers = await db.get('userServers');
     userServers[id] = {
@@ -44,22 +45,39 @@ const set = {
     await db.set(`userServers.${id}`, userServers[id]);
     return userServers[id];
   },
+  // `ub_${userId}_${badgeId}`
+  userBadge: async (id, data) => {
+    const userBadges = await db.get('userBadges');
+    userBadges[id] = {
+      userId: '',
+      badgeId: '',
+      createdAt: 0,
+      ...userBadges[id],
+      ...data,
+      id,
+    };
+    await db.set(`userBadges.${id}`, userBadges[id]);
+    return userBadges[id];
+  },
   server: async (id, data) => {
     const servers = await db.get('servers');
     servers[id] = {
-      id,
       name: '',
       avatar: null,
       avatarUrl: null,
       announcement: '',
       description: '',
-      displayId: await func.generateUniqueDisplayId(),
+      displayId: '',
       slogan: '',
-      level: 1,
+      level: 0,
       wealth: 0,
       ownerId: '',
       lobbyId: '',
-      settings: {},
+      settings: {
+        allowDirectMessage: false,
+        visibility: 'public',
+        defaultChannelId: '',
+      },
       createdAt: 0,
       ...servers[id],
       ...data,
@@ -71,10 +89,12 @@ const set = {
   channel: async (id, data) => {
     const channels = await db.get('channels');
     channels[id] = {
-      name: data.name,
+      name: '',
       isRoot: true,
       isCategory: false,
       isLobby: false,
+      voiceMode: 'free',
+      chatMode: 'free',
       order: 0,
       serverId: '',
       settings: {
@@ -91,6 +111,36 @@ const set = {
     await db.set(`channels.${id}`, channels[id]);
     return channels[id];
   },
+  // `fd-${user1Id}_${user2Id}`
+  friend: async (id, data) => {
+    const friends = await db.get('friends');
+    friends[id] = {
+      user1Id: '',
+      user2Id: '',
+      createdAt: 0,
+      ...friends[id],
+      ...data,
+      id,
+    };
+    await db.set(`friends.${id}`, friends[id]);
+    return friends[id];
+  },
+  // `fa-${senderId}_${receiverId}`
+  friendApplication: async (id, data) => {
+    const applications = await db.get('friendApplications');
+    applications[id] = {
+      description: '',
+      senderId: '',
+      receiverId: '',
+      createdAt: 0,
+      ...applications[id],
+      ...data,
+      id,
+    };
+    await db.set(`friendApplications.${id}`, applications[id]);
+    return applications[id];
+  },
+  // `mb-${userId}_${serverId}`
   member: async (id, data) => {
     const members = await db.get('members');
     members[id] = {
@@ -107,12 +157,26 @@ const set = {
     await db.set(`members.${id}`, members[id]);
     return members[id];
   },
+  // `ma-${userId}_${serverId}`
+  memberApplications: async (id, data) => {
+    const applications = await db.get('memberApplications');
+    applications[id] = {
+      userId: '',
+      serverId: '',
+      description: '',
+      createdAt: 0,
+      ...applications[id],
+      ...data,
+      id,
+    };
+    await db.set(`memberApplications.${id}`, applications[id]);
+    return applications[id];
+  },
   message: async (id, data) => {
     const messages = await db.get('messages');
     messages[id] = {
       content: '',
       type: 'general',
-      permissionLevel: 0,
       senderId: '',
       channelId: '',
       timestamp: 0,
@@ -128,7 +192,6 @@ const set = {
     directMessages[id] = {
       content: '',
       type: 'general',
-      permissionLevel: 0,
       senderId: '',
       friendId: '',
       timestamp: 0,
@@ -138,18 +201,6 @@ const set = {
     };
     await db.set(`directMessages.${id}`, directMessages[id]);
     return directMessages[id];
-  },
-  serverApplications: async (id, data) => {
-    const applications = await db.get('serverApplications');
-    applications[id] = {
-      userId: '',
-      serverId: '',
-      description: '',
-      createdAt: 0,
-      ...applications[id],
-      ...data,
-      id,
-    };
   },
 };
 

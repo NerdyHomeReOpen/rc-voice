@@ -2,13 +2,9 @@
 const { v4: uuidv4 } = require('uuid');
 // Utils
 const utils = require('../utils');
-// const Logger = utils.logger;
-// const Map = utils.map;
-// const Get = utils.get;
-// const Interval = utils.interval;
+const StandardizedError = utils.standardizedError;
+const Map = utils.map;
 const JWT = utils.jwt;
-// Socket error
-const StandardizedError = require('../standardizedError');
 // Handlers
 const userHandler = require('./user');
 const serverHandler = require('./server');
@@ -20,6 +16,9 @@ const friendHandler = require('./friend');
 const friendApplicationHandler = require('./friendApplication');
 const memberApplicationHandler = require('./memberApplication');
 const rtcHandler = require('./rtc');
+
+// TODO:
+// - make validation a Func
 
 module.exports = (io) => {
   io.use((socket, next) => {
@@ -67,9 +66,13 @@ module.exports = (io) => {
       socket.jwt = jwt;
       socket.sessionId = sessionId;
 
+      // Save maps
+      Map.createUserIdSessionIdMap(userId, socket.sessionId);
+      Map.createUserIdSocketIdMap(userId, socket.id);
+
       return next();
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
           `驗證時發生無法預期的錯誤: ${error.error_message}`,
           'ServerError',

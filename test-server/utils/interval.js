@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Constants
 const { XP_SYSTEM } = require('../constant');
 // Utils

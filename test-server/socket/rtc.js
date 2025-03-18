@@ -1,18 +1,9 @@
-const { v4: uuidv4 } = require('uuid');
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Utils
 const utils = require('../utils');
+const StandardizedError = utils.standardizedError;
 const Logger = utils.logger;
-const Map = utils.map;
-const Get = utils.get;
-const Interval = utils.interval;
-const Set = utils.set;
-const JWT = utils.jwt;
-// Socket error
-const StandardizedError = require('../standardizedError');
-
-const rtcRooms = {};
+const Func = utils.func;
 
 const rtcHandler = {
   offer: async (io, socket, data) => {
@@ -26,42 +17,23 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
-          'SENDRTCOFFER',
+          `無效的操作`,
           'ValidationError',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
           'SENDRTCOFFER',
-          'ValidationError',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'SENDRTCOFFER',
-          'ValidationError',
-          'TOKEN_INVALID',
-          401,
+          'OPERATOR_NOT_FOUND',
+          404,
         );
       }
       const { to, offer } = data;
       if (!to || !offer) {
         throw new StandardizedError(
           '無效的資料',
-          'SENDRTCOFFER',
           'ValidationError',
+          'SENDRTCOFFER',
           'DATA_INVALID',
           401,
         );
@@ -76,9 +48,9 @@ const rtcHandler = {
         `User(socket-id: ${socket.id}) sent RTC offer to user(socket-id: ${to})`,
       );
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `傳送 RTC offer 時發生無法預期的錯誤: ${error.error_message}`,
+          `傳送 RTC offer 時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'SENDRTCOFFER',
           'EXCEPTION_ERROR',
@@ -105,42 +77,23 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
-          'SENDRTCANSWER',
+          `無效的操作`,
           'ValidationError',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
           'SENDRTCANSWER',
-          'ValidationError',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'SENDRTCANSWER',
-          'ValidationError',
-          'TOKEN_INVALID',
-          401,
+          'OPERATOR_NOT_FOUND',
+          404,
         );
       }
       const { to, answer } = data;
       if (!to || !answer) {
         throw new StandardizedError(
           '無效的資料',
-          'SENDRTCANSWER',
           'ValidationError',
+          'SENDRTCANSWER',
           'DATA_INVALID',
           401,
         );
@@ -155,9 +108,9 @@ const rtcHandler = {
         `User(socket-id: ${socket.id}) sent RTC answer to user(socket-id: ${to})`,
       );
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `傳送 RTC answer 時發生無法預期的錯誤: ${error.error_message}`,
+          `傳送 RTC answer 時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'SENDRTCANSWER',
           'EXCEPTION_ERROR',
@@ -184,42 +137,23 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
-          'SENDRTCCANDIDATE',
+          `無效的操作`,
           'ValidationError',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
           'SENDRTCCANDIDATE',
-          'ValidationError',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'SENDRTCCANDIDATE',
-          'ValidationError',
-          'TOKEN_INVALID',
-          401,
+          'OPERATOR_NOT_FOUND',
+          404,
         );
       }
       const { to, candidate } = data;
       if (!to || !candidate) {
         throw new StandardizedError(
           '無效的資料',
-          'SENDRTCCANDIDATE',
           'ValidationError',
+          'SENDRTCCANDIDATE',
           'DATA_INVALID',
           401,
         );
@@ -234,9 +168,9 @@ const rtcHandler = {
         `User(socket-id: ${socket.id}) sent RTC ICE candidate to user(socket-id: ${to})`,
       );
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `傳送 RTC ICE candidate 時發生無法預期的錯誤: ${error.error_message}`,
+          `傳送 RTC ICE candidate 時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'SENDRTCICECANDIDATE',
           'EXCEPTION_ERROR',
@@ -260,34 +194,15 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
-          'JOINRTCCHANNEL',
+          `無效的操作`,
           'ValidationError',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
           'JOINRTCCHANNEL',
-          'ValidationError',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'JOINRTCCHANNEL',
-          'ValidationError',
-          'TOKEN_INVALID',
-          401,
+          'OPERATOR_NOT_FOUND',
+          404,
         );
       }
       const { channelId } = data;
@@ -303,10 +218,6 @@ const rtcHandler = {
 
       socket.join(`channel_${channelId}`);
 
-      // NOT USED ANYMORE
-      // if (!rtcRooms[channelId]) rtcRooms[channelId] = [];
-      // rtcRooms[channelId].push(socket.id);
-
       // Emit RTC join event (To all users)
       socket.to(`channel_${channelId}`).emit('RTCJoin', socket.id);
 
@@ -314,9 +225,9 @@ const rtcHandler = {
         `User(socket-id: ${socket.id}) joined RTC channel(${channelId})`,
       );
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `加入 RTC 頻道時發生無法預期的錯誤: ${error.error_message}`,
+          `加入 RTC 頻道時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'JOINRTCCHANNEL',
           'EXCEPTION_ERROR',
@@ -340,54 +251,29 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const jwt = socket.jwt;
-      if (!jwt) {
+      const operatorId = Func.validate.socket(socket);
+      const operator = users[operatorId];
+      if (!operator) {
         throw new StandardizedError(
-          '無可用的 JWT',
-          'LEAVERTCCHANNEL',
+          `無效的操作`,
           'ValidationError',
-          'TOKEN_MISSING',
-          401,
-        );
-      }
-      const sessionId = socket.sessionId;
-      if (!sessionId) {
-        throw new StandardizedError(
-          '無可用的 session ID',
           'LEAVERTCCHANNEL',
-          'ValidationError',
-          'SESSION_MISSING',
-          401,
-        );
-      }
-      const result = JWT.verifyToken(jwt);
-      if (!result.valid) {
-        throw new StandardizedError(
-          '無效的 token',
-          'LEAVERTCCHANNEL',
-          'ValidationError',
-          'TOKEN_INVALID',
-          401,
+          'OPERATOR_NOT_FOUND',
+          404,
         );
       }
       const { channelId } = data;
       if (!channelId) {
         throw new StandardizedError(
           '無效的資料',
-          'LEAVERTCCHANNEL',
           'ValidationError',
+          'LEAVERTCCHANNEL',
           'DATA_INVALID',
           401,
         );
       }
 
       socket.leave(`channel_${channelId}`);
-
-      // NOT USED ANYMORE
-      // if (!rtcRooms[channelId]) return;
-      // rtcRooms[channelId] = rtcRooms[channelId].filter(
-      //   (id) => id !== socket.id,
-      // );
 
       // Emit RTC leave event (To all users)
       socket.to(`channel_${channelId}`).emit('RTCLeave', socket.id);
@@ -396,9 +282,9 @@ const rtcHandler = {
         `User(socket-id: ${socket.id}) left RTC channel(${channelId})`,
       );
     } catch (error) {
-      if (!error instanceof StandardizedError) {
+      if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
-          `離開 RTC 頻道時發生無法預期的錯誤: ${error.error_message}`,
+          `離開 RTC 頻道時發生無法預期的錯誤: ${error.message}`,
           'ServerError',
           'LEAVERTCCHANNEL',
           'EXCEPTION_ERROR',

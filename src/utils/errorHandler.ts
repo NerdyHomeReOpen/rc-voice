@@ -28,8 +28,7 @@ export class errorHandler {
 
     ipcService.popup.open(PopupType.DIALOG_ERROR);
     ipcService.popup.onSubmit('error', () => {
-      this.error.handler();
-      console.log('Error handled.');
+      if (this.error.handler) this.error.handler();
     });
     ipcService.initialData.onRequest(PopupType.DIALOG_ERROR, {
       iconType: 'error',
