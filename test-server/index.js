@@ -135,7 +135,7 @@ const server = http.createServer((req, res) => {
           );
         }
 
-        sendError(res, error.statusCode, error.error_message);
+        sendError(res, error.status_code, error.error_message);
         new Logger('Auth').error(`Login error: ${error.error_message}`);
       }
     });
@@ -278,7 +278,7 @@ const server = http.createServer((req, res) => {
           );
         }
 
-        sendError(res, error.statusCode, error.error_message);
+        sendError(res, error.status_code, error.error_message);
         new Logger('Auth').error(`Register error: ${error.error_message}`);
       }
     });
@@ -307,6 +307,7 @@ server.on('error', (error) => {
       'ServerError',
       'SERVER_ERROR',
       'SERVER_ERROR',
+      500,
     );
   }
   new Logger('Server').error(`Server error: ${error.error_message}`);
@@ -318,6 +319,7 @@ process.on('uncaughtException', (error) => {
       'ServerError',
       'UNCAUGHT_EXCEPTION',
       'SERVER_ERROR',
+      500,
     );
   }
   new Logger('Server').error(`Uncaught Exception: ${error.error_message}`);
@@ -329,6 +331,7 @@ process.on('unhandledRejection', (error) => {
       'ServerError',
       'UNHANDLED_REJECTION',
       'SERVER_ERROR',
+      500,
     );
   }
   new Logger('Server').error(`Unhandled Rejection: ${error.error_message}`);
