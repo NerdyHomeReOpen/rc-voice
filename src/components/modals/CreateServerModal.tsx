@@ -6,7 +6,7 @@ import popup from '@/styles/common/popup.module.css';
 import createServer from '@/styles/popups/createServer.module.css';
 
 // Types
-import { User, Server, PopupType } from '@/types';
+import { User, Server, PopupType, SocketServerEvent } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -113,10 +113,33 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       });
     };
 
+    const handleUserUpdate = (data: Partial<User>) => {
+      setUser((prev) => ({ ...prev, ...data }));
+    };
+
     // Effects
     useEffect(() => {
-      // GET USER DATA
-    }, [userId]);
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
+      if (!socket) return;
+      socket.send.refreshUser({ userId: userId });
+    }, [socket, userId]);
 
     switch (section) {
       // Server Type Selection Section

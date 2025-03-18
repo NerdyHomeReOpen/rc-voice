@@ -5,7 +5,7 @@ import Popup from '@/styles/common/popup.module.css';
 import editChannel from '@/styles/popups/editchannel.module.css';
 
 // Types
-import { Channel, Visibility } from '@/types';
+import { Channel, SocketServerEvent, Visibility } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -60,10 +60,33 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
       socket.send.updateChannel({ channel: channel });
     };
 
+    const handleChannelUpdate = (data: Partial<Channel>) => {
+      setChannel((prev) => ({ ...prev, ...data }));
+    };
+
     // Effects
     useEffect(() => {
-      // GET CHANNEL DATA
-    }, [channelId]);
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
+      if (!socket) return;
+      socket.send.refreshChannel({ channelId: channelId });
+    }, [socket, channelId]);
 
     return (
       <div className={Popup['popupContainer']}>

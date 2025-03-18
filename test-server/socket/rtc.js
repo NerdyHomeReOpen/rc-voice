@@ -332,7 +332,6 @@ const rtcHandler = {
       );
     }
   },
-
   leave: async (io, socket, data) => {
     try {
       // data = {

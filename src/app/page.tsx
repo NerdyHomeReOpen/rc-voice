@@ -385,15 +385,8 @@ const Home = () => {
     const eventHandlers = {
       [SocketServerEvent.CONNECT]: () => handleConnect,
       [SocketServerEvent.DISCONNECT]: () => handleDisconnect,
-      [SocketServerEvent.USER_CONNECT]: handleUserConnect,
-      [SocketServerEvent.USER_DISCONNECT]: handleUserDisconnect,
       [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
-      [SocketServerEvent.SERVER_CONNECT]: handleServerConnect,
-      [SocketServerEvent.SERVER_DISCONNECT]: handleServerDisconnect,
       [SocketServerEvent.SERVER_UPDATE]: handleServerUpdate,
-      [SocketServerEvent.CHANNEL_CONNECT]: handleChannelConnect,
-      [SocketServerEvent.CHANNEL_DISCONNECT]: handleChannelDisconnect,
-      [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
       [SocketServerEvent.ERROR]: handleError,
     };
     const unsubscribe: (() => void)[] = [];
@@ -427,56 +420,56 @@ const Home = () => {
     new errorHandler(error).show();
   };
 
-  const handleUserConnect = (user: User) => {
-    console.log('User connected: ', user);
-    setUser(user);
-    setSelectedTabId(1);
-  };
+  // const handleUserConnect = (user: User) => {
+  //   console.log('User connected: ', user);
+  //   setUser(user);
+  //   setSelectedTabId(1);
+  // };
 
-  const handleUserDisconnect = () => {
-    console.log('User disconnected');
-    store.dispatch(clearChannel());
-    store.dispatch(clearServer());
-    store.dispatch(clearUser());
-    authService.logout();
-  };
+  // const handleUserDisconnect = () => {
+  //   console.log('User disconnected');
+  //   store.dispatch(clearChannel());
+  //   store.dispatch(clearServer());
+  //   store.dispatch(clearUser());
+  //   authService.logout();
+  // };
 
   const handleUserUpdate = (data: Partial<User>) => {
     console.log('User update: ', data);
     setUser({ ...user, ...data });
   };
 
-  const handleServerConnect = (server: Server) => {
-    console.log('Server connected: ', server);
-    setServer(server);
-    setSelectedTabId(3);
-  };
+  // const handleServerConnect = (server: Server) => {
+  //   console.log('Server connected: ', server);
+  //   setServer(server);
+  //   setSelectedTabId(3);
+  // };
 
-  const handleServerDisconnect = () => {
-    console.log('Server disconnected');
-    store.dispatch(clearServer());
-    setSelectedTabId(1);
-  };
+  // const handleServerDisconnect = () => {
+  //   console.log('Server disconnected');
+  //   store.dispatch(clearServer());
+  //   setSelectedTabId(1);
+  // };
 
   const handleServerUpdate = (data: Partial<Server>) => {
     console.log('Server update: ', data);
     setServer({ ...server, ...data });
   };
 
-  const handleChannelConnect = (channel: Channel) => {
-    console.log('Channel connected: ', channel);
-    store.dispatch(setChannel(channel));
-  };
+  // const handleChannelConnect = (channel: Channel) => {
+  //   console.log('Channel connected: ', channel);
+  //   store.dispatch(setChannel(channel));
+  // };
 
-  const handleChannelDisconnect = () => {
-    console.log('Channel disconnected');
-    store.dispatch(clearChannel());
-  };
+  // const handleChannelDisconnect = () => {
+  //   console.log('Channel disconnected');
+  //   store.dispatch(clearChannel());
+  // };
 
-  const handleChannelUpdate = (data: Partial<Channel>) => {
-    console.log('Channel update: ', data);
-    store.dispatch(setChannel(data));
-  };
+  // const handleChannelUpdate = (data: Partial<Channel>) => {
+  //   console.log('Channel update: ', data);
+  //   store.dispatch(setChannel(data));
+  // };
 
   const getMainContent = () => {
     if (!socket) return <LoadingSpinner />;

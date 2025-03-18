@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 
 // Types
-import { Channel } from '@/types';
+import { Channel, SocketServerEvent } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
@@ -81,10 +81,33 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
       socket.send.createChannel({ channel: channel });
     };
 
+    const handleChannelUpdate = (data: Partial<Channel>) => {
+      setParent((prev) => ({ ...prev, ...data }));
+    };
+
     // Effects
     useEffect(() => {
-      // GET PARENT CHANNEL DATA
-    }, [parentId]);
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
+      if (!socket) return;
+      socket.send.refreshChannel({ channelId: parentId });
+    }, [socket, parentId]);
 
     return (
       <div className={popup['popupContainer']}>

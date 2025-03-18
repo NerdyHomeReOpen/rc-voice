@@ -6,7 +6,13 @@ import Popup from '@/styles/common/popup.module.css';
 import applyMember from '@/styles/popups/serverApplication.module.css';
 
 // Types
-import { PopupType, User, Server, ServerApplication } from '@/types';
+import {
+  PopupType,
+  User,
+  Server,
+  SocketServerEvent,
+  MemberApplication,
+} from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -65,7 +71,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
       },
       createdAt: 0,
     });
-    const [application, setApplication] = useState<ServerApplication>({
+    const [application, setApplication] = useState<MemberApplication>({
       id: '',
       name: '未知使用者',
       avatar: '',
@@ -97,12 +103,8 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     // Section Control
     const [section, setSection] = useState<number>(0);
 
-    const handleCreatMemberApplication = (application: ServerApplication) => {
-      socket?.send.createServerApplication({ application: application });
-
-      socket?.on.createServerApplication((data) => {
-        if (data) handleOpenSuccessDialog();
-      });
+    const handleCreatMemberApplication = (application: MemberApplication) => {
+      socket?.send.createMemberApplication({ memberApplication: application });
     };
 
     const handleOpenSuccessDialog = () => {
@@ -120,10 +122,39 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
       ipcService.window.close();
     };
 
+    const handleUserUpdate = (data: Partial<User>) => {
+      setUser((prev) => ({ ...prev, ...data }));
+    };
+
+    const handleServerUpdate = (data: Partial<Server>) => {
+      setServer((prev) => ({ ...prev, ...data }));
+    };
+
     // UseEffect
     useEffect(() => {
-      // GET USER, SERVRE, APPLICATION
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
+        [SocketServerEvent.SERVER_UPDATE]: handleServerUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
     }, []);
+
+    useEffect(() => {
+      if (!socket) return;
+      socket.send.refreshUser({ userId: userId });
+      socket.send.refreshServer({ serverId: serverId });
+    }, [socket]);
 
     switch (section) {
       // Member Application Form
@@ -188,6 +219,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
                     serverId: serverId,
                     userId: userId,
                   });
+                  handleOpenSuccessDialog();
                 }}
               >
                 {lang.tr.submit}

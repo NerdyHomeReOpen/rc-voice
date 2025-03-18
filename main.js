@@ -7,6 +7,7 @@ const net = require('net');
 const DiscordRPC = require('discord-rpc');
 const { io } = require('socket.io-client');
 const { autoUpdater } = require('electron-updater');
+const { SocketClientEvent, SocketServerEvent } = require('./src/types');
 
 let isDev = process.argv.includes('--dev');
 
@@ -258,120 +259,35 @@ function connectSocket(token) {
     },
   });
 
-  const ipcHandlers = {
-    refreshUser: () => socket.emit('refreshUser'),
-    connectUser: (_, data) => socket.emit('connectUser', data),
-    updateUser: (_, data) => socket.emit('updateUser', data),
-    connectServer: (_, data) => socket.emit('connectServer', data),
-    searchServer: (_, data) => socket.emit('searchServer', data),
-    disconnectServer: (_, data) => socket.emit('disconnectServer', data),
-    createServer: (_, data) => socket.emit('createServer', data),
-    updateServer: (_, data) => socket.emit('updateServer', data),
-    deleteServer: (_, data) => socket.emit('deleteServer', data),
-    createServerApplication: (_, data) =>
-      socket.emit('createServerApplication', data),
-    updateMember: (_, data) => socket.emit('updateMember', data),
-    connectChannel: (_, data) => socket.emit('connectChannel', data),
-    disconnectChannel: (_, data) => socket.emit('disconnectChannel', data),
-    updateChannel: (_, data) => socket.emit('updateChannel', data),
-    createChannel: (_, data) => socket.emit('createChannel', data),
-    deleteChannel: (_, data) => socket.emit('deleteChannel', data),
-    message: (_, data) => socket.emit('message', data),
-    directMessage: (_, data) => socket.emit('directMessage', data),
-    RTCOffer: (_, data) => socket.emit('RTCOffer', data),
-    RTCAnswer: (_, data) => socket.emit('RTCAnswer', data),
-    RTCIceCandidate: (_, data) => socket.emit('RTCIceCandidate', data),
-  };
-
   socket.on('connect', () => {
+    // 定義所有 IPC 處理器
+    const ipcHandlers = Object.values(SocketClientEvent).reduce(
+      (acc, event) => {
+        acc[event] = (_, data) => socket.emit(event, data);
+        return acc;
+      },
+      {},
+    );
+
+    // 註冊 IPC 處理器
     Object.entries(ipcHandlers).forEach(([event, handler]) => {
       ipcMain.on(event, handler);
     });
 
-    BrowserWindow.getAllWindows().forEach((window) => {
-      window.webContents.send('connect', socket.id);
-    });
-    socket.on('connect_error', (error) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('connect_error', error),
-      );
-    });
-    socket.on('error', (error) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('error', error),
-      );
-    });
-    socket.on('disconnect', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('disconnect', data),
-      );
-    });
-    socket.on('userConnect', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('userConnect', data),
-      );
-    });
-    socket.on('userDisconnect', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('userDisconnect', data),
-      );
-    });
-    socket.on('userUpdate', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('userUpdate', data),
-      );
-    });
-    socket.on('serverConnect', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('serverConnect', data),
-      );
-    });
-    socket.on('serverDisconnect', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('serverDisconnect', data),
-      );
-    });
-    socket.on('serverUpdate', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('serverUpdate', data),
-      );
-    });
-    socket.on('RTCConnect', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCConnect', data),
-      );
-    });
-    socket.on('RTCOffer', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCOffer', data),
-      );
-    });
-    socket.on('RTCAnswer', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCAnswer', data),
-      );
-    });
-    socket.on('RTCIceCandidate', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCIceCandidate', data),
-      );
-    });
-    socket.on('RTCJoin', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCJoin', data),
-      );
-    });
-    socket.on('RTCLeave', (data) => {
-      BrowserWindow.getAllWindows().forEach((window) =>
-        window.webContents.send('RTCLeave', data),
-      );
+    // 註冊所有 Socket 事件
+    Object.values(SocketServerEvent).forEach((event) => {
+      socket.on(event, (data) => {
+        BrowserWindow.getAllWindows().forEach((window) => {
+          window.webContents.send(event, data);
+        });
+      });
     });
 
     mainWindow?.show();
     authWindow?.hide();
   });
 
-  // 将处理函数存储在 socket 实例上,以便后续清理
+  // 將處理函數存儲在 socket 實例上，以便後續清理
   socket.ipcHandlers = ipcHandlers;
 
   return socket;
@@ -380,7 +296,7 @@ function connectSocket(token) {
 function disconnectSocket(socket) {
   if (!socket) return null;
 
-  // 移除所有 IPC 事件处理函数
+  // 移除所有 IPC 事件處理函數
   if (socket.ipcHandlers) {
     Object.entries(socket.ipcHandlers).forEach(([event, handler]) => {
       ipcMain.removeListener(event, handler);

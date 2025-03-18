@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Types
-import { User, UserFriend, DirectMessage } from '@/types';
+import { User, UserFriend, DirectMessage, SocketServerEvent } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -77,6 +77,36 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
       if (!socket) return;
       socket.send.directMessage({ directMessage });
     };
+
+    const handleUserUpdate = (data: Partial<User>) => {
+      if (data.id === userId) setUser((prev) => ({ ...prev, ...data }));
+      if (data.id === friendId) setFriend((prev) => ({ ...prev, ...data }));
+    };
+
+    // Effects
+    useEffect(() => {
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
+      if (!socket) return;
+      socket.send.refreshUser({ userId: userId });
+      socket.send.refreshUser({ userId: friendId });
+    }, [socket, userId, friendId]);
 
     return null;
     // <Modal title={friendName} onClose={onClose} width="600px" height="600px">

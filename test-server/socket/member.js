@@ -13,6 +13,12 @@ const JWT = utils.jwt;
 const StandardizedError = require('../standardizedError');
 
 const memberHandler = {
+  refreshMember: async (io, socket, data) => {
+    // Get database
+    const users = (await db.get('users')) || {};
+    const servers = (await db.get('servers')) || {};
+    const members = (await db.get('members')) || {};
+  },
   updateMember: async (io, socket, data) => {
     // Get database
     const users = (await db.get('users')) || {};

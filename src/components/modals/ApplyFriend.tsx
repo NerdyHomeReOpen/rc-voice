@@ -92,9 +92,36 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
     //   // socket?.send.createFriendApplication({});
     // };
 
+    const handleUserUpdate = (data: Partial<User>) => {
+      if (data.id === userId) setUser((prev) => ({ ...prev, ...data }));
+      if (data.id === targetUserId)
+        setTargetUser((prev) => ({ ...prev, ...data }));
+    };
+
+    // Effects
     useEffect(() => {
-      // GET USER DATA
-    }, [userId, targetUserId]);
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
+      if (!socket) return;
+      socket.send.refreshUser({ userId: userId });
+      socket.send.refreshUser({ userId: targetUserId });
+    }, [socket, userId, targetUserId]);
 
     return (
       <div className={popup['popupContainer']}>

@@ -1224,7 +1224,7 @@ export interface Server {
   rootChannels?: Channel[];
   channels?: Channel[];
   users?: ServerMember[];
-  memberApplications?: ServerApplication[];
+  memberApplications?: MemberApplication[];
 }
 
 export interface ServerMember extends User {
@@ -1235,7 +1235,7 @@ export interface ServerMember extends User {
   serverId: string;
 }
 
-export interface ServerApplication extends User {
+export interface MemberApplication extends User {
   description: string;
   userId: string;
   serverId: string;
@@ -1324,24 +1324,30 @@ export enum SocketClientEvent {
   UPDATE_SERVER = 'updateServer',
   DELETE_SERVER = 'deleteServer',
   // Channel
+  REFRESH_CHANNEL = 'refreshChannel',
   CONNECT_CHANNEL = 'connectChannel',
   DISCONNECT_CHANNEL = 'disconnectChannel',
   CREATE_CHANNEL = 'createChannel',
   UPDATE_CHANNEL = 'updateChannel',
   DELETE_CHANNEL = 'deleteChannel',
   // Friend Group
+  REFRESH_FRIEND_GROUP = 'refreshFriendGroup',
   CREATE_FRIEND_GROUP = 'createFriendGroup',
   UPDATE_FRIEND_GROUP = 'updateFriendGroup',
   DELETE_FRIEND_GROUP = 'deleteFriendGroup',
   // Member
+  REFRESH_MEMBER = 'refreshMember',
   UPDATE_MEMBER = 'updateMember',
   // Friend
+  REFRESH_FRIEND = 'refreshFriend',
   UPDATE_FRIEND = 'updateFriend',
   // Member Application
+  REFRESH_MEMBER_APPLICATION = 'refreshMemberApplication',
   CREATE_MEMBER_APPLICATION = 'createMemberApplication',
   UPDATE_MEMBER_APPLICATION = 'updateMemberApplication',
   DELETE_MEMBER_APPLICATION = 'deleteMemberApplication',
   // Friend Application
+  REFRESH_FRIEND_APPLICATION = 'refreshFriendApplication',
   CREATE_FRIEND_APPLICATION = 'createFriendApplication',
   UPDATE_FRIEND_APPLICATION = 'updateFriendApplication',
   DELETE_FRIEND_APPLICATION = 'deleteFriendApplication',

@@ -16,6 +16,12 @@ const rtcHandler = require('./rtc');
 const Func = require('../utils/func');
 
 const channelHandler = {
+  refreshChannel: async (io, socket, data) => {
+    // Get database
+    const channels = (await db.get('channels')) || {};
+    const servers = (await db.get('servers')) || {};
+    const users = (await db.get('users')) || {};
+  },
   connectChannel: async (io, socket, data) => {
     // Get database
     const users = (await db.get('users')) || {};

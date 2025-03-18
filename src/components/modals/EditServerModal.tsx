@@ -12,7 +12,13 @@ import permission from '@/styles/common/permission.module.css';
 import MarkdownViewer from '@/components/viewers/MarkdownViewer';
 
 // Types
-import { ServerApplication, Server, PopupType, ServerMember } from '@/types';
+import {
+  MemberApplication,
+  Server,
+  PopupType,
+  ServerMember,
+  SocketServerEvent,
+} from '@/types';
 
 // Utils
 import { getPermissionText } from '@/utils/formatters';
@@ -62,7 +68,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
 
     const [sortedMembers, setSortedMembers] = useState<ServerMember[]>([]);
     const [sortedApplications, setSortedApplications] = useState<
-      ServerApplication[]
+      MemberApplication[]
     >([]);
     const [sortedBlockMembers, setSortedBlockMembers] = useState<
       ServerMember[]
@@ -125,10 +131,33 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
 
     const handleBlockUser = () => {};
 
+    const handleServerUpdate = (data: Partial<Server>) => {
+      setServer((prev) => ({ ...prev, ...data }));
+    };
+
     // Effects
     useEffect(() => {
-      // GET SERVER DATA
-    }, [serverId]);
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.SERVER_UPDATE]: handleServerUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
+      if (!socket) return;
+      socket.send.refreshServer({ serverId: serverId });
+    }, [socket, serverId]);
 
     return (
       <div className={Popup['popupContainer']}>
