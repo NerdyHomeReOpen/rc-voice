@@ -19,8 +19,8 @@ import { ipcService } from '@/services/ipc.service';
 import { createDefault } from '@/utils/default';
 
 interface ApplyFriendModalProps {
-  userId: string | null;
-  targetId: string | null;
+  userId: string;
+  targetId: string;
 }
 
 const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
@@ -40,8 +40,8 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
     );
 
     // Variables
-    const userId = initialData.userId || '';
-    const targetId = initialData.targetId || '';
+    const userId = initialData.userId;
+    const targetId = initialData.targetId;
     const targetName = target.name;
     const targetAvatar = target.avatar;
     const userFriendGroups = user.friendGroups || [];
@@ -108,7 +108,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
           senderId: userId,
           receiverId: targetId,
         });
-    }, [socket, userId, targetId]);
+    }, [socket]);
 
     return (
       <div className={popup['popupContainer']}>

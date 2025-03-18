@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 
 // Types
 import { SocketServerEvent, SocketClientEvent } from '@/types';
@@ -32,6 +32,7 @@ interface SocketProviderProps {
 
 const SocketProvider = ({ children }: SocketProviderProps) => {
   const [event, setEvent] = useState<SocketContextType['event']>();
+  const cleanupRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
     const newEvent = {
@@ -44,8 +45,11 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
       }, {} as Record<SocketClientEvent, (data: any) => () => void>),
       on: Object.values(SocketServerEvent).reduce((acc, event) => {
         acc[event] = (callback: (data: any) => void) => {
+          ipcService.removeListener(event);
           ipcService.onSocketEvent(event, callback);
-          return () => ipcService.removeListener(event);
+          const cleanup = () => ipcService.removeListener(event);
+          cleanupRef.current.push(cleanup);
+          return cleanup;
         };
         return acc;
       }, {} as Record<SocketServerEvent, (callback: (data: any) => void) => () => void>),
@@ -53,9 +57,8 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     setEvent(newEvent);
 
     return () => {
-      Object.keys(newEvent.on).map((event) => {
-        ipcService.removeListener(event);
-      });
+      cleanupRef.current.forEach((cleanup) => cleanup());
+      cleanupRef.current = [];
     };
   }, []);
 

@@ -97,6 +97,8 @@ const Modal = React.memo(() => {
         setInitialData(data);
       });
 
+      if (!initialData) return;
+
       switch (type) {
         case PopupType.EDIT_USER:
           setHeader(<Header title={lang.tr.editUser} buttons={['close']} />);

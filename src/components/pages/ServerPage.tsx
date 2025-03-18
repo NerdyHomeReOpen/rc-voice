@@ -51,6 +51,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
 
     // Variables
     const channelMessages = currentChannel.messages || [];
+    const serverId = server.id;
     const serverName = server.name;
     const serverAvatar = server.avatar;
     const serverDisplayId = server.displayId;
@@ -138,10 +139,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
 
     useEffect(() => {
       if (!socket) return;
-      if (server.id) socket.send.refreshServer({ serverId: server.id });
-      if (currentChannel.id)
-        socket.send.refreshChannel({ channelId: currentChannel.id });
-    }, [socket, server, currentChannel]);
+      if (serverId) socket.send.refreshServer({ serverId: serverId });
+      if (userCurrentChannelId)
+        socket.send.refreshChannel({ channelId: userCurrentChannelId });
+    }, [socket]);
 
     useEffect(() => {
       ipcService.discord.updatePresence({

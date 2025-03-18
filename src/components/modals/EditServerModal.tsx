@@ -36,8 +36,8 @@ import { ipcService } from '@/services/ipc.service';
 import { createDefault } from '@/utils/default';
 
 interface ServerSettingModalProps {
-  serverId: string | null;
-  userId: string | null;
+  serverId: string;
+  userId: string;
 }
 
 const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
@@ -67,8 +67,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const [sortField, setSortField] = useState<string>('name');
 
     // Variables
-    const serverId = initialData.serverId || '';
-    const userId = initialData.userId || '';
+    const serverId = initialData.serverId;
+    const userId = initialData.userId;
     const serverName = server.name;
     const serverAvatar = server.avatar;
     const serverAnnouncement = server.announcement;
@@ -79,9 +79,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const serverLevel = server.level;
     const serverWealth = server.wealth;
     const serverCreatedAt = server.createdAt;
+    const serverSettings = server.settings;
     const serverUsers = server.users || [];
     const serverApplications = server.memberApplications || [];
-    const serverSettings = server.settings;
 
     // Handlers
     const handleSort = (field: string, array: any[], direction: number) => {
@@ -149,7 +149,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       if (!socket) return;
       if (serverId) socket.send.refreshServer({ serverId: serverId });
       if (userId) socket.send.refreshUser({ userId: userId });
-    }, [socket, serverId, userId]);
+    }, [socket]);
 
     return (
       <div className={Popup['popupContainer']}>
@@ -790,4 +790,5 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
 );
 
 EditServerModal.displayName = 'EditServerModal';
+
 export default EditServerModal;

@@ -30,6 +30,7 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
   const [searchResults, setSearchResults] = useState<Server[]>([]);
 
   // Variables
+  const userId = user.id;
   const userName = user.name;
   const userOwnedServers = user.ownedServers || [];
   const userRecentServers = user.recentServers || [];
@@ -73,8 +74,8 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
 
   useEffect(() => {
     if (!socket) return;
-    if (user.id) socket.send.refreshUser({ userId: user.id });
-  }, [socket, user]);
+    if (userId) socket.send.refreshUser({ userId: userId });
+  }, [socket]);
 
   useEffect(() => {
     if (!lang) return;

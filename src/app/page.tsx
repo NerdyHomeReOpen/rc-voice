@@ -44,7 +44,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = React.memo(
-  ({ user, server, selectedId = 1, setSelectedTabId }) => {
+  ({ user, server, selectedId, setSelectedTabId }) => {
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
@@ -77,9 +77,9 @@ const Header: React.FC<HeaderProps> = React.memo(
       authService.logout();
     };
 
-    const handleLeaveServer = (serverId: string) => {
+    const handleLeaveServer = () => {
       if (!socket) return;
-      socket.send.disconnectServer({ serverId: serverId, userId: user.id });
+      socket.send.disconnectServer({ serverId: server.id, userId: user.id });
     };
 
     const handleUpdateStatus = (status: User['status']) => {
@@ -164,7 +164,7 @@ const Header: React.FC<HeaderProps> = React.memo(
         </div>
         {/* Main Tabs */}
         <div className={header['mainTabs']}>
-          {MAIN_TABS.map((Tab) => {
+          {MAIN_TABS.filter((t) => !!t.label || serverId).map((Tab) => {
             const TabId = Tab.id;
             const TabLable = Tab.label;
             return (
@@ -179,7 +179,7 @@ const Header: React.FC<HeaderProps> = React.memo(
                 <div className={header['tabBg']}></div>
                 {TabId > 2 && serverId && (
                   <CircleX
-                    onClick={() => handleLeaveServer(serverId)}
+                    onClick={() => handleLeaveServer()}
                     size={16}
                     className={header['tabClose']}
                   />
@@ -365,10 +365,12 @@ const Home = () => {
   // Handlers
   const handleConnect = () => {
     console.log('Socket connected');
+    setSelectedTabId(1);
   };
 
   const handleDisconnect = () => {
     console.log('Socket disconnected');
+    setSelectedTabId(1);
   };
 
   const handleError = (error: StandardizedError) => {
@@ -381,7 +383,9 @@ const Home = () => {
   };
 
   const handleServerUpdate = (data: Partial<Server> | null) => {
+    setSelectedTabId(data ? 3 : 1);
     if (!data) data = createDefault.server();
+    console.log('Server updated', data);
     setServer((prev) => ({ ...prev, ...data }));
   };
 

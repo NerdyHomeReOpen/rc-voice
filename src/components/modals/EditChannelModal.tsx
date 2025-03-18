@@ -18,8 +18,8 @@ import { ipcService } from '@/services/ipc.service';
 import { createDefault } from '@/utils/default';
 
 interface EditChannelModalProps {
-  userId: string | null;
-  channelId: string | null;
+  userId: string;
+  channelId: string;
 }
 
 const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
@@ -33,8 +33,8 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     const [channel, setChannel] = useState<Channel>(createDefault.channel());
 
     // Variables
-    const userId = initialData.userId || '';
-    const channelId = initialData.channelId || '';
+    const userId = initialData.userId;
+    const channelId = initialData.channelId;
     const channelName = channel.name;
     const channelSettings = channel.settings;
     const isCategory = channel.isCategory;
@@ -83,7 +83,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
       if (!socket) return;
       if (channelId) socket.send.refreshChannel({ channelId: channelId });
       if (userId) socket.send.refreshUser({ userId: userId });
-    }, [socket, channelId, userId]);
+    }, [socket]);
 
     return (
       <div className={Popup['popupContainer']}>

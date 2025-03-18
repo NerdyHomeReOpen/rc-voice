@@ -25,8 +25,8 @@ import { ipcService } from '@/services/ipc.service';
 import { createDefault } from '@/utils/default';
 
 interface ServerApplicationModalProps {
-  serverId: string | null;
-  userId: string | null;
+  serverId: string;
+  userId: string;
 }
 
 const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
@@ -43,8 +43,8 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     );
 
     // Variables
-    const userId = initialData.userId || '';
-    const serverId = initialData.serverId || '';
+    const userId = initialData.userId;
+    const serverId = initialData.serverId;
     const serverName = server.name;
     const serverDisplayId = server.displayId;
     const serverAvatar = server.avatar;
@@ -121,7 +121,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
           senderId: userId,
           receiverId: serverId,
         });
-    }, [socket, userId, serverId]);
+    }, [socket]);
 
     switch (section) {
       // Member Application Form

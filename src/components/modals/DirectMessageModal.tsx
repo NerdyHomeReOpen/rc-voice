@@ -16,8 +16,8 @@ import MessageInputBox from '@/components/MessageInputBox';
 import { createDefault } from '@/utils/default';
 
 interface DirectMessageModalProps {
-  friendId: string | null;
-  userId: string | null;
+  friendId: string;
+  userId: string;
 }
 
 const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
@@ -74,7 +74,7 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
       if (!socket) return;
       socket.send.refreshUser({ userId: userId });
       socket.send.refreshUser({ userId: friendId });
-    }, [socket, userId, friendId]);
+    }, [socket]);
 
     return null;
     // <Modal title={friendName} onClose={onClose} width="600px" height="600px">

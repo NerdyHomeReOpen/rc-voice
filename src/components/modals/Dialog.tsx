@@ -20,9 +20,9 @@ enum DIALOG_ICON {
 }
 
 interface DialogProps {
-  iconType: keyof typeof DIALOG_ICON | null;
-  title: React.ReactNode | null;
-  submitTo: string | null;
+  iconType: keyof typeof DIALOG_ICON;
+  title: React.ReactNode;
+  submitTo: string;
 }
 
 const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
@@ -30,9 +30,9 @@ const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
   const lang = useLanguage();
 
   // Variables
-  const iconType = initialData.iconType || 'INFO';
-  const title = initialData.title || '未知';
-  const submitTo = initialData.submitTo || '';
+  const iconType = initialData.iconType;
+  const title = initialData.title;
+  const submitTo = initialData.submitTo;
 
   // Handlers
   const handleClose = () => {

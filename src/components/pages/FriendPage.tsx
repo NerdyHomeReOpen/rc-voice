@@ -39,6 +39,7 @@ const FriendPageComponent: React.FC<FriendPageProps> = React.memo(
 
     // Variables
     const MAXLENGTH = 300;
+    const userId = user.id;
     const userName = user.name;
     const userAvatar = user.avatar;
     const userSignature = user.signature;
@@ -102,8 +103,8 @@ const FriendPageComponent: React.FC<FriendPageProps> = React.memo(
 
     useEffect(() => {
       if (!socket) return;
-      if (user.id) socket.send.refreshUser({ userId: user.id });
-    }, [socket, user]);
+      if (userId) socket.send.refreshUser({ userId: userId });
+    }, [socket]);
 
     return (
       <div className={friendPage['friendWrapper']}>

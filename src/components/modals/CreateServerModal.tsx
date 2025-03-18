@@ -36,7 +36,7 @@ export const validateSlogan = (slogan: string): string => {
 };
 
 interface CreateServerModalProps {
-  userId: string | null;
+  userId: string;
 }
 
 const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
@@ -57,7 +57,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
 
     // Variables
     const maxGroups = 3;
-    const userId = initialData.userId || '';
+    const userId = initialData.userId;
     const userOwnedServers = user.ownedServers || [];
     const remainingGroups = maxGroups - userOwnedServers.length;
     const canCreate = remainingGroups > 0;
@@ -107,7 +107,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     useEffect(() => {
       if (!socket) return;
       if (userId) socket.send.refreshUser({ userId: userId });
-    }, [socket, userId]);
+    }, [socket]);
 
     switch (section) {
       // Server Type Selection Section

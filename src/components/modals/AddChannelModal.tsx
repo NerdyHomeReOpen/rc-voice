@@ -18,9 +18,9 @@ import { ipcService } from '@/services/ipc.service';
 import { createDefault } from '@/utils/default';
 
 interface AddChannelModalProps {
-  userId: string | null;
-  parentId: string | null;
-  serverId: string | null;
+  userId: string;
+  parentId: string;
+  serverId: string;
 }
 
 const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
@@ -35,9 +35,9 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     const [channel, setChannel] = useState<Channel>(createDefault.channel());
 
     // Variables
-    const userId = initialData.userId || '';
-    const parentId = initialData.parentId || '';
-    const serverId = initialData.serverId || '';
+    const userId = initialData.userId;
+    const parentId = initialData.parentId;
+    const serverId = initialData.serverId;
     const parentName = parent.name;
     const channelName = channel.name;
     const isRoot = !!parentId;
@@ -86,7 +86,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
       if (!socket) return;
       if (parentId) socket.send.refreshChannel({ channelId: parentId });
       if (userId) socket.send.refreshUser({ userId: userId });
-    }, [socket, parentId, userId]);
+    }, [socket]);
 
     return (
       <div className={popup['popupContainer']}>
