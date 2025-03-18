@@ -25,6 +25,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 // Utils
 import { errorHandler, StandardizedError } from '@/utils/errorHandler';
+import { createDefault } from '@/utils/default';
 
 // Providers
 import WebRTCProvider from '@/providers/WebRTCProvider';
@@ -78,12 +79,12 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     const handleLeaveServer = (serverId: string) => {
       if (!socket) return;
-      socket.send.disconnectServer({ serverId: serverId });
+      socket.send.disconnectServer({ serverId: serverId, userId: user.id });
     };
 
     const handleUpdateStatus = (status: User['status']) => {
       if (!socket) return;
-      socket.send.updateUser({ user: { status } });
+      socket.send.updateUser({ user: { id: user.id, status } });
     };
 
     const handleCreateError = (error: StandardizedError) => {
@@ -328,44 +329,8 @@ const Home = () => {
   const lang = useLanguage();
 
   // States
-  const [user, setUser] = useState<User>({
-    id: '',
-    name: '未知使用者',
-    avatar: '',
-    avatarUrl: '',
-    signature: '',
-    status: 'online',
-    gender: 'Male',
-    level: 0,
-    xp: 0,
-    requiredXp: 0,
-    progress: 0,
-    currentChannelId: '',
-    currentServerId: '',
-    lastActiveAt: 0,
-    createdAt: 0,
-  });
-  const [server, setServer] = useState<Server>({
-    id: '',
-    name: '未知伺服器',
-    avatar: '',
-    avatarUrl: '/logo_server_def.png',
-    announcement: '',
-    description: '',
-    type: 'other',
-    displayId: '00000000',
-    slogan: '',
-    level: 0,
-    wealth: 0,
-    lobbyId: '',
-    ownerId: '',
-    settings: {
-      allowDirectMessage: false,
-      visibility: 'public',
-      defaultChannelId: '',
-    },
-    createdAt: 0,
-  });
+  const [user, setUser] = useState<User>(createDefault.user());
+  const [server, setServer] = useState<Server>(createDefault.server());
   const [selectedTabId, setSelectedTabId] = useState<number>(1);
 
   // Effects
@@ -410,11 +375,13 @@ const Home = () => {
     new errorHandler(error).show();
   };
 
-  const handleUserUpdate = (data: Partial<User>) => {
+  const handleUserUpdate = (data: Partial<User> | null) => {
+    if (!data) data = createDefault.user();
     setUser((prev) => ({ ...prev, ...data }));
   };
 
-  const handleServerUpdate = (data: Partial<Server>) => {
+  const handleServerUpdate = (data: Partial<Server> | null) => {
+    if (!data) data = createDefault.server();
     setServer((prev) => ({ ...prev, ...data }));
   };
 

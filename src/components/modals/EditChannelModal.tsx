@@ -5,7 +5,7 @@ import Popup from '@/styles/common/popup.module.css';
 import editChannel from '@/styles/popups/editChannel.module.css';
 
 // Types
-import { Channel, SocketServerEvent, Visibility } from '@/types';
+import { Channel, SocketServerEvent, User, Visibility } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -14,7 +14,11 @@ import { useSocket } from '@/providers/SocketProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
+// Utils
+import { createDefault } from '@/utils/default';
+
 interface EditChannelModalProps {
+  userId: string | null;
   channelId: string | null;
 }
 
@@ -25,26 +29,11 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     const socket = useSocket();
 
     // States
-    const [channel, setChannel] = useState<Channel>({
-      id: '',
-      name: '',
-      isLobby: false,
-      isCategory: false,
-      isRoot: false,
-      serverId: '',
-      voiceMode: 'free',
-      chatMode: 'free',
-      order: 0,
-      settings: {
-        bitrate: 0,
-        visibility: 'public',
-        slowmode: false,
-        userLimit: 0,
-      },
-      createdAt: 0,
-    });
+    const [user, setUser] = useState<User>(createDefault.user());
+    const [channel, setChannel] = useState<Channel>(createDefault.channel());
 
     // Variables
+    const userId = initialData.userId || '';
     const channelId = initialData.channelId || '';
     const channelName = channel.name;
     const channelSettings = channel.settings;
@@ -57,11 +46,17 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
 
     const handleUpdateChannel = async () => {
       if (!socket) return;
-      socket.send.updateChannel({ channel: channel });
+      socket.send.updateChannel({ channel: channel, userId: user.id });
     };
 
-    const handleChannelUpdate = (data: Partial<Channel>) => {
+    const handleChannelUpdate = (data: Partial<Channel> | null) => {
+      if (!data) data = createDefault.channel();
       setChannel((prev) => ({ ...prev, ...data }));
+    };
+
+    const handleUserUpdate = (data: Partial<User> | null) => {
+      if (!data) data = createDefault.user();
+      setUser((prev) => ({ ...prev, ...data }));
     };
 
     // Effects
@@ -70,6 +65,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
 
       const eventHandlers = {
         [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
+        [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
       };
       const unsubscribe: (() => void)[] = [];
 
@@ -85,8 +81,9 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
 
     useEffect(() => {
       if (!socket) return;
-      socket.send.refreshChannel({ channelId: channelId });
-    }, [socket, channelId]);
+      if (channelId) socket.send.refreshChannel({ channelId: channelId });
+      if (userId) socket.send.refreshUser({ userId: userId });
+    }, [socket, channelId, userId]);
 
     return (
       <div className={Popup['popupContainer']}>

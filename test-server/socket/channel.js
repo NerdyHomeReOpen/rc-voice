@@ -147,6 +147,7 @@ const channelHandler = {
       if (user.currentChannelId) {
         await channelHandler.disconnectChannel(io, socket, {
           channelId: user.currentChannelId,
+          userId: user.id,
         });
       }
 
@@ -316,7 +317,7 @@ const channelHandler = {
       //     ...
       //   },
       // }
-      // console.log(data);
+      console.log(data);
 
       // Validate data
       const operatorId = Func.validate.socket(socket);
@@ -360,7 +361,7 @@ const channelHandler = {
           404,
         );
       }
-      const member = members[`mb_${server.id}_${user.id}`];
+      const member = members[`mb_${user.id}-${server.id}`];
       if (!member) {
         throw new StandardizedError(
           `使用者(${user.id})不存在於伺服器(${server.id})`,
@@ -497,7 +498,7 @@ const channelHandler = {
           404,
         );
       }
-      const userMember = members[`mb_${server.id}_${user.id}`];
+      const userMember = members[`mb_${user.id}_${server.id}`];
       if (!userMember) {
         throw new StandardizedError(
           `使用者(${user.id})不存在於伺服器(${server.id})`,

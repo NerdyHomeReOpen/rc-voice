@@ -15,6 +15,9 @@ import { useLanguage } from '@/providers/LanguageProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
+// Utils
+import { createDefault } from '@/utils/default';
+
 // Validation
 export const validateName = (name: string): string => {
   if (!name?.trim()) return '請輸入群組名稱';
@@ -49,44 +52,8 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       description: '',
     });
 
-    const [user, setUser] = useState<User>({
-      id: '',
-      name: '未知使用者',
-      avatar: '',
-      avatarUrl: '',
-      signature: '',
-      status: 'online',
-      gender: 'Male',
-      level: 0,
-      xp: 0,
-      requiredXp: 0,
-      progress: 0,
-      currentChannelId: '',
-      currentServerId: '',
-      lastActiveAt: 0,
-      createdAt: 0,
-    });
-    const [server, setServer] = useState<Server>({
-      id: '',
-      name: '',
-      avatar: null,
-      avatarUrl: null,
-      level: 0,
-      description: '',
-      wealth: 0,
-      slogan: '',
-      announcement: '',
-      type: '',
-      displayId: '',
-      lobbyId: '',
-      ownerId: '',
-      settings: {
-        allowDirectMessage: true,
-        visibility: 'public',
-        defaultChannelId: '',
-      },
-      createdAt: 0,
-    });
+    const [user, setUser] = useState<User>(createDefault.user());
+    const [server, setServer] = useState<Server>(createDefault.server());
 
     // Variables
     const maxGroups = 3;
@@ -102,7 +69,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
 
     const handleCreateServer = (server: Server) => {
       if (!socket) return;
-      socket.send.createServer({ server: server });
+      socket.send.createServer({ server: server, userId: userId });
     };
 
     const handleOpenErrorDialog = (message: string) => {
@@ -113,7 +80,8 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
       });
     };
 
-    const handleUserUpdate = (data: Partial<User>) => {
+    const handleUserUpdate = (data: Partial<User> | null) => {
+      if (!data) data = createDefault.user();
       setUser((prev) => ({ ...prev, ...data }));
     };
 

@@ -259,12 +259,14 @@ const serverHandler = {
       if (user.currentServerId) {
         await serverHandler.disconnectServer(io, socket, {
           serverId: user.currentServerId,
+          userId: user.id,
         });
       }
 
       // Connect to the server's lobby channel
       await channelHandler.connectChannel(io, socket, {
         channelId: server.lobbyId,
+        userId: user.id,
       });
 
       // Update user-server
@@ -372,6 +374,7 @@ const serverHandler = {
       if (user.currentChannelId) {
         await channelHandler.disconnectChannel(io, socket, {
           channelId: user.currentChannelId,
+          userId: user.id,
         });
       }
 
@@ -458,26 +461,26 @@ const serverHandler = {
         );
       }
       // TODO: change to Func.validate.server
-      const serverNameError = Func.validate.serverName(newServer.name);
-      if (serverNameError) {
-        throw new StandardizedError(
-          serverNameError,
-          'ValidationError',
-          'CREATESERVER',
-          'NAME',
-          400,
-        );
-      }
-      const userOwnedServers = await Get.userOwnedServers(userId);
-      if (userOwnedServers.length >= 3) {
-        throw new StandardizedError(
-          '您已達到可創建群組上限',
-          'ValidationError',
-          'CREATESERVER',
-          'LIMIT',
-          403,
-        );
-      }
+      // const serverNameError = Func.validate.serverName(newServer.name);
+      // if (serverNameError) {
+      //   throw new StandardizedError(
+      //     serverNameError,
+      //     'ValidationError',
+      //     'CREATESERVER',
+      //     'NAME',
+      //     400,
+      //   );
+      // }
+      // const userOwnedServers = await Get.userOwnedServers(userId);
+      // if (userOwnedServers.length >= 3) {
+      //   throw new StandardizedError(
+      //     '您已達到可創建群組上限',
+      //     'ValidationError',
+      //     'CREATESERVER',
+      //     'LIMIT',
+      //     403,
+      //   );
+      // }
 
       // Create Ids
       const serverId = uuidv4();
@@ -485,8 +488,8 @@ const serverHandler = {
 
       // Handle avatar upload if provided
       let avatarData = null;
-      if (server.avatar) {
-        const matches = server.avatar.match(/^data:image\/(.*?);base64,/);
+      if (newServer.avatar) {
+        const matches = newServer.avatar.match(/^data:image\/(.*?);base64,/);
         if (!matches) {
           throw new Error('無效的圖片格式');
         }
@@ -495,7 +498,7 @@ const serverHandler = {
         if (!['png', 'jpeg', 'gif', 'webp'].includes(imageType)) {
           throw new Error('無效的圖片格式');
         }
-        const base64Data = server.avatar.replace(
+        const base64Data = newServer.avatar.replace(
           /^data:image\/\w+;base64,/,
           '',
         );

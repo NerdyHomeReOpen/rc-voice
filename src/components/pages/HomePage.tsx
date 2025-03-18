@@ -45,9 +45,11 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
     setSearchResults(servers);
   };
 
-  const handleOpenCreateServerPopup = () => {
+  const handleOpenCreateServer = () => {
     ipcService.popup.open(PopupType.CREATE_SERVER);
-    ipcService.initialData.onRequest(PopupType.CREATE_SERVER, { user: user });
+    ipcService.initialData.onRequest(PopupType.CREATE_SERVER, {
+      userId: user.id,
+    });
   };
 
   // Effects
@@ -136,7 +138,7 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
           <button
             className={homePage['navegateItem']}
             data-key="30014"
-            onClick={() => handleOpenCreateServerPopup()}
+            onClick={() => handleOpenCreateServer()}
           >
             <div></div>
             {lang.tr.createGroup}

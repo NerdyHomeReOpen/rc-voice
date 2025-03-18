@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+const { QuickDB } = require('quick.db');
+const db = new QuickDB();
 // Utils
 const utils = require('../utils');
 const StandardizedError = utils.standardizedError;
@@ -7,6 +9,9 @@ const Func = utils.func;
 
 const rtcHandler = {
   offer: async (io, socket, data) => {
+    // Get database
+    const users = await db.get('users');
+
     try {
       // data = {
       //   to:
@@ -67,6 +72,9 @@ const rtcHandler = {
     }
   },
   answer: async (io, socket, data) => {
+    // Get database
+    const users = await db.get('users');
+
     try {
       // data = {
       //   to:
@@ -127,6 +135,9 @@ const rtcHandler = {
     }
   },
   candidate: async (io, socket, data) => {
+    // Get database
+    const users = await db.get('users');
+
     try {
       // data = {
       //   to:
@@ -187,6 +198,9 @@ const rtcHandler = {
     }
   },
   join: async (io, socket, data) => {
+    // Get database
+    const users = await db.get('users');
+
     try {
       // data = {
       //   channelId:
@@ -244,6 +258,9 @@ const rtcHandler = {
     }
   },
   leave: async (io, socket, data) => {
+    // Get database
+    const users = await db.get('users');
+
     try {
       // data = {
       //   channelId:

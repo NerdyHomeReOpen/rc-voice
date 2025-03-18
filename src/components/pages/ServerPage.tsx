@@ -28,6 +28,7 @@ import { useSocket } from '@/providers/SocketProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 import { useWebRTC } from '@/providers/WebRTCProvider';
+import { createDefault } from '@/utils/default';
 
 interface ServerPageProps {
   user: User;
@@ -44,24 +45,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     // States
     const [sidebarWidth, setSidebarWidth] = useState<number>(256);
     const [isResizing, setIsResizing] = useState<boolean>(false);
-    const [currentChannel, setCurrentChannel] = useState<Channel>({
-      id: '',
-      name: '',
-      isLobby: false,
-      isCategory: false,
-      isRoot: false,
-      serverId: '',
-      voiceMode: 'free',
-      chatMode: 'free',
-      order: 0,
-      settings: {
-        bitrate: 0,
-        visibility: 'public',
-        slowmode: false,
-        userLimit: 0,
-      },
-      createdAt: 0,
-    });
+    const [currentChannel, setCurrentChannel] = useState<Channel>(
+      createDefault.channel(),
+    );
 
     // Variables
     const channelMessages = currentChannel.messages || [];
@@ -82,23 +68,25 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       socket.send.message({ message });
     };
 
-    const handleChannelUpdate = (channel: Channel) => {
-      setCurrentChannel(channel);
-    };
-
     const handleOpenServerSettings = () => {
       ipcService.popup.open(PopupType.EDIT_SERVER);
       ipcService.initialData.onRequest(PopupType.EDIT_SERVER, {
-        server: server,
-        mainUserId: userId,
+        serverId: server.id,
+        userId: user.id,
       });
     };
 
     const handleOpenApplyMember = () => {
       ipcService.popup.open(PopupType.APPLY_MEMBER);
       ipcService.initialData.onRequest(PopupType.APPLY_MEMBER, {
-        server: server,
+        serverId: server.id,
+        userId: user.id,
       });
+    };
+
+    const handleChannelUpdate = (channel: Partial<Channel>) => {
+      if (!channel) channel = createDefault.channel();
+      setCurrentChannel((prev) => ({ ...prev, ...channel }));
     };
 
     const handleStartResizing = useCallback((e: React.MouseEvent) => {

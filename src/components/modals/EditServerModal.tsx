@@ -18,6 +18,7 @@ import {
   PopupType,
   ServerMember,
   SocketServerEvent,
+  User,
 } from '@/types';
 
 // Utils
@@ -31,9 +32,12 @@ import { useLanguage } from '@/providers/LanguageProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
+// Utils
+import { createDefault } from '@/utils/default';
+
 interface ServerSettingModalProps {
-  serverId: string;
-  userId: string;
+  serverId: string | null;
+  userId: string | null;
 }
 
 const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
@@ -44,27 +48,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const contextMenu = useContextMenu();
 
     // States
-    const [server, setServer] = useState<Server>({
-      id: '',
-      name: '未知伺服器',
-      avatar: '',
-      avatarUrl: '/logo_server_def.png',
-      announcement: '',
-      description: '',
-      type: 'other',
-      displayId: '00000000',
-      slogan: '',
-      level: 0,
-      wealth: 0,
-      lobbyId: '',
-      ownerId: '',
-      settings: {
-        allowDirectMessage: false,
-        visibility: 'public',
-        defaultChannelId: '',
-      },
-      createdAt: 0,
-    });
+    const [user, setUser] = useState<User>(createDefault.user());
+    const [server, setServer] = useState<Server>(createDefault.server());
 
     const [sortedMembers, setSortedMembers] = useState<ServerMember[]>([]);
     const [sortedApplications, setSortedApplications] = useState<
@@ -82,8 +67,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const [sortField, setSortField] = useState<string>('name');
 
     // Variables
-    const serverId = initialData.serverId;
-    const userId = initialData.userId;
+    const serverId = initialData.serverId || '';
+    const userId = initialData.userId || '';
     const serverName = server.name;
     const serverAvatar = server.avatar;
     const serverAnnouncement = server.announcement;
@@ -119,7 +104,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
 
     const handleSubmit = () => {
       if (!socket) return;
-      socket.send.updateServer({ server: server });
+      socket.send.updateServer({ server: server, userId: user.id });
       handleClose();
     };
 
@@ -131,8 +116,14 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
 
     const handleBlockUser = () => {};
 
-    const handleServerUpdate = (data: Partial<Server>) => {
+    const handleServerUpdate = (data: Partial<Server> | null) => {
+      if (!data) data = createDefault.server();
       setServer((prev) => ({ ...prev, ...data }));
+    };
+
+    const handleUserUpdate = (data: Partial<User> | null) => {
+      if (!data) data = createDefault.user();
+      setUser((prev) => ({ ...prev, ...data }));
     };
 
     // Effects
@@ -156,8 +147,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
 
     useEffect(() => {
       if (!socket) return;
-      socket.send.refreshServer({ serverId: serverId });
-    }, [socket, serverId]);
+      if (serverId) socket.send.refreshServer({ serverId: serverId });
+      if (userId) socket.send.refreshUser({ userId: userId });
+    }, [socket, serverId, userId]);
 
     return (
       <div className={Popup['popupContainer']}>

@@ -26,7 +26,7 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(({ user, server }) => {
     if (!socket) return;
     if (user.currentServerId === serverId) return;
 
-    socket.send.connectServer({ serverId });
+    socket.send.connectServer({ serverId, userId: user.id });
   };
 
   const handleError = (error: StandardizedError) => {

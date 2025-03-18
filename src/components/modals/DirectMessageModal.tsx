@@ -12,6 +12,9 @@ import { useSocket } from '@/providers/SocketProvider';
 import MessageViewer from '@/components/viewers/MessageViewer';
 import MessageInputBox from '@/components/MessageInputBox';
 
+// Utils
+import { createDefault } from '@/utils/default';
+
 interface DirectMessageModalProps {
   friendId: string | null;
   userId: string | null;
@@ -24,44 +27,8 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
     const socket = useSocket();
 
     // States
-    const [user, setUser] = useState<User>({
-      id: '',
-      name: '未知使用者',
-      avatar: '',
-      avatarUrl: '',
-      signature: '',
-      status: 'online',
-      gender: 'Male',
-      level: 0,
-      xp: 0,
-      requiredXp: 0,
-      progress: 0,
-      currentChannelId: '',
-      currentServerId: '',
-      lastActiveAt: 0,
-      createdAt: 0,
-    });
-    const [friend, setFriend] = useState<UserFriend>({
-      id: '',
-      name: '未知使用者',
-      avatar: '',
-      avatarUrl: '',
-      signature: '',
-      status: 'online',
-      gender: 'Male',
-      level: 0,
-      xp: 0,
-      requiredXp: 0,
-      progress: 0,
-      currentChannelId: '',
-      currentServerId: '',
-      lastActiveAt: 0,
-      createdAt: 0,
-      isBlocked: false,
-      friendGroupId: '',
-      user1Id: '',
-      user2Id: '',
-    });
+    const [user, setUser] = useState<User>(createDefault.user());
+    const [friend, setFriend] = useState<User>(createDefault.user());
 
     // Variables
     const userId = user.id;
@@ -70,7 +37,7 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
     const friendName = friend.name;
     const friendLevel = friend.level;
     const friendGrade = Math.min(56, Math.ceil(friendLevel / 5)); // 56 is max level
-    const friendDirectMessages = friend.directMessages || [];
+    // const friendDirectMessages = friend.directMessages || [];
 
     // Handlers
     const handleSendMessage = (directMessage: DirectMessage) => {
@@ -78,7 +45,8 @@ const DirectMessageModal: React.FC<DirectMessageModalProps> = React.memo(
       socket.send.directMessage({ directMessage });
     };
 
-    const handleUserUpdate = (data: Partial<User>) => {
+    const handleUserUpdate = (data: Partial<User> | null) => {
+      if (!data) data = createDefault.user();
       if (data.id === userId) setUser((prev) => ({ ...prev, ...data }));
       if (data.id === friendId) setFriend((prev) => ({ ...prev, ...data }));
     };

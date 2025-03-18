@@ -21,6 +21,9 @@ import { useSocket } from '@/providers/SocketProvider';
 // Services
 import { ipcService } from '@/services/ipc.service';
 
+// Utils
+import { createDefault } from '@/utils/default';
+
 interface ServerApplicationModalProps {
   serverId: string | null;
   userId: string | null;
@@ -33,64 +36,11 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     const socket = useSocket();
 
     // State
-    const [user, setUser] = useState<User>({
-      id: '',
-      name: '未知使用者',
-      avatar: '',
-      avatarUrl: '',
-      signature: '',
-      status: 'online',
-      gender: 'Male',
-      level: 0,
-      xp: 0,
-      requiredXp: 0,
-      progress: 0,
-      currentChannelId: '',
-      currentServerId: '',
-      lastActiveAt: 0,
-      createdAt: 0,
-    });
-    const [server, setServer] = useState<Server>({
-      id: '',
-      name: '未知伺服器',
-      avatar: '',
-      avatarUrl: '/logo_server_def.png',
-      announcement: '',
-      description: '',
-      type: 'other',
-      displayId: '00000000',
-      slogan: '',
-      level: 0,
-      wealth: 0,
-      lobbyId: '',
-      ownerId: '',
-      settings: {
-        allowDirectMessage: false,
-        visibility: 'public',
-        defaultChannelId: '',
-      },
-      createdAt: 0,
-    });
-    const [application, setApplication] = useState<MemberApplication>({
-      id: '',
-      name: '未知使用者',
-      avatar: '',
-      avatarUrl: '',
-      signature: '',
-      status: 'online',
-      gender: 'Male',
-      level: 0,
-      xp: 0,
-      requiredXp: 0,
-      progress: 0,
-      currentChannelId: '',
-      currentServerId: '',
-      lastActiveAt: 0,
-      createdAt: 0,
-      description: '',
-      userId: '',
-      serverId: '',
-    });
+    const [user, setUser] = useState<User>(createDefault.user());
+    const [server, setServer] = useState<Server>(createDefault.server());
+    const [application, setApplication] = useState<MemberApplication>(
+      createDefault.memberApplication(),
+    );
 
     // Variables
     const userId = initialData.userId || '';
@@ -104,7 +54,8 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
     const [section, setSection] = useState<number>(0);
 
     const handleCreatMemberApplication = (application: MemberApplication) => {
-      socket?.send.createMemberApplication({ memberApplication: application });
+      if (!socket) return;
+      socket.send.createMemberApplication({ memberApplication: application });
     };
 
     const handleOpenSuccessDialog = () => {
@@ -122,12 +73,21 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
       ipcService.window.close();
     };
 
-    const handleUserUpdate = (data: Partial<User>) => {
+    const handleUserUpdate = (data: Partial<User> | null) => {
+      if (!data) data = createDefault.user();
       setUser((prev) => ({ ...prev, ...data }));
     };
 
-    const handleServerUpdate = (data: Partial<Server>) => {
+    const handleServerUpdate = (data: Partial<Server> | null) => {
+      if (!data) data = createDefault.server();
       setServer((prev) => ({ ...prev, ...data }));
+    };
+
+    const handleMemberApplicationUpdate = (
+      data: Partial<MemberApplication> | null,
+    ) => {
+      if (!data) data = createDefault.memberApplication();
+      setApplication((prev) => ({ ...prev, ...data }));
     };
 
     // UseEffect
@@ -137,6 +97,8 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
       const eventHandlers = {
         [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
         [SocketServerEvent.SERVER_UPDATE]: handleServerUpdate,
+        // [SocketServerEvent.MEMBER_APPLICATION_UPDATE]:
+        //   handleMemberApplicationUpdate,
       };
       const unsubscribe: (() => void)[] = [];
 
@@ -148,13 +110,18 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
       return () => {
         unsubscribe.forEach((unsub) => unsub());
       };
-    }, []);
+    }, [socket]);
 
     useEffect(() => {
       if (!socket) return;
-      socket.send.refreshUser({ userId: userId });
-      socket.send.refreshServer({ serverId: serverId });
-    }, [socket]);
+      if (userId) socket.send.refreshUser({ userId: userId });
+      if (serverId) socket.send.refreshServer({ serverId: serverId });
+      if (userId && serverId)
+        socket.send.refreshMemberApplication({
+          senderId: userId,
+          receiverId: serverId,
+        });
+    }, [socket, userId, serverId]);
 
     switch (section) {
       // Member Application Form
@@ -167,11 +134,7 @@ const ServerApplicationModal: React.FC<ServerApplicationModalProps> =
                   <div className={applyMember['avatarWrapper']}>
                     <div
                       className={applyMember['avatarPicture']}
-                      style={
-                        serverAvatar
-                          ? { backgroundImage: `url(${serverAvatar})` }
-                          : {}
-                      }
+                      style={{ backgroundImage: `url(${serverAvatar})` }}
                     />
                   </div>
                   <div className={applyMember['serverInfoWrapper']}>

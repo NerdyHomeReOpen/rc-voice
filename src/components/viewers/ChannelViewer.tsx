@@ -45,22 +45,24 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
     const [expanded, setExpanded] = useState<boolean>(true);
 
     // Handlers
-    const handleOpenEditChannelPopup = () => {
+    const handleOpenEditChannel = () => {
       ipcService.popup.open(PopupType.EDIT_CHANNEL);
       ipcService.initialData.onRequest(PopupType.EDIT_CHANNEL, {
-        channel: category,
+        channelId: category.id,
+        userId: user.id,
       });
     };
 
-    const handleOpenCreateChannelPopup = () => {
+    const handleOpenCreateChannel = () => {
       ipcService.popup.open(PopupType.CREATE_CHANNEL);
       ipcService.initialData.onRequest(PopupType.CREATE_CHANNEL, {
         serverId: category.serverId,
-        parent: category,
+        parentId: category.id,
+        userId: user.id,
       });
     };
 
-    const handleOpenWarningPopup = () => {
+    const handleOpenWarning = () => {
       ipcService.popup.open(PopupType.DIALOG_WARNING);
       ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
         iconType: 'warning',
@@ -74,7 +76,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
 
     const handleDeleteChannel = (channelId: string) => {
       if (!socket) return;
-      socket.send.deleteChannel({ channelId });
+      socket.send.deleteChannel({ channelId, userId: user.id });
     };
 
     return (
@@ -95,21 +97,21 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                 icon: <Edit size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.edit,
                 show: canEdit,
-                onClick: () => handleOpenEditChannelPopup(),
+                onClick: () => handleOpenEditChannel(),
               },
               {
                 id: 'add',
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.add,
                 show: canEdit && !categoryIsLobby && categoryIsRoot,
-                onClick: () => handleOpenCreateChannelPopup(),
+                onClick: () => handleOpenCreateChannel(),
               },
               {
                 id: 'delete',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.delete,
                 show: canEdit && !categoryIsLobby,
-                onClick: () => handleOpenWarningPopup(),
+                onClick: () => handleOpenWarning(),
               },
             ]);
           }}
@@ -170,22 +172,24 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
     const [expanded, setExpanded] = useState<boolean>(true);
 
     // Handlers
-    const handleOpenEditChannelPopup = () => {
+    const handleOpenEditChannel = () => {
       ipcService.popup.open(PopupType.EDIT_CHANNEL);
       ipcService.initialData.onRequest(PopupType.EDIT_CHANNEL, {
-        channel: channel,
+        channelId: channel.id,
+        userId: user.id,
       });
     };
 
-    const handleOpenCreateChannelPopup = () => {
+    const handleOpenCreateChannel = () => {
       ipcService.popup.open(PopupType.CREATE_CHANNEL);
       ipcService.initialData.onRequest(PopupType.CREATE_CHANNEL, {
         serverId: channel.serverId,
-        parent: channel,
+        parentId: channel.id,
+        userId: user.id,
       });
     };
 
-    const handleOpenWarningPopup = () => {
+    const handleOpenWarning = () => {
       ipcService.popup.open(PopupType.DIALOG_WARNING);
       ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
         iconType: 'warning',
@@ -199,12 +203,12 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
 
     const handleDeleteChannel = (channelId: string) => {
       if (!socket) return;
-      socket.send.deleteChannel({ channelId });
+      socket.send.deleteChannel({ channelId, userId: user.id });
     };
 
     const handleJoinChannel = (channelId: string) => {
       if (!socket) return;
-      socket.send.connectChannel({ channelId });
+      socket.send.connectChannel({ channelId, userId: user.id });
     };
 
     return (
@@ -231,21 +235,21 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
                 icon: <Edit size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.edit,
                 show: canEdit,
-                onClick: () => handleOpenEditChannelPopup(),
+                onClick: () => handleOpenEditChannel(),
               },
               {
                 id: 'add',
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.add,
                 show: canEdit && !channelIsLobby && channelIsRoot,
-                onClick: () => handleOpenCreateChannelPopup(),
+                onClick: () => handleOpenCreateChannel(),
               },
               {
                 id: 'delete',
                 icon: <Trash size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.delete,
                 show: canEdit && !channelIsLobby,
-                onClick: () => handleOpenWarningPopup(),
+                onClick: () => handleOpenWarning(),
               },
             ]);
           }}
@@ -302,11 +306,11 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const isCurrentUser = user.id === channelUser.id;
 
     // Handlers
-    const handleOpenApplyFriendPopup = () => {
+    const handleOpenApplyFriend = () => {
       ipcService.popup.open(PopupType.APPLY_FRIEND);
       ipcService.initialData.onRequest(PopupType.APPLY_FRIEND, {
-        user: user,
-        targetUser: channelUser,
+        userId: user.id,
+        targetUserId: channelUser.id,
       });
     };
 
@@ -334,7 +338,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
                 icon: <Plus size={14} className="w-5 h-5 mr-2" />,
                 label: lang.tr.addFriend,
                 show: canEdit && user.id != channelUser.id,
-                onClick: () => handleOpenApplyFriendPopup(),
+                onClick: () => handleOpenApplyFriend(),
               },
             ]);
           }}
@@ -392,11 +396,12 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
   const canEdit = memberPermission >= 5;
 
   // Handlers
-  const handleOpenCreateChannelPopup = () => {
+  const handleOpenCreateChannel = () => {
     ipcService.popup.open(PopupType.CREATE_CHANNEL);
     ipcService.initialData.onRequest(PopupType.CREATE_CHANNEL, {
       serverId: server.id,
-      parent: null,
+      parentId: null,
+      userId: user.id,
     });
   };
 
@@ -443,7 +448,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = ({
               icon: <Plus size={14} className="w-5 h-5 mr-2" />,
               label: lang.tr.add,
               show: canEdit,
-              onClick: () => handleOpenCreateChannelPopup(),
+              onClick: () => handleOpenCreateChannel(),
             },
           ]);
         }}
