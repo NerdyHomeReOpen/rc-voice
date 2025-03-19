@@ -21,6 +21,11 @@ const SocketClientEvent = {
   CREATE_SERVER: 'createServer',
   UPDATE_SERVER: 'updateServer',
   DELETE_SERVER: 'deleteServer',
+  // Category
+  REFRESH_CATEGORY: 'refreshCategory',
+  CREATE_CATEGORY: 'createCategory',
+  UPDATE_CATEGORY: 'updateCategory',
+  DELETE_CATEGORY: 'deleteCategory',
   // Channel
   REFRESH_CHANNEL: 'refreshChannel',
   CONNECT_CHANNEL: 'connectChannel',
@@ -72,6 +77,18 @@ const SocketServerEvent = {
   SERVER_UPDATE: 'serverUpdate',
   // Channel
   CHANNEL_UPDATE: 'channelUpdate',
+  // Category
+  CATEGORY_UPDATE: 'categoryUpdate',
+  // Friend Group
+  FRIEND_GROUP_UPDATE: 'friendGroupUpdate',
+  // Member
+  MEMBER_UPDATE: 'memberUpdate',
+  // Member Application
+  MEMBER_APPLICATION_UPDATE: 'memberApplicationUpdate',
+  // Friend
+  FRIEND_UPDATE: 'friendUpdate',
+  // Friend Application
+  FRIEND_APPLICATION_UPDATE: 'friendApplicationUpdate',
   // RTC
   RTC_OFFER: 'RTCOffer',
   RTC_ANSWER: 'RTCAnswer',
@@ -347,6 +364,7 @@ function connectSocket(token) {
     // 註冊所有 Socket 事件
     Object.values(SocketServerEvent).forEach((event) => {
       socket.on(event, (data) => {
+        console.log('Socket event:', event);
         BrowserWindow.getAllWindows().forEach((window) => {
           window.webContents.send(event, data);
         });
@@ -373,7 +391,6 @@ function disconnectSocket(socket) {
     });
   }
 
-  socket.disconnect();
   return null;
 }
 
@@ -417,6 +434,7 @@ app.on('ready', async () => {
   ipcMain.on('logout', () => {
     mainWindow.hide();
     authWindow.show();
+    socketInstance.disconnect();
     socketInstance = disconnectSocket(socketInstance);
   });
 
