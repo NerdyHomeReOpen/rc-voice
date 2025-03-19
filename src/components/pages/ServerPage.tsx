@@ -217,6 +217,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
             <ChannelViewer
               user={user}
               server={server}
+              member={member}
               currentChannel={currentChannel}
             />
           </div>

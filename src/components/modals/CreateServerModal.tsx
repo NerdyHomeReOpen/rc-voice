@@ -45,6 +45,22 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const lang = useLanguage();
     const socket = useSocket();
 
+    // Constant
+    const serverType: { value: Server['type']; name: string }[] = [
+      {
+        value: 'game',
+        name: lang.tr.game,
+      },
+      {
+        value: 'community',
+        name: lang.tr.entertainment,
+      },
+      {
+        value: 'other',
+        name: lang.tr.other,
+      },
+    ];
+
     // States
     const [section, setSection] = useState<number>(0);
     const [errors, setErrors] = useState<{ [key: string]: string }>({
@@ -133,19 +149,24 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                   {lang.tr.selectGroupTypeDescription}
                 </label>
                 <div className={createServer['buttonGroup']}>
-                  {[lang.tr.game, lang.tr.entertainment, lang.tr.other].map(
-                    (type) => (
-                      <div
-                        key={type}
-                        className={`${createServer['button']} ${
-                          server.type === type ? createServer['selected'] : ''
-                        }`}
-                        onClick={() => setServer((prev) => ({ ...prev, type }))}
-                      >
-                        {type}
-                      </div>
-                    ),
-                  )}
+                  {serverType.map((type) => (
+                    <div
+                      key={type.value}
+                      className={`${createServer['button']} ${
+                        server.type === type.value
+                          ? createServer['selected']
+                          : ''
+                      }`}
+                      onClick={() =>
+                        setServer((prev) => ({
+                          ...prev,
+                          type: type.value as Server['type'],
+                        }))
+                      }
+                    >
+                      {type.name}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

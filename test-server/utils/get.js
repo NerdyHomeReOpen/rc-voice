@@ -57,7 +57,7 @@ const get = {
       .filter((us) => us.userId === userId && us.recent)
       .map((us) => servers[us.serverId])
       .sort((a, b) => b.timestamp - a.timestamp)
-      .map((_, index) => index < 10)
+      .filter((_, index) => index < 10)
       .filter((s) => s);
   },
   userOwnedServers: async (userId) => {

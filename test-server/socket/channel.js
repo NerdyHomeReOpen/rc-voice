@@ -228,7 +228,7 @@ const channelHandler = {
   createChannel: async (io, socket, data) => {
     // Get database
     const users = (await db.get('users')) || {};
-    const members = (await db.get('members')) || {};
+    const servers = (await db.get('servers')) || {};
 
     try {
       // data = {
@@ -252,6 +252,7 @@ const channelHandler = {
       }
       const user = await Func.validate.user(users[userId]);
       const newChannel = await Func.validate.channel(_newChannel);
+      const server = await Func.validate.server(servers[newChannel.serverId]);
 
       // Validate operation
       await Func.validate.socket(socket);

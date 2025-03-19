@@ -107,7 +107,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const serverLevel = server.level;
     const serverWealth = server.wealth;
     const serverCreatedAt = server.createdAt;
-    const serverSettings = server.settings;
+    const serverVisibility = server.visibility;
     const serverMembers = server.members || [];
     const serverApplications = server.memberApplications || [];
     const serverBlockMembers = serverMembers.filter((mb) => mb.isBlocked);
@@ -297,7 +297,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                             onChange={(e) => {
                               setServer((prev) => ({
                                 ...prev,
-                                type: e.target.value,
+                                type: e.target.value as Server['type'],
                               }));
                             }}
                           >
@@ -577,15 +577,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="public"
                           className="mr-3"
-                          checked={serverSettings.visibility === 'public'}
+                          checked={serverVisibility === 'public'}
                           onChange={(e) => {
                             if (e.target.checked)
                               setServer((prev) => ({
                                 ...prev,
-                                settings: {
-                                  ...prev.settings,
-                                  visibility: 'public',
-                                },
+                                visibility: 'public',
                               }));
                           }}
                         />
@@ -600,15 +597,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="members"
                           className="mr-3"
-                          checked={serverSettings.visibility === 'private'}
+                          checked={serverVisibility === 'private'}
                           onChange={(e) => {
                             if (e.target.checked)
                               setServer((prev) => ({
                                 ...prev,
-                                settings: {
-                                  ...prev.settings,
-                                  visibility: 'private',
-                                },
+                                visibility: 'private',
                               }));
                           }}
                         />
@@ -628,15 +622,12 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                           name="permission"
                           value="private"
                           className="mr-3"
-                          checked={serverSettings.visibility === 'invisible'}
+                          checked={serverVisibility === 'invisible'}
                           onChange={(e) => {
                             if (e.target.checked)
                               setServer((prev) => ({
                                 ...prev,
-                                settings: {
-                                  ...prev.settings,
-                                  visibility: 'invisible',
-                                },
+                                visibility: 'invisible',
                               }));
                           }}
                         />

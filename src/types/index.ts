@@ -1128,7 +1128,7 @@ export const enum Permission {
   Official = 8,
 }
 
-export interface User {
+export type User = {
   id: string;
   name: string;
   avatar: string;
@@ -1153,16 +1153,16 @@ export interface User {
   recentServers?: Server[];
   ownedServers?: Server[];
   favServers?: Server[];
-}
+};
 
-export interface Badge {
+export type Badge = {
   id: string;
   name: string;
   description: string;
   order: number;
-}
+};
 
-export interface FriendGroup {
+export type FriendGroup = {
   id: string;
   name: string;
   order: number;
@@ -1170,16 +1170,16 @@ export interface FriendGroup {
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   friends?: UserFriend[];
-}
+};
 
-export interface FriendApplication extends User {
+export type FriendApplication = User & {
   senderId: string;
   receiverId: string;
   description: string;
   createdAt: number;
-}
+};
 
-export interface Server {
+export type Server = {
   id: string;
   name: string;
   avatar: string;
@@ -1199,33 +1199,33 @@ export interface Server {
   // THESE WERE NOT SAVE IN THE DATABASE
   lobby?: Channel;
   owner?: ServerMember;
-  categories?: Category[]; // Not used yet
-  channels?: Channel[];
+  channels?: (Channel | Category)[];
   members?: ServerMember[];
   memberApplications?: MemberApplication[];
-}
+};
 
-export interface MemberApplication extends User {
+export type MemberApplication = User & {
   description: string;
   userId: string;
   serverId: string;
   createdAt: number;
-}
+};
 
-export interface Category {
+export type BaseChannel = {
   id: string;
   name: string;
   isRoot: boolean;
+  type: 'category' | 'channel';
   order: number;
   serverId: string;
-  createdAt: number;
-}
+};
 
-export interface Channel {
-  id: string;
-  name: string;
-  isRoot: boolean;
-  // isCategory: boolean;
+export type Category = BaseChannel & {
+  type: 'category';
+};
+
+export type Channel = BaseChannel & {
+  type: 'channel';
   isLobby: boolean;
   voiceMode: 'free' | 'queue' | 'forbidden';
   chatMode: 'free' | 'forbidden';
@@ -1233,14 +1233,13 @@ export interface Channel {
   slowmode: boolean;
   userLimit: number;
   visibility: Visibility;
-  order: number;
-  serverId: string;
+  categoryId: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   messages?: Message[];
-}
+};
 
-export interface Member {
+export type Member = {
   isBlocked: boolean;
   nickname: string;
   contribution: number;
@@ -1248,13 +1247,13 @@ export interface Member {
   userId: string;
   serverId: string;
   createdAt: number;
-}
+};
 
-export interface UserMember extends Member, Server {}
+export type UserMember = Member & Server;
 
-export interface ServerMember extends Member, User {}
+export type ServerMember = Member & User;
 
-export interface Friend {
+export type Friend = {
   isBlocked: boolean;
   friendGroupId: string;
   user1Id: string;
@@ -1262,27 +1261,27 @@ export interface Friend {
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   directMessages?: DirectMessage[]; // Change to another sheet
-}
+};
 
-export interface UserFriend extends Friend, User {}
+export type UserFriend = Friend & User;
 
-export interface Message extends ServerMember {
+export type Message = ServerMember & {
   content: string;
   type: 'general' | 'info';
   senderId: string;
   channelId: string;
   timestamp: number;
-}
+};
 
-export interface DirectMessage extends UserFriend {
+export type DirectMessage = UserFriend & {
   content: string;
   type: 'general' | 'info';
   senderId: string;
   friendId: string;
   timestamp: number;
-}
+};
 
-export interface ContextMenuItem {
+export type ContextMenuItem = {
   id?: string;
   label: string;
   show?: boolean;
@@ -1290,15 +1289,15 @@ export interface ContextMenuItem {
   onClick: () => void;
   icon?: React.ReactNode;
   className?: string;
-}
+};
 
-export interface Emoji {
+export type Emoji = {
   id: number;
   alt: string;
   path: string;
-}
+};
 
-export interface DiscordPresence {
+export type DiscordPresence = {
   details: string;
   state: string;
   largeImageKey: string;
@@ -1310,7 +1309,7 @@ export interface DiscordPresence {
     label: string;
     url: string;
   }[];
-}
+};
 
 export enum SocketClientEvent {
   // User

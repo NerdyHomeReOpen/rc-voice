@@ -36,7 +36,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     const userId = initialData.userId;
     const channelId = initialData.channelId;
     const channelName = channel.name;
-    const channelSettings = channel.settings;
+    const channelVisibility = channel.visibility;
     // const isCategory = channel.isCategory;
 
     // Handlers
@@ -113,15 +113,12 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                 </div>
                 <select
                   className={Popup['input']}
-                  value={channelSettings.visibility}
+                  value={channelVisibility}
                   onChange={(e) =>
                     setChannel((prev) => {
                       return {
                         ...prev,
-                        settings: {
-                          ...prev.settings,
-                          visibility: e.target.value as Visibility,
-                        },
+                        visibility: e.target.value as Visibility,
                       };
                     })
                   }

@@ -19,7 +19,7 @@ import { createDefault } from '@/utils/default';
 
 interface AddChannelModalProps {
   userId: string;
-  parentId: string;
+  categoryId: string;
   serverId: string;
 }
 
@@ -36,11 +36,11 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
 
     // Variables
     const userId = initialData.userId;
-    const parentId = initialData.parentId;
+    const categoryId = initialData.categoryId;
     const serverId = initialData.serverId;
     const parentName = parent.name;
     const channelName = channel.name;
-    const isRoot = !!parentId;
+    const isRoot = !!categoryId;
 
     // Handlers
     const handleClose = () => {
@@ -84,7 +84,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
 
     useEffect(() => {
       if (!socket) return;
-      if (parentId) socket.send.refreshChannel({ channelId: parentId });
+      if (categoryId) socket.send.refreshChannel({ channelId: categoryId });
       if (userId) socket.send.refreshUser({ userId: userId });
     }, [socket]);
 
@@ -127,6 +127,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
               handleCreateChannel({
                 ...channel,
                 isRoot: isRoot,
+                categoryId: categoryId,
                 serverId: serverId,
               });
               handleClose();
