@@ -37,7 +37,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
     const channelId = initialData.channelId;
     const channelName = channel.name;
     const channelSettings = channel.settings;
-    const isCategory = channel.isCategory;
+    // const isCategory = channel.isCategory;
 
     // Handlers
     const handleClose = () => {
@@ -92,9 +92,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
             <div className={editChannel['inputGroup']}>
               <div className={Popup['inputBox']}>
                 <div className={Popup['label']}>
-                  {`${isCategory ? lang.tr.category : lang.tr.channel}${
-                    lang.tr.name
-                  }`}
+                  {`${lang.tr.channel}${lang.tr.name}`}
                 </div>
                 <div className={Popup['input']}>
                   <input
