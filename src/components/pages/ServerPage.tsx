@@ -18,7 +18,7 @@ import {
   Message,
   Channel,
   SocketServerEvent,
-  ServerMember,
+  Member,
 } from '@/types';
 
 // Providers
@@ -48,6 +48,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const [currentChannel, setCurrentChannel] = useState<Channel>(
       createDefault.channel(),
     );
+    const [member, setMember] = useState<Member>(createDefault.member());
 
     // Variables
     const channelMessages = currentChannel.messages || [];
@@ -56,10 +57,8 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const serverAvatar = server.avatar;
     const serverDisplayId = server.displayId;
     const serverAnnouncement = server.announcement;
-    const serverUsers = server.users || [];
-    const serverMember =
-      serverUsers.find((s) => s.id === server.id) || ({} as ServerMember); // FIXME: this is not correct
-    const serverUserCount = serverUsers.length;
+    const serverMembers = server.members || [];
+    const serverMemberCount = serverMembers.length;
     const userId = user.id;
     const userCurrentChannelId = user.currentChannelId;
 
@@ -88,6 +87,11 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const handleChannelUpdate = (channel: Partial<Channel>) => {
       if (!channel) channel = createDefault.channel();
       setCurrentChannel((prev) => ({ ...prev, ...channel }));
+    };
+
+    const handleMemberUpdate = (member: Partial<Member>) => {
+      if (!member) member = createDefault.member();
+      setMember((prev) => ({ ...prev, ...member }));
     };
 
     const handleStartResizing = useCallback((e: React.MouseEvent) => {
@@ -124,6 +128,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
 
       const eventHandlers = {
         [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
+        [SocketServerEvent.MEMBER_UPDATE]: handleMemberUpdate,
       };
       const unsubscribe: (() => void)[] = [];
 
@@ -142,12 +147,14 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       if (serverId) socket.send.refreshServer({ serverId: serverId });
       if (userCurrentChannelId)
         socket.send.refreshChannel({ channelId: userCurrentChannelId });
+      if (userId && serverId)
+        socket.send.refreshMember({ userId: userId, serverId: serverId });
     }, [socket]);
 
     useEffect(() => {
       ipcService.discord.updatePresence({
         details: `${lang.tr.in} ${serverName}`,
-        state: `${lang.tr.with} ${serverUserCount} `,
+        state: `${lang.tr.with} ${serverMemberCount} `,
         largeImageKey: 'app_icon',
         largeImageText: 'RC Voice',
         smallImageKey: 'home_icon',
@@ -160,7 +167,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
           },
         ],
       });
-    }, [lang, serverName, serverUserCount]);
+    }, [lang, serverName, serverMemberCount]);
 
     return (
       <div className={styles['serverWrapper']}>
@@ -186,7 +193,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                   <div className={styles['idIcon']} />
                   <div className={styles['idText']}>{serverDisplayId}</div>
                   <div className={styles['memberIcon']} />
-                  <div className={styles['memberText']}>{serverUserCount}</div>
+                  <div className={styles['memberText']}>
+                    {serverMemberCount}
+                  </div>
                 </div>
               </div>
               <div className={styles['optionBox']}>
@@ -226,17 +235,16 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
               <MessageViewer messages={channelMessages} />
             </div>
             <div className={styles['inputArea']}>
-              {/* FIXME: implement message input box here not components */}
               <MessageInputBox
                 onSendMessage={(msg) => {
                   handleSendMessage({
-                    ...serverMember,
-                    id: '',
                     type: 'general',
                     content: msg,
                     senderId: userId,
                     channelId: userCurrentChannelId,
                     timestamp: 0,
+                    ...member,
+                    ...user,
                   });
                 }}
               />
