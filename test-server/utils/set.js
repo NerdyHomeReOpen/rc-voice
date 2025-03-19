@@ -111,7 +111,7 @@ const set = {
     await db.set(`channels.${id}`, channels[id]);
     return channels[id];
   },
-  // `fd-${user1Id}_${user2Id}`
+  // `fd_${user1Id}-${user2Id}`
   friend: async (id, data) => {
     const friends = await db.get('friends');
     friends[id] = {
@@ -125,7 +125,7 @@ const set = {
     await db.set(`friends.${id}`, friends[id]);
     return friends[id];
   },
-  // `fa-${senderId}_${receiverId}`
+  // `fa_${senderId}-${receiverId}`
   friendApplication: async (id, data) => {
     const applications = await db.get('friendApplications');
     applications[id] = {
@@ -140,7 +140,7 @@ const set = {
     await db.set(`friendApplications.${id}`, applications[id]);
     return applications[id];
   },
-  // `mb-${userId}_${serverId}`
+  // `mb_${userId}-${serverId}`
   member: async (id, data) => {
     const members = await db.get('members');
     members[id] = {
@@ -157,7 +157,7 @@ const set = {
     await db.set(`members.${id}`, members[id]);
     return members[id];
   },
-  // `ma-${userId}_${serverId}`
+  // `ma_${userId}-${serverId}`
   memberApplications: async (id, data) => {
     const applications = await db.get('memberApplications');
     applications[id] = {

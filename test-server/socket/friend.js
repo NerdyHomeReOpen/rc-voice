@@ -6,6 +6,7 @@ const utils = require('../utils');
 const StandardizedError = utils.standardizedError;
 const Logger = utils.logger;
 const Func = utils.func;
+const Get = utils.get;
 const Set = utils.set;
 
 const friendHandler = {
@@ -41,7 +42,9 @@ const friendHandler = {
           401,
         );
       }
-      const friend = friends[`fd_${userId}_${targetId}`];
+      const friend =
+        friends[`fd_${userId}_${targetId}`] ||
+        friends[`fd_${targetId}_${userId}`];
       if (!friend) {
         throw new StandardizedError(
           `好友(${targetId})不存在`,
@@ -53,7 +56,10 @@ const friendHandler = {
       }
 
       // Emit data (only to the user)
-      io.to(socket.id).emit('friendUpdate', friend); // TODO: change to Get.friend
+      io.to(socket.id).emit(
+        'friendUpdate',
+        await Get.friend(friend.user1Id, friend.user2Id),
+      );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(

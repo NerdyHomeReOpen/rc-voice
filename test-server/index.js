@@ -13,18 +13,14 @@ const Set = utils.set;
 const Get = utils.get;
 const JWT = utils.jwt;
 
-const {
-  PORT,
-  CONTENT_TYPE_JSON,
-  // UPLOADS_DIR,
-  // MIME_TYPES,
-} = require('./constant');
+const { PORT, CONTENT_TYPE_JSON } = require('./constant');
 
 // Send Error/Success Response
 const sendError = (res, statusCode, message) => {
   res.writeHead(statusCode, CONTENT_TYPE_JSON);
   res.end(JSON.stringify({ error: message }));
 };
+
 const sendSuccess = (res, data) => {
   res.writeHead(200, CONTENT_TYPE_JSON);
   res.end(JSON.stringify(data));
@@ -92,9 +88,17 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        const user = Object.values(users).find(
-          (user) => user.id === accountUserIds[account],
-        );
+        const userId = accountUserIds[account];
+        if (!userId) {
+          throw new StandardizedError(
+            '用戶不存在',
+            'ValidationError',
+            'LOGIN',
+            'USER_NOT_FOUND',
+            404,
+          );
+        }
+        const user = users[userId];
         if (!user) {
           throw new StandardizedError(
             '用戶不存在',
@@ -107,7 +111,6 @@ const server = http.createServer((req, res) => {
 
         // Update user
         await Set.user(user.id, {
-          status: 'online',
           lastActiveAt: Date.now(),
         });
 
@@ -118,10 +121,7 @@ const server = http.createServer((req, res) => {
 
         sendSuccess(res, {
           message: '登入成功',
-          data: {
-            token: token,
-            user: await Get.user(user.id),
-          },
+          data: { token: token },
         });
         new Logger('Auth').success(`User logged in: ${account}`);
       } catch (error) {
@@ -191,6 +191,7 @@ const server = http.createServer((req, res) => {
         // Validate data
         const account = data.account.trim();
         const password = data.password.trim();
+        const username = data.username.trim();
         if (!account || !password) {
           throw new StandardizedError(
             '無效的帳號或密碼',
@@ -200,7 +201,6 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        const username = data.username;
         if (!username) {
           throw new StandardizedError(
             '無效的使用者名稱',
@@ -210,7 +210,7 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        const exists = accountPasswords[data.account];
+        const exists = accountPasswords[account];
         if (exists) {
           throw new StandardizedError(
             '帳號已存在',
@@ -220,7 +220,6 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-
         const accountError = Func.validateAccount(account);
         if (accountError) {
           throw new StandardizedError(
@@ -254,7 +253,9 @@ const server = http.createServer((req, res) => {
 
         // Create user data
         const userId = uuidv4();
-        await Set.user(userId, { name: username });
+        await Set.user(userId, {
+          name: username,
+        });
 
         // Create account password list
         await db.set(`accountPasswords.${account}`, password);
@@ -312,6 +313,7 @@ server.on('error', (error) => {
   }
   new Logger('Server').error(`Server error: ${error.error_message}`);
 });
+
 process.on('uncaughtException', (error) => {
   if (!(error instanceof StandardizedError)) {
     error = new StandardizedError(
@@ -324,6 +326,7 @@ process.on('uncaughtException', (error) => {
   }
   new Logger('Server').error(`Uncaught Exception: ${error.error_message}`);
 });
+
 process.on('unhandledRejection', (error) => {
   if (!(error instanceof StandardizedError)) {
     error = new StandardizedError(
@@ -340,5 +343,4 @@ process.on('unhandledRejection', (error) => {
 // Start Server
 server.listen(PORT, () => {
   new Logger('Server').success(`Server is running on port ${PORT}`);
-  // utils.interval.setupCleanupInterval();
 });

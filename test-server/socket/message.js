@@ -90,7 +90,7 @@ const messageHandler = {
 
       // Emit updated data (to all users in the channel)
       io.to(`channel_${channel.id}`).emit('channelUpdate', {
-        messages: (await Get.channel(channel.id)).messages,
+        messages: await Get.channelMessages(channel.id),
       });
 
       new Logger('WebSocket').info(
@@ -178,6 +178,11 @@ const messageHandler = {
         friendId: directMessage.friendId,
         senderId: directMessage.senderId,
         timestamp: Date.now().valueOf(),
+      });
+
+      // Emit updated data (to all users in the friend)
+      io.to(`friend_${friend.id}`).emit('friendUpdate', {
+        directMessages: await Get.friendDirectMessages(friend.id),
       });
 
       new Logger('WebSocket').info(

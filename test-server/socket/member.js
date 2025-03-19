@@ -43,10 +43,10 @@ const memberHandler = {
           401,
         );
       }
-      const member = members[`mb_${userId}_${serverId}`];
+      const member = members[`mb_${userId}-${serverId}`];
       if (!member) {
         throw new StandardizedError(
-          `成員(${userId})不存在`,
+          `成員(mb_${userId}-${serverId})不存在`,
           'ValidationError',
           'REFRESHMEMBER',
           'MEMBER_NOT_FOUND',
@@ -55,7 +55,10 @@ const memberHandler = {
       }
 
       // Emit updated data to the user
-      io.to(socket.id).emit('memberUpdate', member);
+      io.to(socket.id).emit(
+        'memberUpdate',
+        await Get.member(member.userId, member.serverId),
+      );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
@@ -131,7 +134,7 @@ const memberHandler = {
           404,
         );
       }
-      const userMember = members[`mb_${userId}_${member.serverId}`];
+      const userMember = members[`mb_${userId}-${member.serverId}`];
       if (!userMember) {
         throw new StandardizedError(
           `你不是此群組的成員`,
@@ -164,10 +167,7 @@ const memberHandler = {
       await Set.member(member.id, editedMember);
 
       // Emit updated data to all users in the server
-      io.to(member.serverId).emit(
-        'serverUpdate',
-        await Get.server(member.serverId),
-      );
+      io.to(socket.id).emit('memberUpdate', editedMember);
 
       new Logger('Server').info(`Member(${member.id}) updated`);
     } catch (error) {
