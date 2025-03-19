@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
 // Utils
 const utils = require('../utils');
 const StandardizedError = utils.standardizedError;
@@ -10,7 +8,6 @@ const Func = utils.func;
 const rtcHandler = {
   offer: async (io, socket, data) => {
     // Get database
-    const users = await db.get('users');
 
     try {
       // data = {
@@ -22,17 +19,6 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'SENDRTCOFFER',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { to, offer } = data;
       if (!to || !offer) {
         throw new StandardizedError(
@@ -43,6 +29,9 @@ const rtcHandler = {
           401,
         );
       }
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       socket.to(to).emit('RTCOffer', {
         from: socket.id,
@@ -73,7 +62,6 @@ const rtcHandler = {
   },
   answer: async (io, socket, data) => {
     // Get database
-    const users = await db.get('users');
 
     try {
       // data = {
@@ -85,17 +73,6 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'SENDRTCANSWER',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { to, answer } = data;
       if (!to || !answer) {
         throw new StandardizedError(
@@ -106,6 +83,9 @@ const rtcHandler = {
           401,
         );
       }
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       socket.to(to).emit('RTCAnswer', {
         from: socket.id,
@@ -136,7 +116,6 @@ const rtcHandler = {
   },
   candidate: async (io, socket, data) => {
     // Get database
-    const users = await db.get('users');
 
     try {
       // data = {
@@ -148,17 +127,6 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'SENDRTCCANDIDATE',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { to, candidate } = data;
       if (!to || !candidate) {
         throw new StandardizedError(
@@ -169,6 +137,9 @@ const rtcHandler = {
           401,
         );
       }
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       socket.to(to).emit('RTCIceCandidate', {
         from: socket.id,
@@ -199,7 +170,6 @@ const rtcHandler = {
   },
   join: async (io, socket, data) => {
     // Get database
-    const users = await db.get('users');
 
     try {
       // data = {
@@ -208,17 +178,6 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'JOINRTCCHANNEL',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { channelId } = data;
       if (!channelId) {
         throw new StandardizedError(
@@ -229,6 +188,9 @@ const rtcHandler = {
           401,
         );
       }
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       socket.join(`channel_${channelId}`);
 
@@ -259,7 +221,6 @@ const rtcHandler = {
   },
   leave: async (io, socket, data) => {
     // Get database
-    const users = await db.get('users');
 
     try {
       // data = {
@@ -268,17 +229,6 @@ const rtcHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'LEAVERTCCHANNEL',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { channelId } = data;
       if (!channelId) {
         throw new StandardizedError(
@@ -289,6 +239,9 @@ const rtcHandler = {
           401,
         );
       }
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       socket.leave(`channel_${channelId}`);
 

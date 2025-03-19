@@ -3,9 +3,7 @@ const map = {
   sessionToUser: new Map(), // sessionId -> userId
   userToSocket: new Map(), // userId -> socketId
   socketToUser: new Map(), // socketId -> userId
-  contributionIntervalMap: new Map(), // socketId -> interval
-  userElapsedTime: new Map(),
-  userTimeFlag: new Map(),
+
   createUserIdSessionIdMap: (userId, sessionId) => {
     map.userToSession.set(userId, sessionId);
     map.sessionToUser.set(sessionId, userId);
@@ -32,14 +30,6 @@ const map = {
     if (socketId && map.socketToUser.has(socketId)) {
       const _userId = map.socketToUser.get(socketId);
       if (userId == _userId) map.socketToUser.delete(socketId);
-    }
-  },
-  createContributionIntervalMap: (socketId, intervalId) => {
-    map.contributionIntervalMap.set(socketId, intervalId);
-  },
-  deleteContributionIntervalMap: (socketId = null) => {
-    if (socketId && map.contributionIntervalMap.has(socketId)) {
-      map.contributionIntervalMap.delete(socketId);
     }
   },
 };

@@ -2,8 +2,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
-const _ = require('lodash');
-const sharp = require('sharp');
 // Utils
 const utils = require('../utils');
 const StandardizedError = utils.standardizedError;
@@ -16,7 +14,6 @@ const channelHandler = require('./channel');
 
 const serverHandler = {
   searchServer: async (io, socket, data) => {
-    const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
     const members = (await db.get('members')) || {};
 
@@ -26,17 +23,6 @@ const serverHandler = {
       // }
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'SEARCHSERVER',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { query } = data;
       if (!query) {
         throw new StandardizedError(
@@ -47,6 +33,9 @@ const serverHandler = {
           401,
         );
       }
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       // FIXME: search logic
       const isServerMatch = (server, query) => {
@@ -105,7 +94,6 @@ const serverHandler = {
     }
   },
   refreshServer: async (io, socket, data) => {
-    const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
 
     try {
@@ -114,17 +102,6 @@ const serverHandler = {
       // }
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'REFRESHSERVER',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { serverId } = data;
       if (!serverId) {
         throw new StandardizedError(
@@ -135,16 +112,10 @@ const serverHandler = {
           401,
         );
       }
-      const server = servers[serverId];
-      if (!server) {
-        throw new StandardizedError(
-          `群組(${serverId})不存在`,
-          'ValidationError',
-          'REFRESHSERVER',
-          'SERVER',
-          404,
-        );
-      }
+      const server = await Func.validate.server(servers[serverId]);
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       // Emit data (only to the user)
       io.to(socket.id).emit('serverUpdate', await Get.server(server.id));
@@ -181,17 +152,6 @@ const serverHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'CONNECTSERVER',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { userId, serverId } = data;
       if (!userId || !serverId) {
         throw new StandardizedError(
@@ -202,48 +162,36 @@ const serverHandler = {
           401,
         );
       }
-      const user = users[userId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${userId})不存在`,
-          'ValidationError',
-          'CONNECTSERVER',
-          'USER',
-          404,
-        );
-      }
-      const server = servers[serverId];
-      if (!server) {
-        throw new StandardizedError(
-          `群組(${serverId})不存在`,
-          'ValidationError',
-          'CONNECTSERVER',
-          'SERVER',
-          404,
-        );
-      }
-      const member = members[`mb_${user.id}-${server.id}`];
-      if (
-        server.settings.visibility === 'invisible' &&
-        !(member?.permissionLevel > 1)
-      ) {
-        throw new StandardizedError(
-          '該群組為私人群組',
-          'ValidationError',
-          'CONNECTSERVER',
-          'VISIBILITY',
-          403,
-        );
-      }
-      if (member?.isBlocked) {
-        throw new StandardizedError(
-          '您已被該群組封鎖',
-          'ValidationError',
-          'CONNECTSERVER',
-          'BLOCKED',
-          403,
-        );
-      }
+      const user = await Func.validate.user(users[userId]);
+      const server = await Func.validate.server(servers[serverId]);
+      const member = await Func.validate.member(
+        members[`mb_${user.id}-${server.id}`],
+      );
+
+      // Validate operation
+      await Func.validate.socket(socket);
+
+      // if (
+      //   server.settings.visibility === 'invisible' &&
+      //   !(member?.permissionLevel > 1)
+      // ) {
+      //   throw new StandardizedError(
+      //     '該群組為私人群組',
+      //     'ValidationError',
+      //     'CONNECTSERVER',
+      //     'VISIBILITY',
+      //     403,
+      //   );
+      // }
+      // if (member?.isBlocked) {
+      //   throw new StandardizedError(
+      //     '您已被該群組封鎖',
+      //     'ValidationError',
+      //     'CONNECTSERVER',
+      //     'BLOCKED',
+      //     403,
+      //   );
+      // }
 
       // Create new membership if there isn't one
       if (!member) {
@@ -328,17 +276,6 @@ const serverHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'DISCONNECTSERVER',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
       const { userId, serverId } = data;
       if (!userId || !serverId) {
         throw new StandardizedError(
@@ -349,26 +286,11 @@ const serverHandler = {
           401,
         );
       }
-      const user = users[userId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${userId})不存在`,
-          'ValidationError',
-          'DISCONNECTSERVER',
-          'USER',
-          404,
-        );
-      }
-      const server = servers[serverId];
-      if (!server) {
-        throw new StandardizedError(
-          `群組(${serverId})不存在`,
-          'ValidationError',
-          'DISCONNECTSERVER',
-          'SERVER',
-          404,
-        );
-      }
+      const user = await Func.validate.user(users[userId]);
+      const server = await Func.validate.server(servers[serverId]);
+
+      // Validate data
+      await Func.validate.socket(socket);
 
       // Leave prev channel
       if (user.currentChannelId) {
@@ -429,19 +351,8 @@ const serverHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'CREATESERVER',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
-      const { server: newServer, userId } = data;
-      if (!newServer || !userId) {
+      const { server: _newServer, userId } = data;
+      if (!_newServer || !userId) {
         throw new StandardizedError(
           '無效的資料',
           'ValidationError',
@@ -450,112 +361,52 @@ const serverHandler = {
           401,
         );
       }
-      const user = users[userId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${userId})不存在`,
-          'ValidationError',
-          'CREATESERVER',
-          'USER',
-          404,
-        );
-      }
-      // TODO: change to Func.validate.server
-      // const serverNameError = Func.validate.serverName(newServer.name);
-      // if (serverNameError) {
-      //   throw new StandardizedError(
-      //     serverNameError,
-      //     'ValidationError',
-      //     'CREATESERVER',
-      //     'NAME',
-      //     400,
-      //   );
-      // }
-      // const userOwnedServers = await Get.userOwnedServers(userId);
-      // if (userOwnedServers.length >= 3) {
-      //   throw new StandardizedError(
-      //     '您已達到可創建群組上限',
-      //     'ValidationError',
-      //     'CREATESERVER',
-      //     'LIMIT',
-      //     403,
-      //   );
-      // }
+      const user = await Func.validate.user(users[userId]);
+      const newServer = await Func.validate.server(_newServer);
+
+      // Validate data
+      await Func.validate.socket(socket);
 
       // Create Ids
       const serverId = uuidv4();
       const channelId = uuidv4();
 
-      // Handle avatar upload if provided
-      let avatarData = null;
-      if (newServer.avatar) {
-        const matches = newServer.avatar.match(/^data:image\/(.*?);base64,/);
-        if (!matches) {
-          throw new Error('無效的圖片格式');
-        }
-
-        const imageType = matches[1];
-        if (!['png', 'jpeg', 'gif', 'webp'].includes(imageType)) {
-          throw new Error('無效的圖片格式');
-        }
-        const base64Data = newServer.avatar.replace(
-          /^data:image\/\w+;base64,/,
-          '',
-        );
-        const buffer = Buffer.from(base64Data, 'base64');
-
-        // Check file size (5MB limit)
-        if (buffer.length > 5 * 1024 * 1024) {
-          throw new Error('圖片大小超過限制');
-        }
-
-        // Resize image to smaller size
-        const resizedBuffer = await sharp(buffer).resize(200, 200).toBuffer();
-        avatarData = resizedBuffer.toString('base64');
-      }
-
       // Create server
-      const server = await Set.server(serverId, {
-        name: newServer.name.toString().trim().substring(0, 30),
-        description: newServer.description.toString().substring(0, 200),
-        avatarUrl: avatarData,
+      await Set.server(serverId, {
+        name: newServer.name.trim(),
+        description: newServer.description.trim(),
+        avatar: await Func.generateImageData(newServer.avatar),
         displayId: await Func.generateUniqueDisplayId(),
         lobbyId: channelId,
-        ownerId: userId,
+        ownerId: user.id,
         settings: {
-          visibility: newServer.settings.visibility || 'public',
+          ...newServer.settings,
           defaultChannelId: channelId,
         },
         createdAt: Date.now(),
       });
 
       // Create channel (lobby)
-      const channel = await Set.channel(channelId, {
+      await Set.channel(channelId, {
         name: '大廳',
         isLobby: true,
         isMain: true,
         serverId: serverId,
-        settings: {
-          visibility: 'public',
-          slowmode: false,
-          userLimit: -1,
-        },
         createdAt: Date.now(),
       });
 
       // Create member
-      await Set.member(`mb_${user.id}-${server.id}`, {
+      await Set.member(`mb_${user.id}-${serverId}`, {
         permissionLevel: 6,
-        nickname: user.name,
-        serverId: server.id,
+        serverId: serverId,
         userId: user.id,
         createdAt: Date.now(),
       });
 
       // Create user-server
-      await Set.userServer(`us_${user.id}-${server.id}`, {
+      await Set.userServer(`us_${user.id}-${serverId}`, {
         userId: user.id,
-        serverId: server.id,
+        serverId: serverId,
         recent: true,
         owned: true,
         timestamp: Date.now(),
@@ -563,12 +414,12 @@ const serverHandler = {
 
       // Join the server
       await serverHandler.connectServer(io, socket, {
-        serverId: server.id,
+        serverId: serverId,
         userId: user.id,
       });
 
       new Logger('Server').success(
-        `New server(${server.id}) created by user(${user.id})`,
+        `User(${user.id}) created server(${serverId})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -605,19 +456,8 @@ const serverHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'UPDATESERVER',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
-      const { server: editedServer, userId } = data;
-      if (!editedServer || !userId) {
+      const { server: _editedServer, userId } = data;
+      if (!_editedServer || !userId) {
         throw new StandardizedError(
           '無效的資料',
           'ValidationError',
@@ -626,146 +466,42 @@ const serverHandler = {
           401,
         );
       }
-      const user = users[userId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${userId})不存在`,
-          'ValidationError',
-          'UPDATESERVER',
-          'USER',
-          404,
-        );
-      }
-      const server = servers[editedServer.id];
-      if (!server) {
-        throw new StandardizedError(
-          `群組(${editedServer.id})不存在`,
-          'ValidationError',
-          'UPDATESERVER',
-          'SERVER',
-          404,
-        );
-      }
-      const member = members[`mb_${user.id}-${server.id}`];
-      if (!member) {
-        throw new StandardizedError(
-          `使用者(${user.id})不在群組(${server.id})中`,
-          'ValidationError',
-          'UPDATESERVER',
-          'MEMBER',
-          404,
-        );
-      }
-      const permission = member.permissionLevel;
-      if (!permission || permission < 4) {
-        throw new StandardizedError(
-          '您沒有權限更新群組',
-          'ValidationError',
-          'UPDATESERVER',
-          'USER_PERMISSION',
-          403,
-        );
-      }
-      // TODO: change to Func.validate.server
-      if (
-        editedServer.name &&
-        (editedServer.name.length > 30 || !editedServer.name.trim())
-      ) {
-        throw new StandardizedError(
-          '無效的群組名稱',
-          'ValidationError',
-          'UPDATESERVER',
-          'NAME',
-          400,
-        );
-      }
-      if (editedServer.description && editedServer.description.length > 200) {
-        throw new StandardizedError(
-          '群組描述過長',
-          'ValidationError',
-          'UPDATESERVER',
-          'DESCRIPTION',
-          400,
-        );
-      }
-      if (editedServer.announcement) {
-        const announcementError = Func.validateAnnouncement(
-          editedServer.announcement,
-        );
-        if (announcementError) {
-          throw new StandardizedError(
-            announcementError,
-            'ValidationError',
-            'UPDATESERVER',
-            'ANNOUNCEMENT',
-            400,
-          );
-        }
-      }
-      if (editedServer.settings?.visibility) {
-        const visibilityError = Func.validateServerVisibility(
-          editedServer.settings.visibility,
-        );
-        if (visibilityError) {
-          throw new StandardizedError(
-            visibilityError,
-            'ValidationError',
-            'UPDATESERVER',
-            'VISIBILITY',
-            400,
-          );
-        }
-      }
+      const user = await Func.validate.user(users[userId]);
+      const editedServer = await Func.validate.server(
+        servers[_editedServer.id],
+      );
+      const server = await Func.validate.server(servers[editedServer.id]);
 
-      let avatarData = null;
+      // Validate operation
+      await Func.validate.socket(socket);
+
+      // const member = await Func.validate.member(
+      //   members[`mb_${user.id}-${server.id}`],
+      // );
+
+      // const permission = member.permissionLevel;
+      // if (!permission || permission < 4) {
+      //   throw new StandardizedError(
+      //     '您沒有權限更新群組',
+      //     'ValidationError',
+      //     'UPDATESERVER',
+      //     'USER_PERMISSION',
+      //     403,
+      //   );
+      // }
+
       if (editedServer.avatar) {
-        const matches = editedServer.avatar.match(/^data:image\/(.*?);base64,/);
-        if (!matches) {
-          throw new Error('無效的圖片格式');
-        }
-
-        const imageType = matches[1];
-        if (!['png', 'jpeg', 'gif', 'webp'].includes(imageType)) {
-          throw new Error('無效的圖片格式');
-        }
-        const base64Data = editedServer.avatar.replace(
-          /^data:image\/\w+;base64,/,
-          '',
-        );
-        const buffer = Buffer.from(base64Data, 'base64');
-
-        // Check file size (5MB limit)
-        if (buffer.length > 5 * 1024 * 1024) {
-          throw new Error('圖片大小超過限制');
-        }
-
-        // Resize image to smaller size
-        const resizedBuffer = await sharp(buffer).resize(200, 200).toBuffer();
-        avatarData = resizedBuffer.toString('base64');
-        editedServer.avatarUrl = avatarData;
+        editedServer.avatar = await Func.generateImageData(editedServer.avatar);
       }
 
-      // Create new server object with only allowed updates
-      await Set.server(server.id, {
-        ...server,
-        ..._.pick(editedServer, [
-          'name',
-          'slogan',
-          'description',
-          'avatarUrl',
-          'announcement',
-        ]),
-        settings: {
-          ...server.settings,
-          ..._.pick(editedServer.settings || {}, ['visibility']),
-        },
-      });
+      // Update server
+      await Set.server(server.id, editedServer);
 
       // Emit updated data to all users in the server
       io.to(`server_${server.id}`).emit('serverUpdate', editedServer);
 
       new Logger('Server').success(
-        `Server(${server.id}) updated by user(${user.id})`,
+        `User(${user.id}) updated server(${server.id})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {

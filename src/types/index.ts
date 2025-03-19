@@ -1132,7 +1132,7 @@ export interface User {
   id: string;
   name: string;
   avatar: string;
-  avatarUrl: string;
+  // avatarUrl: string;
   signature: string;
   status: 'online' | 'dnd' | 'idle' | 'gn';
   gender: 'Male' | 'Female';
@@ -1183,21 +1183,18 @@ export interface Server {
   id: string;
   name: string;
   avatar: string;
-  avatarUrl: string;
+  // avatarUrl: string;
   announcement: string;
   description: string;
-  type: string;
+  type: 'game' | 'community' | 'other';
   displayId: string;
   slogan: string;
   level: number;
   wealth: number;
+  allowDirectMessage: boolean;
+  visibility: 'public' | 'private' | 'invisible';
   lobbyId: string;
   ownerId: string;
-  settings: {
-    allowDirectMessage: boolean;
-    visibility: 'public' | 'private' | 'invisible';
-    defaultChannelId: string;
-  };
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   lobby?: Channel;
@@ -1232,14 +1229,12 @@ export interface Channel {
   isLobby: boolean;
   voiceMode: 'free' | 'queue' | 'forbidden';
   chatMode: 'free' | 'forbidden';
+  bitrate: number;
+  slowmode: boolean;
+  userLimit: number;
+  visibility: Visibility;
   order: number;
   serverId: string;
-  settings: {
-    bitrate: number;
-    slowmode: boolean;
-    userLimit: number;
-    visibility: Visibility;
-  };
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   messages?: Message[];

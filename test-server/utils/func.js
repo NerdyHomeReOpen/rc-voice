@@ -1,19 +1,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
-// Constants
-const { XP_SYSTEM } = require('../constant');
 // Utils
 const StandardizedError = require('./standardizedError');
 const Map = require('./map');
 const JWT = require('./jwt');
 
 const func = {
-  calculateRequiredXP: (level) => {
-    return Math.ceil(
-      XP_SYSTEM.BASE_XP * Math.pow(XP_SYSTEM.GROWTH_RATE, level),
-    );
-  },
   calculateSimilarity: (str1, str2) => {
     const longer = str1.length > str2.length ? str1 : str2;
     const shorter = str1.length > str2.length ? str2 : str1;
@@ -42,6 +35,7 @@ const func = {
       (longer.length - levenshteinDistance(longer, shorter)) / longer.length
     );
   },
+
   generateUniqueDisplayId: async (baseId = 20000000) => {
     const servers = (await db.get('servers')) || {};
     let displayId = baseId + Object.keys(servers).length;
@@ -53,139 +47,47 @@ const func = {
     }
     return displayId;
   },
-  // getAvatar: async (type = 'server', avatarUrl) => {
-  //   try {
-  //     const AVATAR_DIR =
-  //       type === 'server' ? SERVER_AVATAR_DIR : USER_AVATAR_DIR;
-  //     const avatarPath = path.join(AVATAR_DIR, path.basename(avatarUrl));
-  //     const imageBuffer = await fs.readFile(avatarPath);
-  //     const avatar = `data:${
-  //       MIME_TYPES[path.extname(avatarPath)]
-  //     };base64,${imageBuffer.toString('base64')}`;
 
-  //     return avatar;
-  //   } catch (error) {
-  //     return null;
-  //   }
-  // },
-  convertAvatarDataToBase64: (avatarData) => {
-    return `data:image/png;base64,${avatarData}`;
-  },
-  validateAccount: (value) => {
-    value = value.trim();
-    if (!value) return '帳號為必填';
-    if (value.length < 4) return '帳號至少需要 4 個字';
-    if (value.length > 16) return '帳號最多 16 個字';
-    if (!/^[A-Za-z0-9_\.]+$/.test(value))
-      return '帳號只能使用英文、數字、底線(_)和點(.)';
-    return '';
-  },
-  validatePassword: (value) => {
-    value = value.trim();
-    if (!value) return '密碼為必填';
-    if (value.length < 8) return '密碼至少需要 8 個字';
-    if (value.length > 20) return '密碼最多 20 個字';
-    if (!/^[A-Za-z0-9@$!%*#?&]{8,20}$/.test(value))
-      return '密碼長度需要在8-20個字之間，且不包含@$!%*#?&以外的特殊字元';
-    return '';
-  },
-  validateUsername: (value) => {
-    value = value.trim();
-    if (!value) return '顯示名稱為必填';
-    if (value.length < 1) return '顯示名稱至少需要 1 個字';
-    if (value.length > 32) return '顯示名稱最多 32 個字';
-    return '';
-  },
-  validateCheckPassword: (value, check) => {
-    if (value !== check) return '密碼輸入不一致';
-    return '';
-  },
-  validateServerName: (value) => {
-    value = value?.trim();
-    if (!value) return '群組名稱為必填';
-    if (value.length > 30) return '群組名稱不能超過30個字符';
-    return '';
-  },
-  validateServerDescription: (value) => {
-    if (!value?.trim()) return '';
-    if (value.length > 200) return '群組描述不能超過200個字符';
-    return '';
-  },
-  validateServerSlogan: (value) => {
-    if (!value?.trim()) return '';
-    if (value.length > 30) return '群組口號不能超過30個字符';
-    return '';
-  },
-  validateServerAvatar: async (avatar) => {
-    if (!avatar) return '';
-
-    const matches = avatar.match(/^data:image\/(.*?);base64,/);
-    if (!matches) return '無效的圖片格式';
-
+  generateImageData: async (image) => {
+    if (!image) return;
+    const matches = image.match(/^data:image\/(.*?);base64,/);
+    if (!matches) {
+      throw new StandardizedError(
+        '無效的圖片格式',
+        'ValidationError',
+        'GENERATEIMAGE',
+        'INVALID_IMAGE_FORMAT',
+        400,
+      );
+    }
     const imageType = matches[1];
     if (!['png', 'jpeg', 'gif', 'webp'].includes(imageType)) {
-      return '無效的圖片格式';
+      throw new StandardizedError(
+        '無效的圖片格式',
+        'ValidationError',
+        'GENERATEIMAGE',
+        'INVALID_IMAGE_FORMAT',
+        400,
+      );
     }
-
-    const base64Data = avatar.replace(/^data:image\/\w+;base64,/, '');
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
-
     if (buffer.length > 5 * 1024 * 1024) {
-      return '圖片大小不能超過5MB';
+      throw new StandardizedError(
+        '圖片大小超過限制',
+        'ValidationError',
+        'GENERATEIMAGE',
+        'IMAGE_SIZE_EXCEEDED',
+        400,
+      );
     }
-
-    return '';
-  },
-  validateChannelName: (value) => {
-    value = value?.trim();
-    if (!value) return '頻道名稱為必填';
-    if (value.length > 30) return '頻道名稱不能超過30個字符';
-    return '';
-  },
-  validateMessage: (value) => {
-    if (!value?.trim()) return '訊息不能為空';
-    if (value.length > 2000) return '訊息不能超過2000個字符';
-    return '';
-  },
-  validateSignature: (value) => {
-    if (!value?.trim()) return '';
-    if (value.length > 200) return '個性簽名不能超過200個字符';
-    return '';
-  },
-  validateNickname: (value) => {
-    value = value?.trim();
-    if (!value) return '暱稱為必填';
-    if (value.length > 32) return '暱稱不能超過32個字符';
-    return '';
-  },
-  validateAnnouncement: (value) => {
-    if (!value?.trim()) return '';
-    if (value.length > 500) return '公告不能超過500個字符';
-    return '';
-  },
-  validatePermissionLevel: (value) => {
-    if (typeof value !== 'number') return '權限等級必須是數字';
-    if (value < 0 || value > 6) return '權限等級必須在0-6之間';
-    return '';
-  },
-  validateUserLimit: (value) => {
-    if (typeof value !== 'number') return '人數限制必須是數字';
-    if (value !== -1 && (value < 1 || value > 99))
-      return '人數限制必須是-1或1-99之間';
-    return '';
-  },
-  validateChannelVisibility: (value) => {
-    if (!['public', 'private'].includes(value)) return '無效的頻道可見度設定';
-    return '';
-  },
-  validateServerVisibility: (value) => {
-    if (!['public', 'private', 'invisible'].includes(value))
-      return '無效的群組可見度設定';
-    return '';
+    const resizedBuffer = await sharp(buffer).resize(200, 200).toBuffer();
+    const imageData = resizedBuffer.toString('base64');
+    return `data:image/png;base64,${imageData}`;
   },
 
   validate: {
-    socket: (socket) => {
+    socket: async (socket) => {
       if (!socket) {
         throw new StandardizedError(
           '無可用的 socket',
@@ -248,6 +150,359 @@ const func = {
         );
       }
       return userId;
+    },
+
+    user: async (user) => {
+      if (!user) {
+        throw new StandardizedError(
+          '使用者不存在',
+          'ValidationError',
+          'USER',
+          'USER_NOT_FOUND',
+          401,
+        );
+      }
+      if (user.name && user.name.length > 32) {
+        throw new StandardizedError(
+          '顯示名稱不能超過32個字符',
+          'ValidationError',
+          'USER',
+          'USERNAME_TOO_LONG',
+        );
+      }
+      if (user.signature && user.signature.length > 200) {
+        throw new StandardizedError(
+          '個性簽名不能超過200個字符',
+          'ValidationError',
+          'USER',
+          'SIGNATURE_TOO_LONG',
+        );
+      }
+      if (
+        user.status &&
+        !['online', 'dnd', 'idle', 'gn'].includes(user.status)
+      ) {
+        throw new StandardizedError(
+          '無效的狀態',
+          'ValidationError',
+          'USER',
+          'STATUS_INVALID',
+        );
+      }
+      if (user.gender && !['Male', 'Female'].includes(user.gender)) {
+        throw new StandardizedError(
+          '無效的性別',
+          'ValidationError',
+          'USER',
+          'GENDER_INVALID',
+        );
+      }
+      if (user.level && user.level < 0) {
+        throw new StandardizedError(
+          '等級不能小於0',
+          'ValidationError',
+          'USER',
+          'LEVEL_INVALID',
+        );
+      }
+      if (user.xp && user.xp < 0) {
+        throw new StandardizedError(
+          '經驗值不能小於0',
+          'ValidationError',
+          'USER',
+          'XP_INVALID',
+        );
+      }
+      if (user.requiredXp && user.requiredXp < 0) {
+        throw new StandardizedError(
+          '所需經驗值不能小於0',
+          'ValidationError',
+          'USER',
+          'REQUIRED_XP_INVALID',
+        );
+      }
+      if (user.progress && user.progress < 0) {
+        throw new StandardizedError(
+          '進度不能小於0',
+          'ValidationError',
+          'USER',
+          'PROGRESS_INVALID',
+        );
+      }
+      return user;
+    },
+
+    server: (server) => {
+      if (!server) {
+        throw new StandardizedError(
+          '群組不存在',
+          'ValidationError',
+          'SERVER',
+          'SERVER_NOT_FOUND',
+          401,
+        );
+      }
+      if (server.name && server.name.length > 30) {
+        throw new StandardizedError(
+          '群組名稱不能超過30個字符',
+          'ValidationError',
+          'SERVER',
+          'NAME_TOO_LONG',
+        );
+      }
+      if (server.announcement && server.announcement.length > 500) {
+        throw new StandardizedError(
+          '公告不能超過500個字符',
+          'ValidationError',
+          'SERVER',
+          'ANNOUNCEMENT_TOO_LONG',
+        );
+      }
+      if (server.description && server.description.length > 200) {
+        throw new StandardizedError(
+          '群組描述不能超過200個字符',
+          'ValidationError',
+          'SERVER',
+          'DESCRIPTION_TOO_LONG',
+        );
+      }
+      if (
+        server.type &&
+        !['game', 'community', 'other'].includes(server.type)
+      ) {
+        throw new StandardizedError(
+          '無效的群組類型',
+          'ValidationError',
+          'SERVER',
+          'TYPE_INVALID',
+        );
+      }
+      if (server.displayId && server.displayId.length > 10) {
+        throw new StandardizedError(
+          '顯示ID不能超過10個字符',
+          'ValidationError',
+          'SERVER',
+          'DISPLAY_ID_TOO_LONG',
+          400,
+        );
+      }
+      if (server.slogan && server.slogan.length > 30) {
+        throw new StandardizedError(
+          '群組口號不能超過30個字符',
+          'ValidationError',
+          'SERVER',
+          'SLOGAN_TOO_LONG',
+        );
+      }
+      if (server.level && server.level < 0) {
+        throw new StandardizedError(
+          '等級不能小於0',
+          'ValidationError',
+          'SERVER',
+          'LEVEL_INVALID',
+        );
+      }
+      if (server.wealth && server.wealth < 0) {
+        throw new StandardizedError(
+          '財富不能小於0',
+          'ValidationError',
+          'SERVER',
+          'WEALTH_INVALID',
+        );
+      }
+      if (
+        server.visibility &&
+        !['public', 'private', 'invisible'].includes(server.visibility)
+      ) {
+        throw new StandardizedError(
+          '無效的群組可見度',
+          'ValidationError',
+          'SERVER',
+          'VISIBILITY_INVALID',
+        );
+      }
+      return server;
+    },
+
+    channel: (channel) => {
+      if (!channel) {
+        throw new StandardizedError(
+          '頻道不存在',
+          'ValidationError',
+          'CHANNEL',
+          'CHANNEL_NOT_FOUND',
+          401,
+        );
+      }
+      if (channel.name && channel.name.length > 30) {
+        throw new StandardizedError(
+          '頻道名稱不能超過30個字符',
+          'ValidationError',
+          'CHANNEL',
+          'NAME_TOO_LONG',
+        );
+      }
+      if (
+        channel.voiceMode &&
+        !['free', 'queue', 'forbidden'].includes(channel.voiceMode)
+      ) {
+        throw new StandardizedError(
+          '無效的語音模式',
+          'ValidationError',
+          'CHANNEL',
+          'VOICE_MODE_INVALID',
+        );
+      }
+      if (
+        channel.chatMode &&
+        !['free', 'forbidden'].includes(channel.chatMode)
+      ) {
+        throw new StandardizedError(
+          '無效的聊天模式',
+          'ValidationError',
+          'CHANNEL',
+          'CHAT_MODE_INVALID',
+        );
+      }
+      if (channel.bitrate && channel.bitrate < 1000) {
+        throw new StandardizedError(
+          '比特率不能小於1000',
+          'ValidationError',
+          'CHANNEL',
+          'BITRATE_INVALID',
+        );
+      }
+      if (
+        channel.userLimit &&
+        (channel.userLimit < 1 || channel.userLimit > 99)
+      ) {
+        throw new StandardizedError(
+          '人數限制必須在1-99之間',
+          'ValidationError',
+          'CHANNEL',
+          'USER_LIMIT_INVALID',
+        );
+      }
+      if (
+        channel.visibility &&
+        !['public', 'private'].includes(channel.visibility)
+      ) {
+        throw new StandardizedError(
+          '無效的頻道可見度',
+          'ValidationError',
+          'CHANNEL',
+          'VISIBILITY_INVALID',
+        );
+      }
+      return channel;
+    },
+
+    category: (category) => {
+      if (!category) {
+        throw new StandardizedError(
+          '類別不存在',
+          'ValidationError',
+          'CATEGORY',
+          'CATEGORY_NOT_FOUND',
+          401,
+        );
+      }
+      if (category.name && category.name.length > 30) {
+        throw new StandardizedError(
+          '類別名稱不能超過30個字符',
+          'ValidationError',
+          'CATEGORY',
+          'NAME_TOO_LONG',
+        );
+      }
+      return category;
+    },
+
+    member: (member) => {
+      if (!member) {
+        throw new StandardizedError(
+          '成員不存在',
+          'ValidationError',
+          'MEMBER',
+          'MEMBER_NOT_FOUND',
+          401,
+        );
+      }
+      if (member.nickname && member.nickname.length > 32) {
+        throw new StandardizedError(
+          '暱稱不能超過32個字符',
+          'ValidationError',
+          'MEMBER',
+          'NICKNAME_TOO_LONG',
+        );
+      }
+      if (
+        member.permissionLevel &&
+        (member.permissionLevel < 0 || member.permissionLevel > 8)
+      ) {
+        throw new StandardizedError(
+          '權限等級必須介於0-8之間',
+          'ValidationError',
+          'MEMBER',
+          'PERMISSION_LEVEL_INVALID',
+        );
+      }
+      return member;
+    },
+
+    friend: (friend) => {
+      if (!friend) {
+        throw new StandardizedError(
+          '好友不存在',
+          'ValidationError',
+          'FRIEND',
+          'FRIEND_NOT_FOUND',
+          401,
+        );
+      }
+      return friend;
+    },
+
+    message: (message) => {
+      if (!message) {
+        throw new StandardizedError(
+          '訊息不存在',
+          'ValidationError',
+          'MESSAGE',
+          'MESSAGE_NOT_FOUND',
+          401,
+        );
+      }
+      if (message.content && message.content.length > 2000) {
+        throw new StandardizedError(
+          '訊息不能超過2000個字符',
+          'ValidationError',
+          'MESSAGE',
+          'CONTENT_TOO_LONG',
+        );
+      }
+      return message;
+    },
+
+    directMessage: (directMessage) => {
+      if (!directMessage) {
+        throw new StandardizedError(
+          '私人訊息不存在',
+          'ValidationError',
+          'DIRECT_MESSAGE',
+          'DIRECT_MESSAGE_NOT_FOUND',
+          401,
+        );
+      }
+      if (directMessage.content && directMessage.content.length > 2000) {
+        throw new StandardizedError(
+          '私人訊息不能超過2000個字符',
+          'ValidationError',
+          'DIRECT_MESSAGE',
+          'CONTENT_TOO_LONG',
+        );
+      }
+      return directMessage;
     },
   },
 };

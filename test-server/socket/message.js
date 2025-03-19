@@ -25,19 +25,8 @@ const messageHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'SENDMESSAGE',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
-      const { message } = data;
-      if (!message) {
+      const { message: _message } = data;
+      if (!_message) {
         throw new StandardizedError(
           '無效的資料',
           'SENDMESSAGE',
@@ -46,45 +35,17 @@ const messageHandler = {
           401,
         );
       }
-      const user = users[message.senderId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${message.senderId})不存在`,
-          'ValidationError',
-          'SENDMESSAGE',
-          'USER',
-          404,
-        );
-      }
-      const channel = channels[message.channelId];
-      if (!channel) {
-        throw new StandardizedError(
-          `頻道(${message.channelId})不存在`,
-          'ValidationError',
-          'SENDMESSAGE',
-          'CHANNEL',
-          404,
-        );
-      }
+      const message = await Func.validate.message(_message);
+      const user = await Func.validate.user(users[message.senderId]);
+      const channel = await Func.validate.channel(channels[message.channelId]);
 
-      // Validate message content
-      const messageError = Func.validateMessage(message.content);
-      if (messageError) {
-        throw new StandardizedError(
-          messageError,
-          'ValidationError',
-          'SENDMESSAGE',
-          'CONTENT',
-          400,
-        );
-      }
+      // Validate operation
+      await Func.validate.socket(socket);
 
       // Create new message
       const messageId = uuidv4();
       await Set.message(messageId, {
-        content: message.content,
-        channelId: message.channelId,
-        senderId: message.senderId,
+        ...message,
         timestamp: Date.now().valueOf(),
       });
 
@@ -129,19 +90,8 @@ const messageHandler = {
       // console.log(data);
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'SENDDIRECTMESSAGE',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
-      const { directMessage } = data;
-      if (!directMessage) {
+      const { directMessage: _directMessage } = data;
+      if (!_directMessage) {
         throw new StandardizedError(
           '無效的資料',
           'SENDDIRECTMESSAGE',
@@ -150,33 +100,19 @@ const messageHandler = {
           401,
         );
       }
-      const user = users[directMessage.senderId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${directMessage.senderId})不存在`,
-          'ValidationError',
-          'SENDDIRECTMESSAGE',
-          'USER',
-          404,
-        );
-      }
-      const friend = friends[directMessage.friendId];
-      if (!friend) {
-        throw new StandardizedError(
-          `好友私訊頻道(${directMessage.friendId})不存在`,
-          'ValidationError',
-          'SENDDIRECTMESSAGE',
-          'FRIEND',
-          404,
-        );
-      }
+      const directMessage = await Func.validate.directMessage(_directMessage);
+      const user = await Func.validate.user(users[directMessage.senderId]);
+      const friend = await Func.validate.friend(
+        friends[directMessage.friendId],
+      );
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       // Create new message
       const directMessageId = uuidv4();
       await Set.directMessage(directMessageId, {
-        content: directMessage.content,
-        friendId: directMessage.friendId,
-        senderId: directMessage.senderId,
+        ...directMessage,
         timestamp: Date.now().valueOf(),
       });
 

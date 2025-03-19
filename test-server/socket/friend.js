@@ -15,23 +15,12 @@ const friendHandler = {
     const friends = (await db.get('friends')) || {};
 
     try {
-      // Validate data
       // data = {
       //   userId: string
       //   targetId: string
       // }
 
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'REFRESHFRIEND',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
+      // Validate data
       const { userId, targetId } = data;
       if (!userId || !targetId) {
         throw new StandardizedError(
@@ -42,18 +31,13 @@ const friendHandler = {
           401,
         );
       }
-      const friend =
+      const friend = await Func.validate.friend(
         friends[`fd_${userId}_${targetId}`] ||
-        friends[`fd_${targetId}_${userId}`];
-      if (!friend) {
-        throw new StandardizedError(
-          `好友(${targetId})不存在`,
-          'ValidationError',
-          'REFRESHFRIEND',
-          'FRIEND_NOT_FOUND',
-          401,
-        );
-      }
+          friends[`fd_${targetId}_${userId}`],
+      );
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       // Emit data (only to the user)
       io.to(socket.id).emit(
@@ -85,27 +69,14 @@ const friendHandler = {
     const friends = (await db.get('friends')) || {};
 
     try {
-      // Validate data
       // data = {
       //   userId: string
       //   friend: {
       //     ...
       //   }
       // }
-
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'UPDATEFRIEND',
-          'OPERATOR_NOT_FOUND',
-          404,
-        );
-      }
-      const { friend: editedFriend, userId } = data;
-      if (!editedFriend || !userId) {
+      const { friend: _editedFriend, userId } = data;
+      if (!_editedFriend || !userId) {
         throw new StandardizedError(
           '無效的資料',
           'ValidationError',
@@ -114,36 +85,23 @@ const friendHandler = {
           401,
         );
       }
-      const friend = friends[editedFriend.id];
-      if (!friend) {
-        throw new StandardizedError(
-          `好友(${editedFriend.id})不存在`,
-          'ValidationError',
-          'UPDATEFRIEND',
-          'FRIEND_NOT_FOUND',
-          404,
-        );
-      }
-      const user = users[userId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${userId})不存在`,
-          'ValidationError',
-          'UPDATEFRIEND',
-          'USER_NOT_FOUND',
-          404,
-        );
-      }
-      const userFriend = friends[`fd_${userId}_${friend.id}`];
-      if (!userFriend) {
-        throw new StandardizedError(
-          `你不是此使用者的好友`,
-          'ValidationError',
-          'UPDATEFRIEND',
-          'OPERATOR_NOT_FRIEND',
-          403,
-        );
-      }
+      const user = await Func.validate.user(users[userId]);
+      const editedFriend = await Func.validate.friend(_editedFriend);
+      const friend = await Func.validate.friend(friends[editedFriend.id]);
+
+      // Validate operation
+      await Func.validate.socket(socket);
+
+      // const userFriend = friends[`fd_${userId}_${friend.id}`];
+      // if (!userFriend) {
+      //   throw new StandardizedError(
+      //     `你不是此使用者的好友`,
+      //     'ValidationError',
+      //     'UPDATEFRIEND',
+      //     'OPERATOR_NOT_FRIEND',
+      //     403,
+      //   );
+      // }
 
       // Update friend
       await Set.friend(friend.id, editedFriend);

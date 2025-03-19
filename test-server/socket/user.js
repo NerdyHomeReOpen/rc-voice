@@ -15,7 +15,7 @@ const channelHandler = require('./channel');
 
 const userHandler = {
   searchUser: async (io, socket, data) => {
-    const users = (await db.get('users')) || {};
+    // const users = (await db.get('users')) || {};
 
     try {
       // data = {
@@ -23,17 +23,6 @@ const userHandler = {
       // }
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'SEARCHUSER',
-          'OPERATOR_INVALID',
-          404,
-        );
-      }
       const { query } = data;
       if (!query) {
         throw new StandardizedError(
@@ -44,6 +33,10 @@ const userHandler = {
           401,
         );
       }
+
+      // Validate operation
+      await Func.validate.socket(socket);
+
       // TODO: implement search results
 
       // Emit data (only to the user)
@@ -76,17 +69,6 @@ const userHandler = {
       // }
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'REFRESHUSER',
-          'OPERATOR_INVALID',
-          404,
-        );
-      }
       const { userId } = data;
       if (!userId) {
         throw new StandardizedError(
@@ -96,16 +78,10 @@ const userHandler = {
           'DATA_INVALID',
         );
       }
-      const user = users[userId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${userId})不存在`,
-          'ValidationError',
-          'REFRESHUSER',
-          'USER',
-          404,
-        );
-      }
+      const user = await Func.validate.user(users[userId]);
+
+      // Validate operation
+      await Func.validate.socket(socket);
 
       // Emit data (only to the user)
       io.to(socket.id).emit('userUpdate', await Get.user(user.id));
@@ -129,22 +105,12 @@ const userHandler = {
     }
   },
   connectUser: async (io, socket) => {
-    // Get database
     const users = (await db.get('users')) || {};
 
     try {
       // Validate data
-      const userId = Func.validate.socket(socket);
-      const user = users[userId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${userId})不存在`,
-          'ValidationError',
-          'CONNECTUSER',
-          'USER',
-          404,
-        );
-      }
+      const userId = await Func.validate.socket(socket);
+      const user = await Func.validate.user(users[userId]);
 
       // Check if user is already connected
       for (const [_socketId, _userId] of Map.socketToUser) {
@@ -186,17 +152,8 @@ const userHandler = {
 
     try {
       // Validate data
-      const userId = Func.validate.socket(socket);
-      const user = users[userId];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${userId})不存在`,
-          'ValidationError',
-          'DISCONNECTUSER',
-          'USER',
-          404,
-        );
-      }
+      const userId = await Func.validate.socket(socket);
+      const user = await Func.validate.user(users[userId]);
 
       // Disconnect server or channel
       if (user.currentServerId) {
@@ -257,17 +214,6 @@ const userHandler = {
       // }
 
       // Validate data
-      const operatorId = Func.validate.socket(socket);
-      const operator = users[operatorId];
-      if (!operator) {
-        throw new StandardizedError(
-          `無效的操作`,
-          'ValidationError',
-          'UPDATEUSER',
-          'OPERATOR_INVALID',
-          404,
-        );
-      }
       const { user: editedUser } = data;
       if (!editedUser) {
         throw new StandardizedError(
@@ -278,40 +224,13 @@ const userHandler = {
           401,
         );
       }
-      const user = users[editedUser.id];
-      if (!user) {
-        throw new StandardizedError(
-          `使用者(${editedUser.id})不存在`,
-          'ValidationError',
-          'UPDATEUSER',
-          'USER',
-          404,
-        );
-      }
-      // TODO: change to use Func.validate.user
-      if (editedUser.name) {
-        const nameError = Func.validateUsername(editedUser.name);
-        if (nameError) {
-          throw new StandardizedError(
-            nameError,
-            'ValidationError',
-            'UPDATEUSER',
-            'USERNAME',
-            401,
-          );
-        }
-      }
-      if (editedUser.signature) {
-        const signatureError = Func.validateSignature(editedUser.signature);
-        if (signatureError) {
-          throw new StandardizedError(
-            signatureError,
-            'ValidationError',
-            'UPDATEUSER',
-            'SIGNATURE',
-            401,
-          );
-        }
+      const user = await Func.validate.user(users[editedUser.id]);
+
+      // Validate operation
+      await Func.validate.socket(socket);
+
+      if (editedUser.avatar) {
+        editedUser.avatar = await Func.generateImageData(editedUser.avatar);
       }
 
       // Update user data
