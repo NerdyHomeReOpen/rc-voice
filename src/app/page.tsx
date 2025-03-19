@@ -39,8 +39,8 @@ import authService from '@/services/auth.service';
 interface HeaderProps {
   user: User;
   server: Server;
-  selectedId: number;
-  setSelectedTabId: (tabId: number) => void;
+  selectedId: 'home' | 'friends' | 'server';
+  setSelectedTabId: (tabId: 'home' | 'friends' | 'server') => void;
 }
 
 const Header: React.FC<HeaderProps> = React.memo(
@@ -56,14 +56,15 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     // Variables
     const serverId = server.id;
+    const userId = user.id;
     const userName = user.name;
     const userStatus = user.status;
 
     // Constants
     const MAIN_TABS = [
-      { id: 1, label: lang.tr.home },
-      { id: 2, label: lang.tr.friends },
-      { id: 3, label: server.name },
+      { id: 'home', label: lang.tr.home },
+      { id: 'friends', label: lang.tr.friends },
+      { id: 'server', label: server.name },
     ];
     const STATUS_OPTIONS = [
       { status: 'online', label: lang.tr.online },
@@ -79,12 +80,12 @@ const Header: React.FC<HeaderProps> = React.memo(
 
     const handleLeaveServer = () => {
       if (!socket) return;
-      socket.send.disconnectServer({ serverId: server.id, userId: user.id });
+      socket.send.disconnectServer({ serverId: serverId, userId: userId });
     };
 
     const handleUpdateStatus = (status: User['status']) => {
       if (!socket) return;
-      socket.send.updateUser({ user: { id: user.id, status } });
+      socket.send.updateUser({ user: { id: userId, status } });
     };
 
     const handleCreateError = (error: StandardizedError) => {
@@ -164,20 +165,24 @@ const Header: React.FC<HeaderProps> = React.memo(
         </div>
         {/* Main Tabs */}
         <div className={header['mainTabs']}>
-          {MAIN_TABS.filter((t) => !!t.label || serverId).map((Tab) => {
+          {MAIN_TABS.map((Tab) => {
             const TabId = Tab.id;
             const TabLable = Tab.label;
+            const TabClose = TabId === 'server';
+            if (TabId === 'server' && !serverId) return null;
             return (
               <div
                 key={`Tabs-${TabId}`}
                 className={`${header['tab']} ${
                   TabId === selectedId ? header['selected'] : ''
                 }`}
-                onClick={() => setSelectedTabId(TabId)}
+                onClick={() =>
+                  setSelectedTabId(TabId as 'home' | 'friends' | 'server')
+                }
               >
                 <div className={header['tabLable']}>{TabLable}</div>
                 <div className={header['tabBg']}></div>
-                {TabId > 2 && serverId && (
+                {TabClose && (
                   <CircleX
                     onClick={() => handleLeaveServer()}
                     size={16}
@@ -331,15 +336,17 @@ const Home = () => {
   // States
   const [user, setUser] = useState<User>(createDefault.user());
   const [server, setServer] = useState<Server>(createDefault.server());
-  const [selectedTabId, setSelectedTabId] = useState<number>(1);
+  const [selectedTabId, setSelectedTabId] = useState<
+    'home' | 'friends' | 'server'
+  >('home');
 
   // Effects
   useEffect(() => {
     if (!socket) return;
 
     const eventHandlers = {
-      [SocketServerEvent.CONNECT]: () => handleConnect,
-      [SocketServerEvent.DISCONNECT]: () => handleDisconnect,
+      [SocketServerEvent.CONNECT]: handleConnect,
+      [SocketServerEvent.DISCONNECT]: handleDisconnect,
       [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
       [SocketServerEvent.SERVER_UPDATE]: handleServerUpdate,
       [SocketServerEvent.ERROR]: handleError,
@@ -354,7 +361,7 @@ const Home = () => {
     return () => {
       unsubscribe.forEach((unsub) => unsub());
     };
-  }, [socket, user, server]);
+  }, [socket]);
 
   useEffect(() => {
     if (!lang) return;
@@ -365,12 +372,14 @@ const Home = () => {
   // Handlers
   const handleConnect = () => {
     console.log('Socket connected');
-    setSelectedTabId(1);
+    setSelectedTabId('home');
   };
 
   const handleDisconnect = () => {
     console.log('Socket disconnected');
-    setSelectedTabId(1);
+    setUser(createDefault.user());
+    setServer(createDefault.server());
+    setSelectedTabId('home');
   };
 
   const handleError = (error: StandardizedError) => {
@@ -383,20 +392,19 @@ const Home = () => {
   };
 
   const handleServerUpdate = (data: Partial<Server> | null) => {
-    setSelectedTabId(data ? 3 : 1);
+    setSelectedTabId(data ? 'server' : 'home');
     if (!data) data = createDefault.server();
-    console.log('Server updated', data);
     setServer((prev) => ({ ...prev, ...data }));
   };
 
   const getMainContent = () => {
     if (!socket) return <LoadingSpinner />;
     switch (selectedTabId) {
-      case 1:
+      case 'home':
         return <HomePage user={user} />;
-      case 2:
+      case 'friends':
         return <FriendPage user={user} />;
-      case 3:
+      case 'server':
         return <ServerPage user={user} server={server} />;
     }
   };
