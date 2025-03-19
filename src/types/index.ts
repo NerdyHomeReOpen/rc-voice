@@ -1131,8 +1131,8 @@ export const enum Permission {
 export interface User {
   id: string;
   name: string;
-  avatar: string | null;
-  avatarUrl: string | null;
+  avatar: string;
+  avatarUrl: string;
   signature: string;
   status: 'online' | 'dnd' | 'idle' | 'gn';
   gender: 'Male' | 'Female';
@@ -1149,9 +1149,10 @@ export interface User {
   friends?: UserFriend[];
   friendGroups?: FriendGroup[];
   friendApplications?: FriendApplication[];
-  recentServers?: UserMember[];
-  ownedServers?: UserMember[];
-  favServers?: UserMember[];
+  joinedServers?: Server[];
+  recentServers?: Server[];
+  ownedServers?: Server[];
+  favServers?: Server[];
 }
 
 export interface Badge {
@@ -1178,31 +1179,11 @@ export interface FriendApplication extends User {
   createdAt: number;
 }
 
-export interface UserMember extends Server {
-  isBlocked: boolean;
-  nickname: string;
-  contribution: number;
-  permissionLevel: Permission;
-  userId: string;
-  serverId: string;
-  createdAt: number;
-}
-
-export interface UserFriend extends User {
-  isBlocked: boolean;
-  friendGroupId: string;
-  user1Id: string;
-  user2Id: string;
-  createdAt: number;
-  // THESE WERE NOT SAVE IN THE DATABASE
-  directMessages?: DirectMessage[];
-}
-
 export interface Server {
   id: string;
   name: string;
-  avatar: string | null;
-  avatarUrl: string | null;
+  avatar: string;
+  avatarUrl: string;
   announcement: string;
   description: string;
   type: string;
@@ -1221,18 +1202,10 @@ export interface Server {
   // THESE WERE NOT SAVE IN THE DATABASE
   lobby?: Channel;
   owner?: ServerMember;
-  rootChannels?: Channel[];
+  categories?: Category[]; // Not used yet
   channels?: Channel[];
-  users?: ServerMember[];
+  members?: ServerMember[];
   memberApplications?: MemberApplication[];
-}
-
-export interface ServerMember extends User {
-  isBlocked: boolean;
-  nickname: string;
-  contribution: number;
-  permissionLevel: Permission;
-  serverId: string;
 }
 
 export interface MemberApplication extends User {
@@ -1242,11 +1215,20 @@ export interface MemberApplication extends User {
   createdAt: number;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  isRoot: boolean;
+  order: number;
+  serverId: string;
+  createdAt: number;
+}
+
 export interface Channel {
   id: string;
   name: string;
   isRoot: boolean;
-  isCategory: boolean;
+  // isCategory: boolean;
   isLobby: boolean;
   voiceMode: 'free' | 'queue' | 'forbidden';
   chatMode: 'free' | 'forbidden';
@@ -1260,9 +1242,34 @@ export interface Channel {
   };
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  subChannels?: Channel[];
   messages?: Message[];
 }
+
+export interface Member {
+  isBlocked: boolean;
+  nickname: string;
+  contribution: number;
+  permissionLevel: Permission;
+  userId: string;
+  serverId: string;
+  createdAt: number;
+}
+
+export interface UserMember extends Member, Server {}
+
+export interface ServerMember extends Member, User {}
+
+export interface Friend {
+  isBlocked: boolean;
+  friendGroupId: string;
+  user1Id: string;
+  user2Id: string;
+  createdAt: number;
+  // THESE WERE NOT SAVE IN THE DATABASE
+  directMessages?: DirectMessage[]; // Change to another sheet
+}
+
+export interface UserFriend extends Friend, User {}
 
 export interface Message extends ServerMember {
   content: string;
@@ -1323,6 +1330,11 @@ export enum SocketClientEvent {
   CREATE_SERVER = 'createServer',
   UPDATE_SERVER = 'updateServer',
   DELETE_SERVER = 'deleteServer',
+  // Category
+  REFRESH_CATEGORY = 'refreshCategory',
+  CREATE_CATEGORY = 'createCategory',
+  UPDATE_CATEGORY = 'updateCategory',
+  DELETE_CATEGORY = 'deleteCategory',
   // Channel
   REFRESH_CHANNEL = 'refreshChannel',
   CONNECT_CHANNEL = 'connectChannel',
@@ -1374,6 +1386,18 @@ export enum SocketServerEvent {
   SERVER_UPDATE = 'serverUpdate',
   // Channel
   CHANNEL_UPDATE = 'channelUpdate',
+  // Category
+  CATEGORY_UPDATE = 'categoryUpdate',
+  // Friend Group
+  FRIEND_GROUP_UPDATE = 'friendGroupUpdate',
+  // Member
+  MEMBER_UPDATE = 'memberUpdate',
+  // Member Application
+  MEMBER_APPLICATION_UPDATE = 'memberApplicationUpdate',
+  // Friend
+  FRIEND_UPDATE = 'friendUpdate',
+  // Friend Application
+  FRIEND_APPLICATION_UPDATE = 'friendApplicationUpdate',
   // RTC
   RTC_OFFER = 'RTCOffer',
   RTC_ANSWER = 'RTCAnswer',
