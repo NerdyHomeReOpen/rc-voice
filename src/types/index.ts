@@ -1233,7 +1233,7 @@ export type Channel = BaseChannel & {
   slowmode: boolean;
   userLimit: number;
   visibility: Visibility;
-  categoryId: string;
+  categoryId: string | null;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   messages?: Message[];
@@ -1241,7 +1241,7 @@ export type Channel = BaseChannel & {
 
 export type Member = {
   isBlocked: boolean;
-  nickname: string;
+  nickname: string | null;
   contribution: number;
   permissionLevel: Permission;
   userId: string;

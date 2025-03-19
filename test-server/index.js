@@ -10,7 +10,6 @@ const StandardizedError = utils.standardizedError;
 const Logger = utils.logger;
 const Func = utils.func;
 const Set = utils.set;
-const Get = utils.get;
 const JWT = utils.jwt;
 
 const { PORT, CONTENT_TYPE_JSON } = require('./constant');
@@ -58,8 +57,7 @@ const server = http.createServer((req, res) => {
         const users = (await db.get(`users`)) || {};
 
         // Validate data
-        const account = data.account;
-        const password = data.password;
+        const { account, password } = data;
         if (!account || !password) {
           throw new StandardizedError(
             '無效的帳號或密碼',
@@ -142,34 +140,6 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // if (req.method == 'GET' && req.url == '/refresh-token') {
-  //   // Get the authorization header
-  //   const authHeader = req.headers.authorization;
-  //   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-  //     return sendError(res, 401, 'No token provided');
-  //   }
-
-  //   const sessionId = authHeader.split(' ')[1];
-
-  //   // Verify current token
-  //   const result = JWT.verifyToken(sessionId);
-  //   if (!result.valid) {
-  //     return sendError(res, 401, 'Invalid token');
-  //   }
-
-  //   const newToken = JWT.generateToken(result.userId);
-
-  //   // Update the user sessions map
-  //   utils.map.sessionToUser.set(newToken, result.userId);
-
-  //   sendSuccess(res, {
-  //     message: 'Token refreshed',
-  //     data: {
-  //       sessionId: newToken,
-  //     },
-  //   });
-  // }
-
   if (req.method == 'POST' && req.url == '/register') {
     let body = '';
     req.on('data', (chunk) => {
@@ -189,27 +159,11 @@ const server = http.createServer((req, res) => {
         const accountPasswords = (await db.get(`accountPasswords`)) || {};
 
         // Validate data
-        const account = data.account.trim();
-        const password = data.password.trim();
-        const username = data.username.trim();
-        if (!account || !password) {
-          throw new StandardizedError(
-            '無效的帳號或密碼',
-            'ValidationError',
-            'REGISTER',
-            'INVALID_ACCOUNT_OR_PASSWORD',
-            401,
-          );
-        }
-        if (!username) {
-          throw new StandardizedError(
-            '無效的使用者名稱',
-            'ValidationError',
-            'REGISTER',
-            'INVALID_USERNAME',
-            401,
-          );
-        }
+        const { account, password, username } = data;
+        Func.validate.account(account.trim());
+        Func.validate.password(password.trim());
+        Func.validate.nickname(username.trim());
+
         const exists = accountPasswords[account];
         if (exists) {
           throw new StandardizedError(
@@ -217,36 +171,6 @@ const server = http.createServer((req, res) => {
             'ValidationError',
             'REGISTER',
             'ACCOUNT_ALREADY_EXISTS',
-            401,
-          );
-        }
-        const accountError = Func.validateAccount(account);
-        if (accountError) {
-          throw new StandardizedError(
-            accountError,
-            'ValidationError',
-            'REGISTER',
-            'INVALID_ACCOUNT',
-            401,
-          );
-        }
-        const passwordError = Func.validatePassword(password);
-        if (passwordError) {
-          throw new StandardizedError(
-            passwordError,
-            'ValidationError',
-            'REGISTER',
-            'INVALID_PASSWORD',
-            401,
-          );
-        }
-        const usernameError = Func.validateUsername(username);
-        if (usernameError) {
-          throw new StandardizedError(
-            usernameError,
-            'ValidationError',
-            'REGISTER',
-            'INVALID_USERNAME',
             401,
           );
         }

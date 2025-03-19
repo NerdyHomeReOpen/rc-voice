@@ -125,12 +125,14 @@ const xpSystem = {
 
       // Process XP and level
       user.xp += XP_SYSTEM.XP_PER_HOUR;
+
       let requiredXP = 0;
-      do {
+      while (true) {
         requiredXP = xpSystem.getRequiredXP(user.level);
+        if (user.xp < requiredXP) break;
         user.level += 1;
         user.xp -= requiredXP;
-      } while (user.xp >= requiredXP);
+      }
 
       // Update user
       const userUpdate = {

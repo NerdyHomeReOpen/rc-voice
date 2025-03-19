@@ -315,7 +315,10 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                 }`}
                 disabled={!server.name.trim() || !canCreate}
                 onClick={() => {
-                  handleCreateServer({ ...server, ownerId: userId });
+                  handleCreateServer({
+                    ...server,
+                    ownerId: userId,
+                  });
                   handleClose();
                 }}
               >

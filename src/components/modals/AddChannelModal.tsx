@@ -19,7 +19,7 @@ import { createDefault } from '@/utils/default';
 
 interface AddChannelModalProps {
   userId: string;
-  categoryId: string;
+  categoryId: string | null;
   serverId: string;
 }
 
@@ -40,7 +40,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
     const serverId = initialData.serverId;
     const parentName = parent.name;
     const channelName = channel.name;
-    const isRoot = !!categoryId;
+    const isRoot = !categoryId;
 
     // Handlers
     const handleClose = () => {

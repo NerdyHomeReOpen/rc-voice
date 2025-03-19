@@ -54,7 +54,7 @@ const messageHandler = {
         messages: await Get.channelMessages(channel.id),
       });
 
-      new Logger('WebSocket').info(
+      new Logger('WebSocket').success(
         `User(${user.id}) sent ${message.content} to channel(${channel.id})`,
       );
     } catch (error) {
@@ -121,7 +121,7 @@ const messageHandler = {
         directMessages: await Get.friendDirectMessages(friend.id),
       });
 
-      new Logger('WebSocket').info(
+      new Logger('WebSocket').success(
         `User(${user.id}) sent ${directMessage.content} to direct message(${friend.id})`,
       );
     } catch (error) {

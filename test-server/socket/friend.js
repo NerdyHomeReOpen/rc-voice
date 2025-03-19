@@ -65,7 +65,7 @@ const friendHandler = {
   },
   updateFriend: async (io, socket, data) => {
     // Get database
-    const users = (await db.get('users')) || {};
+    // const users = (await db.get('users')) || {};
     const friends = (await db.get('friends')) || {};
 
     try {
@@ -85,7 +85,7 @@ const friendHandler = {
           401,
         );
       }
-      const user = await Func.validate.user(users[userId]);
+      // const user = await Func.validate.user(users[userId]);
       const editedFriend = await Func.validate.friend(_editedFriend);
       const friend = await Func.validate.friend(friends[editedFriend.id]);
 
@@ -109,7 +109,7 @@ const friendHandler = {
       // Emit data (only to the user)
       io.to(socket.id).emit('friendUpdate', editedFriend);
 
-      new Logger('Friend').info(`Friend(${friend.id}) updated`);
+      new Logger('Friend').success(`Friend(${friend.id}) updated`);
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(

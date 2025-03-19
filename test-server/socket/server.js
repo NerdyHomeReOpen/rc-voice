@@ -444,7 +444,7 @@ const serverHandler = {
     // Get database
     const users = (await db.get('users')) || {};
     const servers = (await db.get('servers')) || {};
-    const members = (await db.get('members')) || {};
+    // const members = (await db.get('members')) || {};
 
     try {
       // data = {
@@ -467,9 +467,7 @@ const serverHandler = {
         );
       }
       const user = await Func.validate.user(users[userId]);
-      const editedServer = await Func.validate.server(
-        servers[_editedServer.id],
-      );
+      const editedServer = await Func.validate.server(_editedServer);
       const server = await Func.validate.server(servers[editedServer.id]);
 
       // Validate operation

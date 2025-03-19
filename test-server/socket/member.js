@@ -65,7 +65,7 @@ const memberHandler = {
   },
   updateMember: async (io, socket, data) => {
     // Get database
-    const users = (await db.get('users')) || {};
+    // const users = (await db.get('users')) || {};
     const members = (await db.get('members')) || {};
 
     try {
@@ -88,7 +88,7 @@ const memberHandler = {
           401,
         );
       }
-      const user = await Func.validate.user(users[userId]);
+      // const user = await Func.validate.user(users[userId]);
       const editedMember = await Func.validate.member(_editedMember);
       const member = await Func.validate.member(members[editedMember.id]);
 
@@ -120,7 +120,7 @@ const memberHandler = {
       // Emit updated data to all users in the server
       io.to(socket.id).emit('memberUpdate', editedMember);
 
-      new Logger('Server').info(`Member(${member.id}) updated`);
+      new Logger('Server').success(`Member(${member.id}) updated`);
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(

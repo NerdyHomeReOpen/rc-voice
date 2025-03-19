@@ -38,7 +38,7 @@ const rtcHandler = {
         offer: offer,
       });
 
-      new Logger('RTC').info(
+      new Logger('RTC').success(
         `User(socket-id: ${socket.id}) sent RTC offer to user(socket-id: ${to})`,
       );
     } catch (error) {
@@ -92,7 +92,7 @@ const rtcHandler = {
         answer: answer,
       });
 
-      new Logger('RTC').info(
+      new Logger('RTC').success(
         `User(socket-id: ${socket.id}) sent RTC answer to user(socket-id: ${to})`,
       );
     } catch (error) {
@@ -146,7 +146,7 @@ const rtcHandler = {
         candidate: candidate,
       });
 
-      new Logger('RTC').info(
+      new Logger('RTC').success(
         `User(socket-id: ${socket.id}) sent RTC ICE candidate to user(socket-id: ${to})`,
       );
     } catch (error) {
@@ -197,7 +197,7 @@ const rtcHandler = {
       // Emit RTC join event (To all users)
       socket.to(`channel_${channelId}`).emit('RTCJoin', socket.id);
 
-      new Logger('RTC').info(
+      new Logger('RTC').success(
         `User(socket-id: ${socket.id}) joined RTC channel(${channelId})`,
       );
     } catch (error) {
@@ -248,7 +248,7 @@ const rtcHandler = {
       // Emit RTC leave event (To all users)
       socket.to(`channel_${channelId}`).emit('RTCLeave', socket.id);
 
-      new Logger('RTC').info(
+      new Logger('RTC').success(
         `User(socket-id: ${socket.id}) left RTC channel(${channelId})`,
       );
     } catch (error) {

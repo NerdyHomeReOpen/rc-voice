@@ -120,7 +120,7 @@ const channelHandler = {
 
       // Emit updated data (to all users in the server)
       io.to(`server_${channel.serverId}`).emit('serverUpdate', {
-        users: await Get.serverUsers(channel.serverId),
+        members: await Get.serverMembers(channel.serverId),
       });
 
       new Logger('WebSocket').success(
@@ -198,7 +198,7 @@ const channelHandler = {
 
       // Emit updated data (to all users in the server)
       io.to(`server_${channel.serverId}`).emit('serverUpdate', {
-        users: await Get.serverUsers(channel.serverId),
+        members: await Get.serverMembers(channel.serverId),
       });
 
       new Logger('WebSocket').success(
@@ -286,7 +286,7 @@ const channelHandler = {
         channels: await Get.serverChannels(server.id),
       });
 
-      new Logger('WebSocket').info(
+      new Logger('WebSocket').success(
         `User(${user.id}) created channel(${channelId}) in server(${server.id})`,
       );
     } catch (error) {
@@ -313,7 +313,7 @@ const channelHandler = {
     // Get database
     const users = (await db.get('users')) || {};
     const channels = (await db.get('channels')) || {};
-    const members = (await db.get('members')) || {};
+    // const members = (await db.get('members')) || {};
 
     try {
       // data = {
@@ -368,7 +368,7 @@ const channelHandler = {
         channels: await Get.serverChannels(server.id),
       });
 
-      new Logger('WebSocket').info(
+      new Logger('WebSocket').success(
         `User(${user.id}) updated channel(${channel.id})`,
       );
     } catch (error) {
@@ -395,7 +395,7 @@ const channelHandler = {
     // Get database
     const users = (await db.get('users')) || {};
     const channels = (await db.get('channels')) || {};
-    const members = (await db.get('members')) || {};
+    // const members = (await db.get('members')) || {};
 
     try {
       // data = {

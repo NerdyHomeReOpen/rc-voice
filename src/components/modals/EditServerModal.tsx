@@ -472,7 +472,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                         <tbody>
                           {serverMembers.map((member) => {
                             const userGender = member.gender;
-                            const userNickname = member.nickname;
+                            const userNickname = member.nickname || member.name;
                             const userPermission = member.permissionLevel;
                             const userContributions = member.contribution;
                             const userJoinDate = member.createdAt;

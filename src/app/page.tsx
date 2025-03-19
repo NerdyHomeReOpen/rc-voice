@@ -392,6 +392,7 @@ const Home = () => {
   };
 
   const handleServerUpdate = (data: Partial<Server> | null) => {
+    console.log('Server updated', data);
     setSelectedTabId(data ? 'server' : 'home');
     if (!data) data = createDefault.server();
     setServer((prev) => ({ ...prev, ...data }));

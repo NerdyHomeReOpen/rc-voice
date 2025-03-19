@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
+const sharp = require('sharp');
 // Utils
 const StandardizedError = require('./standardizedError');
 const Map = require('./map');
@@ -87,6 +88,117 @@ const func = {
   },
 
   validate: {
+    account: async (account) => {
+      if (!account) {
+        throw new StandardizedError(
+          '帳號不可為空',
+          'ValidationError',
+          'ACCOUNT',
+          'ACCOUNT_MISSING',
+          401,
+        );
+      }
+      if (account.length < 3) {
+        throw new StandardizedError(
+          '帳號長度不能小於3個字符',
+          'ValidationError',
+          'ACCOUNT',
+          'ACCOUNT_TOO_SHORT',
+          400,
+        );
+      }
+      if (account.length > 32) {
+        throw new StandardizedError(
+          '帳號長度不能超過32個字符',
+          'ValidationError',
+          'ACCOUNT',
+          'ACCOUNT_TOO_LONG',
+          400,
+        );
+      }
+      if (!/^[a-zA-Z0-9]+$/.test(account)) {
+        throw new StandardizedError(
+          '帳號只能包含英文字母和數字',
+          'ValidationError',
+          'ACCOUNT',
+          'ACCOUNT_INVALID',
+          400,
+        );
+      }
+      return account;
+    },
+
+    password: async (password) => {
+      if (!password) {
+        throw new StandardizedError(
+          '密碼不可為空',
+          'ValidationError',
+          'PASSWORD',
+          'PASSWORD_MISSING',
+          401,
+        );
+      }
+      if (password.length < 6) {
+        throw new StandardizedError(
+          '密碼長度不能小於6個字符',
+          'ValidationError',
+          'PASSWORD',
+          'PASSWORD_TOO_SHORT',
+          400,
+        );
+      }
+      if (password.length > 32) {
+        throw new StandardizedError(
+          '密碼長度不能超過32個字符',
+          'ValidationError',
+          'PASSWORD',
+          'PASSWORD_TOO_LONG',
+          400,
+        );
+      }
+      if (!/^[a-zA-Z0-9]+$/.test(password)) {
+        throw new StandardizedError(
+          '密碼只能包含英文字母和數字',
+          'ValidationError',
+          'PASSWORD',
+          'PASSWORD_INVALID',
+          400,
+        );
+      }
+      return password;
+    },
+
+    nickname: async (nickname) => {
+      if (!nickname) {
+        throw new StandardizedError(
+          '暱稱不可為空',
+          'ValidationError',
+          'NICKNAME',
+          'NICKNAME_MISSING',
+          401,
+        );
+      }
+      if (nickname.length > 32) {
+        throw new StandardizedError(
+          '暱稱不能超過32個字符',
+          'ValidationError',
+          'NICKNAME',
+          'NICKNAME_TOO_LONG',
+          400,
+        );
+      }
+      if (!/^[a-zA-Z0-9\u4e00-\u9fa5]+$/.test(nickname)) {
+        throw new StandardizedError(
+          '暱稱只能包含英文字母、數字和中文',
+          'ValidationError',
+          'NICKNAME',
+          'NICKNAME_INVALID',
+          400,
+        );
+      }
+      return nickname;
+    },
+
     socket: async (socket) => {
       if (!socket) {
         throw new StandardizedError(

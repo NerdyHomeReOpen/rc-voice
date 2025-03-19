@@ -125,7 +125,6 @@ const get = {
       lobby: await get.channel(server.lobbyId),
       owner: await get.user(server.ownerId),
       users: await get.serverUsers(serverId),
-      categories: await get.serverCategories(serverId),
       channels: await get.serverChannels(serverId),
       members: await get.serverMembers(serverId),
       memberApplications: await get.serverApplications(serverId),
@@ -138,16 +137,10 @@ const get = {
       .sort((a, b) => b.lastActiveAt - a.lastActiveAt)
       .filter((u) => u);
   },
-  serverCategories: async (serverId) => {
-    const categories = (await db.get('categories')) || {};
-    return Object.values(categories)
-      .filter((cat) => cat.serverId === serverId)
-      .sort((a, b) => a.order - b.order)
-      .filter((cat) => cat);
-  },
   serverChannels: async (serverId) => {
     const channels = (await db.get('channels')) || {};
-    return Object.values(channels)
+    const categories = (await db.get('categories')) || {};
+    return Object.values({ ...channels, ...categories })
       .filter((ch) => ch.serverId === serverId)
       .sort((a, b) => a.order - b.order)
       .filter((ch) => ch);
