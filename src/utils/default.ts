@@ -4,6 +4,12 @@ import {
   Server,
   FriendApplication,
   MemberApplication,
+  ServerMember,
+  Permission,
+  UserMember,
+  Member,
+  Friend,
+  UserFriend,
 } from '@/types';
 
 export const createDefault = {
@@ -28,9 +34,9 @@ export const createDefault = {
 
   channel: (overrides: Partial<Channel> = {}): Channel => ({
     id: '',
-    name: '',
+    name: '未知頻道',
     isLobby: false,
-    isCategory: false,
+    // isCategory: false,
     isRoot: false,
     serverId: '',
     voiceMode: 'free',
@@ -48,9 +54,9 @@ export const createDefault = {
 
   server: (overrides: Partial<Server> = {}): Server => ({
     id: '',
-    name: '',
-    avatar: null,
-    avatarUrl: null,
+    name: '未知伺服器',
+    avatar: '',
+    avatarUrl: '',
     level: 0,
     description: '',
     wealth: 0,
@@ -66,6 +72,44 @@ export const createDefault = {
       defaultChannelId: '',
     },
     createdAt: 0,
+    ...overrides,
+  }),
+
+  friend: (overrides: Partial<Friend> = {}): Friend => ({
+    isBlocked: false,
+    friendGroupId: '',
+    user1Id: '',
+    user2Id: '',
+    createdAt: 0,
+    ...overrides,
+  }),
+
+  userFriend: (overrides: Partial<UserFriend> = {}): UserFriend => ({
+    ...createDefault.friend(),
+    ...createDefault.user(),
+    ...overrides,
+  }),
+
+  member: (overrides: Partial<Member> = {}): Member => ({
+    isBlocked: false,
+    nickname: '',
+    contribution: 0,
+    permissionLevel: Permission.Guest,
+    userId: '',
+    serverId: '',
+    createdAt: 0,
+    ...overrides,
+  }),
+
+  userMember: (overrides: Partial<UserMember> = {}): UserMember => ({
+    ...createDefault.member(),
+    ...createDefault.server(),
+    ...overrides,
+  }),
+
+  serverMember: (overrides: Partial<ServerMember> = {}): ServerMember => ({
+    ...createDefault.member(),
+    ...createDefault.user(),
     ...overrides,
   }),
 
