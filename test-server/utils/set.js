@@ -7,11 +7,11 @@ const set = {
     const users = await db.get('users');
     users[id] = {
       name: '',
-      avatar: null,
+      avatar: '',
       signature: '',
       status: 'online',
       gender: 'Male',
-      level: 1,
+      level: 0,
       xp: 0,
       requiredXp: 0,
       progress: 0,
@@ -31,11 +31,11 @@ const set = {
   userServer: async (id, data) => {
     const userServers = await db.get('userServers');
     userServers[id] = {
-      userId: '',
-      serverId: '',
       recent: false,
       owned: false,
       favorite: false,
+      userId: '',
+      serverId: '',
       timestamp: 0,
       ...userServers[id],
       ...data,
@@ -62,17 +62,18 @@ const set = {
     const servers = await db.get('servers');
     servers[id] = {
       name: '',
-      avatar: null,
+      avatar: '',
       announcement: '',
       description: '',
-      displayId: '',
       slogan: '',
-      level: 1,
-      wealth: 0,
-      ownerId: '',
-      lobbyId: '',
-      allowDirectMessage: false,
+      type: 'other',
       visibility: 'public',
+      allowDirectMessage: true,
+      level: 0,
+      wealth: 0,
+      displayId: '',
+      lobbyId: '',
+      ownerId: '',
       createdAt: 0,
       ...servers[id],
       ...data,
@@ -85,19 +86,18 @@ const set = {
     const channels = await db.get('channels');
     channels[id] = {
       name: '',
-      isRoot: true,
-      isLobby: false,
+      type: 'channel',
+      visibility: 'public',
       voiceMode: 'free',
       chatMode: 'free',
-      order: 0,
-      type: 'channel',
-      allowDirectMessage: false,
-      visibility: 'public',
-      bitrate: 64000,
-      slowMode: false,
+      isLobby: false,
+      isRoot: false,
+      slowmode: false,
+      bitrate: 0,
       userLimit: 0,
+      order: 0,
       serverId: '',
-      categoryId: null,
+      categoryId: '',
       createdAt: 0,
       ...channels[id],
       ...data,
@@ -110,6 +110,8 @@ const set = {
   friend: async (id, data) => {
     const friends = await db.get('friends');
     friends[id] = {
+      isBlocked: false,
+      friendGroupId: '',
       user1Id: '',
       user2Id: '',
       createdAt: 0,
@@ -139,11 +141,12 @@ const set = {
   member: async (id, data) => {
     const members = await db.get('members');
     members[id] = {
+      isBlocked: false,
       nickname: null,
       contribution: 0,
       permissionLevel: 0,
-      serverId: '',
       userId: '',
+      serverId: '',
       createdAt: 0,
       ...members[id],
       ...data,
@@ -156,9 +159,9 @@ const set = {
   memberApplications: async (id, data) => {
     const applications = await db.get('memberApplications');
     applications[id] = {
+      description: '',
       userId: '',
       serverId: '',
-      description: '',
       createdAt: 0,
       ...applications[id],
       ...data,

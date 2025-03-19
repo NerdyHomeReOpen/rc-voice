@@ -15,7 +15,7 @@ import {
 export const createDefault = {
   user: (overrides: Partial<User> = {}): User => ({
     id: '',
-    name: '未知使用者',
+    name: '',
     avatar: '',
     signature: '',
     status: 'online',
@@ -33,15 +33,15 @@ export const createDefault = {
 
   channel: (overrides: Partial<Channel> = {}): Channel => ({
     id: '',
-    name: '未知頻道',
+    name: '',
     type: 'channel',
-    isLobby: false,
-    isRoot: false,
+    visibility: 'public',
     voiceMode: 'free',
     chatMode: 'free',
-    bitrate: 0,
-    visibility: 'public',
+    isLobby: false,
+    isRoot: false,
     slowmode: false,
+    bitrate: 0,
     userLimit: 0,
     order: 0,
     serverId: '',
@@ -52,16 +52,16 @@ export const createDefault = {
 
   server: (overrides: Partial<Server> = {}): Server => ({
     id: '',
-    name: '未知伺服器',
+    name: '',
     avatar: '',
-    level: 0,
-    description: '',
-    wealth: 0,
-    slogan: '',
     announcement: '',
+    description: '',
+    slogan: '',
     type: 'other',
-    allowDirectMessage: true,
     visibility: 'public',
+    allowDirectMessage: true,
+    level: 0,
+    wealth: 0,
     displayId: '',
     lobbyId: '',
     ownerId: '',
@@ -86,7 +86,7 @@ export const createDefault = {
 
   member: (overrides: Partial<Member> = {}): Member => ({
     isBlocked: false,
-    nickname: '',
+    nickname: null,
     contribution: 0,
     permissionLevel: Permission.Guest,
     userId: '',
@@ -110,9 +110,9 @@ export const createDefault = {
   friendApplication: (
     overrides: Partial<FriendApplication> = {},
   ): FriendApplication => ({
+    description: '',
     senderId: '',
     receiverId: '',
-    description: '',
     ...createDefault.user(),
     ...overrides,
   }),
@@ -120,9 +120,9 @@ export const createDefault = {
   memberApplication: (
     overrides: Partial<MemberApplication> = {},
   ): MemberApplication => ({
+    description: '',
     userId: '',
     serverId: '',
-    description: '',
     ...createDefault.user(),
     ...overrides,
   }),
