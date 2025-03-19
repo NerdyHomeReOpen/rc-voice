@@ -98,12 +98,17 @@
 .inputBox table tr th,
 .inputBox table tr td {
   flex: 1;
+  position: relative;
   display: flex;
   flex-direction: row;
   height: 3rem;
   align-items: center;
   justify-content: center;
   text-align: left;
+}
+.inputBox table tr th:hover {
+  cursor: pointer;
+  background: #d1d1d1;
 }
 
 .inputBox select {
