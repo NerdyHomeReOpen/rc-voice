@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { contextBridge, ipcRenderer } = require('electron');
+import { contextBridge, ipcRenderer } from 'electron';
 
 // 使用 contextBridge 曝露 API 給渲染進程
 contextBridge.exposeInMainWorld('electron', {

@@ -1,12 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-require-imports */
-const path = require('path');
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
-const serve = require('electron-serve');
-const net = require('net');
-const DiscordRPC = require('discord-rpc');
-const { io } = require('socket.io-client');
-const { autoUpdater } = require('electron-updater');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import serve from 'electron-serve';
+import net from 'net';
+import DiscordRPC from 'discord-rpc';
+import { io } from 'socket.io-client';
+import electronUpdater from 'electron-updater';
+import Store from 'electron-store';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const { autoUpdater } = electronUpdater;
+const store = new Store();
 
 const SocketClientEvent = {
   // User
@@ -123,10 +130,10 @@ let popups = {};
 const WS_URL = 'http://localhost:4500';
 let socketInstance = null;
 
-// Disocrd RPC
+// Discord RPC
 const clientId = '1242441392341516288';
 DiscordRPC.register(clientId);
-let rpc = new DiscordRPC.Client({ transport: 'ipc' });
+let rpc = null;
 
 const defaultPrecence = {
   details: '正在使用應用',
@@ -288,6 +295,31 @@ async function createAuthWindow() {
   return authWindow;
 }
 
+// 設定開機啟動
+function setAutoLaunch(enable) {
+  try {
+    app.setLoginItemSettings({
+      openAtLogin: enable,
+      openAsHidden: false,
+    });
+  } catch (error) {
+    console.error('設置開機自動啟動時出錯:', error);
+  }
+}
+
+// 讀取目前開機啟動狀態
+function isAutoLaunchEnabled() {
+  try {
+    const settings = app.getLoginItemSettings();
+    // 可以加入日誌來幫助調試
+    console.log('讀取開機自動啟動狀態:', settings.openAtLogin);
+    return settings.openAtLogin;
+  } catch (error) {
+    console.error('讀取開機自動啟動狀態時出錯:', error);
+    return false;
+  }
+}
+
 async function createPopup(type, height, width) {
   // Track popup windows
   if (popups[type] && !popups[type].isDestroyed()) {
@@ -405,20 +437,132 @@ async function setActivity(activity) {
   }
 }
 
-rpc.on('ready', () => {
-  setActivity(defaultPrecence);
-});
+// 配置自動更新
+function configureAutoUpdater() {
+  // 允許在開發環境中測試自動更新
+  if (isDev) {
+    autoUpdater.forceDevUpdateConfig = true;
+    // 設置更新配置
+    autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml');
+  }
+
+  // 檢查更新錯誤
+  autoUpdater.on('error', (error) => {
+    // 在開發環境中忽略特定錯誤
+    if (isDev && error.message.includes('dev-app-update.yml')) {
+      console.log('開發環境中跳過更新檢查');
+      return;
+    }
+    dialog.showMessageBox({
+      type: 'error',
+      title: '更新錯誤',
+      message: '檢查更新時發生錯誤：' + error.message,
+    });
+  });
+
+  // 檢查更新中
+  autoUpdater.on('checking-for-update', () => {
+    console.log('正在檢查更新...');
+  });
+
+  // 有可用更新
+  autoUpdater.on('update-available', (info) => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: '有新版本可用',
+      message: `正在下載新版本 ${info.version}，請稍後...`,
+      buttons: ['確定'],
+    });
+  });
+
+  // 沒有可用更新
+  autoUpdater.on('update-not-available', () => {
+    console.log('目前是最新版本');
+  });
+
+  // 更新下載進度
+  autoUpdater.on('download-progress', (progressObj) => {
+    let message = `下載速度: ${progressObj.bytesPerSecond}`;
+    message = `${message} - 已下載 ${progressObj.percent}%`;
+    message = `${message} (${progressObj.transferred}/${progressObj.total})`;
+    console.log(message);
+  });
+
+  // 更新下載完成
+  autoUpdater.on('update-downloaded', (info) => {
+    dialog
+      .showMessageBox({
+        type: 'info',
+        title: '安裝更新',
+        message: `版本 ${info.version} 已下載完成，是否立即安裝？`,
+        buttons: ['立即安裝', '稍後安裝'],
+      })
+      .then((buttonIndex) => {
+        if (buttonIndex.response === 0) {
+          autoUpdater.quitAndInstall(false, true);
+        }
+      });
+  });
+}
 
 app.on('ready', async () => {
+  // 初始化 Discord RPC
+  try {
+    rpc = new DiscordRPC.Client({ transport: 'ipc' });
+    await rpc.login({ clientId }).catch(() => {
+      console.log('Discord RPC登錄失敗, 將不會顯示Discord Rich Presence');
+      rpc = null;
+    });
+
+    if (rpc) {
+      rpc.on('ready', () => {
+        setActivity(defaultPrecence);
+      });
+    }
+  } catch (error) {
+    console.error('Discord RPC初始化失敗:', error);
+    rpc = null;
+  }
+
   await createAuthWindow();
   await createMainWindow();
-  autoUpdater.checkForUpdatesAndNotify();
+
+  // 配置並啟動自動更新
+  configureAutoUpdater();
+
+  // 檢查更新
+  try {
+    // 只在生產環境中檢查更新
+    if (!isDev) {
+      await autoUpdater.checkForUpdates();
+    }
+  } catch (error) {
+    console.error('檢查更新失敗:', error);
+  }
+
+  // 設定定期檢查更新（每小時檢查一次）
+  setInterval(() => {
+    try {
+      // 只在生產環境中檢查更新
+      if (!isDev) {
+        autoUpdater.checkForUpdates();
+      }
+    } catch (error) {
+      console.error('定期檢查更新失敗:', error);
+    }
+  }, 60 * 60 * 1000);
 
   mainWindow.hide();
   authWindow.show();
 
   app.on('before-quit', () => {
-    if (rpc) rpc.destroy().catch(console.error);
+    if (rpc) {
+      try {
+        rpc.destroy();
+      } catch (error) {
+        console.error('Discord RPC銷毀失敗:', error);
+      }
+    }
   });
 
   app.on('window-all-closed', () => {
@@ -500,6 +644,36 @@ app.on('ready', async () => {
         currentWindow.webContents.openDevTools({ mode: 'detach' });
     }
   });
+
+  ipcMain.on('set-auto-launch', (_, enable) => {
+    setAutoLaunch(enable);
+  });
+
+  ipcMain.on('get-auto-launch', (event) => {
+    event.reply('auto-launch-status', isAutoLaunchEnabled());
+  });
+
+  // 音訊設備設定處理器
+  ipcMain.on('set-audio-device', (_, { deviceId, type }) => {
+    // 儲存設定到本地
+    if (type === 'input') {
+      store.set('audioInputDevice', deviceId);
+    } else if (type === 'output') {
+      store.set('audioOutputDevice', deviceId);
+    }
+  });
+
+  ipcMain.on('get-audio-device', (event) => {
+    // 讀取本地設定
+    event.reply('audio-device-status', {
+      input: store.get('audioInputDevice'),
+      output: store.get('audioOutputDevice'),
+    });
+  });
+
+  ipcMain.on('open-external', (_, url) => {
+    shell.openExternal(url);
+  });
 });
 
 app.on('activate', async () => {
@@ -510,32 +684,4 @@ app.on('activate', async () => {
     mainWindow.hide();
     authWindow.show();
   }
-});
-
-autoUpdater.on('update-available', () => {
-  dialog.showMessageBox({
-    type: 'info',
-    title: '有新版本可用',
-    message: '正在下載新版本，請稍後...',
-  });
-});
-
-autoUpdater.on('update-downloaded', () => {
-  dialog
-    .showMessageBox({
-      type: 'question',
-      title: '更新已下載',
-      message: '應用程式已下載新版本，請重新啟動以完成更新。',
-      buttons: ['立即重啟'],
-    })
-    .then((result) => {
-      if (result.response === 0) {
-        autoUpdater.quitAndInstall();
-      }
-    });
-});
-
-rpc.login({ clientId }).catch(() => {
-  console.log('Discord RPC登錄失敗, 將不會顯示Discord Rich Presence');
-  rpc = null;
 });

@@ -1466,4 +1466,5 @@ export enum PopupType {
   DIALOG_WARNING = 'dialogWarning',
   DIALOG_ERROR = 'dialogError',
   DIALOG_INFO = 'dialogInfo',
+  SYSTEM_SETTING = 'systemSetting',
 }

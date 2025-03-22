@@ -194,7 +194,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     useEffect(() => {
       ipcService.discord.updatePresence({
         details: `${lang.tr.in} ${serverName}`,
-        state: `${lang.tr.with} ${serverMembers.length} `,
+        state: `${lang.tr.with} ${serverMembers.length} ${lang.tr.chatWithMembers}`,
         largeImageKey: 'app_icon',
         largeImageText: 'RC Voice',
         smallImageKey: 'home_icon',

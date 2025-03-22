@@ -6,7 +6,7 @@
     "output": "dist"
   },
   "files": [
-    "main.js",
+    "main.mjs",
     "package.json",
     "./out/**/*"
   ],
@@ -44,7 +44,9 @@
     {
       "provider": "github",
       "owner": "NerdyHomeReOpen",
-      "repo": "RiceCall"
+      "repo": "RiceCall",
+      "private": false,
+      "releaseType": "release"
     }
   ]
 }
