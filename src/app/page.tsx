@@ -289,13 +289,6 @@ const Header: React.FC<HeaderProps> = React.memo(
                   >
                     日本語
                   </div>
-                  <div
-                    className={header['option']}
-                    data-lang="ru"
-                    onClick={() => handleLanguageChange('ru')}
-                  >
-                    русский язык
-                  </div>
                 </div>
               </div>
               <div

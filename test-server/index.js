@@ -88,7 +88,7 @@ const server = http.createServer((req, res) => {
         const exist = accountPasswords[account];
         if (!exist) {
           throw new StandardizedError(
-            '帳號或密碼錯誤',
+            '找不到此帳號',
             'ValidationError',
             'LOGIN',
             'INVALID_ACCOUNT_OR_PASSWORD',

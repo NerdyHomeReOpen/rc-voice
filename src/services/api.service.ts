@@ -65,24 +65,14 @@ axiosInstance.interceptors.response.use(
 
 const handleResponse = async (response: Response): Promise<any> => {
   const data = await response.json();
-
   if (!response.ok) {
-    // Handle specific error codes
-    if (response.status === 409) {
-      throw new StandardizedError(
-        'ServerError',
-        `資源已存在: ${data.error}`,
-        'API_GET',
-        'DATA_EXIST',
-        409,
-      );
-    }
+    // 直接拋出後端返回的錯誤信息
     throw new StandardizedError(
-      'ServerError',
-      `請求失敗: ${data.error}`,
+      'ValidationError',
+      data.error, // 使用後端返回的錯誤信息
       'API_GET',
-      'FETCH',
-      500,
+      'VALIDATION_ERROR',
+      response.status,
     );
   }
 
@@ -126,18 +116,18 @@ const apiService = {
           : { 'Content-Type': 'application/json' }),
         ...(options?.headers || {}),
       });
-      // Fetch
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: headers,
         credentials: options?.credentials || 'omit',
         body: data instanceof FormData ? data : JSON.stringify(data),
       });
-      // Handle response
+
       return handleResponse(response);
     } catch (error: Error | any) {
       if (!(error instanceof StandardizedError)) {
-        throw new StandardizedError(
+        error = new StandardizedError(
           'ServerError',
           `提交資料時發生預期外的錯誤: ${error.message}`,
           'API_POST',
@@ -145,7 +135,7 @@ const apiService = {
           500,
         );
       }
-      new errorHandler(error).show();
+      throw error; // 直接拋出錯誤，而不是調用 errorHandler
     }
   },
 

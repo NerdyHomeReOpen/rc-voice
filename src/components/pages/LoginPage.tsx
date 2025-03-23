@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import styles from '@/styles/loginPage.module.css';
 
 // Utils
-import { validateAccount, validatePassword } from '@/utils/validators';
+import { createValidators } from '@/utils/validators';
 
 // Services
 import authService from '@/services/auth.service';
@@ -32,6 +32,7 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = React.memo(({ setSection }) => {
   // Hooks
   const lang = useLanguage();
+  const validators = React.useMemo(() => createValidators(lang), [lang]);
 
   // States
   const [formData, setFormData] = useState<FormDatas>({
@@ -57,24 +58,54 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(({ setSection }) => {
     if (name === 'account') {
       setErrors((prev) => ({
         ...prev,
-        account: validateAccount(value),
+        account: validators.validateAccount(value),
       }));
     } else if (name === 'password') {
       setErrors((prev) => ({
         ...prev,
-        password: validatePassword(value),
+        password: validators.validatePassword(value),
       }));
     }
   };
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+
+    // 檢查必填欄位
+    const validationErrors: FormErrors = {};
+
+    if (!formData.account.trim()) {
+      validationErrors.account = lang.tr.pleaseInputAccount;
+    }
+    if (!formData.password.trim()) {
+      validationErrors.password = lang.tr.pleaseInputPassword;
+    }
+
+    // 如果有任何驗證錯誤，更新錯誤狀態並返回
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors((prev) => ({
+        ...prev,
+        ...validationErrors,
+        general: lang.tr.pleaseInputAllRequired,
+      }));
+      return;
+    }
+
+    // 檢查現有的驗證錯誤
+    if (errors.account || errors.password) {
+      setErrors((prev) => ({
+        ...prev,
+        general: lang.tr.pleaseFixFormErrors,
+      }));
+      return;
+    }
+
     setIsLoading(true);
     try {
       if (await authService.login(formData)) setSection('login');
-    } catch (error) {
+    } catch (error: any) {
       setErrors({
-        general: error instanceof Error ? error.message : lang.tr.unknownError,
+        general: error.error_message || error.message || lang.tr.unknownError,
       });
     } finally {
       setIsLoading(false);

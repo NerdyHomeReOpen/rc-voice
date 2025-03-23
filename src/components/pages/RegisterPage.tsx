@@ -4,12 +4,7 @@ import React, { useState } from 'react';
 import styles from '@/styles/registerPage.module.css';
 
 // Utils
-import {
-  validateAccount,
-  validateCheckPassword,
-  validatePassword,
-  validateUsername,
-} from '@/utils/validators';
+import { createValidators } from '@/utils/validators';
 
 // Services
 import authService from '@/services/auth.service';
@@ -41,6 +36,7 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
   ({ setSection }) => {
     // Hooks
     const lang = useLanguage();
+    const validators = React.useMemo(() => createValidators(lang), [lang]);
 
     // States
     const [formData, setFormData] = useState<FormDatas>({
@@ -66,39 +62,78 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
       if (name === 'account') {
         setErrors((prev) => ({
           ...prev,
-          account: validateAccount(value),
+          account: validators.validateAccount(value),
         }));
       } else if (name === 'password') {
         setErrors((prev) => ({
           ...prev,
-          password: validatePassword(value),
+          password: validators.validatePassword(value),
         }));
       } else if (name === 'confirmPassword') {
         setErrors((prev) => ({
           ...prev,
-          confirmPassword: validateCheckPassword(value, formData.password),
+          confirmPassword: validators.validateCheckPassword(
+            value,
+            formData.password,
+          ),
         }));
       } else if (name === 'username') {
         setErrors((prev) => ({
           ...prev,
-          username: validateUsername(value),
+          username: validators.validateUsername(value),
         }));
       }
     };
 
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
+
+      // 檢查必填欄位
+      const validationErrors: FormErrors = {};
+
+      if (!formData.account.trim()) {
+        validationErrors.account = lang.tr.pleaseInputAccount;
+      }
+      if (!formData.password.trim()) {
+        validationErrors.password = lang.tr.pleaseInputPassword;
+      }
+      if (!formData.confirmPassword.trim()) {
+        validationErrors.confirmPassword = lang.tr.pleaseInputPasswordAgain;
+      }
+      if (!formData.username.trim()) {
+        validationErrors.username = lang.tr.pleaseInputNickname;
+      }
+
+      // 如果有任何驗證錯誤，更新錯誤狀態並返回
+      if (Object.keys(validationErrors).length > 0) {
+        setErrors((prev) => ({
+          ...prev,
+          ...validationErrors,
+          general: lang.tr.pleaseInputAllRequired,
+        }));
+        return;
+      }
+
+      // 檢查現有的驗證錯誤
+      if (
+        errors.account ||
+        errors.password ||
+        errors.confirmPassword ||
+        errors.username
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          general: lang.tr.pleaseFixFormErrors,
+        }));
+        return;
+      }
+
       setIsLoading(true);
       try {
-        if (errors.account) return;
-        if (errors.password) return;
-        if (errors.confirmPassword) return;
-        if (errors.username) return;
         if (await authService.register(formData)) setSection('login');
-      } catch (error) {
+      } catch (error: any) {
         setErrors({
-          general:
-            error instanceof Error ? error.message : lang.tr.unknownError,
+          general: error.error_message || error.message || lang.tr.unknownError,
         });
       } finally {
         setIsLoading(false);
@@ -137,8 +172,7 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
               {errors.account ? (
                 <p className={styles['warning']}>{errors.account}</p>
               ) : (
-                <p className={styles['hint']}>{'帳號註冊後不可更換'}</p>
-                // lang.tr.accountHint
+                <p className={styles['hint']}>{lang.tr.accountCannotChange}</p>
               )}
             </div>
             <div className={styles['inputWrapper']}>
@@ -211,6 +245,14 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
             <button className={styles['button']} onClick={handleSubmit}>
               {lang.tr.register}
             </button>
+          </div>
+        </div>
+        <div className={styles['loginFooter']}>
+          <div
+            className={styles['backToLogin']}
+            onClick={() => setSection('login')}
+          >
+            {lang.tr.backToLogin}
           </div>
         </div>
       </div>

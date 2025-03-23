@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 // Types
 import { Translation, LanguageKey, translations, Permission } from '@/types';
@@ -35,13 +35,18 @@ const LanguageProvider = ({ children }: LanguageProviderProps) => {
     return permissionMap[permission] || translation.unknownUser;
   };
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const savedLang = localStorage.getItem('language') as LanguageKey;
+    if (savedLang) setLanguage(savedLang);
+  }, []);
+
   const getFormatTimestamp = (timestamp: number): string => {
     const langMap: Record<LanguageKey, string> = {
       tw: 'zh-TW',
       cn: 'zh-CN',
       en: 'en-US',
       jp: 'ja-JP',
-      ru: 'ru-RU',
     };
     const timezoneLang = langMap[language] || 'zh-TW';
     const now = new Date();
