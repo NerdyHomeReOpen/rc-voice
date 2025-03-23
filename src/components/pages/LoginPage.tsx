@@ -71,7 +71,6 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(({ setSection }) => {
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    // 檢查必填欄位
     const validationErrors: FormErrors = {};
 
     if (!formData.account.trim()) {
@@ -81,7 +80,6 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(({ setSection }) => {
       validationErrors.password = lang.tr.pleaseInputPassword;
     }
 
-    // 如果有任何驗證錯誤，更新錯誤狀態並返回
     if (Object.keys(validationErrors).length > 0) {
       setErrors((prev) => ({
         ...prev,
@@ -91,7 +89,6 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(({ setSection }) => {
       return;
     }
 
-    // 檢查現有的驗證錯誤
     if (errors.account || errors.password) {
       setErrors((prev) => ({
         ...prev,
@@ -101,15 +98,8 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(({ setSection }) => {
     }
 
     setIsLoading(true);
-    try {
-      if (await authService.login(formData)) setSection('login');
-    } catch (error: any) {
-      setErrors({
-        general: error.error_message || error.message || lang.tr.unknownError,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    if (await authService.login(formData)) setSection('login');
+    setIsLoading(false);
   };
 
   return (
