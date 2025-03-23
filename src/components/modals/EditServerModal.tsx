@@ -392,9 +392,11 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                               setServerType(e.target.value as Server['type']);
                             }}
                           >
-                            <option>{lang.tr.other}</option>
-                            <option>{lang.tr.game}</option>
-                            <option>{lang.tr.entertainment}</option>
+                            <option value="other">{lang.tr.other}</option>
+                            <option value="game">{lang.tr.game}</option>
+                            <option value="entertainment">
+                              {lang.tr.entertainment}
+                            </option>
                           </select>
                         </div>
                       </div>
@@ -569,7 +571,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                               <tr
                                 key={memberId}
                                 onContextMenu={(e) => {
-                                  if (memberUserId === userId) return;
+                                  const isCurrentUser = memberUserId === userId;
                                   contextMenu.showContextMenu(
                                     e.pageX,
                                     e.pageY,
@@ -577,14 +579,17 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                       {
                                         label: '傳送即時訊息',
                                         onClick: () => {},
+                                        show: !isCurrentUser,
                                       },
                                       {
                                         label: '檢視個人檔案',
                                         onClick: () => {},
+                                        show: !isCurrentUser,
                                       },
                                       {
                                         label: '新增好友',
                                         onClick: () => {},
+                                        show: !isCurrentUser,
                                       },
                                       // {
                                       //   label: '拒聽此人語音',
@@ -601,6 +606,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                       {
                                         label: lang.tr.moveToMyChannel,
                                         onClick: () => handleUserMove(),
+                                        show: !isCurrentUser,
                                       },
                                       // {
                                       //   label: '禁止此人語音',
@@ -613,14 +619,17 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                       {
                                         label: lang.tr.kickOut,
                                         onClick: () => handleKickServer(member),
+                                        show: !isCurrentUser,
                                       },
                                       {
                                         label: lang.tr.block,
                                         onClick: () => handleBlockUser(member),
+                                        show: !isCurrentUser,
                                       },
                                       {
                                         label: lang.tr.memberManagement,
                                         onClick: () => {},
+                                        show: !isCurrentUser,
                                       },
                                       // {
                                       //   label: lang.tr.inviteToBeMember,

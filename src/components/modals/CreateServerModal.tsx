@@ -33,7 +33,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
     const refreshRef = useRef(false);
 
     // Constant
-    const MAX_GROUPS = 999;
+    const MAX_GROUPS = 3;
     const SERVER_TYPES: { value: Server['type']; name: string }[] = [
       {
         value: 'game',

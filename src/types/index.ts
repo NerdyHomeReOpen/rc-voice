@@ -201,6 +201,34 @@ export interface Translation {
   usernameMaxLength: string;
   accountCannotChange: string;
   passwordsDoNotMatch: string;
+  basicSettings: string;
+  voiceSettings: string;
+  aboutUs: string;
+  generalSettings: string;
+  autoStartup: string;
+  autoStartupDescription: string;
+  minimizeToTray: string;
+  minimizeToTrayDescription: string;
+  startMinimized: string;
+  startMinimizedDescription: string;
+  notificationSound: string;
+  notificationSoundDescription: string;
+  inputDevice: string;
+  outputDevice: string;
+  defaultMicrophone: string;
+  defaultSpeaker: string;
+  unknownDevice: string;
+  microphone: string;
+  speaker: string;
+  version: string;
+  projectRepo: string;
+  projectRepoDescription: string;
+  developmentTeam: string;
+  mainDeveloper: string;
+  serverMaintainer: string;
+  frontendDeveloper: string;
+  backendDeveloper: string;
+  copyright: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -413,6 +441,34 @@ export const translations: Record<LanguageKey, Translation> = {
     usernameMaxLength: '顯示名稱最多 32 個字',
     accountCannotChange: '帳號註冊後不可更換',
     passwordsDoNotMatch: '密碼輸入不一致',
+    basicSettings: '基本設定',
+    voiceSettings: '語音設定',
+    aboutUs: '關於我們',
+    generalSettings: '一般設定',
+    autoStartup: '開機自動啟動',
+    autoStartupDescription: '開機時自動啟動應用程式',
+    minimizeToTray: '最小化到系統列',
+    minimizeToTrayDescription: '關閉視窗時最小化到系統列而不是退出',
+    startMinimized: '啟動時最小化',
+    startMinimizedDescription: '啟動應用程式時自動最小化到系統列',
+    notificationSound: '通知音效',
+    notificationSoundDescription: '收到新訊息時播放提示音效',
+    inputDevice: '輸入裝置',
+    outputDevice: '輸出裝置',
+    defaultMicrophone: '系統默認麥克風',
+    defaultSpeaker: '系統默認揚聲器',
+    unknownDevice: '未知裝置',
+    microphone: '麥克風',
+    speaker: '揚聲器',
+    version: '版本號',
+    projectRepo: '專案倉庫',
+    projectRepoDescription: '(歡迎提 issue 或 PR)',
+    developmentTeam: '開發團隊',
+    mainDeveloper: '主要開發',
+    serverMaintainer: '伺服器架設',
+    frontendDeveloper: '前端開發',
+    backendDeveloper: '後端開發',
+    copyright: '版權所有',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -621,6 +677,34 @@ export const translations: Record<LanguageKey, Translation> = {
     usernameMaxLength: '显示名称最多 32 个字',
     accountCannotChange: '账号注册后不可更换',
     passwordsDoNotMatch: '密码输入不一致',
+    basicSettings: '基本设置',
+    voiceSettings: '语音设置',
+    aboutUs: '关于我们',
+    generalSettings: '一般设置',
+    autoStartup: '开机自动启动',
+    autoStartupDescription: '开机时自动启动应用程序',
+    minimizeToTray: '最小化到系统列',
+    minimizeToTrayDescription: '关闭窗口时最小化到系统列而不是退出',
+    startMinimized: '启动时最小化',
+    startMinimizedDescription: '启动应用程序时自动最小化到系统列',
+    notificationSound: '通知音效',
+    notificationSoundDescription: '收到新讯息时播放提示音效',
+    inputDevice: '输入装置',
+    outputDevice: '输出装置',
+    defaultMicrophone: '系统默认麦克风',
+    defaultSpeaker: '系统默认扬声器',
+    unknownDevice: '未知装置',
+    microphone: '麦克风',
+    speaker: '扬声器',
+    version: '版本号',
+    projectRepo: '专案仓库',
+    projectRepoDescription: '(欢迎提 issue 或 PR)',
+    developmentTeam: '开发团队',
+    mainDeveloper: '主要开发',
+    serverMaintainer: '伺服器架设',
+    frontendDeveloper: '前端开发',
+    backendDeveloper: '后端开发',
+    copyright: '版权所有',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -832,6 +916,37 @@ export const translations: Record<LanguageKey, Translation> = {
     usernameMaxLength: 'Display name cannot exceed 32 characters',
     accountCannotChange: 'Account cannot be changed after registration',
     passwordsDoNotMatch: 'Passwords do not match',
+    basicSettings: 'Basic Settings',
+    voiceSettings: 'Voice Settings',
+    aboutUs: 'About Us',
+    generalSettings: 'General Settings',
+    autoStartup: 'Auto Startup',
+    autoStartupDescription: 'Auto start application on boot',
+    minimizeToTray: 'Minimize to Tray',
+    minimizeToTrayDescription:
+      'Minimize to tray instead of exiting when closing window',
+    startMinimized: 'Start Minimized',
+    startMinimizedDescription:
+      'Auto minimize to tray when starting application',
+    notificationSound: 'Notification Sound',
+    notificationSoundDescription:
+      'Play notification sound when receiving new message',
+    inputDevice: 'Input Device',
+    outputDevice: 'Output Device',
+    defaultMicrophone: 'Default Microphone',
+    defaultSpeaker: 'Default Speaker',
+    unknownDevice: 'Unknown Device',
+    microphone: 'Microphone',
+    speaker: 'Speaker',
+    version: 'Version',
+    projectRepo: 'Project Repository',
+    projectRepoDescription: '(Welcome to submit issue or PR)',
+    developmentTeam: 'Development Team',
+    mainDeveloper: 'Main Developer',
+    serverMaintainer: 'Server Maintainer',
+    frontendDeveloper: 'Frontend Developer',
+    backendDeveloper: 'Backend Developer',
+    copyright: 'Copyright',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1041,6 +1156,36 @@ export const translations: Record<LanguageKey, Translation> = {
     usernameMaxLength: '表示名は最大32文字です',
     accountCannotChange: 'アカウントは登録後変更できません',
     passwordsDoNotMatch: 'パスワードが一致しません',
+    basicSettings: '基本設定',
+    voiceSettings: '音声設定',
+    aboutUs: '私たちについて',
+    generalSettings: '一般設定',
+    autoStartup: '自動起動',
+    autoStartupDescription: '起動時に自動でアプリを起動',
+    minimizeToTray: 'システムトレイに最小化',
+    minimizeToTrayDescription:
+      'ウィンドウを閉じた時にシステムトレイに最小化する',
+    startMinimized: '最小化して起動',
+    startMinimizedDescription: 'アプリを起動時に自動でシステムトレイに最小化',
+    notificationSound: '通知音',
+    notificationSoundDescription:
+      '新しいメッセージを受け取った時に通知音を再生',
+    inputDevice: '入力デバイス',
+    outputDevice: '出力デバイス',
+    defaultMicrophone: 'システムデフォルトのマイク',
+    defaultSpeaker: 'システムデフォルトのスピーカー',
+    unknownDevice: '不明のデバイス',
+    microphone: 'マイク',
+    speaker: 'スピーカー',
+    version: 'バージョン',
+    projectRepo: 'プロジェクトリポジトリ',
+    projectRepoDescription: '(issueやPRを提案してください)',
+    developmentTeam: '開発チーム',
+    mainDeveloper: 'メイン開発者',
+    serverMaintainer: 'サーバー管理者',
+    frontendDeveloper: 'フロントエンド開発者',
+    backendDeveloper: 'バックエンド開発者',
+    copyright: '著作権所有',
   },
 };
 

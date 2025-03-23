@@ -122,7 +122,11 @@ const SettingModal: React.FC = React.memo(() => {
           {/* Left Sidebar */}
           <div className={EditServer['left']}>
             <div className={EditServer['tabs']}>
-              {['基本設定', '語音設定', '關於我們'].map((title, index) => (
+              {[
+                lang.tr.basicSettings,
+                lang.tr.voiceSettings,
+                lang.tr.aboutUs,
+              ].map((title, index) => (
                 <div
                   className={`${EditServer['item']} ${
                     activeTabIndex === index ? EditServer['active'] : ''
@@ -143,7 +147,9 @@ const SettingModal: React.FC = React.memo(() => {
                   <div
                     className={`${EditServer['inputGroup']} ${EditServer['col']}`}
                   >
-                    <div className={Popup['label']}>一般設定</div>
+                    <div className={Popup['label']}>
+                      {lang.tr.generalSettings}
+                    </div>
                     <div
                       className={`${Popup['inputBox']} ${Popup['col']}`}
                       style={{ gap: '16px', padding: '20px' }}
@@ -158,9 +164,11 @@ const SettingModal: React.FC = React.memo(() => {
                         }}
                       >
                         <div>
-                          <div className={Popup['label']}>開機自動啟動</div>
+                          <div className={Popup['label']}>
+                            {lang.tr.autoStartup}
+                          </div>
                           <div className="text-gray-500 text-sm">
-                            開機時自動啟動應用程式
+                            {lang.tr.autoStartupDescription}
                           </div>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -185,10 +193,10 @@ const SettingModal: React.FC = React.memo(() => {
                       >
                         <div>
                           <div className={Popup['label']}>
-                            最小化到系統列 (Not working)
+                            {lang.tr.minimizeToTray}
                           </div>
                           <div className="text-gray-500 text-sm">
-                            關閉視窗時最小化到系統列而不是退出
+                            {lang.tr.minimizeToTrayDescription}
                           </div>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -215,10 +223,10 @@ const SettingModal: React.FC = React.memo(() => {
                       >
                         <div>
                           <div className={Popup['label']}>
-                            啟動時最小化 (Not working)
+                            {lang.tr.startMinimized}
                           </div>
                           <div className="text-gray-500 text-sm">
-                            啟動應用程式時自動最小化到系統列
+                            {lang.tr.startMinimizedDescription}
                           </div>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -245,10 +253,10 @@ const SettingModal: React.FC = React.memo(() => {
                       >
                         <div>
                           <div className={Popup['label']}>
-                            通知音效 (Not working)
+                            {lang.tr.notificationSound}
                           </div>
                           <div className="text-gray-500 text-sm">
-                            收到新訊息時播放提示音效
+                            {lang.tr.notificationSoundDescription}
                           </div>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -271,21 +279,25 @@ const SettingModal: React.FC = React.memo(() => {
                   <div
                     className={`${EditServer['inputGroup']} ${EditServer['col']}`}
                   >
-                    <div className={Popup['label']}>語音設定</div>
+                    <div className={Popup['label']}>
+                      {lang.tr.voiceSettings}
+                    </div>
                     <div
                       className={`${Popup['inputBox']} ${Popup['col']}`}
                       style={{ gap: '20px', padding: '20px' }}
                     >
                       <div style={{ width: '100%' }}>
-                        <div className={`${Popup['label']} mb-2`}>輸入裝置</div>
+                        <div className={`${Popup['label']} mb-2`}>
+                          {lang.tr.inputDevice}
+                        </div>
                         <select
                           className={`${Popup['select']} w-full p-2 rounded border border-gray-200 bg-white hover:border-gray-300 focus:border-blue-500 focus:outline-none transition-colors`}
                           value={selectedInput}
                           onChange={handleInputChange}
                         >
                           <option value="">
-                            系統默認麥克風 (
-                            {inputDevices[0]?.label || '未知裝置'})
+                            {lang.tr.defaultMicrophone} (
+                            {inputDevices[0]?.label || lang.tr.unknownDevice})
                           </option>
                           {inputDevices.map((device) => (
                             <option
@@ -293,22 +305,26 @@ const SettingModal: React.FC = React.memo(() => {
                               value={device.deviceId}
                             >
                               {device.label ||
-                                `麥克風 ${inputDevices.indexOf(device) + 1}`}
+                                `${lang.tr.microphone} ${
+                                  inputDevices.indexOf(device) + 1
+                                }`}
                             </option>
                           ))}
                         </select>
                       </div>
 
                       <div style={{ width: '100%' }}>
-                        <div className={`${Popup['label']} mb-2`}>輸出裝置</div>
+                        <div className={`${Popup['label']} mb-2`}>
+                          {lang.tr.outputDevice}
+                        </div>
                         <select
                           className={`${Popup['select']} w-full p-2 rounded border border-gray-200 bg-white hover:border-gray-300 focus:border-blue-500 focus:outline-none transition-colors`}
                           value={selectedOutput}
                           onChange={handleOutputChange}
                         >
                           <option value="">
-                            系統默認揚聲器 (
-                            {outputDevices[0]?.label || '未知裝置'})
+                            {lang.tr.defaultSpeaker} (
+                            {outputDevices[0]?.label || lang.tr.unknownDevice})
                           </option>
                           {outputDevices.map((device) => (
                             <option
@@ -316,7 +332,9 @@ const SettingModal: React.FC = React.memo(() => {
                               value={device.deviceId}
                             >
                               {device.label ||
-                                `揚聲器 ${outputDevices.indexOf(device) + 1}`}
+                                `${lang.tr.speaker} ${
+                                  outputDevices.indexOf(device) + 1
+                                }`}
                             </option>
                           ))}
                         </select>
@@ -329,7 +347,7 @@ const SettingModal: React.FC = React.memo(() => {
                   <div
                     className={`${EditServer['inputGroup']} ${EditServer['col']}`}
                   >
-                    <div className={Popup['label']}>關於我們</div>
+                    <div className={Popup['label']}>{lang.tr.aboutUs}</div>
                     <div
                       className={`${Popup['inputBox']} ${Popup['col']}`}
                       style={{
@@ -341,14 +359,14 @@ const SettingModal: React.FC = React.memo(() => {
                     >
                       {/* 版本信息 */}
                       <div className={Popup['row']}>
-                        <div className={Popup['label']}>版本號</div>
+                        <div className={Popup['label']}>{lang.tr.version}</div>
                         <div className={Popup['value']}>v{version}</div>
                       </div>
 
                       {/* 專案資訊 */}
                       <div className={Popup['row']}>
                         <div className={Popup['label']}>
-                          專案倉庫 (歡迎提 issue 或 PR)
+                          {lang.tr.projectRepo} {lang.tr.projectRepoDescription}
                         </div>
                         <div className={Popup['value']}>
                           <div
@@ -366,47 +384,49 @@ const SettingModal: React.FC = React.memo(() => {
 
                       {/* 開發團隊 */}
                       <div className={`${Popup['row']} flex-col items-start`}>
-                        <div className={`${Popup['label']} mb-3`}>開發團隊</div>
+                        <div className={`${Popup['label']} mb-3`}>
+                          {lang.tr.developmentTeam}
+                        </div>
                         <div className="grid grid-cols-2 gap-4 w-full">
                           {[
                             {
                               name: '🤓 NerdyHomeReOpen',
-                              role: '主要開發',
+                              role: lang.tr.mainDeveloper,
                               github: 'https://github.com/NerdyHomeReOpen',
                             },
                             {
                               name: '🤓 JoshHuang9508',
-                              role: '主要開發',
+                              role: lang.tr.mainDeveloper,
                               github: 'https://github.com/JoshHuang9508',
                             },
                             {
                               name: '🤓 yeci226',
-                              role: '主要開發',
+                              role: lang.tr.mainDeveloper,
                               github: 'https://github.com/yeci226',
                             },
                             {
                               name: 'yayacat',
-                              role: '伺服器架設',
+                              role: lang.tr.serverMaintainer,
                               github: 'https://github.com/yayacat',
                             },
                             {
                               name: 'cablate',
-                              role: '前端開發',
+                              role: lang.tr.frontendDeveloper,
                               github: 'https://github.com/cablate',
                             },
                             {
                               name: 'cstrikeasia',
-                              role: '前端開發',
+                              role: lang.tr.frontendDeveloper,
                               github: 'https://github.com/cstrikeasia',
                             },
                             {
                               name: 'lekoOwO',
-                              role: '後端開發',
+                              role: lang.tr.backendDeveloper,
                               github: 'https://github.com/lekoOwO',
                             },
                             {
                               name: 'rytlebsk',
-                              role: '前端開發',
+                              role: lang.tr.frontendDeveloper,
                               github: 'https://github.com/rytlebsk',
                             },
                           ].map((dev) => (
@@ -432,7 +452,9 @@ const SettingModal: React.FC = React.memo(() => {
 
                       {/* 版權信息 */}
                       <div className={`${Popup['row']} mt-4 mb-2`}>
-                        <div className={Popup['label']}>版權所有</div>
+                        <div className={Popup['label']}>
+                          {lang.tr.copyright}
+                        </div>
                         <div className="text-gray-500 text-sm">
                           © {new Date().getFullYear()} NerdyHomeReOpen Team. All
                           rights reserved.
