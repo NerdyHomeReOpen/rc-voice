@@ -129,15 +129,8 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
       }
 
       setIsLoading(true);
-      try {
-        if (await authService.register(formData)) setSection('login');
-      } catch (error: any) {
-        setErrors({
-          general: error.error_message || error.message || lang.tr.unknownError,
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      if (await authService.register(formData)) setSection('login');
+      setIsLoading(false);
     };
 
     return (

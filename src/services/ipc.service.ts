@@ -127,12 +127,6 @@ const ipcService = {
         ipcRenderer.removeListener('window-unmaximized', callback);
       }
     },
-    // FIXME: THIS SHOULD BE REMOVED
-    openDevtool: () => {
-      if (isElectron) {
-        ipcRenderer.send('openDevtool');
-      }
-    },
     openExternal: (url: string) => {
       if (isElectron) {
         ipcRenderer.send('open-external', url);

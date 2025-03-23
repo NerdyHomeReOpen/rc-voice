@@ -65,11 +65,11 @@ axiosInstance.interceptors.response.use(
 
 const handleResponse = async (response: Response): Promise<any> => {
   const data = await response.json();
+
   if (!response.ok) {
-    // 直接拋出後端返回的錯誤信息
     throw new StandardizedError(
       'ValidationError',
-      data.error, // 使用後端返回的錯誤信息
+      data.error,
       'API_GET',
       'VALIDATION_ERROR',
       response.status,
@@ -135,7 +135,8 @@ const apiService = {
           500,
         );
       }
-      throw error; // 直接拋出錯誤，而不是調用 errorHandler
+      new errorHandler(error).show();
+      return null;
     }
   },
 

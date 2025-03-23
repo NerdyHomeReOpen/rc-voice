@@ -101,10 +101,6 @@ const Header: React.FC<HeaderProps> = React.memo(
       ipcService.window.close();
     };
 
-    const handleOpenDevtool = () => {
-      ipcService.window.openDevtool();
-    };
-
     const handleLanguageChange = (language: LanguageKey) => {
       lang.set(language);
       localStorage.setItem('language', language);

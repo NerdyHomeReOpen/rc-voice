@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-require-imports */
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
@@ -168,24 +166,43 @@ function waitForPort(port) {
         resolve();
       });
 
-      client.once('error', (error) => {
+      client.once('error', () => {
         client.destroy();
-
         if (timeout <= 0) {
           clearTimeout(timer);
           reject(new Error('Timeout waiting for port'));
           return;
         }
-
         setTimeout(tryConnect, 1000);
         timeout -= 1000;
       });
 
       client.connect({ port: port, host: '127.0.0.1' });
     }
-
     tryConnect();
   });
+}
+
+function setAutoLaunch(enable) {
+  try {
+    app.setLoginItemSettings({
+      openAtLogin: enable,
+      openAsHidden: false,
+    });
+  } catch (error) {
+    console.error('設置開機自動啟動時出錯:', error);
+  }
+}
+
+function isAutoLaunchEnabled() {
+  try {
+    const settings = app.getLoginItemSettings();
+    console.log('讀取開機自動啟動狀態:', settings.openAtLogin);
+    return settings.openAtLogin;
+  } catch (error) {
+    console.error('讀取開機自動啟動狀態時出錯:', error);
+    return false;
+  }
 }
 
 async function createMainWindow() {
@@ -228,7 +245,6 @@ async function createMainWindow() {
     });
   } else {
     mainWindow.loadURL(`${baseUri}`);
-    // Open DevTools in development mode
     mainWindow.webContents.openDevTools();
   }
 
@@ -290,7 +306,6 @@ async function createAuthWindow() {
     });
   } else {
     authWindow.loadURL(`${baseUri}/auth`);
-    // Open DevTools in development mode
     authWindow.webContents.openDevTools();
   }
 
@@ -305,31 +320,6 @@ async function createAuthWindow() {
   });
 
   return authWindow;
-}
-
-// 設定開機啟動
-function setAutoLaunch(enable) {
-  try {
-    app.setLoginItemSettings({
-      openAtLogin: enable,
-      openAsHidden: false,
-    });
-  } catch (error) {
-    console.error('設置開機自動啟動時出錯:', error);
-  }
-}
-
-// 讀取目前開機啟動狀態
-function isAutoLaunchEnabled() {
-  try {
-    const settings = app.getLoginItemSettings();
-    // 可以加入日誌來幫助調試
-    console.log('讀取開機自動啟動狀態:', settings.openAtLogin);
-    return settings.openAtLogin;
-  } catch (error) {
-    console.error('讀取開機自動啟動狀態時出錯:', error);
-    return false;
-  }
 }
 
 async function createPopup(type, height, width) {
@@ -370,7 +360,6 @@ async function createPopup(type, height, width) {
     });
   } else {
     popups[type].loadURL(`${baseUri}/popup?type=${type}`);
-    // Open DevTools in development mode
     popups[type].webContents.openDevTools();
   }
 
@@ -382,6 +371,9 @@ async function createPopup(type, height, width) {
 }
 
 function connectSocket(token) {
+  if (!token) return null;
+  if (socketInstance) return socketInstance;
+
   const socket = io(WS_URL, {
     transports: ['websocket'],
     reconnection: true,
@@ -395,19 +387,15 @@ function connectSocket(token) {
     },
   });
 
-  // 定義所有 IPC 處理器
   const ipcHandlers = Object.values(SocketClientEvent).reduce((acc, event) => {
     acc[event] = (_, data) => socket.emit(event, data);
     return acc;
   }, {});
 
   socket.on('connect', () => {
-    // 註冊 IPC 處理器
     Object.entries(ipcHandlers).forEach(([event, handler]) => {
       ipcMain.on(event, handler);
     });
-
-    // 註冊所有 Socket 事件
     Object.values(SocketServerEvent).forEach((event) => {
       socket.on(event, (data) => {
         BrowserWindow.getAllWindows().forEach((window) => {
@@ -415,21 +403,15 @@ function connectSocket(token) {
         });
       });
     });
-
-    mainWindow?.show();
-    authWindow?.hide();
   });
 
-  // 將處理函數存儲在 socket 實例上，以便後續清理
   socket.ipcHandlers = ipcHandlers;
-
   return socket;
 }
 
 function disconnectSocket(socket) {
   if (!socket) return null;
 
-  // 移除所有 IPC 事件處理函數
   if (socket.ipcHandlers) {
     Object.entries(socket.ipcHandlers).forEach(([event, handler]) => {
       ipcMain.removeListener(event, handler);
@@ -449,18 +431,13 @@ async function setActivity(activity) {
   }
 }
 
-// 配置自動更新
 function configureAutoUpdater() {
-  // 允許在開發環境中測試自動更新
   if (isDev) {
     autoUpdater.forceDevUpdateConfig = true;
-    // 設置更新配置
     autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml');
   }
 
-  // 檢查更新錯誤
   autoUpdater.on('error', (error) => {
-    // 在開發環境中忽略特定錯誤
     if (isDev && error.message.includes('dev-app-update.yml')) {
       console.log('開發環境中跳過更新檢查');
       return;
@@ -472,12 +449,10 @@ function configureAutoUpdater() {
     });
   });
 
-  // 檢查更新中
   autoUpdater.on('checking-for-update', () => {
     console.log('正在檢查更新...');
   });
 
-  // 有可用更新
   autoUpdater.on('update-available', (info) => {
     dialog.showMessageBox({
       type: 'info',
@@ -487,12 +462,10 @@ function configureAutoUpdater() {
     });
   });
 
-  // 沒有可用更新
   autoUpdater.on('update-not-available', () => {
     console.log('目前是最新版本');
   });
 
-  // 更新下載進度
   autoUpdater.on('download-progress', (progressObj) => {
     let message = `下載速度: ${progressObj.bytesPerSecond}`;
     message = `${message} - 已下載 ${progressObj.percent}%`;
@@ -500,7 +473,6 @@ function configureAutoUpdater() {
     console.log(message);
   });
 
-  // 更新下載完成
   autoUpdater.on('update-downloaded', (info) => {
     dialog
       .showMessageBox({
@@ -517,8 +489,7 @@ function configureAutoUpdater() {
   });
 }
 
-app.on('ready', async () => {
-  // 初始化 Discord RPC
+async function configureDiscordRPC() {
   try {
     rpc = new DiscordRPC.Client({ transport: 'ipc' });
     await rpc.login({ clientId }).catch(() => {
@@ -535,37 +506,29 @@ app.on('ready', async () => {
     console.error('Discord RPC初始化失敗:', error);
     rpc = null;
   }
+}
 
+const configureUpdateChecker = async () => {
+  try {
+    if (!isDev) {
+      await autoUpdater.checkForUpdates();
+      setInterval(updateChecker, 60 * 60 * 1000);
+    }
+  } catch (error) {
+    console.error('定期檢查更新失敗:', error);
+  }
+};
+
+app.on('ready', async () => {
   await createAuthWindow();
   await createMainWindow();
 
-  // 配置並啟動自動更新
-  configureAutoUpdater();
-
-  // 檢查更新
-  try {
-    // 只在生產環境中檢查更新
-    if (!isDev) {
-      await autoUpdater.checkForUpdates();
-    }
-  } catch (error) {
-    console.error('檢查更新失敗:', error);
-  }
-
-  // 設定定期檢查更新（每小時檢查一次）
-  setInterval(() => {
-    try {
-      // 只在生產環境中檢查更新
-      if (!isDev) {
-        autoUpdater.checkForUpdates();
-      }
-    } catch (error) {
-      console.error('定期檢查更新失敗:', error);
-    }
-  }, 60 * 60 * 1000);
-
   mainWindow.hide();
   authWindow.show();
+
+  configureAutoUpdater();
+  configureUpdateChecker();
+  configureDiscordRPC();
 
   app.on('before-quit', () => {
     if (rpc) {
@@ -581,13 +544,13 @@ app.on('ready', async () => {
     if (process.platform !== 'darwin') app.quit();
   });
 
+  // Auth handlers
   ipcMain.on('login', (_, token) => {
     mainWindow.show();
     authWindow.hide();
     if (!socketInstance) socketInstance = connectSocket(token);
     socketInstance.connect();
   });
-
   ipcMain.on('logout', () => {
     mainWindow.hide();
     authWindow.show();
@@ -607,16 +570,14 @@ app.on('ready', async () => {
     });
   });
 
-  // Popup submit handlers
+  // Popup handlers
+  ipcMain.on('open-popup', async (_, type, height, width) => {
+    createPopup(type, height, width);
+  });
   ipcMain.on('popup-submit', (_, to) => {
     BrowserWindow.getAllWindows().forEach((window) => {
       window.webContents.send('popup-submit', to);
     });
-  });
-
-  // Popup handlers
-  ipcMain.on('open-popup', async (_, type, height, width) => {
-    createPopup(type, height, width);
   });
 
   // Window control event handlers
@@ -648,41 +609,30 @@ app.on('ready', async () => {
     setActivity(updatePresence);
   });
 
-  ipcMain.on('openDevtool', () => {
-    if (isDev) {
-      const currentWindow = BrowserWindow.getFocusedWindow();
-
-      if (currentWindow)
-        currentWindow.webContents.openDevTools({ mode: 'detach' });
-    }
-  });
-
+  // Auto launch handlers
   ipcMain.on('set-auto-launch', (_, enable) => {
     setAutoLaunch(enable);
   });
-
   ipcMain.on('get-auto-launch', (event) => {
     event.reply('auto-launch-status', isAutoLaunchEnabled());
   });
 
-  // 音訊設備設定處理器
+  // Audio device handlers
   ipcMain.on('set-audio-device', (_, { deviceId, type }) => {
-    // 儲存設定到本地
     if (type === 'input') {
       store.set('audioInputDevice', deviceId);
     } else if (type === 'output') {
       store.set('audioOutputDevice', deviceId);
     }
   });
-
   ipcMain.on('get-audio-device', (event) => {
-    // 讀取本地設定
     event.reply('audio-device-status', {
       input: store.get('audioInputDevice'),
       output: store.get('audioOutputDevice'),
     });
   });
 
+  // Open external url handlers
   ipcMain.on('open-external', (_, url) => {
     shell.openExternal(url);
   });
