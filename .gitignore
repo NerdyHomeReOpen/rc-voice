@@ -54,3 +54,7 @@ package-lock.json
 !/test-server/uploads/serverAvatars/__default.png
 /test-server/uploads/userAvatars/*
 !/test-server/uploads/userAvatars/__default.png
+
+# env
+.env
+!.env.example
