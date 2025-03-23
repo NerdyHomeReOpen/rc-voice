@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
 const fs = require('fs').promises;
 
 const XP_SYSTEM = {
@@ -18,7 +21,7 @@ const MIME_TYPES = {
   '.webp': 'image/webp',
 };
 
-const PORT = 4500;
+const PORT = process.env.PORT || 4500;
 const CONTENT_TYPE_JSON = { 'Content-Type': 'application/json' };
 
 const UPLOADS_PATH = 'uploads';

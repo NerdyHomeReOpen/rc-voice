@@ -5,12 +5,16 @@ const nextConfig: NextConfig = {
     domains: ['localhost'],
     // 如果你之後有其他網域也要加在這裡
     // 例如: 'your-production-domain.com'
-    unoptimized: true
+    unoptimized: true,
   },
   basePath: '',
   assetPrefix: '',
   trailingSlash: false,
-  output: "export"
+  output: 'export',
+  env: {
+    NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
+    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
+  },
 };
 
 export default nextConfig;
