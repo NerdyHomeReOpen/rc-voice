@@ -1,10 +1,10 @@
 {
-  "name": "rc-voice-ts",
+  "name": "ricecall",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "main": "main.js",
-  "description": "rc-voice-client",
+  "description": "Ricecall is a voice chat app that allows you to chat with your friends.",
   "author": "null",
   "scripts": {
     "dev": "next dev --turbopack",

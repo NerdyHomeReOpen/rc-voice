@@ -209,6 +209,11 @@ async function createMainWindow() {
     transparent: true,
     resizable: true,
     hasShadow: true,
+    icon: path.join(
+      __dirname,
+      'resources',
+      process.platform === 'win32' ? 'icon.ico' : 'icon.png',
+    ),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -266,6 +271,11 @@ async function createAuthWindow() {
     frame: false,
     transparent: true,
     hasShadow: true,
+    icon: path.join(
+      __dirname,
+      'resources',
+      process.platform === 'win32' ? 'icon.ico' : 'icon.png',
+    ),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

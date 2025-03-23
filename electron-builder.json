@@ -6,7 +6,7 @@
     "output": "dist"
   },
   "files": [
-    "main.mjs",
+    "main.js",
     "package.json",
     "./out/**/*"
   ],
