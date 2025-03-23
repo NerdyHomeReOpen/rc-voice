@@ -85,12 +85,8 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
       }
     };
 
-    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-
-      // 檢查必填欄位
+    const handleSubmit = async () => {
       const validationErrors: FormErrors = {};
-
       if (!formData.account.trim()) {
         validationErrors.account = lang.tr.pleaseInputAccount;
       }
@@ -103,27 +99,11 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
       if (!formData.username.trim()) {
         validationErrors.username = lang.tr.pleaseInputNickname;
       }
-
-      // 如果有任何驗證錯誤，更新錯誤狀態並返回
       if (Object.keys(validationErrors).length > 0) {
         setErrors((prev) => ({
           ...prev,
           ...validationErrors,
           general: lang.tr.pleaseInputAllRequired,
-        }));
-        return;
-      }
-
-      // 檢查現有的驗證錯誤
-      if (
-        errors.account ||
-        errors.password ||
-        errors.confirmPassword ||
-        errors.username
-      ) {
-        setErrors((prev) => ({
-          ...prev,
-          general: lang.tr.pleaseFixFormErrors,
         }));
         return;
       }

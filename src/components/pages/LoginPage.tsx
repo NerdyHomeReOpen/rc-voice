@@ -68,35 +68,7 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(({ setSection }) => {
     }
   };
 
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
-    const validationErrors: FormErrors = {};
-
-    if (!formData.account.trim()) {
-      validationErrors.account = lang.tr.pleaseInputAccount;
-    }
-    if (!formData.password.trim()) {
-      validationErrors.password = lang.tr.pleaseInputPassword;
-    }
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors((prev) => ({
-        ...prev,
-        ...validationErrors,
-        general: lang.tr.pleaseInputAllRequired,
-      }));
-      return;
-    }
-
-    if (errors.account || errors.password) {
-      setErrors((prev) => ({
-        ...prev,
-        general: lang.tr.pleaseFixFormErrors,
-      }));
-      return;
-    }
-
+  const handleSubmit = async () => {
     setIsLoading(true);
     if (await authService.login(formData)) setSection('login');
     setIsLoading(false);

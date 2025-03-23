@@ -64,19 +64,31 @@ axiosInstance.interceptors.response.use(
 );
 
 const handleResponse = async (response: Response): Promise<any> => {
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new StandardizedError(
-      'ValidationError',
-      data.error,
-      'API_GET',
-      'VALIDATION_ERROR',
-      response.status,
-    );
+  try {
+    const data = await response.json();
+    if (!response.ok) {
+      throw new StandardizedError(
+        'ValidationError',
+        data.error,
+        'RESPONSE',
+        'VALIDATION_ERROR',
+        response.status,
+      );
+    }
+    return data.data;
+  } catch (error: Error | any) {
+    if (!(error instanceof StandardizedError)) {
+      error = new StandardizedError(
+        'ServerError',
+        `請求失敗: ${error.message}`,
+        'RESPONSE',
+        'EXCEPTION_ERROR',
+        500,
+      );
+    }
+    new errorHandler(error).show();
+    return null;
   }
-
-  return data.data;
 };
 
 const apiService = {
@@ -93,7 +105,7 @@ const apiService = {
         error = new StandardizedError(
           'ServerError',
           `獲取資料時發生預期外的錯誤: ${error.message}`,
-          'API_GET',
+          'GET',
           'EXCEPTION_ERROR',
           500,
         );
@@ -130,7 +142,7 @@ const apiService = {
         error = new StandardizedError(
           'ServerError',
           `提交資料時發生預期外的錯誤: ${error.message}`,
-          'API_POST',
+          'POST',
           'EXCEPTION_ERROR',
           500,
         );
@@ -162,7 +174,7 @@ const apiService = {
         error = new StandardizedError(
           'ServerError',
           `更新資料時發生預期外的錯誤: ${error.message}`,
-          'API_PATCH',
+          'PATCH',
           'EXCEPTION_ERROR',
           500,
         );
