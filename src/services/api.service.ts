@@ -135,8 +135,9 @@ const apiService = {
         credentials: options?.credentials || 'omit',
         body: data instanceof FormData ? data : JSON.stringify(data),
       });
-
-      return handleResponse(response);
+      // Handle response
+      const result = await handleResponse(response);
+      return result;
     } catch (error: Error | any) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
