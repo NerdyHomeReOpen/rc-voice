@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { authService } from './auth.service';
 import { errorHandler, StandardizedError } from '@/utils/errorHandler';
-const API_URL = 'http://localhost:4500';
+const API_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

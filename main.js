@@ -7,6 +7,8 @@ import DiscordRPC from 'discord-rpc';
 import { io } from 'socket.io-client';
 import electronUpdater from 'electron-updater';
 import Store from 'electron-store';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -125,7 +127,7 @@ let authWindow = null;
 let popups = {};
 
 // Socket connection
-const WS_URL = 'http://localhost:4500';
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL;
 let socketInstance = null;
 
 // Discord RPC
