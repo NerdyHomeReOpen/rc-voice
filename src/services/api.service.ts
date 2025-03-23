@@ -135,7 +135,8 @@ const apiService = {
           500,
         );
       }
-      throw error; // 直接拋出錯誤，而不是調用 errorHandler
+      new errorHandler(error).show();
+      return null;
     }
   },
 
