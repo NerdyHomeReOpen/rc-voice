@@ -36,7 +36,7 @@ import refreshService from '@/services/refresh.service';
 import { createDefault } from '@/utils/createDefault';
 import { createSorter } from '@/utils/createSorter';
 
-const SystemSettingModal: React.FC = React.memo(() => {
+const SettingModal: React.FC = React.memo(() => {
   // Hooks
   const lang = useLanguage();
   const socket = useSocket();
@@ -463,6 +463,6 @@ const SystemSettingModal: React.FC = React.memo(() => {
   );
 });
 
-SystemSettingModal.displayName = 'SystemSettingModal';
+SettingModal.displayName = 'SettingModal';
 
-export default SystemSettingModal;
+export default SettingModal;

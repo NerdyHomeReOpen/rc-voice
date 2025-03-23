@@ -16,7 +16,7 @@ import EditServer from '@/components/modals/EditServerModal';
 import EditChannel from '@/components/modals/EditChannelModal';
 import EditUser from '@/components/modals/UserSettingModal';
 import EditMember from '@/components/modals/EditMemberModal';
-import SystemSetting from '@/components/modals/SystemSettingModal';
+import SystemSetting from '@/components/modals/SettingModal';
 import ApplyMember from '@/components/modals/ApplyMember';
 import ApplyFriend from '@/components/modals/ApplyFriend';
 import Dialog from '@/components/modals/Dialog';
