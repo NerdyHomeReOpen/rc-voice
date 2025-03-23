@@ -1,45 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { version } from '../../../package.json';
-import { shell } from 'electron';
 
 // CSS
 import EditServer from '@/styles/popups/editServer.module.css';
 import Popup from '@/styles/common/popup.module.css';
 
-// Components
-// import MarkdownViewer from '@/components/viewers/MarkdownViewer';
-
-// Types
-import {
-  MemberApplication,
-  Server,
-  PopupType,
-  ServerMember,
-  Member,
-  Permission,
-  User,
-} from '@/types';
-
 // Providers
 import { useSocket } from '@/providers/SocketProvider';
-import { useContextMenu } from '@/providers/ContextMenuProvider';
 import { useLanguage } from '@/providers/LanguageProvider';
 
 // Services
 import ipcService from '@/services/ipc.service';
-import apiService from '@/services/api.service';
-import refreshService from '@/services/refresh.service';
-
-// Utils
-import { createDefault } from '@/utils/createDefault';
-import { createSorter } from '@/utils/createSorter';
 
 const SettingModal: React.FC = React.memo(() => {
   // Hooks
   const lang = useLanguage();
-  const socket = useSocket();
 
   // States
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
@@ -154,7 +130,7 @@ const SettingModal: React.FC = React.memo(() => {
                       className={`${Popup['inputBox']} ${Popup['col']}`}
                       style={{ gap: '16px', padding: '20px' }}
                     >
-                      {/* 開機自動啟動 */}
+                      {/* Auto Startup */}
                       <div
                         className={`${Popup['row']}`}
                         style={{
@@ -182,7 +158,7 @@ const SettingModal: React.FC = React.memo(() => {
                         </label>
                       </div>
 
-                      {/* 最小化到系統列 */}
+                      {/* Minimize to Tray (Not implemented) */}
                       <div
                         className={`${Popup['row']}`}
                         style={{
@@ -193,7 +169,7 @@ const SettingModal: React.FC = React.memo(() => {
                       >
                         <div>
                           <div className={Popup['label']}>
-                            {lang.tr.minimizeToTray}
+                            {lang.tr.minimizeToTray} (Not implemented)
                           </div>
                           <div className="text-gray-500 text-sm">
                             {lang.tr.minimizeToTrayDescription}
@@ -212,7 +188,7 @@ const SettingModal: React.FC = React.memo(() => {
                         </label>
                       </div>
 
-                      {/* 啟動時最小化 */}
+                      {/* Start Minimized (Not implemented) */}
                       <div
                         className={`${Popup['row']}`}
                         style={{
@@ -223,7 +199,7 @@ const SettingModal: React.FC = React.memo(() => {
                       >
                         <div>
                           <div className={Popup['label']}>
-                            {lang.tr.startMinimized}
+                            {lang.tr.startMinimized} (Not implemented)
                           </div>
                           <div className="text-gray-500 text-sm">
                             {lang.tr.startMinimizedDescription}
@@ -242,7 +218,7 @@ const SettingModal: React.FC = React.memo(() => {
                         </label>
                       </div>
 
-                      {/* 通知音效 */}
+                      {/* Notification Sound (Not implemented) */}
                       <div
                         className={`${Popup['row']}`}
                         style={{
@@ -253,7 +229,7 @@ const SettingModal: React.FC = React.memo(() => {
                       >
                         <div>
                           <div className={Popup['label']}>
-                            {lang.tr.notificationSound}
+                            {lang.tr.notificationSound} (Not implemented)
                           </div>
                           <div className="text-gray-500 text-sm">
                             {lang.tr.notificationSoundDescription}
@@ -357,13 +333,11 @@ const SettingModal: React.FC = React.memo(() => {
                         gap: '24px',
                       }}
                     >
-                      {/* 版本信息 */}
                       <div className={Popup['row']}>
                         <div className={Popup['label']}>{lang.tr.version}</div>
                         <div className={Popup['value']}>v{version}</div>
                       </div>
 
-                      {/* 專案資訊 */}
                       <div className={Popup['row']}>
                         <div className={Popup['label']}>
                           {lang.tr.projectRepo} {lang.tr.projectRepoDescription}
@@ -382,7 +356,6 @@ const SettingModal: React.FC = React.memo(() => {
                         </div>
                       </div>
 
-                      {/* 開發團隊 */}
                       <div className={`${Popup['row']} flex-col items-start`}>
                         <div className={`${Popup['label']} mb-3`}>
                           {lang.tr.developmentTeam}
@@ -450,7 +423,6 @@ const SettingModal: React.FC = React.memo(() => {
                         </div>
                       </div>
 
-                      {/* 版權信息 */}
                       <div className={`${Popup['row']} mt-4 mb-2`}>
                         <div className={Popup['label']}>
                           {lang.tr.copyright}
