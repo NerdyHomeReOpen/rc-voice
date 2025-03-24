@@ -106,4 +106,4 @@ export const useLanguage = (): LanguageContextProps => {
 
 LanguageProvider.displayName = 'LanguageProvider';
 
-export { LanguageProvider };
+export default LanguageProvider;
