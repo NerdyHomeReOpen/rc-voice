@@ -49,7 +49,8 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const socket = useSocket();
     const webRTC = useWebRTC();
     const contextMenu = useContextMenu();
-    const { setCategoryExpanded, setChannelExpanded } = useExpandedContext();
+    const { handleSetCategoryExpanded, handleSetChannelExpanded } =
+      useExpandedContext();
 
     // Refs
     const refreshed = useRef(false);
@@ -165,8 +166,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     };
 
     const handleLocateUser = () => {
-      setCategoryExpanded.current?.(true);
-      setChannelExpanded.current?.(true);
+      if (!handleSetCategoryExpanded || !handleSetChannelExpanded) return;
+      handleSetCategoryExpanded();
+      handleSetChannelExpanded();
     };
 
     const handleStartResizing = useCallback((e: React.MouseEvent) => {

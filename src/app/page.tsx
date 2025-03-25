@@ -28,7 +28,8 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { errorHandler, StandardizedError } from '@/utils/errorHandler';
 import { createDefault } from '@/utils/createDefault';
 
-// Providers
+// Providersx
+import ExpandedProvider from '@/providers/ExpandedContextProvider';
 import { useSocket } from '@/providers/SocketProvider';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useContextMenu } from '@/providers/ContextMenuProvider';
@@ -370,11 +371,13 @@ const Home = () => {
         return <FriendPage user={user} handleUserUpdate={handleUserUpdate} />;
       case 'server':
         return (
-          <ServerPage
-            user={user}
-            server={server}
-            handleServerUpdate={handleServerUpdate}
-          />
+          <ExpandedProvider>
+            <ServerPage
+              user={user}
+              server={server}
+              handleServerUpdate={handleServerUpdate}
+            />
+          </ExpandedProvider>
         );
     }
   };

@@ -33,19 +33,17 @@ interface CategoryTabProps {
   server: Server;
   category: Category;
   permissionLevel: number;
+  expanded: Record<string, boolean>;
+  setExpanded: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
 const CategoryTab: React.FC<CategoryTabProps> = React.memo(
-  ({ user, server, category, permissionLevel }) => {
+  ({ user, server, category, permissionLevel, expanded, setExpanded }) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
     const contextMenu = useContextMenu();
     const { setCategoryExpanded } = useExpandedContext();
-
-    // States
-    const [expanded, setExpanded] = useState(false);
-
     // Variables
     const { channels: serverChannels = [] } = server;
     const { id: userId } = user;
@@ -62,37 +60,6 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
     const userInCategory = categoryChannels.some(
       (ch) => ch.id === user.currentChannelId,
     );
-
-    // Effect
-    useEffect(() => {
-      if (setCategoryExpanded.current && userInCategory)
-        setCategoryExpanded.current = setExpanded;
-    }, [setCategoryExpanded, userInCategory]);
-
-    // // States
-    // const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
-    //   () => {
-    //     const initialState: Record<string, boolean> = {};
-    //     serverChannels.forEach((item) => {
-    //       initialState[item.id] =
-    //         item.type === 'channel' &&
-    //         ('isLobby' in item ? item.isLobby : false);
-    //     });
-    //     return initialState;
-    //   },
-    // );
-
-    // const toggleItem = (itemId: string) => {
-    //   setExpandedItems((prev) => ({
-    //     ...prev,
-    //     [itemId]: !prev[itemId],
-    //   }));
-    // };
-
-    // // Check if user is in any child channel
-    // const hasUserInChildren = categoryChannels.some(
-    //   (ch) => ch.id === user.currentChannelId,
-    // );
 
     // Handlers
     const handleOpenEditChannel = (
@@ -139,16 +106,31 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
       socket.send.deleteChannel({ channelId, serverId });
     };
 
+    // Effect
+    useEffect(() => {
+      if (setCategoryExpanded && userInCategory)
+        setCategoryExpanded.current = () =>
+          setExpanded((prev) => ({
+            ...prev,
+            [categoryId]: true,
+          }));
+    }, [setCategoryExpanded, userInCategory]);
+
     return (
       <div key={categoryId}>
         {/* Category View */}
         <div
           className={`
             ${styles['channelTab']} 
-            ${expanded ? styles['expanded'] : ''} 
+            ${expanded[categoryId] ? styles['expanded'] : ''} 
             ${styles[categoryVisibility]}
           `}
-          onClick={() => setExpanded(!expanded)}
+          onClick={() =>
+            setExpanded((prev) => ({
+              ...prev,
+              [categoryId]: !prev[categoryId],
+            }))
+          }
           onContextMenu={(e) => {
             contextMenu.showContextMenu(e.pageX, e.pageY, [
               {
@@ -174,13 +156,13 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
           }}
         >
           <div className={styles['channelTabLable']}>{categoryName}</div>
-          {!expanded && userInCategory && (
+          {!expanded[categoryId] && userInCategory && (
             <div className={styles['myLocationIcon']} />
           )}
         </div>
 
         {/* Expanded Sections */}
-        {expanded && (
+        {expanded[categoryId] && (
           <div className={styles['channelList']}>
             {categoryChannels
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
@@ -191,6 +173,8 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
                   server={server}
                   channel={channel}
                   permissionLevel={permissionLevel}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
                 />
               ))}
           </div>
@@ -207,19 +191,17 @@ interface ChannelTabProps {
   server: Server;
   channel: Channel;
   permissionLevel: number;
+  expanded: Record<string, boolean>;
+  setExpanded: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
 const ChannelTab: React.FC<ChannelTabProps> = React.memo(
-  ({ user, server, channel, permissionLevel }) => {
+  ({ user, server, channel, permissionLevel, expanded, setExpanded }) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
     const contextMenu = useContextMenu();
     const { setChannelExpanded } = useExpandedContext();
-
-    // States
-    const [expanded, setExpanded] = useState(false);
-
     // Variables
     const { id: userId } = user;
     const { id: serverId, members: serverMembers = [] } = server;
@@ -295,8 +277,12 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
 
     // Effect
     useEffect(() => {
-      if (setChannelExpanded.current && userInChannel)
-        setChannelExpanded.current = setExpanded;
+      if (setChannelExpanded && userInChannel)
+        setChannelExpanded.current = () =>
+          setExpanded((prev) => ({
+            ...prev,
+            [channelId]: true,
+          }));
     }, [setChannelExpanded, userInChannel]);
 
     return (
@@ -305,14 +291,19 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
         <div
           className={`
             ${styles['channelTab']} 
-            ${expanded ? styles['expanded'] : ''} 
+            ${expanded[channelId] ? styles['expanded'] : ''} 
             ${channelIsLobby ? styles['lobby'] : styles[channelVisibility]}  
             ${channelIsRoot ? '' : styles['subChannel']}
           `}
           onDoubleClick={() => {
             if (canJoin) handleJoinChannel(userId, channelId);
           }}
-          onClick={() => setExpanded(!expanded)}
+          onClick={() =>
+            setExpanded((prev) => ({
+              ...prev,
+              [channelId]: !prev[channelId],
+            }))
+          }
           onContextMenu={(e) => {
             contextMenu.showContextMenu(e.pageX, e.pageY, [
               {
@@ -324,7 +315,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
               {
                 id: 'add',
                 label: lang.tr.add,
-                show: canEdit && !channelIsLobby && !channel.categoryId,
+                show: canEdit && !channelIsLobby && channelIsRoot,
                 onClick: () =>
                   handleOpenCreateChannel(serverId, channelId, userId),
               },
@@ -343,12 +334,12 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
               {`(${channelMembers.length})`}
             </div>
           )}
-          {userInChannel && !expanded && (
+          {userInChannel && !expanded[channelId] && (
             <div className={styles['myLocationIcon']} />
           )}
         </div>
         {/* Expanded Sections */}
-        {expanded && (
+        {expanded[channelId] && (
           <div className={styles['userList']}>
             {channelMembers
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -552,19 +543,16 @@ interface ChannelViewerProps {
   server: Server;
   member: Member;
   currentChannel: Channel;
-  onLocateUser?: () => void;
 }
-
-// // Add ref interface
-// export interface ChannelViewerRef {
-//   locateUser: () => void;
-// }
 
 const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
   ({ user, server, member, currentChannel }) => {
     // Hooks
     const lang = useLanguage();
     const contextMenu = useContextMenu();
+
+    // States
+    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
     // Variables
     const connectStatus = 3;
@@ -585,6 +573,16 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
       });
     };
 
+    // Effect
+    useEffect(() => {
+      for (const channel of serverChannels) {
+        setExpanded((prev) => ({
+          ...prev,
+          [channel.id]: true,
+        }));
+      }
+    }, [serverChannels]);
+
     return (
       <>
         {/* Current Channel */}
@@ -598,9 +596,10 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
             {currentChannelName}
           </div>
         </div>
+
+        {/* Mic Queue */}
         {currentChannelVoiceMode === 'queue' && (
           <>
-            {/* Mic Queue */}
             <div className={styles['sectionTitle']}>{lang.tr.micOrder}</div>
             <div className={styles['micQueueBox']}>
               <div className={styles['userList']}>
@@ -638,7 +637,6 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
         </div>
 
         {/* Channel List */}
-
         <div className={styles['channelList']}>
           {serverChannels
             .filter((c) => c.isRoot)
@@ -651,6 +649,8 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
                   server={server}
                   category={item}
                   permissionLevel={memberPermission}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
                 />
               ) : (
                 <ChannelTab
@@ -659,6 +659,8 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
                   server={server}
                   channel={item}
                   permissionLevel={memberPermission}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
                 />
               ),
             )}
