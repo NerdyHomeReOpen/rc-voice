@@ -14,10 +14,13 @@ interface ContextMenuContextType {
   closeContextMenu: () => void;
 }
 
-const ContextMenuContext = createContext<ContextMenuContextType>({} as any);
+const ContextMenuContext = createContext<ContextMenuContextType | null>(null);
 
-export const useContextMenu = () => {
-  return useContext(ContextMenuContext);
+export const useContextMenu = (): ContextMenuContextType => {
+  const context = useContext(ContextMenuContext);
+  if (!context)
+    throw new Error('useContextMenu must be used within a ContextMenuProvider');
+  return context;
 };
 
 interface ContextMenuProviderProps {

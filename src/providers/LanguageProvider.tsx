@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 // Types
 import { Translation, LanguageKey, translations, Permission } from '@/types';
 
-interface LanguageContextProps {
+interface LanguageContextType {
   key: LanguageKey;
   tr: Translation;
   set: (lang: LanguageKey) => void;
@@ -11,7 +11,14 @@ interface LanguageContextProps {
   getFormatTimestamp: (timestamp: number) => string;
 }
 
-const LanguageContext = createContext<LanguageContextProps | null>(null);
+const LanguageContext = createContext<LanguageContextType | null>(null);
+
+export const useLanguage = (): LanguageContextType => {
+  const context = useContext(LanguageContext);
+  if (!context)
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  return context;
+};
 
 interface LanguageProviderProps {
   children: React.ReactNode;
@@ -95,13 +102,6 @@ const LanguageProvider = ({ children }: LanguageProviderProps) => {
       {children}
     </LanguageContext.Provider>
   );
-};
-
-export const useLanguage = (): LanguageContextProps => {
-  const context = useContext(LanguageContext);
-  if (!context)
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  return context;
 };
 
 LanguageProvider.displayName = 'LanguageProvider';

@@ -12,21 +12,23 @@ import React, {
 import { useSocket } from '@/providers/SocketProvider';
 import { SocketServerEvent } from '@/types';
 
-interface RTCOfferProps {
+type Offer = {
   from: string;
   offer: {
     type: RTCSdpType;
     sdp: string;
   };
-}
-interface RTCAnswerProps {
+};
+
+type Answer = {
   from: string;
   answer: {
     type: RTCSdpType;
     sdp: string;
   };
-}
-interface RTCIceCandidateProps {
+};
+
+type IceCandidate = {
   from: string;
   candidate: {
     candidate: string;
@@ -34,7 +36,7 @@ interface RTCIceCandidateProps {
     sdpMLineIndex: number | null;
     usernameFragment: string | null;
   };
-}
+};
 
 interface WebRTCContextType {
   toggleMute?: () => void;
@@ -51,8 +53,11 @@ interface WebRTCContextType {
 
 const WebRTCContext = createContext<WebRTCContextType>({});
 
-export const useWebRTC = () => {
-  return useContext(WebRTCContext);
+export const useWebRTC = (): WebRTCContextType => {
+  const context = useContext(WebRTCContext);
+  if (!context)
+    throw new Error('useWebRTC must be used within a WebRTCProvider');
+  return context;
 };
 
 interface WebRTCProviderProps {
@@ -94,7 +99,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     await removePeerConnection(rtcConnection);
   };
 
-  const handleRTCOffer = async ({ from, offer }: RTCOfferProps) => {
+  const handleRTCOffer = async ({ from, offer }: Offer) => {
     if (!peerConnections.current[from]) await createPeerConnection(from);
     // Receive offer
     const offerDes = new RTCSessionDescription({
@@ -109,7 +114,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     handleSendRTCAnswer(from, answer);
   };
 
-  const handleRTCAnswer = async ({ from, answer }: RTCAnswerProps) => {
+  const handleRTCAnswer = async ({ from, answer }: Answer) => {
     if (!peerConnections.current[from]) return;
     // Receive answer
     const answerDes = new RTCSessionDescription({
@@ -119,10 +124,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     await peerConnections.current[from].setRemoteDescription(answerDes);
   };
 
-  const handleRTCIceCandidate = async ({
-    from,
-    candidate,
-  }: RTCIceCandidateProps) => {
+  const handleRTCIceCandidate = async ({ from, candidate }: IceCandidate) => {
     if (!peerConnections.current[from]) return;
     // Receive ICE candidate
     const iceCandidate = new RTCIceCandidate({
