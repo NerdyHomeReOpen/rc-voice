@@ -225,7 +225,10 @@ const Header: React.FC<HeaderProps> = React.memo(
                   label: lang.tr.feedback,
                   icon: 'feedback',
                   onClick: () => {
-                    // TODO: Implement
+                    window.open(
+                      'https://forms.gle/AkBTqsZm9NGr5aH46',
+                      '_blank',
+                    );
                   },
                 },
                 {
