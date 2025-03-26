@@ -607,7 +607,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                       <input
                         type="range"
                         min="0"
-                        max="100"
+                        max="200"
                         value={micVolume}
                         onChange={handleMicVolumeChange}
                         className={styles['slider']}

@@ -36,12 +36,12 @@ const rtcHandler = {
       // TODO: Add validation for operator
 
       socket.to(to).emit('RTCOffer', {
-        from: socket.id,
+        from: socket.userId,
         offer: offer,
       });
 
       new Logger('RTC').success(
-        `User(socket-id: ${socket.id}) sent RTC offer to user(socket-id: ${to})`,
+        `User(${socket.userId}) sent RTC offer to user(${to})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -58,7 +58,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC offer to user(socket-id: ${to}): ${error.error_message}`,
+        `Error sending RTC offer to user(${to}): ${error.error_message}`,
       );
     }
   },
@@ -91,12 +91,12 @@ const rtcHandler = {
       // TODO: Add validation for operator
 
       socket.to(to).emit('RTCAnswer', {
-        from: socket.id,
+        from: socket.userId,
         answer: answer,
       });
 
       new Logger('RTC').success(
-        `User(socket-id: ${socket.id}) sent RTC answer to user(socket-id: ${to})`,
+        `User(${socket.userId}) sent RTC answer to user(${to})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -113,7 +113,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC answer to user(socket-id: ${to}): ${error.error_message}`,
+        `Error sending RTC answer to user(${to}): ${error.error_message}`,
       );
     }
   },
@@ -146,12 +146,12 @@ const rtcHandler = {
       // TODO: Add validation for operator
 
       socket.to(to).emit('RTCIceCandidate', {
-        from: socket.id,
+        from: socket.userId,
         candidate: candidate,
       });
 
       new Logger('RTC').success(
-        `User(socket-id: ${socket.id}) sent RTC ICE candidate to user(socket-id: ${to})`,
+        `User(${socket.userId}) sent RTC ICE candidate to user(${to})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -168,7 +168,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC ICE candidate user(socket-id: ${to}): ${error.error_message}`,
+        `Error sending RTC ICE candidate to user(${to}): ${error.error_message}`,
       );
     }
   },
@@ -200,10 +200,10 @@ const rtcHandler = {
       socket.join(`channel_${channelId}`);
 
       // Emit RTC join event (To all users)
-      socket.to(`channel_${channelId}`).emit('RTCJoin', socket.id);
+      socket.to(`channel_${channelId}`).emit('RTCJoin', socket.userId);
 
       new Logger('RTC').success(
-        `User(socket-id: ${socket.id}) joined RTC channel(${channelId})`,
+        `User(${socket.userId}) joined RTC channel(${channelId})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -252,10 +252,10 @@ const rtcHandler = {
       socket.leave(`channel_${channelId}`);
 
       // Emit RTC leave event (To all users)
-      socket.to(`channel_${channelId}`).emit('RTCLeave', socket.id);
+      socket.to(`channel_${channelId}`).emit('RTCLeave', socket.userId);
 
       new Logger('RTC').success(
-        `User(socket-id: ${socket.id}) left RTC channel(${channelId})`,
+        `User(${socket.userId}) left RTC channel(${channelId})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
