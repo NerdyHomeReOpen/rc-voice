@@ -44,6 +44,7 @@
   border-bottom: 1px solid #b4dbec;
   border-right: 1px solid #ffffff00;
   background-color: #f7f7f7;
+  width: 145px;
 }
 
 .right {
@@ -53,6 +54,10 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+.headerBar {
+  justify-content: space-between;
 }
 
 .search {
@@ -72,7 +77,7 @@
   justify-content: center;
   align-items: center;
   height: auto;
-  width: 100%;
+  width: 30%;
 }
 .avatarPicture {
   position: relative;
@@ -93,15 +98,17 @@
   z-index: 99;
   min-width: 102px;
   min-height: 102px;
-  background: url(../../../public/channel/server_logo_border.png) no-repeat
-    center center;
-  background-size: cover;
-  background-position: 0 0;
 }
 
+.wealthCoinIcon {
+  display: flex;
+  align-items: center;
+}
 .wealthCoinIcon::after {
+  content: '';
   height: 16px;
   width: 16px;
+  display: block;
   background: url(../../../public/golden_pea.png);
   background-size: cover;
   margin-left: 3px;
@@ -112,4 +119,65 @@
   width: 100%;
   background-color: #dbdbdb;
   margin: 20px 0;
+}
+
+.memberName {
+  color: #6e849b;
+}
+
+.noteText {
+  text-align: right;
+  margin-top: 3;
+}
+
+.inputBoxDropDownIcon {
+  width: 25px;
+  height: 10px;
+  background: url(../../../public/login_combobox_triangle.png) no-repeat center
+    center;
+  background-position: 0 0;
+  position: absolute;
+  top: 6px;
+  right: -1px;
+  pointer-events: none;
+}
+
+.searchWrapper {
+  width: auto;
+}
+
+.searchBorder {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+.searchIcon {
+  height: 17px;
+  width: 17px;
+  background: url(../../../public/channel/channel_search.png);
+  background-size: cover;
+  background-position: 0 0;
+  margin-left: 5;
+}
+
+.searchBorder:hover:not(:has(.searchPrev:hover, .searchNext:hover))
+  .searchIcon {
+  background-position: -17px 0;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 5px;
+  font-size: 13px;
+  height: 25px;
+  border-right: 0;
+  outline: none;
+  box-shadow: none;
+}
+
+.checkBox {
+  display: flex;
 }

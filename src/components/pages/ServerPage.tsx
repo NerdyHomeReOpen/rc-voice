@@ -328,7 +328,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
             style={{ width: `${sidebarWidth}px` }}
           >
             <div className={styles['sidebarHeader']}>
-              <div className={styles['avatarBox']}>
+              <div
+                className={styles['avatarBox']}
+                onClick={() => handleOpenServerSettings(userId, serverId)}
+              >
                 <div
                   className={styles['avatarPicture']}
                   style={{ backgroundImage: `url(${serverAvatarUrl})` }}
@@ -363,13 +366,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                       e.clientY,
                       [
                         {
-                          id: 'setting',
-                          label: '設定群組',
-                          show: memberPermissionLevel > 4,
-                          onClick: () =>
-                            handleOpenServerSettings(userId, serverId),
-                        },
-                        {
                           id: 'invitation',
                           label: '申請會員',
                           show: memberPermissionLevel < 2,
@@ -390,9 +386,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                         {
                           id: 'separator',
                           label: '',
-                          show:
-                            memberPermissionLevel > 4 ||
-                            memberPermissionLevel < 2,
+                          show: memberPermissionLevel < 2,
                         },
                         {
                           id: 'editNickname',

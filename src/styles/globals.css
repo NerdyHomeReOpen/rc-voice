@@ -70,3 +70,39 @@ div.resizeHandle {
   background: rgb(229 231 235);
   cursor: col-resize;
 }
+
+input[type='radio'] {
+  background: url(../../public/ctrl/radiobox_icon.png);
+}
+
+input[type='checkbox'] {
+  background: url(../../public/ctrl/checkbox_icon.png);
+}
+
+input[type='radio'],
+input[type='checkbox'] {
+  background-size: inherit;
+  background-position: 0 0;
+  cursor: pointer;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+input[type='radio']:checked:hover,
+input[type='checkbox']:checked:hover {
+  background-position: -18px -18px;
+}
+
+input[type='radio']:hover,
+input[type='checkbox']:hover {
+  background-position: -18px 0;
+}
+
+input[type='radio']:checked,
+input[type='checkbox']:checked {
+  background-position: 0 -18px;
+}
