@@ -4,6 +4,7 @@
   padding: 15px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .left {

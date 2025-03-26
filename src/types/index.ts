@@ -81,6 +81,7 @@ export interface Translation {
   memberApplicationManagement: string;
   blacklistManagement: string;
   confirm: string;
+  save: string;
   modify: string;
   cancel: string;
   next: string;
@@ -387,6 +388,7 @@ export const translations: Record<LanguageKey, Translation> = {
     memberApplicationManagement: '會員申請管理',
     blacklistManagement: '黑名單管理',
     confirm: '確定',
+    save: '保存',
     modify: '修改',
     cancel: '取消',
     next: '下一步',
@@ -692,6 +694,7 @@ export const translations: Record<LanguageKey, Translation> = {
     memberApplicationManagement: '会员申请管理',
     blacklistManagement: '黑名单管理',
     confirm: '确定',
+    save: '保存',
     modify: '修改',
     cancel: '取消',
     next: '下一步',
@@ -998,6 +1001,7 @@ export const translations: Record<LanguageKey, Translation> = {
     memberApplicationManagement: 'Member Application Management',
     blacklistManagement: 'Blacklist Management',
     confirm: 'Confirm',
+    save: 'Save',
     modify: 'Modify',
     cancel: 'Cancel',
     next: 'Next',
@@ -1318,6 +1322,7 @@ export const translations: Record<LanguageKey, Translation> = {
     memberApplicationManagement: 'メンバーアプリケーション管理',
     blacklistManagement: 'ブラックリスト管理',
     confirm: '確認',
+    save: '保存',
     modify: '変更',
     cancel: 'キャンセル',
     next: '次へ',

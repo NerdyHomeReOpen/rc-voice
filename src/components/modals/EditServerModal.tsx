@@ -680,7 +680,9 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                 />
                                 <div
                                   className={`${popup['p1']} ${
-                                    memberName ? setting['memberName'] : ''
+                                    memberNickname && memberName
+                                      ? setting['memberName']
+                                      : ''
                                   }`}
                                 >
                                   {memberNickname || memberName}
@@ -990,7 +992,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
               handleClose();
             }}
           >
-            {lang.tr.confirm}
+            {lang.tr.save}
           </button>
           <button
             type="button"
