@@ -244,7 +244,9 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
       channelVisibility !== 'readonly' &&
       !(channelVisibility === 'private' && permissionLevel < 3) &&
       !(channelVisibility === 'member' && permissionLevel < 2) &&
-      (channelUserLimit > channelMembers.length || userPermission > 4);
+      (channelUserLimit === 0 ||
+        channelUserLimit > channelMembers.length ||
+        userPermission > 4);
 
     // Handlers
     const handleOpenEditChannel = (
