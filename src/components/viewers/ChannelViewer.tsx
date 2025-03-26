@@ -520,7 +520,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(
             permission[channelMemberGender]
           } ${permission[`lv-${channelMemberPermission}`]}`}
         />
-        <div className={styles['userTabName']}>
+        <div
+          className={`${styles['userTabName']} ${
+            channelMemberNickname && channelMemberName
+              ? styles['channelMemberName']
+              : ''
+          }`}
+        >
           {channelMemberNickname || channelMemberName}
         </div>
         <div

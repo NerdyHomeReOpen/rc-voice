@@ -286,8 +286,8 @@
   font-size: 14px;
 }
 
-.channelList .channelList:not(.lobby),
-.channelList .channelList:not(.lobby) + .userList {
+.channelList .channelList:not(.lobby) .channelTab,
+.channelList .channelList:not(.lobby) + .userList .channelTab {
   padding-left: 16px;
 }
 
@@ -320,6 +320,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.userList .userTab .channelMemberName {
+  color: #6e849b;
 }
 
 .userList .userTab .userIcon {
