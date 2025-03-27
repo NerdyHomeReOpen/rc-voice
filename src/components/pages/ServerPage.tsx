@@ -330,7 +330,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
             <div className={styles['sidebarHeader']}>
               <div
                 className={styles['avatarBox']}
-                onClick={() => handleOpenServerSettings(userId, serverId)}
+                onClick={() =>
+                  memberPermissionLevel >= 5 &&
+                  handleOpenServerSettings(userId, serverId)
+                }
               >
                 <div
                   className={styles['avatarPicture']}

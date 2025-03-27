@@ -124,7 +124,7 @@ const CategoryTab: React.FC<CategoryTabProps> = React.memo(
             ...prev,
             [categoryId]: true,
           }));
-    }, [setCategoryExpanded, userInCategory]);
+    }, [categoryId, setCategoryExpanded, setExpanded, userInCategory]);
 
     return (
       <>
@@ -310,7 +310,7 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
             ...prev,
             [channelId]: true,
           }));
-    }, [setChannelExpanded, userInChannel]);
+    }, [channelId, setChannelExpanded, setExpanded, userInChannel]);
 
     return (
       <>

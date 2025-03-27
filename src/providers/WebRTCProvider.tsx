@@ -310,7 +310,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         const checkAudioLevel = () => {
           analyser.getByteFrequencyData(dataArray);
           const average = dataArray.reduce((a, b) => a + b) / bufferLength;
-          const isSpeaking = average > 5; // 降低阈值以提高灵敏度
+          const isSpeaking = average > 10;
           updateSpeakingStatus(rtcConnection, isSpeaking);
           requestAnimationFrame(checkAudioLevel);
         };
@@ -537,7 +537,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         const checkLocalAudioLevel = () => {
           localAnalyser.getByteFrequencyData(dataArray);
           const average = dataArray.reduce((a, b) => a + b) / bufferLength;
-          const isSpeaking = average > 5; // 降低阈值以提高灵敏度
+          const isSpeaking = average > 10;
           updateSpeakingStatus('local', isSpeaking);
           requestAnimationFrame(checkLocalAudioLevel);
         };

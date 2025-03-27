@@ -267,7 +267,7 @@ export interface Translation {
   VOICE_CHANGE_TO_FORBIDDEN_SPEECH: string;
   VOICE_CHANGE_TO_QUEUE: string;
   pleaseInputFriendAccount: string;
-  pleaseInputFriendSubGroups:string;
+  pleaseInputFriendSubGroups: string;
   basicInfo: string;
   channelAnnouncement: string;
   accessPermissions: string;
@@ -299,7 +299,7 @@ export interface Translation {
   female: string;
   taiwan: string;
   wealthValue: string;
-  addFriendSubGroups:string;
+  addFriendSubGroups: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';

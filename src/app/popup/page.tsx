@@ -163,11 +163,13 @@ const Modal = React.memo(() => {
         setContent(<ApplyFriend {...initialData} />);
         break;
       case PopupType.ADD_FRIEND:
-        setHeader(<Header title={'新增好友'} buttons={['close']} />);
+        setHeader(<Header title={lang.tr.addFriend} buttons={['close']} />);
         setContent(<AddFriend {...initialData} />);
         break;
       case PopupType.ADD_FRIEND_SUBGROUPS:
-        setHeader(<Header title={'新增分組'} buttons={['close']} />);
+        setHeader(
+          <Header title={lang.tr.addFriendSubGroups} buttons={['close']} />,
+        );
         setContent(<AddFriendSubgroups {...initialData} />);
         break;
       case PopupType.DIRECT_MESSAGE:

@@ -227,13 +227,10 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     {lang.tr.channelAudioQuality}
                   </div>
                   <div className={popup['inputGroup']}>
-                    <div className={`${popup['inputBox']} ${popup['row']}`}>
-                      <input
-                        type="radio"
-                        name="voiceQuality"
-                        defaultChecked
-                        disabled
-                      />
+                    <div
+                      className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
+                    >
+                      <input type="radio" name="voiceQuality" defaultChecked />
                       <div>
                         <label className={popup['label']}>
                           {lang.tr.chatMode}
@@ -244,8 +241,10 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                       </div>
                     </div>
 
-                    <div className={`${popup['inputBox']} ${popup['row']}`}>
-                      <input type="radio" name="voiceQuality" disabled />
+                    <div
+                      className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
+                    >
+                      <input type="radio" name="voiceQuality" />
                       <div>
                         <label className={popup['label']}>
                           {lang.tr.entertainmentMode}
@@ -263,9 +262,10 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                 <div className={popup['label']}>
                   {lang.tr.inputAnnouncement}
                 </div>
-                <div className={`${popup['inputBox']} ${popup['col']}`}>
+                <div
+                  className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
+                >
                   <textarea
-                    disabled
                     style={{ minHeight: '200px' }}
                     // value={channelAnnouncement}
                     value={''}
@@ -281,12 +281,15 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
               <div className={popup['col']}>
                 <label>{lang.tr.accessPermissions}</label>
                 <div className={popup['inputGroup']}>
-                  <div className={popup['inputBox']}>
+                  <div
+                    className={`${popup['inputBox']} ${
+                      channelIsLobby ? popup['disabled'] : ''
+                    }`}
+                  >
                     <input
                       type="radio"
                       name="voiceQuality"
                       checked={channelVisibility === 'public'}
-                      disabled={channelIsLobby}
                       onChange={() => {
                         setChannelVisibility('public');
                       }}
@@ -298,12 +301,15 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     </div>
                   </div>
 
-                  <div className={popup['inputBox']}>
+                  <div
+                    className={`${popup['inputBox']} ${
+                      channelIsLobby ? popup['disabled'] : ''
+                    }`}
+                  >
                     <input
                       type="radio"
                       name="voiceQuality"
                       checked={channelVisibility === 'member'}
-                      disabled={channelIsLobby}
                       onChange={() => {
                         setChannelVisibility('member');
                       }}
@@ -315,12 +321,15 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     </div>
                   </div>
 
-                  <div className={popup['inputBox']}>
+                  <div
+                    className={`${popup['inputBox']} ${
+                      channelIsLobby ? popup['disabled'] : ''
+                    }`}
+                  >
                     <input
                       type="radio"
                       name="voiceQuality"
                       checked={channelVisibility === 'private'}
-                      disabled={channelIsLobby}
                       onChange={() => {
                         setChannelVisibility('private');
                       }}
@@ -332,12 +341,15 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     </div>
                   </div>
 
-                  <div className={popup['inputBox']}>
+                  <div
+                    className={`${popup['inputBox']} ${
+                      channelIsLobby ? popup['disabled'] : ''
+                    }`}
+                  >
                     <input
                       type="radio"
                       name="voiceQuality"
                       checked={channelVisibility === 'readonly'}
-                      disabled={channelIsLobby}
                       onChange={() => {
                         setChannelVisibility('readonly');
                       }}
@@ -354,11 +366,10 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
               <div className={popup['col']}>
                 <label>{lang.tr.speakingPermissions}</label>
                 <div className={popup['inputGroup']}>
-                  <div className={popup['inputBox']}>
+                  <div className={`${popup['inputBox']} ${popup['disabled']}`}>
                     <input
                       type="checkbox"
                       checked={false}
-                      disabled
                       onChange={() => {}}
                     />
                     <div>
@@ -368,11 +379,10 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     </div>
                   </div>
 
-                  <div className={popup['inputBox']}>
+                  <div className={`${popup['inputBox']} ${popup['disabled']}`}>
                     <input
                       type="checkbox"
                       checked={false}
-                      disabled
                       onChange={() => {}}
                     />
                     <div>
@@ -404,11 +414,10 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     </label>
                   </div>
 
-                  <div className={popup['inputBox']}>
+                  <div className={`${popup['inputBox']} ${popup['disabled']}`}>
                     <input
                       type="checkbox"
                       checked={false}
-                      disabled={true}
                       onChange={() => {}}
                     />
                     <label className={popup['label']}>
@@ -416,11 +425,10 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     </label>
                   </div>
 
-                  <div className={popup['inputBox']}>
+                  <div className={`${popup['inputBox']} ${popup['disabled']}`}>
                     <input
                       type="checkbox"
                       checked={false}
-                      disabled={true}
                       onChange={() => {}}
                     />
                     <label className={popup['label']}>
@@ -428,42 +436,45 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                     </label>
                   </div>
 
-                  <div className={`${popup['inputBox']} ${popup['row']}`}>
+                  <div
+                    className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
+                  >
                     <div className={popup['label']}>
                       {lang.tr.guestTextMaxLength}
                     </div>
                     <input
                       type="text"
                       value={0}
-                      disabled
                       onChange={() => {}}
                       style={{ width: '60px' }}
                     />
                     <div className={popup['label']}>{lang.tr.characters}</div>
                   </div>
 
-                  <div className={`${popup['inputBox']} ${popup['row']}`}>
+                  <div
+                    className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
+                  >
                     <div className={popup['label']}>
                       {lang.tr.guestTextWaitTime}
                     </div>
                     <input
                       type="text"
                       value={0}
-                      disabled
                       onChange={() => {}}
                       style={{ width: '60px' }}
                     />
                     <div className={popup['label']}>{lang.tr.seconds}</div>
                   </div>
 
-                  <div className={`${popup['inputBox']} ${popup['row']}`}>
+                  <div
+                    className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
+                  >
                     <div className={popup['label']}>
                       {lang.tr.guestTextInterval}
                     </div>
                     <input
                       type="text"
                       value={0}
-                      disabled
                       onChange={() => {}}
                       style={{ width: '60px' }}
                     />
