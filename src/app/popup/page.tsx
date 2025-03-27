@@ -27,6 +27,7 @@ import ipcService from '@/services/ipc.service';
 
 // Providers
 import { useLanguage } from '@/providers/LanguageProvider';
+import AddFriendSubgroups from '@/components/modals/AddFriendSubgroups';
 
 interface HeaderProps {
   title: string;
@@ -164,6 +165,10 @@ const Modal = React.memo(() => {
       case PopupType.ADD_FRIEND:
         setHeader(<Header title={'新增好友'} buttons={['close']} />);
         setContent(<AddFriend {...initialData} />);
+        break;
+      case PopupType.ADD_FRIEND_SUBGROUPS:
+        setHeader(<Header title={'新增分組'} buttons={['close']} />);
+        setContent(<AddFriendSubgroups {...initialData} />);
         break;
       case PopupType.DIRECT_MESSAGE:
         // setHeader(<Header title={lang.tr.directMessage} buttons={['close']} />);

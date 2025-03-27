@@ -194,6 +194,11 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
       });
     };
 
+    const handleOpenAddSubGroups = () => {
+      ipcService.popup.open(PopupType.ADD_FRIEND_SUBGROUPS);
+      ipcService.initialData.onRequest(PopupType.ADD_FRIEND_SUBGROUPS, {});
+    };
+
     // const handleOpenCreateGroupPopup = () => {
     //   // ipcService.popup.open(PopupType.CREATE_FRIEND_GROUP);
     // };
@@ -247,7 +252,11 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
             </div>
             {/* Bottom Buttons */}
             <div className={styles['bottomButtons']}>
-              <div className={styles['button']} datatype="addGroup">
+              <div
+                className={styles['button']}
+                datatype="addGroup"
+                onClick={() => handleOpenAddSubGroups()}
+              >
                 {lang.tr.friendAddGroup}
               </div>
               <div
