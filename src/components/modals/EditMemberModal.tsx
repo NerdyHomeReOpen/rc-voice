@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 // Types
-import { Member, Server, User } from '@/types';
+import { Member, User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/SocketProvider';

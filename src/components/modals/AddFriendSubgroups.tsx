@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 // Types
 import { PopupType, SocketServerEvent, User } from '@/types';
@@ -32,13 +32,13 @@ const AddFriendSubgroups: React.FC<AddFriendProps> = React.memo(() => {
     socket.send.searchUser({ query: groupName });
   };
 
-  const handleUserSearch = (name: User | null) => {
+  const handleUserSearch = useCallback((name: User | null) => {
     if (!name) return;
     ipcService.popup.open(PopupType.APPLY_FRIEND);
     ipcService.initialData.onRequest(PopupType.APPLY_FRIEND, {}, () =>
       handleClose(),
     );
-  };
+  }, []);
 
   const handleClose = () => {
     ipcService.window.close();
@@ -61,7 +61,7 @@ const AddFriendSubgroups: React.FC<AddFriendProps> = React.memo(() => {
     return () => {
       unsubscribe.forEach((unsub) => unsub());
     };
-  }, [socket]);
+  }, [socket, handleUserSearch]);
 
   return (
     <div className={popup['popupContainer']}>

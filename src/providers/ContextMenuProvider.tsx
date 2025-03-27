@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useContext, createContext, ReactNode } from 'react';
 
 // Types

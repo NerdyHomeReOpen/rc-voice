@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
@@ -77,11 +77,14 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
       setTargetAvatar(data.avatar);
     };
 
-    const handleFriendApplicationUpdate = (data: FriendApplication | null) => {
-      setSection(data ? (data.receiverId === userId ? 2 : 1) : 0);
-      if (!data) data = createDefault.friendApplication();
-      setApplicationDescription(data.description);
-    };
+    const handleFriendApplicationUpdate = useCallback(
+      (data: FriendApplication | null) => {
+        setSection(data ? (data.receiverId === userId ? 2 : 1) : 0);
+        if (!data) data = createDefault.friendApplication();
+        setApplicationDescription(data.description);
+      },
+      [userId],
+    );
 
     const handleOpenSuccessDialog = (message: string) => {
       ipcService.popup.open(PopupType.DIALOG_SUCCESS);
@@ -114,7 +117,7 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
         handleFriendApplicationUpdate(friendApplication);
       };
       refresh();
-    }, [userId, targetId]);
+    }, [userId, targetId, socket, handleFriendApplicationUpdate]);
 
     switch (section) {
       // Friend Application Form

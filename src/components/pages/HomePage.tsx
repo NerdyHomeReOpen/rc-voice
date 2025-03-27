@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 // CSS
 import homePage from '@/styles/homePage.module.css';
@@ -116,47 +116,57 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
       setSearchQuery(query);
     };
 
-    const handleServerSearch = (servers: Server[], query: string) => {
-      if (!query.trim()) {
+    const handleServerSearch = useCallback(
+      (servers: Server[], query: string) => {
+        if (!query.trim()) {
+          setExactMatch(null);
+          setPersonalResults([]);
+          setRelatedResults([]);
+          return;
+        }
+
         setExactMatch(null);
         setPersonalResults([]);
         setRelatedResults([]);
-        return;
-      }
 
-      setExactMatch(null);
-      setPersonalResults([]);
-      setRelatedResults([]);
+        if (!servers.length) return;
 
-      if (!servers.length) return;
+        const exact = servers.find(
+          (server) => server.displayId.toString() === query.trim(),
+        );
 
-      const exact = servers.find(
-        (server) => server.displayId.toString() === query.trim(),
-      );
+        if (exact) setExactMatch(exact);
 
-      if (exact) setExactMatch(exact);
+        const sortedServers = servers.sort((a, b) => {
+          const aHasId = a.displayId.toString().includes(query.trim());
+          const bHasId = b.displayId.toString().includes(query.trim());
+          if (aHasId && !bHasId) return -1;
+          if (!aHasId && bHasId) return 1;
+          return 0;
+        });
 
-      const sortedServers = servers.sort((a, b) => {
-        const aHasId = a.displayId.toString().includes(query.trim());
-        const bHasId = b.displayId.toString().includes(query.trim());
-        if (aHasId && !bHasId) return -1;
-        if (!aHasId && bHasId) return 1;
-        return 0;
-      });
+        const personal = sortedServers.filter(
+          (server) =>
+            userRecentServers.some((recent) => recent.id === server.id) ||
+            userFavServers.some((fav) => fav.id === server.id) ||
+            userOwnedServers.some((owned) => owned.id === server.id),
+        );
+        setPersonalResults(personal);
 
-      const personal = sortedServers.filter(
-        (server) =>
-          userRecentServers.some((recent) => recent.id === server.id) ||
-          userFavServers.some((fav) => fav.id === server.id) ||
-          userOwnedServers.some((owned) => owned.id === server.id),
-      );
-      setPersonalResults(personal);
-
-      const related = sortedServers
-        .filter((server) => !personal.includes(server))
-        .filter((server) => server.visibility !== 'invisible');
-      setRelatedResults(related);
-    };
+        const related = sortedServers
+          .filter((server) => !personal.includes(server))
+          .filter((server) => server.visibility !== 'invisible');
+        setRelatedResults(related);
+      },
+      [
+        userRecentServers,
+        userFavServers,
+        userOwnedServers,
+        setExactMatch,
+        setPersonalResults,
+        setRelatedResults,
+      ],
+    );
 
     const handleOpenCreateServer = (userId: User['id']) => {
       ipcService.popup.open(PopupType.CREATE_SERVER);
@@ -181,7 +191,7 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
       return () => {
         unsubscribe.forEach((unsub) => unsub());
       };
-    }, [socket, searchQuery]);
+    }, [socket, searchQuery, handleServerSearch]);
 
     useEffect(() => {
       if (!userId || refreshed.current) return;
