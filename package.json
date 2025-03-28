@@ -1,6 +1,6 @@
 {
   "name": "ricecall",
-  "version": "0.1.0a",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "main": "main.js",
