@@ -135,7 +135,7 @@
 }
 
 .searchBorder {
-  width: 100%;
+  width: max-content;
   display: flex;
   align-items: center;
   border: 1px solid #ccc;

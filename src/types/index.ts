@@ -1912,7 +1912,7 @@ export const PopupSize = {
   [PopupType.EDIT_APPLY]: { height: 220, width: 400 },
   [PopupType.EDIT_MEMBER]: { height: 220, width: 400 },
   [PopupType.EDIT_USER]: { height: 650, width: 500 },
-  [PopupType.CREATE_SERVER]: { height: 430, width: 520 },
+  [PopupType.CREATE_SERVER]: { height: 460, width: 520 },
   [PopupType.EDIT_SERVER]: { height: 450, width: 600 },
   [PopupType.CREATE_CHANNEL]: { height: 220, width: 400 },
   [PopupType.EDIT_CHANNEL]: { height: 450, width: 600 },

@@ -496,9 +496,7 @@
 
 .micText {
   margin-left: 5px;
-  width: auto;
   font-size: 1.3rem;
-  max-width: 107px;
   color: #28a0da;
   font-family: 'Noto Sans TC', '微軟正黑體', sans-serif;
 }

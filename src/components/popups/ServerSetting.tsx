@@ -539,7 +539,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                   </div>
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
-                  <table style={{ minHeight: '280px' }}>
+                  <table style={{ minHeight: '260px' }}>
                     <thead>
                       <tr>
                         {MEMBER_FIELDS.map((field) => (
@@ -796,7 +796,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                   </div>
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
-                  <table style={{ minHeight: '280px' }}>
+                  <table style={{ minHeight: '260px' }}>
                     <thead>
                       <tr>
                         {APPLICATION_FIELDS.map((field) => (
@@ -917,7 +917,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                   </div>
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
-                  <table style={{ minHeight: '280px' }}>
+                  <table style={{ minHeight: '260px' }}>
                     <thead>
                       <tr>
                         {BLOCK_MEMBER_FIELDS.map((field) => (

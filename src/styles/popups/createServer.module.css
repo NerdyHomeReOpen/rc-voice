@@ -1,13 +1,11 @@
 .message {
   padding: 5px;
   margin-bottom: 15px;
-  font-size: 0.9rem;
   background: #fff8dc;
   border: 1px solid #ffd700;
 }
 
 .typeLabel {
-  font-size: 0.9rem;
   font-weight: bold;
   color: #646464;
 }
@@ -26,7 +24,6 @@
   background: white;
   cursor: pointer;
   border-radius: 4px;
-  font-size: 0.9rem;
   text-align: center;
 }
 .buttonGroup .button.selected {
