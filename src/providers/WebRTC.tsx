@@ -10,6 +10,8 @@ import React, {
 
 // Providers
 import { useSocket } from '@/providers/Socket';
+
+// Types
 import { SocketServerEvent } from '@/types';
 
 type Offer = {
@@ -49,8 +51,6 @@ interface WebRTCContextType {
   bitrate?: number;
   micVolume?: number;
   speakerVolume?: number;
-  speakingUsers?: string[];
-  updateSpeakingStatus?: (userId: string, isSpeaking: boolean) => void;
 }
 
 const WebRTCContext = createContext<WebRTCContextType>({});
@@ -68,11 +68,10 @@ interface WebRTCProviderProps {
 
 const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   // States
-  const [isMute, setIsMute] = useState<boolean>(true);
+  const [isMute, setIsMute] = useState<boolean>(false);
   const [bitrate, setBitrate] = useState<number>(128000);
   const [micVolume, setMicVolume] = useState<number>(100);
   const [speakerVolume, setSpeakerVolume] = useState<number>(100);
-  const [speakingUsers, setSpeakingUsers] = useState<string[]>([]);
 
   // Refs
   const lastBitrateRef = useRef<number>(128000);
@@ -84,101 +83,69 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const gainNode = useRef<GainNode | null>(null);
   const sourceNode = useRef<MediaStreamAudioSourceNode | null>(null);
   const destinationNode = useRef<MediaStreamAudioDestinationNode | null>(null);
-  const iceCandidateQueue = useRef<{ [id: string]: RTCIceCandidate[] }>({});
 
   // Hooks
   const socket = useSocket();
 
   const handleRTCJoin = async (rtcConnection: string) => {
     try {
+      // Remove peer connection if it exists
       if (peerConnections.current[rtcConnection])
         await removePeerConnection(rtcConnection);
-
+      // Create peer connection
       await createPeerConnection(rtcConnection);
-
-      if (!localStream.current) {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        localStream.current = stream;
-        stream.getTracks().forEach((track) => {
-          track.enabled = false;
-        });
-      }
+      // Create offer
 
       const offer = await peerConnections.current[rtcConnection].createOffer();
       await peerConnections.current[rtcConnection].setLocalDescription(offer);
+      // Send offer
       handleSendRTCOffer(rtcConnection, offer);
     } catch (error) {
-      console.error('Error in handleRTCJoin:', error);
-      if (peerConnections.current[rtcConnection]) {
-        await removePeerConnection(rtcConnection);
-      }
+      console.error('Error setting remote description:', error);
     }
   };
 
   const handleRTCLeave = async (rtcConnection: string) => {
-    try {
-      if (!peerConnections.current[rtcConnection]) return;
-
-      if (peerStreams.current[rtcConnection]) {
-        peerStreams.current[rtcConnection]
-          .getTracks()
-          .forEach((track) => track.stop());
-      }
-
-      await removePeerConnection(rtcConnection);
-    } catch (error) {
-      console.error('Error in handleRTCLeave:', error);
-    }
+    if (!peerConnections.current[rtcConnection]) return;
+    // Remove peer connection
+    await removePeerConnection(rtcConnection);
   };
 
   const handleRTCOffer = async ({ from, offer }: Offer) => {
+    if (!peerConnections.current[from]) await createPeerConnection(from);
     try {
-      if (peerConnections.current[from]) {
-        await removePeerConnection(from);
-      }
-
-      await createPeerConnection(from);
-      const connection = peerConnections.current[from];
+      // Receive offer
 
       const offerDes = new RTCSessionDescription({
         type: offer.type,
         sdp: offer.sdp,
       });
-      await connection.setRemoteDescription(offerDes);
-
-      await processIceCandidateQueue(from);
-
-      const answer = await connection.createAnswer();
-      await connection.setLocalDescription(answer);
+      await peerConnections.current[from].setRemoteDescription(offerDes);
+      // Create answer
+      const answer = await peerConnections.current[from].createAnswer();
+      await peerConnections.current[from].setLocalDescription(answer);
+      // Send answer
 
       handleSendRTCAnswer(from, answer);
     } catch (error) {
-      console.error('Error handling offer:', error);
-      if (peerConnections.current[from]) {
-        await removePeerConnection(from);
-      }
+      console.error('Error setting remote description:', error);
     }
   };
 
   const handleRTCAnswer = async ({ from, answer }: Answer) => {
     if (!peerConnections.current[from]) return;
     try {
-      const connection = peerConnections.current[from];
-
-      if (connection.signalingState === 'stable') {
+      // Check if connection is already in stable state
+      if (peerConnections.current[from].signalingState === 'stable') {
         console.warn('Connection already in stable state, ignoring answer');
         return;
       }
-
+      // Receive answer
       const answerDes = new RTCSessionDescription({
         type: answer.type,
         sdp: answer.sdp,
       });
-      await connection.setRemoteDescription(answerDes);
-
-      await processIceCandidateQueue(from);
+      await peerConnections.current[from].setRemoteDescription(answerDes);
     } catch (error) {
       console.error('Error setting remote description:', error);
     }
@@ -187,49 +154,16 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const handleRTCIceCandidate = async ({ from, candidate }: IceCandidate) => {
     if (!peerConnections.current[from]) return;
     try {
-      const connection = peerConnections.current[from];
+      // Receive ICE candidate
       const iceCandidate = new RTCIceCandidate({
         candidate: candidate.candidate,
         sdpMid: candidate.sdpMid,
         sdpMLineIndex: candidate.sdpMLineIndex,
         usernameFragment: candidate.usernameFragment,
       });
-
-      if (!connection.remoteDescription) {
-        if (!iceCandidateQueue.current[from]) {
-          iceCandidateQueue.current[from] = [];
-        }
-        iceCandidateQueue.current[from].push(iceCandidate);
-        return;
-      }
-
-      await connection.addIceCandidate(iceCandidate);
+      await peerConnections.current[from].addIceCandidate(iceCandidate);
     } catch (error) {
       console.error('Error adding ice candidate:', error);
-    }
-  };
-
-  const processIceCandidateQueue = async (rtcConnection: string) => {
-    if (
-      !iceCandidateQueue.current[rtcConnection] ||
-      !peerConnections.current[rtcConnection]
-    )
-      return;
-
-    const connection = peerConnections.current[rtcConnection];
-    const queue = iceCandidateQueue.current[rtcConnection];
-
-    while (queue.length > 0) {
-      const candidate = queue.shift();
-      if (!candidate) continue;
-
-      try {
-        await connection.addIceCandidate(candidate);
-      } catch (error) {
-        console.error('Error processing queued ice candidate:', error);
-        queue.unshift(candidate);
-        break;
-      }
     }
   };
 
@@ -286,38 +220,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         iceCandidatePoolSize: 10,
       });
 
-      // 修改音频处理逻辑
-      peerConnection.ontrack = (event) => {
-        if (!peerAudioRefs.current[rtcConnection]) {
-          peerAudioRefs.current[rtcConnection] =
-            document.createElement('audio');
-          peerAudioRefs.current[rtcConnection].autoplay = true;
-        }
-        peerAudioRefs.current[rtcConnection].srcObject = event.streams[0];
-        peerStreams.current[rtcConnection] = event.streams[0];
-
-        // 创建音频上下文进行音量检测
-        const audioContext = new AudioContext();
-        const source = audioContext.createMediaStreamSource(event.streams[0]);
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.8;
-        source.connect(analyser);
-
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
-        const checkAudioLevel = () => {
-          analyser.getByteFrequencyData(dataArray);
-          const average = dataArray.reduce((a, b) => a + b) / bufferLength;
-          const isSpeaking = average > 10;
-          updateSpeakingStatus(rtcConnection, isSpeaking);
-          requestAnimationFrame(checkAudioLevel);
-        };
-
-        checkAudioLevel();
-      };
-
       peerConnection.onicecandidate = (event) => {
         if (event.candidate)
           handleSendRTCIceCandidate(rtcConnection, event.candidate);
@@ -352,14 +254,22 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
           removePeerConnection(rtcConnection);
         }
       };
+      peerConnection.ontrack = (event) => {
+        if (!peerAudioRefs.current[rtcConnection]) {
+          peerAudioRefs.current[rtcConnection] =
+            document.createElement('audio');
+          peerAudioRefs.current[rtcConnection].autoplay = true;
+        }
+        peerAudioRefs.current[rtcConnection].srcObject = event.streams[0];
+        peerStreams.current[rtcConnection] = event.streams[0];
+      };
+      peerConnections.current[rtcConnection] = peerConnection;
 
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => {
           peerConnection.addTrack(track, localStream.current!);
         });
       }
-
-      peerConnections.current[rtcConnection] = peerConnection;
     } catch (error) {
       console.error('Error creating peer connection:', error);
     }
@@ -368,18 +278,11 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const removePeerConnection = async (rtcConnection: string) => {
     if (!peerConnections.current[rtcConnection]) return;
     try {
-      if (peerStreams.current[rtcConnection]) {
-        peerStreams.current[rtcConnection]
-          .getTracks()
-          .forEach((track) => track.stop());
-      }
-
       peerConnections.current[rtcConnection].close();
 
       delete peerConnections.current[rtcConnection];
-      delete peerStreams.current[rtcConnection];
+
       delete peerAudioRefs.current[rtcConnection];
-      delete iceCandidateQueue.current[rtcConnection];
     } catch (error) {
       console.error('Error removing peer connection:', error);
     }
@@ -476,18 +379,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     }
   };
 
-  const updateSpeakingStatus = (userId: string, isSpeaking: boolean) => {
-    setSpeakingUsers((prev) => {
-      if (isSpeaking) {
-        if (prev.includes(userId)) return prev;
-        return [...prev, userId];
-      } else {
-        if (!prev.includes(userId)) return prev;
-        return prev.filter((id) => id !== userId);
-      }
-    });
-  };
-
   // Effects
   useEffect(() => {
     if (!socket) return;
@@ -517,32 +408,11 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       .then((stream) => {
         localStream.current = stream;
         stream.getTracks().forEach((track) => {
-          track.enabled = false;
+          track.enabled = !isMute;
           Object.values(peerConnections.current).forEach((peerConnection) => {
             peerConnection.addTrack(track, stream);
           });
         });
-
-        // 添加本地音频检测
-        const localAudioContext = new AudioContext();
-        const localSource = localAudioContext.createMediaStreamSource(stream);
-        const localAnalyser = localAudioContext.createAnalyser();
-        localAnalyser.fftSize = 256;
-        localAnalyser.smoothingTimeConstant = 0.8;
-        localSource.connect(localAnalyser);
-
-        const bufferLength = localAnalyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
-        const checkLocalAudioLevel = () => {
-          localAnalyser.getByteFrequencyData(dataArray);
-          const average = dataArray.reduce((a, b) => a + b) / bufferLength;
-          const isSpeaking = average > 10;
-          updateSpeakingStatus('local', isSpeaking);
-          requestAnimationFrame(checkLocalAudioLevel);
-        };
-
-        checkLocalAudioLevel();
       })
       .catch((err) => console.error('Error accessing microphone', err));
 
@@ -585,6 +455,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     // });
   };
 
+  // 在組件卸載時清理 Audio Context
   useEffect(() => {
     return () => {
       if (audioContext.current) {
@@ -607,8 +478,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         bitrate,
         micVolume,
         speakerVolume,
-        speakingUsers,
-        updateSpeakingStatus,
       }}
     >
       {Object.keys(peerStreams).map((rtcConnection) => (
