@@ -21,7 +21,7 @@ import { useLanguage } from '@/providers/Language';
 import { useSocket } from '@/providers/Socket';
 import { useContextMenu } from '@/providers/ContextMenu';
 import { useExpandedContext } from '@/providers/Expanded';
-import { useWebRTC } from '@/providers/WebRTC';
+// import { useWebRTC } from '@/providers/WebRTC';
 
 // Components
 import BadgeViewer from '@/components/viewers/Badge';
@@ -402,7 +402,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const lang = useLanguage();
     const contextMenu = useContextMenu();
     const socket = useSocket();
-    const webRTC = useWebRTC();
+    // const webRTC = useWebRTC();
 
     // Variables
     const { id: userId } = user;
@@ -420,10 +420,10 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const channelMemberGrade = Math.min(56, Math.ceil(channelMemberLevel / 5)); // 56 is max leve
     const isCurrentUser = userId === channelMemberUserId;
     const canEdit = permissionLevel > channelMemberPermission;
-    const isSpeaking = isCurrentUser
-      ? webRTC.speakingUsers?.includes('local')
-      : webRTC.speakingUsers?.includes(channelMemberUserId);
-    console.log(channelMemberUserId, webRTC.speakingUsers);
+    // const isSpeaking = isCurrentUser
+    //   ? webRTC.speakingUsers?.includes('local')
+    //   : webRTC.speakingUsers?.includes(channelMemberUserId);
+    // console.log(channelMemberUserId, webRTC.speakingUsers);
 
     // Handlers
     const handleOpenEditMember = (
@@ -510,11 +510,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
           ]);
         }}
       >
-        <div
-          className={`${styles['userState']} ${
-            isSpeaking ? styles['play'] : ''
-          }`}
-        />
+        <div className={`${styles['userState']}`} />
         <div
           className={`${styles['userIcon']} ${
             permission[channelMemberGender]
