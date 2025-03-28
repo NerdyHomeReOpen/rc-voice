@@ -13,7 +13,7 @@
   width: 100%;
   max-width: 145px;
   min-height: 0;
-  background: url(../../../public/setting_left_bg.png) no-repeat center center;
+  background: url('../../../public/setting_left_bg.png') no-repeat center center;
   background-size: cover;
   border-right: 1px solid #b4dbec;
 }
@@ -24,6 +24,7 @@
   display: flex;
   flex-direction: column;
 }
+
 .tabs .item {
   width: 100%;
   min-height: 28px;
@@ -32,17 +33,19 @@
   justify-content: center;
   text-align: center;
   cursor: pointer;
-  border-top: 1px solid #ffffff00;
-  border-bottom: 1px solid #ffffff00;
-  border-right: 1px solid #ffffff00;
+  border-top: 1px solid #fff0;
+  border-bottom: 1px solid #fff0;
+  border-right: 1px solid #fff0;
 }
+
 .tabs .item:first-child {
   margin-top: 15px;
 }
+
 .tabs .item.active {
   border-top: 1px solid #b4dbec;
   border-bottom: 1px solid #b4dbec;
-  border-right: 1px solid #ffffff00;
+  border-right: 1px solid #fff0;
   background-color: #f7f7f7;
   width: 145px;
 }
@@ -79,17 +82,19 @@
   height: auto;
   width: 30%;
 }
+
 .avatarPicture {
   position: relative;
   cursor: pointer;
   object-fit: cover;
   min-width: 100px;
   min-height: 100px;
-  background-image: url(../../../public/logo_server_def.png);
+  background-image: url('../../../public/logo_server_def.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center center;
 }
+
 .avatarPicture::before {
   content: '';
   position: absolute;
@@ -104,12 +109,13 @@
   display: flex;
   align-items: center;
 }
+
 .wealthCoinIcon::after {
   content: '';
   height: 16px;
   width: 16px;
   display: block;
-  background: url(../../../public/golden_pea.png);
+  background: url('../../../public/golden_pea.png');
   background-size: cover;
   margin-left: 3px;
 }
@@ -145,7 +151,7 @@
 .searchIcon {
   height: 17px;
   width: 17px;
-  background: url(../../../public/channel/channel_search.png);
+  background: url('../../../public/channel/channel_search.png');
   background-size: cover;
   background-position: 0 0;
   margin-left: 5px;

@@ -10,7 +10,7 @@
 }
 
 .messageInputBox.warning {
-  border-color: #ff0000;
+  border-color: #f00;
 }
 
 .messageInputBox.locked {
@@ -46,7 +46,7 @@
   content: '';
   min-width: 18px;
   min-height: 18px;
-  background: url(../../public/channel/FaceButton.png) no-repeat center center;
+  background: url('../../public/channel/FaceButton.png') no-repeat center center;
   background-size: auto;
   background-position: 0 0;
   cursor: pointer;
@@ -73,7 +73,7 @@
   padding: 5px;
   background-color: #fff;
   border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgb(0 0 0 / 10%);
 }
 
 .emoji {
@@ -87,111 +87,111 @@
 }
 
 .emoji[data-id='1'] {
-  background-image: url(../../public/smiles/1.gif);
+  background-image: url('../../public/smiles/1.gif');
 }
 
 .emoji[data-id='2'] {
-  background-image: url(../../public/smiles/2.gif);
+  background-image: url('../../public/smiles/2.gif');
 }
 
 .emoji[data-id='3'] {
-  background-image: url(../../public/smiles/3.gif);
+  background-image: url('../../public/smiles/3.gif');
 }
 
 .emoji[data-id='4'] {
-  background-image: url(../../public/smiles/4.gif);
+  background-image: url('../../public/smiles/4.gif');
 }
 
 .emoji[data-id='5'] {
-  background-image: url(../../public/smiles/5.gif);
+  background-image: url('../../public/smiles/5.gif');
 }
 
 .emoji[data-id='6'] {
-  background-image: url(../../public/smiles/6.gif);
+  background-image: url('../../public/smiles/6.gif');
 }
 
 .emoji[data-id='7'] {
-  background-image: url(../../public/smiles/7.gif);
+  background-image: url('../../public/smiles/7.gif');
 }
 
 .emoji[data-id='8'] {
-  background-image: url(../../public/smiles/8.gif);
+  background-image: url('../../public/smiles/8.gif');
 }
 
 .emoji[data-id='9'] {
-  background-image: url(../../public/smiles/9.gif);
+  background-image: url('../../public/smiles/9.gif');
 }
 
 .emoji[data-id='10'] {
-  background-image: url(../../public/smiles/10.gif);
+  background-image: url('../../public/smiles/10.gif');
 }
 
 .emoji[data-id='11'] {
-  background-image: url(../../public/smiles/11.gif);
+  background-image: url('../../public/smiles/11.gif');
 }
 
 .emoji[data-id='12'] {
-  background-image: url(../../public/smiles/12.gif);
+  background-image: url('../../public/smiles/12.gif');
 }
 
 .emoji[data-id='13'] {
-  background-image: url(../../public/smiles/13.gif);
+  background-image: url('../../public/smiles/13.gif');
 }
 
 .emoji[data-id='14'] {
-  background-image: url(../../public/smiles/14.gif);
+  background-image: url('../../public/smiles/14.gif');
 }
 
 .emoji[data-id='15'] {
-  background-image: url(../../public/smiles/15.gif);
+  background-image: url('../../public/smiles/15.gif');
 }
 
 .emoji[data-id='16'] {
-  background-image: url(../../public/smiles/16.gif);
+  background-image: url('../../public/smiles/16.gif');
 }
 
 .emoji[data-id='17'] {
-  background-image: url(../../public/smiles/17.gif);
+  background-image: url('../../public/smiles/17.gif');
 }
 
 .emoji[data-id='18'] {
-  background-image: url(../../public/smiles/18.gif);
+  background-image: url('../../public/smiles/18.gif');
 }
 
 .emoji[data-id='19'] {
-  background-image: url(../../public/smiles/19.gif);
+  background-image: url('../../public/smiles/19.gif');
 }
 
 .emoji[data-id='20'] {
-  background-image: url(../../public/smiles/20.gif);
+  background-image: url('../../public/smiles/20.gif');
 }
 
 .emoji[data-id='21'] {
-  background-image: url(../../public/smiles/21.gif);
+  background-image: url('../../public/smiles/21.gif');
 }
 
 .emoji[data-id='22'] {
-  background-image: url(../../public/smiles/22.gif);
+  background-image: url('../../public/smiles/22.gif');
 }
 
 .emoji[data-id='23'] {
-  background-image: url(../../public/smiles/23.gif);
+  background-image: url('../../public/smiles/23.gif');
 }
 
 .emoji[data-id='24'] {
-  background-image: url(../../public/smiles/24.gif);
+  background-image: url('../../public/smiles/24.gif');
 }
 
 .emoji[data-id='25'] {
-  background-image: url(../../public/smiles/25.gif);
+  background-image: url('../../public/smiles/25.gif');
 }
 
 .emoji[data-id='26'] {
-  background-image: url(../../public/smiles/26.gif);
+  background-image: url('../../public/smiles/26.gif');
 }
 
 .emoji[data-id='27'] {
-  background-image: url(../../public/smiles/27.gif);
+  background-image: url('../../public/smiles/27.gif');
 }
 
 /* .emoji[data-id='28'] {
@@ -199,133 +199,133 @@
   } */
 
 .emoji[data-id='29'] {
-  background-image: url(../../public/smiles/29.gif);
+  background-image: url('../../public/smiles/29.gif');
 }
 
 .emoji[data-id='30'] {
-  background-image: url(../../public/smiles/30.gif);
+  background-image: url('../../public/smiles/30.gif');
 }
 
 .emoji[data-id='31'] {
-  background-image: url(../../public/smiles/31.gif);
+  background-image: url('../../public/smiles/31.gif');
 }
 
 .emoji[data-id='32'] {
-  background-image: url(../../public/smiles/32.gif);
+  background-image: url('../../public/smiles/32.gif');
 }
 
 .emoji[data-id='33'] {
-  background-image: url(../../public/smiles/33.gif);
+  background-image: url('../../public/smiles/33.gif');
 }
 
 .emoji[data-id='34'] {
-  background-image: url(../../public/smiles/34.gif);
+  background-image: url('../../public/smiles/34.gif');
 }
 
 .emoji[data-id='35'] {
-  background-image: url(../../public/smiles/35.gif);
+  background-image: url('../../public/smiles/35.gif');
 }
 
 .emoji[data-id='36'] {
-  background-image: url(../../public/smiles/36.gif);
+  background-image: url('../../public/smiles/36.gif');
 }
 
 .emoji[data-id='37'] {
-  background-image: url(../../public/smiles/37.gif);
+  background-image: url('../../public/smiles/37.gif');
 }
 
 .emoji[data-id='38'] {
-  background-image: url(../../public/smiles/38.gif);
+  background-image: url('../../public/smiles/38.gif');
 }
 
 .emoji[data-id='39'] {
-  background-image: url(../../public/smiles/39.gif);
+  background-image: url('../../public/smiles/39.gif');
 }
 
 .emoji[data-id='40'] {
-  background-image: url(../../public/smiles/40.gif);
+  background-image: url('../../public/smiles/40.gif');
 }
 
 .emoji[data-id='41'] {
-  background-image: url(../../public/smiles/41.gif);
+  background-image: url('../../public/smiles/41.gif');
 }
 
 .emoji[data-id='42'] {
-  background-image: url(../../public/smiles/42.gif);
+  background-image: url('../../public/smiles/42.gif');
 }
 
 .emoji[data-id='43'] {
-  background-image: url(../../public/smiles/43.gif);
+  background-image: url('../../public/smiles/43.gif');
 }
 
 .emoji[data-id='44'] {
-  background-image: url(../../public/smiles/44.gif);
+  background-image: url('../../public/smiles/44.gif');
 }
 
 .emoji[data-id='45'] {
-  background-image: url(../../public/smiles/45.gif);
+  background-image: url('../../public/smiles/45.gif');
 }
 
 .emoji[data-id='46'] {
-  background-image: url(../../public/smiles/46.gif);
+  background-image: url('../../public/smiles/46.gif');
 }
 
 .emoji[data-id='47'] {
-  background-image: url(../../public/smiles/47.gif);
+  background-image: url('../../public/smiles/47.gif');
 }
 
 .emoji[data-id='48'] {
-  background-image: url(../../public/smiles/48.gif);
+  background-image: url('../../public/smiles/48.gif');
 }
 
 .emoji[data-id='49'] {
-  background-image: url(../../public/smiles/49.gif);
+  background-image: url('../../public/smiles/49.gif');
 }
 
 .emoji[data-id='50'] {
-  background-image: url(../../public/smiles/50.gif);
+  background-image: url('../../public/smiles/50.gif');
 }
 
 .emoji[data-id='51'] {
-  background-image: url(../../public/smiles/51.gif);
+  background-image: url('../../public/smiles/51.gif');
 }
 
 .emoji[data-id='52'] {
-  background-image: url(../../public/smiles/52.gif);
+  background-image: url('../../public/smiles/52.gif');
 }
 
 .emoji[data-id='53'] {
-  background-image: url(../../public/smiles/53.gif);
+  background-image: url('../../public/smiles/53.gif');
 }
 
 .emoji[data-id='54'] {
-  background-image: url(../../public/smiles/54.gif);
+  background-image: url('../../public/smiles/54.gif');
 }
 
 .emoji[data-id='55'] {
-  background-image: url(../../public/smiles/55.gif);
+  background-image: url('../../public/smiles/55.gif');
 }
 
 .emoji[data-id='56'] {
-  background-image: url(../../public/smiles/56.gif);
+  background-image: url('../../public/smiles/56.gif');
 }
 
 .emoji[data-id='57'] {
-  background-image: url(../../public/smiles/57.gif);
+  background-image: url('../../public/smiles/57.gif');
 }
 
 .emoji[data-id='58'] {
-  background-image: url(../../public/smiles/58.gif);
+  background-image: url('../../public/smiles/58.gif');
 }
 
 .emoji[data-id='59'] {
-  background-image: url(../../public/smiles/59.gif);
+  background-image: url('../../public/smiles/59.gif');
 }
 
 .emoji[data-id='60'] {
-  background-image: url(../../public/smiles/60.gif);
+  background-image: url('../../public/smiles/60.gif');
 }
 
 .emoji[data-id='61'] {
-  background-image: url(../../public/smiles/61.gif);
+  background-image: url('../../public/smiles/61.gif');
 }

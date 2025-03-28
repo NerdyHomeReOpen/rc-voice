@@ -2,17 +2,19 @@
   display: flex;
   padding: 5px;
 }
+
 .avatarPicture {
   position: relative;
   cursor: pointer;
   object-fit: cover;
   min-width: 50px;
   min-height: 50px;
-  background-image: url(../../../public/logo_server_def.png);
+  background-image: url('../../../public/logo_server_def.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center center;
 }
+
 .avatarPicture::before {
   content: '';
   position: absolute;
@@ -21,7 +23,7 @@
   z-index: 99;
   min-width: 52px;
   min-height: 52px;
-  background: url(../../../public/channel/server_logo_border.png) no-repeat
+  background: url('../../../public/channel/server_logo_border.png') no-repeat
     center center;
   background-size: cover;
   background-position: 0 0;
@@ -33,9 +35,11 @@
   flex-direction: column;
   justify-content: space-evenly;
 }
+
 .userAccount {
   margin-left: 10px;
 }
+
 .userName {
   margin-left: 10px;
   color: #777;

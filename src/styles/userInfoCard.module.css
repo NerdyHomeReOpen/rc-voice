@@ -10,29 +10,33 @@
 }
 
 .userInfoCard.vip-1 {
-  background: url(../../public/channel/ucard_vip1_bg.png) no-repeat center
+  background: url('../../public/channel/ucard_vip1_bg.png') no-repeat center
     center;
-  border: 1px solid #ffffff00;
+  border: 1px solid #fff0;
 }
+
 .userInfoCard.vip-2 {
-  background: url(../../public/channel/ucard_vip2_bg.png) no-repeat center
+  background: url('../../public/channel/ucard_vip2_bg.png') no-repeat center
     center;
-  border: 1px solid #ffffff00;
+  border: 1px solid #fff0;
 }
+
 .userInfoCard.vip-3 {
-  background: url(../../public/channel/ucard_vip3_bg.png) no-repeat center
+  background: url('../../public/channel/ucard_vip3_bg.png') no-repeat center
     center;
-  border: 1px solid #ffffff00;
+  border: 1px solid #fff0;
 }
+
 .userInfoCard.vip-4 {
-  background: url(../../public/channel/ucard_vip4_bg.png) no-repeat center
+  background: url('../../public/channel/ucard_vip4_bg.png') no-repeat center
     center;
-  border: 1px solid #ffffff00;
+  border: 1px solid #fff0;
 }
+
 .userInfoCard.vip-5 {
-  background: url(../../public/channel/ucard_vip5_bg.png) no-repeat center
+  background: url('../../public/channel/ucard_vip5_bg.png') no-repeat center
     center;
-  border: 1px solid #ffffff00;
+  border: 1px solid #fff0;
 }
 
 .body {
@@ -54,7 +58,7 @@
 .avatarPicture {
   min-height: 98px;
   min-width: 98px;
-  background: url(../../public/im/IMLogo.png) no-repeat center center;
+  background: url('../../public/im/IMLogo.png') no-repeat center center;
   background-size: cover;
 }
 
@@ -87,7 +91,7 @@
 .nicknameRow::before {
   content: '';
   display: block;
-  background: url(../../public/channel/groupcard.png) no-repeat center center;
+  background: url('../../public/channel/groupcard.png') no-repeat center center;
   min-width: 16px;
   min-height: 16px;
   object-fit: cover;
@@ -129,23 +133,23 @@
 }
 
 .vipText {
-  color: #ff0000;
+  color: #f00;
 }
 
 .permissionText {
   color: #25476a;
 }
 
-.permissionText:before {
+.permissionText::before {
   content: '[';
 }
 
-.permissionText:after {
+.permissionText::after {
   content: ']';
 }
 
 .saperator {
-  background: url(../../public/icon_v_split.png) no-repeat center center;
+  background: url('../../public/icon_v_split.png') no-repeat center center;
   margin: 0 5px;
   min-width: 2px;
   min-height: 12px;
@@ -157,7 +161,7 @@
 }
 
 .contributionValue {
-  color: #777777;
+  color: #777;
 }
 
 .xpWrapper {

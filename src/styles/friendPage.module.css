@@ -27,7 +27,7 @@
   object-fit: cover;
   min-width: 40px;
   min-height: 40px;
-  background: url(../../public/im/SecretaryLogo.png) no-repeat center center;
+  background: url('../../public/im/SecretaryLogo.png') no-repeat center center;
   background-size: contain;
   background-position: 0 0;
 }
@@ -40,7 +40,7 @@
   z-index: 99;
   min-width: 42px;
   min-height: 42px;
-  background: url(../../public/win_border.png) no-repeat center center;
+  background: url('../../public/win_border.png') no-repeat center center;
   background-size: cover;
 }
 
@@ -58,7 +58,7 @@
 .levelIcon {
   min-width: 16px;
   min-height: 16px;
-  background: url(../../public/im/LV.png) no-repeat center center;
+  background: url('../../public/im/LV.png') no-repeat center center;
   background-size: auto;
   background-position: 0 0;
 }
@@ -66,7 +66,7 @@
 .userGrade {
   min-width: 15px;
   min-height: 15px;
-  background: url(../../public/usergrade.png) no-repeat center center;
+  background: url('../../public/usergrade.png') no-repeat center center;
   background-size: auto;
   background-position: 0 0;
   cursor: pointer;
@@ -75,7 +75,7 @@
 .wealthIcon {
   min-width: 16px;
   min-height: 16px;
-  background: url(../../public/silver_pea.png) no-repeat center;
+  background: url('../../public/silver_pea.png') no-repeat center;
   background-size: cover;
   border: none;
   cursor: pointer;
@@ -90,7 +90,7 @@
 .vipIcon {
   min-width: 14px;
   min-height: 14px;
-  background: url(../../public/channel/vip_icons.png) no-repeat center;
+  background: url('../../public/channel/vip_icons.png') no-repeat center;
   background-size: cover;
   border: none;
   cursor: pointer;
@@ -140,10 +140,9 @@
 .sidebar {
   display: flex;
   flex-direction: column;
+  background-color: #f4f6fa;
   border-top: 2px solid #e0e0e4;
-  background-color: #fff;
   border-right: 1px solid #ddd;
-  background: #f4f6fa;
 }
 
 .sidebar .navigateTabs {
@@ -153,7 +152,6 @@
   width: 100%;
   height: 36px;
   cursor: pointer;
-  background: #fff;
 }
 
 .sidebar .navigateTabs .tab {
@@ -161,7 +159,7 @@
   flex: 1;
   text-align: center;
   cursor: pointer;
-  background: url(../../public/friend_tab_item_bg.png) no-repeat center;
+  background: url('../../public/friend_tab_item_bg.png') no-repeat center;
   background-size: 100% 72px;
   background-position: 0 0;
   min-height: 36px;
@@ -169,19 +167,11 @@
   align-items: center;
 }
 
-.sidebar .navigateTabs .tab.selected {
-  background-position: 0px -36px;
-}
-
-.selected .friendListIcon,
-.selected .recentIcon {
-  background-position: -64px 0;
-}
-
 .friendListIcon {
   min-width: 16px;
   min-height: 16px;
-  background: url(../../public/im/friend_list_page.png) no-repeat center center;
+  background: url('../../public/im/friend_list_page.png') no-repeat center
+    center;
   background-size: auto;
   background-position: 0 0;
 }
@@ -189,10 +179,19 @@
 .recentIcon {
   min-width: 16px;
   min-height: 16px;
-  background: url(../../public/im/recently_list_page.png) no-repeat center
+  background: url('../../public/im/recently_list_page.png') no-repeat center
     center;
   background-size: auto;
   background-position: 0 0;
+}
+
+.sidebar .navigateTabs .tab.selected {
+  background-position: 0 -36px;
+}
+
+.selected .friendListIcon,
+.selected .recentIcon {
+  background-position: -64px 0;
 }
 
 .friendList {
@@ -217,7 +216,7 @@
 .searchInput {
   flex: 1;
   padding: 5px;
-  border: 1px solid #ffffff;
+  border: 1px solid #fff;
   width: 125px;
   outline: none;
 }
@@ -225,7 +224,7 @@
 .searchIcon {
   min-width: 20px;
   min-height: 20px;
-  background: url(../../public/channel/channel_search.png) no-repeat center
+  background: url('../../public/channel/channel_search.png') no-repeat center
     center;
   background-position: 0 0;
 }
@@ -237,7 +236,7 @@
 .prevIcon {
   min-width: 30px;
   min-height: 30px;
-  background: url(../../public/channel/search_pre.png) no-repeat center center;
+  background: url('../../public/channel/search_pre.png') no-repeat center center;
   background-position: 0 0;
   cursor: pointer;
 }
@@ -245,7 +244,8 @@
 .nextIcon {
   min-width: 30px;
   min-height: 30px;
-  background: url(../../public/channel/search_next.png) no-repeat center center;
+  background: url('../../public/channel/search_next.png') no-repeat center
+    center;
   background-position: 0 0;
   cursor: pointer;
 }
@@ -290,17 +290,17 @@
   background-color: #d1d5da5c;
 }
 
-.bottomButtons .button[datatype='addGroup']:before {
+.bottomButtons .button[datatype='addGroup']::before {
   content: '';
-  background: url(../../public/im/add_group.png) no-repeat center center;
+  background: url('../../public/im/add_group.png') no-repeat center center;
   min-height: 16px;
   min-width: 16px;
   margin-right: 5px;
 }
 
-.bottomButtons .button[datatype='addFriend']:before {
+.bottomButtons .button[datatype='addFriend']::before {
   content: '';
-  background: url(../../public/im/add_friend.png) no-repeat center center;
+  background: url('../../public/im/add_friend.png') no-repeat center center;
   min-height: 16px;
   min-width: 16px;
   margin-right: 5px;
@@ -338,7 +338,8 @@
   display: inline-block;
   min-width: 14px;
   min-height: 14px;
-  background: url(../../public/channel/channelIcon.png) no-repeat center center;
+  background: url('../../public/channel/channelIcon.png') no-repeat center
+    center;
   background-size: auto;
   background-position: 0 0;
   margin-right: 5px;

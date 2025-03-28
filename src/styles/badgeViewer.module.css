@@ -12,7 +12,7 @@
   background-color: #1f2937;
   color: #fff;
   border-radius: 0.375rem;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
   pointer-events: none;
 }
 

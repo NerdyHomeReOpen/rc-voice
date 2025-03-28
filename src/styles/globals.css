@@ -43,20 +43,23 @@ body,
   display: flex;
   flex: 1;
   min-height: 0;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #6d6d6d0f;
   border-radius: 4px;
   border: 1px solid #6d6d6d26;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #6d6d6d38;
 }
@@ -69,11 +72,11 @@ div.resizeHandle {
 }
 
 input[type='radio'] {
-  background: url(../../public/ctrl/radiobox_icon.png);
+  background: url('../../public/ctrl/radiobox_icon.png');
 }
 
 input[type='checkbox'] {
-  background: url(../../public/ctrl/checkbox_icon.png);
+  background: url('../../public/ctrl/checkbox_icon.png');
 }
 
 input[type='radio'],
@@ -89,9 +92,9 @@ input[type='checkbox'] {
   margin: 0;
 }
 
-input[type='radio']:checked:hover,
-input[type='checkbox']:checked:hover {
-  background-position: -18px -18px;
+input[type='radio']:checked,
+input[type='checkbox']:checked {
+  background-position: 0 -18px;
 }
 
 input[type='radio']:hover,
@@ -99,7 +102,7 @@ input[type='checkbox']:hover {
   background-position: -18px 0;
 }
 
-input[type='radio']:checked,
-input[type='checkbox']:checked {
-  background-position: 0 -18px;
+input[type='radio']:checked:hover,
+input[type='checkbox']:checked:hover {
+  background-position: -18px -18px;
 }

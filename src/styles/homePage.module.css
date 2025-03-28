@@ -11,8 +11,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff;
-  padding: 4px 8px 4px 8px;
+  background-color: #fff;
+  padding: 4px 8px;
   border-bottom: 2px solid #ddd;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .backBtn {
-  background: url(../../public/icon_left_arrow.png) no-repeat center center;
+  background: url('../../public/icon_left_arrow.png') no-repeat center center;
   min-height: 15px;
   min-width: 15px;
   border: none;
@@ -35,7 +35,7 @@
 }
 
 .forwardBtn {
-  background: url(../../public/icon_right_arrow.png) no-repeat center center;
+  background: url('../../public/icon_right_arrow.png') no-repeat center center;
   min-height: 15px;
   min-width: 15px;
   border: none;
@@ -77,7 +77,7 @@
   background: none;
   cursor: pointer;
   border-radius: 5px;
-  border: 1px solid #ffffff00;
+  border: 1px solid #fff0;
   min-width: max-content;
   height: 2.2rem;
   margin-right: 15px;
@@ -99,45 +99,45 @@
   background-color: #666;
 }
 
-.navegateItem[data-key='60060']:before {
+.navegateItem[data-key='60060']::before {
   content: '';
-  background: url(../../public/icon_home_page.png) no-repeat center center;
+  background: url('../../public/icon_home_page.png') no-repeat center center;
   background-position: 0 0;
   min-width: 20px;
   min-height: 20px;
   margin-right: 5px;
 }
 
-.navegateItem[data-key='40007']:before {
+.navegateItem[data-key='40007']::before {
   content: '';
-  background: url(../../public/icon_game.png) no-repeat center center;
+  background: url('../../public/icon_game.png') no-repeat center center;
   background-position: 0 0;
   min-width: 20px;
   min-height: 20px;
   margin-right: 5px;
 }
 
-.navegateItem[data-key='30375']:before {
+.navegateItem[data-key='30375']::before {
   content: '';
-  background: url(../../public/icon_amusement.png) no-repeat center center;
+  background: url('../../public/icon_amusement.png') no-repeat center center;
   background-position: 0 0;
   min-width: 20px;
   min-height: 20px;
   margin-right: 5px;
 }
 
-.navegateItem[data-key='30014']:before {
+.navegateItem[data-key='30014']::before {
   content: '';
-  background: url(../../public/icon_create.png) no-repeat center center;
+  background: url('../../public/icon_create.png') no-repeat center center;
   background-position: 0 0;
   min-width: 12px;
   min-height: 12px;
   margin-right: 5px;
 }
 
-.navegateItem[data-key='60004']:before {
+.navegateItem[data-key='60004']::before {
   content: '';
-  background: url(../../public/icon_person.png) no-repeat center center;
+  background: url('../../public/icon_person.png') no-repeat center center;
   background-position: 0 0;
   min-width: 12px;
   min-height: 12px;
@@ -206,7 +206,7 @@
   object-fit: cover;
   min-height: 50px;
   min-width: 50px;
-  background-image: url(../../public/logo_server_def.png);
+  background-image: url('../../public/logo_server_def.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center center;
@@ -232,7 +232,7 @@
 
 .myGroupsRoomIDBox,
 .myGroupsRoomSlogen {
-  color: #777777;
+  color: #777;
 }
 
 .myGroupsRoomIDTitle {
@@ -247,24 +247,24 @@
   max-width: 70%;
 }
 
-.myGroupsRoomIDTitle.IsOwner:before {
+.myGroupsRoomIDTitle.IsOwner::before {
   content: '';
   width: 13px;
   height: 15px;
-  background: url(../../public/icon_creator.png) no-repeat center center;
+  background: url('../../public/icon_creator.png') no-repeat center center;
   background-size: contain;
   background-position: 0 0;
   display: block;
   margin-right: 2px;
 }
 
-@media only screen and (min-width: 500px) {
+@media only screen and (width >= 500px) {
   .myGroupsRoomItems {
     width: 450px;
   }
 }
 
-@media only screen and (min-width: 650px) {
+@media only screen and (width >= 650px) {
   .myGroupsRoomItems {
     width: 650px;
   }
@@ -289,7 +289,7 @@
 .more::before {
   content: '';
   display: inline-block;
-  background: url(../../public/btn_fold_person.png) no-repeat center center;
+  background: url('../../public/btn_fold_person.png') no-repeat center center;
   background-size: auto;
   min-width: 14px;
   min-height: 14px;
@@ -302,7 +302,7 @@
 .less::before {
   content: '';
   display: inline-block;
-  background: url(../../public/btn_fold_person.png) no-repeat center center;
+  background: url('../../public/btn_fold_person.png') no-repeat center center;
   background-size: auto;
   min-width: 14px;
   min-height: 14px;
@@ -322,7 +322,7 @@
   right: 0;
   background: #fff;
   border-radius: 3px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 10%);
   margin-top: 2px;
   z-index: 1000;
   width: 200px;
@@ -331,7 +331,7 @@
 }
 
 .dropdownHeader {
-  padding: 6px 12px 3px 12px;
+  padding: 6px 12px 3px;
   color: #000;
   border-top: 1px solid #eee;
 }
@@ -362,7 +362,7 @@
 .serverAvatar {
   width: 40px;
   height: 40px;
-  background-image: url(../../public/logo_server_def.png);
+  background-image: url('../../public/logo_server_def.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -370,7 +370,7 @@
 }
 
 .idIcon {
-  background: url(../../public/channel/ID.png) no-repeat center center;
+  background: url('../../public/channel/ID.png') no-repeat center center;
   background-size: auto;
   min-height: 12px;
   min-width: 12px;

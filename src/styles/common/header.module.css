@@ -11,7 +11,8 @@
   display: inline-block;
   min-width: 60px;
   min-height: 24px;
-  background: url(../../../public/login_logo_title.png) no-repeat center center;
+  background: url('../../../public/login_logo_title.png') no-repeat center
+    center;
   vertical-align: middle;
   background-size: contain;
   left: 2.5rem;
@@ -31,7 +32,7 @@
   display: inline-block;
   min-width: 18px;
   min-height: 18px;
-  background: url(../../../public/rc_logo_small.png) no-repeat center center;
+  background: url('../../../public/rc_logo_small.png') no-repeat center center;
   background-size: auto;
 }
 
@@ -63,102 +64,102 @@
 .gift {
   min-width: 28px;
   min-height: 28px;
-  background: url(../../../public/gift.png) no-repeat center center;
+  background: url('../../../public/gift.png') no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .game {
   min-width: 28px;
   min-height: 28px;
-  background: url(../../../public/game.png) no-repeat center center;
+  background: url('../../../public/game.png') no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .notice {
   min-width: 24px;
   min-height: 24px;
-  background: url(../../../public/icon_notice.png) no-repeat center center;
+  background: url('../../../public/icon_notice.png') no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .overlay {
   min-width: 24px;
   min-height: 24px;
-  background: url(../../../public/icon_notice_overlay.png) no-repeat center
+  background: url('../../../public/icon_notice_overlay.png') no-repeat center
     center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .spliter {
   min-width: 2px;
   min-height: 19px;
-  background: url(../../../public/mf_spliter.png) no-repeat center center;
+  background: url('../../../public/mf_spliter.png') no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .menu {
   min-width: 20px;
   min-height: 20px;
-  background: url(../../../public/BtnMenu.png) no-repeat center center;
+  background: url('../../../public/BtnMenu.png') no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .minimize {
   min-width: 20px;
   min-height: 20px;
-  background: url(../../../public/Button_Minsize.png) no-repeat center center;
+  background: url('../../../public/Button_Minsize.png') no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .restore {
   min-width: 20px;
   min-height: 20px;
-  background: url(../../../public/Button_Restore.png) no-repeat center center !important;
+  background: url('../../../public/Button_Restore.png') no-repeat center center !important;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px !important;
+  background-position: 0 0 !important;
 }
 
 .maxsize {
   min-width: 20px;
   min-height: 20px;
-  background: url(../../../public/Button_Maxsize.png) no-repeat center center;
+  background: url('../../../public/Button_Maxsize.png') no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .close {
   min-width: 20px;
   min-height: 20px;
-  background: url(../../../public/Button_Close.png) no-repeat center center;
+  background: url('../../../public/Button_Close.png') no-repeat center center;
   display: inline-block;
   cursor: pointer;
   background-size: cover;
-  background-position: 0px 0px;
+  background-position: 0 0;
 }
 
 .overlayNew {
@@ -169,15 +170,18 @@
 .gift:hover {
   background-position: -28px 0;
 }
+
 .notice:hover {
   background-position: -24px 0;
 }
+
 .minimize:hover,
 .maxsize:hover,
 .close:hover,
 .menu:hover:not(:has(.menuDropDown:hover)) {
   background-position: -20px 0;
 }
+
 .restore:hover {
   background-position: -20px 0 !important;
 }
@@ -186,23 +190,26 @@
 .gift:active {
   background-position: -56px 0;
 }
+
 .notice:active {
   background-position: -48px 0;
 }
+
 .minimize:active,
 .close:active,
 .maxsize:active,
 .menu:active:not(:has(.menuDropDown:active)) {
   background-position: -40px 0;
 }
+
 .restore:active {
   background-position: -40px 0 !important;
 }
 
-.selected:before {
+.selected::before {
   width: 13px;
   height: 13px;
-  background: url(../../../public/user_state.png) no-repeat center center;
+  background: url('../../../public/user_state.png') no-repeat center center;
   background-size: auto;
   background-position: 0 0;
 }
@@ -224,17 +231,24 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 0.5rem 0.5rem 0 0.5rem;
+  padding: 0.5rem 0.5rem 0;
   width: max-content;
   min-width: 120px;
   height: 2.2rem;
   align-items: center;
   justify-content: center;
-  font-family: Arial;
   font-size: 1.1rem;
   text-align: left;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.mainTabs .tabClose {
+  color: #fff;
+  z-index: 1;
+  position: absolute;
+  top: 0.6rem;
+  right: 0.5rem;
 }
 
 .mainTabs .tab .tabBg {
@@ -248,7 +262,7 @@
 
 .mainTabs .tab.selected .tabBg {
   background-color: #fff;
-  color: rgb(55, 144, 206);
+  color: rgb(55 144 206);
 }
 
 .mainTabs .tab .tabLable {
@@ -269,14 +283,6 @@
   color: #0073c6;
 }
 
-.mainTabs .tabClose {
-  color: #fff;
-  z-index: 1;
-  position: absolute;
-  top: 0.6rem;
-  right: 0.5rem;
-}
-
 /* User Status */
 
 .userStatus {
@@ -292,7 +298,7 @@
 
 .nameDisplay {
   color: #000;
-  text-shadow: 0px 0px 4px #ffffff99;
+  text-shadow: 0 0 4px #fff9;
   font-size: 0.9rem;
   font-weight: bold;
   line-height: 16px;
@@ -305,15 +311,15 @@
 }
 
 .nameDisplay:hover {
-  color: #222222;
-  text-shadow: 0px 0px 4px #ffffff;
+  color: #222;
+  text-shadow: 0 0 4px #fff;
   background: #ffffff1f;
   border-radius: 3px;
 }
 
 .nameDisplay:active {
-  color: #222222;
-  text-shadow: 0px 0px 4px #ffffff;
+  color: #222;
+  text-shadow: 0 0 4px #fff;
   background: #ffffff36;
 }
 
@@ -325,13 +331,13 @@
 }
 
 .statusBox:hover:not(:has(.statusDropdown:hover)) {
-  text-shadow: 0px 0px 4px #ffffff;
+  text-shadow: 0 0 4px #fff;
   background: #ffffff1f;
   border-radius: 3px;
 }
 
 .statusBox:active:not(:has(.statusDropdown:active)) {
-  text-shadow: 0px 0px 4px #ffffff;
+  text-shadow: 0 0 4px #fff;
   background: #ffffff36;
 }
 
@@ -339,7 +345,7 @@
   display: inline-block;
   min-width: 13px;
   min-height: 13px;
-  background: url(../../../public/user_state.png) no-repeat center center;
+  background: url('../../../public/user_state.png') no-repeat center center;
   background-size: auto;
   background-position: 0 0 !important;
 }
@@ -365,9 +371,9 @@
   min-width: 8px;
   min-height: 13px;
   margin-left: 5px;
-  background: url(../../../public/state_triangle.png) no-repeat center center;
+  background: url('../../../public/state_triangle.png') no-repeat center center;
   background-size: auto;
-  background-position: 0px 4px;
+  background-position: 0 4px;
 }
 
 .statusBox:hover:not(:has(.statusDropdown:hover)) .statusTriangle {
@@ -381,17 +387,16 @@
 .statusDropdown {
   position: absolute;
   display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
+  flex-flow: column wrap;
   justify-content: space-between;
   align-items: center;
   top: 1.4rem;
   width: fit-content;
   height: fit-content;
-  background-color: #ffffff;
+  background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 3px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   z-index: 1000;
   padding: 3px;
 }
@@ -403,7 +408,6 @@
 .statusDropdown .option {
   color: #333;
   cursor: pointer;
-  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -424,7 +428,7 @@
   display: inline-block;
   min-width: 13px;
   min-height: 13px;
-  background: url(../../../public/user_state.png) no-repeat center center;
+  background: url('../../../public/user_state.png') no-repeat center center;
   background-size: auto;
 }
 

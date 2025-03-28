@@ -1,14 +1,13 @@
 .contextMenu {
   position: fixed;
-  background-color: #ffffff;
+  background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   z-index: 1000;
   height: fit-content;
   display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
+  flex-flow: column wrap;
   justify-content: space-around;
 }
 
@@ -21,7 +20,7 @@
   min-width: 100%;
   display: block;
   margin: 3px 0;
-  background-image: url(../../public/ctrl/menu_spliter.png);
+  background-image: url('../../public/ctrl/menu_spliter.png');
   background-repeat: no-repeat;
   background-size: auto;
 }
@@ -40,56 +39,56 @@
   position: absolute;
 }
 
-.contextMenu .option[data-type='setting']:before {
+.contextMenu .option[data-type='setting']::before {
   left: 3px;
   content: '';
   width: 16px;
   height: 16px;
-  background-image: url(../../public/set.png);
+  background-image: url('../../public/set.png');
   background-size: auto;
   background-repeat: no-repeat;
   background-position: center center;
 }
 
-.contextMenu .option[data-type='message']:before {
+.contextMenu .option[data-type='message']::before {
   left: 3px;
   content: '';
   width: 16px;
   height: 16px;
-  background-image: url(../../public/message.png);
+  background-image: url('../../public/message.png');
   background-size: auto;
   background-repeat: no-repeat;
   background-position: center center;
 }
 
-.contextMenu .option[data-type='skin']:before {
+.contextMenu .option[data-type='skin']::before {
   left: 3px;
   content: '';
   width: 16px;
   height: 16px;
-  background-image: url(../../public/skin.png);
+  background-image: url('../../public/skin.png');
   background-size: auto;
   background-repeat: no-repeat;
   background-position: center center;
 }
 
-.contextMenu .option[data-type='exit']:before {
+.contextMenu .option[data-type='exit']::before {
   left: 3px;
   content: '';
   width: 16px;
   height: 16px;
-  background-image: url(../../public/exit.png);
+  background-image: url('../../public/exit.png');
   background-size: auto;
   background-repeat: no-repeat;
   background-position: center center;
 }
 
-.contextMenu .option[data-type='submenu']:before {
+.contextMenu .option[data-type='submenu']::before {
   right: 3px;
   content: '';
   width: 16px;
   height: 16px;
-  background-image: url(../../public/ctrl/icon_submenu.png);
+  background-image: url('../../public/ctrl/icon_submenu.png');
   background-size: auto;
   background-repeat: no-repeat;
   background-position: center center;

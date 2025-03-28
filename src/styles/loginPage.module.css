@@ -21,7 +21,7 @@
   display: block;
   min-width: 226px;
   min-height: 54px;
-  background: url(../../public/login_logo.png) no-repeat center center;
+  background: url('../../public/login_logo.png') no-repeat center center;
   background-size: contain;
 }
 
@@ -51,15 +51,15 @@
   height: 29px;
   padding: 8px;
   border: 1px solid #ccc;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 2px 5px rgb(0 0 0 / 10%);
   transition: box-shadow 0.3s ease;
   background: #fcfcfc;
-  font-family: 'SimSun', sans-serif;
+  font-family: SimSun, sans-serif;
 }
 
 .input:focus {
   outline: none;
-  background: #ffffff;
+  background: #fff;
 }
 
 .inputBox {
@@ -94,7 +94,7 @@
   width: 100%;
   max-width: 400px;
   font-size: 0.9rem;
-  color: #777777;
+  color: #777;
 }
 
 .checkWrapper .checkBox {
@@ -108,7 +108,7 @@
   cursor: pointer;
 }
 
-.checkWrapper .check:before {
+.checkWrapper .check::before {
   content: '';
   background: url('../../public/ctrl/checkbox_icon.png') no-repeat center center;
   background-size: auto;
@@ -118,15 +118,15 @@
   display: block;
 }
 
-.checkBox:hover > .check:before {
+.checkBox:hover > .check::before {
   background-position: -18px 0;
 }
 
-.checkBox .check:checked:before {
+.checkBox .check:checked::before {
   background-position: 0 -18px;
 }
 
-.checkBox:hover > .check:checked:before {
+.checkBox:hover > .check:checked::before {
   background-position: -18px -18px;
 }
 
@@ -138,7 +138,7 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-family: 'SimSun', sans-serif;
+  font-family: SimSun, sans-serif;
 }
 
 .button:hover {
@@ -176,8 +176,8 @@
   color: #0073c6;
 }
 
-.createAccount:before,
-.forgetPassword:before {
+.createAccount::before,
+.forgetPassword::before {
   content: '';
   min-width: 14px;
   min-height: 14px;
@@ -186,10 +186,11 @@
   margin-right: 5px;
   vertical-align: middle;
 }
-.createAccount:before {
+
+.createAccount::before {
   background: url('../../public/icon_createaccount.png') no-repeat center center;
 }
 
-.forgetPassword:before {
+.forgetPassword::before {
   background: url('../../public/icon_getpass.png') no-repeat center center;
 }
