@@ -6,6 +6,7 @@ const version = packageJson.version;
 // CSS
 import setting from '@/styles/popups/editServer.module.css';
 import popup from '@/styles/common/popup.module.css';
+import styles from '@/styles/popups/systemSetting.module.css';
 
 // Providers
 import { useSocket } from '@/providers/Socket';
@@ -134,7 +135,9 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                   </div>
                 </div>
 
-                <div className={`${popup['inputBox']} ${popup['row']}`}>
+                <div
+                  className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
+                >
                   <input
                     type="checkbox"
                     checked={minimizeToTray}
@@ -149,7 +152,9 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                     </div>
                   </div>
                 </div>
-                <div className={`${popup['inputBox']} ${popup['row']}`}>
+                <div
+                  className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
+                >
                   <input
                     type="checkbox"
                     checked={startMinimized}
@@ -165,7 +170,9 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                   </div>
                 </div>
 
-                <div className={`${popup['inputBox']} ${popup['row']}`}>
+                <div
+                  className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
+                >
                   <input
                     type="checkbox"
                     checked={notificationSound}
@@ -186,10 +193,18 @@ const SystemSettingPopup: React.FC = React.memo(() => {
             <div className={popup['col']}>
               <div className={popup['label']}>{lang.tr.voiceSettings}</div>
               <div className={popup['inputGroup']}>
-                <div className={`${popup['inputBox']} ${popup['col']}`}>
+                <div
+                  className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
+                >
                   <div className={popup['label']}>{lang.tr.inputDevice}</div>
                   <div className={popup['selectBox']}>
-                    <select value={selectedInput} onChange={handleInputChange}>
+                    <select
+                      value={selectedInput}
+                      onChange={handleInputChange}
+                      style={{
+                        maxWidth: '250px',
+                      }}
+                    >
                       <option value="">
                         {lang.tr.defaultMicrophone} (
                         {inputDevices[0]?.label || lang.tr.unknownDevice})
@@ -206,12 +221,17 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                   </div>
                 </div>
 
-                <div className={`${popup['inputBox']} ${popup['col']}`}>
+                <div
+                  className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
+                >
                   <div className={popup['label']}>{lang.tr.outputDevice}</div>
                   <div className={popup['selectBox']}>
                     <select
                       value={selectedOutput}
                       onChange={handleOutputChange}
+                      style={{
+                        maxWidth: '250px',
+                      }}
                     >
                       <option value="">
                         {lang.tr.defaultSpeaker} (
@@ -248,7 +268,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                             'https://discord.gg/adCWzv6wwS',
                           )
                         }
-                        className="text-blue-500 hover:text-blue-700 transition-colors hover:underline cursor-pointer"
+                        className={styles.link}
                       >
                         {lang.tr.discord}
                       </div>
@@ -267,7 +287,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                           'https://github.com/NerdyHomeReOpen/RiceCall',
                         )
                       }
-                      className="text-blue-500 hover:text-blue-700 transition-colors hover:underline cursor-pointer"
+                      className={styles.link}
                     >
                       RiceCall
                     </div>
@@ -279,7 +299,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                     {lang.tr.developmentTeam}
                   </div>
                   <div className={`${popup['row']}`}>
-                    <div className="grid grid-cols-2 gap-4 w-full">
+                    <div className={styles.developerGrid}>
                       {[
                         {
                           name: '🤓 JoshHuang9508',
@@ -292,9 +312,9 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                           github: 'https://github.com/yeci226',
                         },
                         {
-                          name: 'yayacat',
-                          role: lang.tr.serverMaintainer,
-                          github: 'https://github.com/yayacat',
+                          name: 'lekoOwO',
+                          role: lang.tr.backendDeveloper,
+                          github: 'https://github.com/lekoOwO',
                         },
                         {
                           name: 'cablate',
@@ -307,29 +327,31 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                           github: 'https://github.com/cstrikeasia',
                         },
                         {
-                          name: 'lekoOwO',
-                          role: lang.tr.backendDeveloper,
-                          github: 'https://github.com/lekoOwO',
-                        },
-                        {
                           name: 'rytlebsk',
                           role: lang.tr.frontendDeveloper,
                           github: 'https://github.com/rytlebsk',
                         },
+                        {
+                          name: 'Cooookie16',
+                          role: lang.tr.serverMaintainer,
+                          github: 'https://github.com/Cooookie16',
+                        },
+                        {
+                          name: 'yayacat',
+                          role: lang.tr.serverMaintainer,
+                          github: 'https://github.com/yayacat',
+                        },
                       ].map((dev) => (
-                        <div
-                          key={dev.name}
-                          className="bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
-                        >
+                        <div key={dev.name} className={styles.developerCard}>
                           <div
                             onClick={() =>
                               ipcService.window.openExternal(dev.github)
                             }
-                            className="text-blue-500 hover:text-blue-700 transition-colors hover:underline cursor-pointer block mb-1"
+                            className={styles.developerName}
                           >
                             {dev.name}
                           </div>
-                          <span className="text-gray-600 text-sm block">
+                          <span className={styles.developerRole}>
                             {dev.role}
                           </span>
                         </div>
