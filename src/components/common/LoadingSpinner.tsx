@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface LoadingSpinnerProps {
   className?: string;
@@ -16,7 +17,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = React.memo(
           height: '100%',
         }}
       >
-        <img src="/loading.gif" className={className} alt="Loading..." />
+        <Image src="/loading.gif" className={className} alt="Loading..." />
       </div>
     );
   },
