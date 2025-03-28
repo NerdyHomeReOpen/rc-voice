@@ -41,12 +41,10 @@
 
 .messageBox .header .name {
   font-weight: bold;
-  font-size: 13px;
 }
 
 .messageBox .header .timestamp {
   margin-left: 0.5rem;
-  font-size: 12px;
   color: #888;
 }
 

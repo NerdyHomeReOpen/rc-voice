@@ -143,9 +143,11 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
                 />
               </div>
               {errors.account ? (
-                <p className={styles['warning']}>{errors.account}</p>
+                <div className={styles['warning']}>{errors.account}</div>
               ) : (
-                <p className={styles['hint']}>{lang.tr.accountCannotChange}</p>
+                <div className={styles['hint']}>
+                  {lang.tr.accountCannotChange}
+                </div>
               )}
             </div>
             <div className={styles['inputWrapper']}>
@@ -165,9 +167,9 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
                 />
               </div>
               {errors.password ? (
-                <p className={styles['warning']}>{errors.password}</p>
+                <div className={styles['warning']}>{errors.password}</div>
               ) : (
-                <p className={styles['hint']}>{lang.tr.passwordHint}</p>
+                <div className={styles['hint']}>{lang.tr.passwordHint}</div>
               )}
             </div>
             <div className={styles['inputWrapper']}>
@@ -189,9 +191,13 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
                 />
               </div>
               {errors.confirmPassword ? (
-                <p className={styles['warning']}>{errors.confirmPassword}</p>
+                <div className={styles['warning']}>
+                  {errors.confirmPassword}
+                </div>
               ) : (
-                <p className={styles['hint']}>{lang.tr.repeatInputPassword}</p>
+                <div className={styles['hint']}>
+                  {lang.tr.repeatInputPassword}
+                </div>
               )}
             </div>
             <div className={styles['inputWrapper']}>
@@ -210,9 +216,9 @@ const RegisterPage: React.FC<RegisterPageProps> = React.memo(
                 />
               </div>
               {errors.username ? (
-                <p className={styles['warning']}>{errors.username}</p>
+                <div className={styles['warning']}>{errors.username}</div>
               ) : (
-                <p className={styles['hint']}>{lang.tr.nicknameHint}</p>
+                <div className={styles['hint']}>{lang.tr.nicknameHint}</div>
               )}
             </div>
             <button className={styles['button']} onClick={handleSubmit}>

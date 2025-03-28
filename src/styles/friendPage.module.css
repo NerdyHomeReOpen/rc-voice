@@ -85,7 +85,6 @@
 .wealthValue {
   color: #7e7c6e;
   text-align: left;
-  font-size: 13px;
 }
 
 .vipIcon {
@@ -115,7 +114,6 @@
   width: 100%;
   resize: none;
   overflow: hidden;
-  font-size: 12px;
   outline: unset;
 }
 
@@ -222,7 +220,6 @@
   border: 1px solid #ffffff;
   width: 125px;
   outline: none;
-  font-size: 12px;
 }
 
 .searchIcon {
@@ -281,13 +278,16 @@
   border-radius: 5px;
   background: #fff;
   text-align: center;
-  font-size: 12px;
   height: auto;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: #6e7c7e;
   padding: 5px;
+}
+
+.bottomButtons .button:hover {
+  background-color: #d1d5da5c;
 }
 
 .bottomButtons .button[datatype='addGroup']:before {
@@ -374,12 +374,12 @@
 
 .friendCard .name {
   font-weight: bold;
-  font-size: 13px;
+  font-size: 1rem;
   font-family: sans-serif;
 }
 
 .friendCard .signature {
-  font-size: 12px;
+  font-size: 0.9rem;
   color: #888;
   white-space: nowrap;
   overflow: hidden;
@@ -400,7 +400,7 @@
 }
 
 .mainContent .header {
-  font-size: 13px;
+  font-size: 1rem;
   padding: 10px;
   background-color: #f4f6fa;
   font-weight: bold;

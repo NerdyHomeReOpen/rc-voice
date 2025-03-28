@@ -22,7 +22,6 @@
   display: flex;
   align-items: center;
   padding: 0 10px;
-  font-size: 16px;
   width: auto;
   color: #fff;
 }
@@ -42,7 +41,6 @@
 
 .title {
   margin-left: 5px;
-  font-size: 13px;
 }
 
 .buttons,
@@ -233,7 +231,7 @@
   align-items: center;
   justify-content: center;
   font-family: Arial;
-  font-size: 15px;
+  font-size: 1.1rem;
   text-align: left;
   overflow: hidden;
   white-space: nowrap;
@@ -295,7 +293,8 @@
 .nameDisplay {
   color: #000;
   text-shadow: 0px 0px 4px #ffffff99;
-  font-size: 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
   line-height: 16px;
   margin-right: 5px;
   white-space: nowrap;

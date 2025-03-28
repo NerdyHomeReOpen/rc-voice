@@ -54,7 +54,6 @@
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
   background: #fcfcfc;
-  font-size: 12px;
   font-family: 'SimSun', sans-serif;
 }
 
@@ -71,7 +70,6 @@
 }
 
 .inputBox label {
-  font-size: 13px;
   color: #333;
   margin-bottom: 5px;
   display: block;
@@ -86,7 +84,7 @@
 
 .inputBox .warning {
   color: red;
-  font-size: 12px;
+  font-size: 0.9rem;
 }
 
 .checkWrapper {
@@ -95,7 +93,7 @@
   align-items: center;
   width: 100%;
   max-width: 400px;
-  font-size: 12px;
+  font-size: 0.9rem;
   color: #777777;
 }
 
@@ -139,7 +137,6 @@
   color: #fff;
   border: none;
   border-radius: 4px;
-  font-size: 13px;
   cursor: pointer;
   font-family: 'SimSun', sans-serif;
 }
@@ -167,7 +164,7 @@
 .createAccount,
 .forgetPassword {
   text-decoration: none;
-  font-size: 12px;
+  font-size: 0.9rem;
   color: #838383;
   display: flex;
   align-items: flex-end;

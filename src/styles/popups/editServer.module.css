@@ -35,7 +35,6 @@
   border-top: 1px solid #ffffff00;
   border-bottom: 1px solid #ffffff00;
   border-right: 1px solid #ffffff00;
-  font-size: 13px;
 }
 .tabs .item:first-child {
   margin-top: 15px;
@@ -160,7 +159,6 @@
 .searchInput {
   width: 100%;
   padding: 5px;
-  font-size: 13px;
   height: 25px;
   border: 0;
   outline: none;

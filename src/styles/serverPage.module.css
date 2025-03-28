@@ -78,7 +78,7 @@
 }
 
 .name {
-  font-size: 13px;
+  font-size: 1rem;
 }
 
 .idIcon {
@@ -167,7 +167,6 @@
 }
 
 .sectionTitle {
-  font-size: 13px;
   color: #a8a8a8;
   padding: 5px 10px;
 }
@@ -208,7 +207,7 @@
 .currentChannelText {
   margin-left: 3px;
   color: #555555;
-  font-size: 15px;
+  font-size: 1.1rem;
 }
 
 .micQueueBox {
@@ -228,6 +227,7 @@
   padding: 1px 20px 1px 8px;
   display: flex;
   align-items: center;
+  height: 1.8rem;
   cursor: pointer;
   gap: 5px;
 }
@@ -278,12 +278,12 @@
 }
 
 .channelList .channelTab .channelTabLable {
-  font-size: 14px;
+  font-size: 1.1rem;
 }
 
 .channelList .channelTab .channelTabCount {
   color: #555555;
-  font-size: 14px;
+  font-size: 1.1rem;
 }
 
 .channelList .channelList:not(.lobby) .channelTab,
@@ -306,6 +306,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  height: 1.8rem;
   padding: 1px 20px 1px 8px;
   cursor: pointer;
   gap: 5px;
@@ -316,7 +317,7 @@
 }
 
 .userList .userTab .userTabName {
-  font-size: 14px;
+  font-size: 1.1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -496,7 +497,7 @@
 .micText {
   margin-left: 5px;
   width: auto;
-  font-size: 18px;
+  font-size: 1.3rem;
   max-width: 107px;
   color: #28a0da;
   font-family: 'Noto Sans TC', '微軟正黑體', sans-serif;
@@ -549,7 +550,6 @@
   border-radius: 4px;
   background: none;
   color: #777777;
-  font-size: 12px;
   text-align: center;
   position: relative;
 }
@@ -562,6 +562,14 @@
   background-position: 0 0;
   cursor: pointer;
   display: block;
+}
+
+.voiceModeDropdown:hover:after {
+  background-position: -9px 0;
+}
+
+.voiceModeDropdown:active:after {
+  background-position: -18px 0;
 }
 
 .dropdownMenu {
@@ -583,7 +591,6 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 13px;
   color: #777777;
 }
 

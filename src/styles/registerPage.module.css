@@ -40,7 +40,7 @@
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
   color: #721c24;
-  font-size: 12px;
+  font-size: 0.9rem;
   text-align: center;
 }
 
@@ -48,6 +48,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  gap: 0.5rem;
 }
 
 .input {
@@ -75,7 +76,7 @@
 }
 
 .inputBox label {
-  font-size: 13px;
+  font-size: 0.9rem;
   color: #333;
   display: inline-block;
   width: 80px;
@@ -89,12 +90,10 @@
 .warning {
   margin-left: 80px;
   color: red;
-  font-size: 12px;
 }
 
 .hint {
   margin-left: 80px;
-  font-size: 13px;
   color: #777777;
 }
 
@@ -105,7 +104,6 @@
   color: #fff;
   border: none;
   border-radius: 4px;
-  font-size: 13px;
   cursor: pointer;
   font-family: 'SimSun', sans-serif;
 }
@@ -132,7 +130,7 @@
 
 .backToLogin {
   text-decoration: none;
-  font-size: 12px;
+  font-size: 0.9rem;
   color: #838383;
   display: flex;
   align-items: flex-end;
