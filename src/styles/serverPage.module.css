@@ -405,31 +405,6 @@
   padding: 0.75rem;
 }
 
-.emojiIcon {
-  margin: 0.25rem;
-  width: 18px;
-  height: 18px;
-}
-
-.emojiIcon::before {
-  content: '';
-  min-width: 18px;
-  min-height: 18px;
-  background: url(../../public/channel/FaceButton.png) no-repeat center center;
-  background-size: auto;
-  background-position: 0 0;
-  cursor: pointer;
-  display: block;
-}
-
-.emojiIcon:hover::before {
-  background-position: -18px 0;
-}
-
-.emojiIcon:active::before {
-  background-position: -36px 0;
-}
-
 /* Button Area */
 
 .buttonArea {

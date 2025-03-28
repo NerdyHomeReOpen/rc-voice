@@ -7,7 +7,7 @@ import homePage from '@/styles/homePage.module.css';
 import { Server, User } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
+import { useSocket } from '@/providers/Socket';
 
 interface ServerCardProps {
   user: User;

@@ -7,13 +7,13 @@ import vip from '@/styles/common/vip.module.css';
 import permission from '@/styles/common/permission.module.css';
 
 // Components
-import BadgeViewer from '@/components/viewers/BadgeViewer';
+import BadgeViewer from '@/components/viewers/Badge';
 
 // Types
 import type { ServerMember } from '@/types';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/Language';
 
 interface UserInfoCardProps {
   x: number;
@@ -31,7 +31,6 @@ const UserInfoCard: React.FC<UserInfoCardProps> = React.memo(
       avatarUrl: memberAvatarUrl,
       gender: memberGender,
       level: memberLevel,
-      xp: memberXp,
       progress: memberXpProgress,
       requiredXp: memberRequiredXp,
       badges: memberBadges = [],
@@ -96,9 +95,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = React.memo(
                       transform: 'translateX(-50%) scale(0.8)',
                     }}
                     className="flex flex-col items-center"
-                  >
-                    <span>{memberXp}</span>
-                  </div>
+                  />
                   <div>{memberRequiredXp}</div>
                 </div>
               </div>

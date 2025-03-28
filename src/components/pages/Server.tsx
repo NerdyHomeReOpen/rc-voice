@@ -5,9 +5,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styles from '@/styles/serverPage.module.css';
 
 // Components
-import MarkdownViewer from '@/components/viewers/MarkdownViewer';
-import MessageViewer from '@/components/viewers/MessageViewer';
-import ChannelViewer from '@/components/viewers/ChannelViewer';
+import MarkdownViewer from '@/components/viewers/Markdown';
+import MessageViewer from '@/components/viewers/Message';
+import ChannelViewer from '@/components/viewers/Channel';
 import MessageInputBox from '@/components/MessageInputBox';
 
 // Types
@@ -23,11 +23,11 @@ import {
 } from '@/types';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
-import { useSocket } from '@/providers/SocketProvider';
-import { useWebRTC } from '@/providers/WebRTCProvider';
-import { useContextMenu } from '@/providers/ContextMenuProvider';
-import { useExpandedContext } from '@/providers/ExpandedContextProvider';
+import { useLanguage } from '@/providers/Language';
+import { useSocket } from '@/providers/Socket';
+import { useWebRTC } from '@/providers/WebRTC';
+import { useContextMenu } from '@/providers/ContextMenu';
+import { useExpandedContext } from '@/providers/Expanded';
 
 // Services
 import ipcService from '@/services/ipc.service';

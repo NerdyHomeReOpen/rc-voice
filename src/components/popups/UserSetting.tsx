@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -19,12 +19,12 @@ import vip from '@/styles/common/vip.module.css';
 import { createDefault } from '@/utils/createDefault';
 import refreshService from '@/services/refresh.service';
 
-interface UserSettingModalProps {
+interface UserSettingPopupProps {
   userId: string;
 }
 
-const UserSettingModal: React.FC<UserSettingModalProps> = React.memo(
-  (initialData: UserSettingModalProps) => {
+const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
+  (initialData: UserSettingPopupProps) => {
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
@@ -160,15 +160,17 @@ const UserSettingModal: React.FC<UserSettingModalProps> = React.memo(
                     >
                       {lang.tr.gender}
                     </label>
-                    <select
-                      value={userGender}
-                      onChange={(e) =>
-                        setUserGender(e.target.value as User['gender'])
-                      }
-                    >
-                      <option value="Male">{lang.tr.male}</option>
-                      <option value="Female">{lang.tr.female}</option>
-                    </select>
+                    <div className={popup['selectBox']}>
+                      <select
+                        value={userGender}
+                        onChange={(e) =>
+                          setUserGender(e.target.value as User['gender'])
+                        }
+                      >
+                        <option value="Male">{lang.tr.male}</option>
+                        <option value="Female">{lang.tr.female}</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
@@ -182,9 +184,11 @@ const UserSettingModal: React.FC<UserSettingModalProps> = React.memo(
                     >
                       {lang.tr.country}
                     </label>
-                    <select>
-                      <option value="taiwan">{lang.tr.taiwan}</option>
-                    </select>
+                    <div className={popup['selectBox']}>
+                      <select>
+                        <option value="taiwan">{lang.tr.taiwan}</option>
+                      </select>
+                    </div>
                   </div>
                   <div
                     className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
@@ -196,41 +200,47 @@ const UserSettingModal: React.FC<UserSettingModalProps> = React.memo(
                       {lang.tr.birthdate}
                     </label>
                     <div className={popup['row']}>
-                      <select
-                        id="birthYear"
-                        // value={userBirthYear}
-                        // onChange={(e) => setUserBirthYear(e.target.value)}
-                      >
-                        {years.map((year) => (
-                          <option key={year} value={year}>
-                            {year}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        className={popup['input']}
-                        id="birthMonth"
-                        // value={userBirthMonth}
-                        // onChange={(e) => setUserBirthMonth(e.target.value)}
-                      >
-                        {months.map((month) => (
-                          <option key={month} value={month}>
-                            {month.toString().padStart(2, '0')}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        className={popup['input']}
-                        id="birthDay"
-                        // value={userBirthDay}
-                        // onChange={(e) => setUserBirthDay(e.target.value)}
-                      >
-                        {days.map((day) => (
-                          <option key={day} value={day}>
-                            {day.toString().padStart(2, '0')}
-                          </option>
-                        ))}
-                      </select>
+                      <div className={popup['selectBox']}>
+                        <select
+                          id="birthYear"
+                          // value={userBirthYear}
+                          // onChange={(e) => setUserBirthYear(e.target.value)}
+                        >
+                          {years.map((year) => (
+                            <option key={year} value={year}>
+                              {year}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className={popup['selectBox']}>
+                        <select
+                          className={popup['input']}
+                          id="birthMonth"
+                          // value={userBirthMonth}
+                          // onChange={(e) => setUserBirthMonth(e.target.value)}
+                        >
+                          {months.map((month) => (
+                            <option key={month} value={month}>
+                              {month.toString().padStart(2, '0')}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className={popup['selectBox']}>
+                        <select
+                          className={popup['input']}
+                          id="birthDay"
+                          // value={userBirthDay}
+                          // onChange={(e) => setUserBirthDay(e.target.value)}
+                        >
+                          {days.map((day) => (
+                            <option key={day} value={day}>
+                              {day.toString().padStart(2, '0')}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -298,6 +308,6 @@ const UserSettingModal: React.FC<UserSettingModalProps> = React.memo(
   },
 );
 
-UserSettingModal.displayName = 'UserSettingModal';
+UserSettingPopup.displayName = 'UserSettingPopup';
 
-export default UserSettingModal;
+export default UserSettingPopup;

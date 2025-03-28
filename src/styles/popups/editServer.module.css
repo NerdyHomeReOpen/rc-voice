@@ -131,18 +131,6 @@
   margin-top: 3px;
 }
 
-.inputBoxDropDownIcon {
-  width: 25px;
-  height: 10px;
-  background: url(../../../public/login_combobox_triangle.png) no-repeat center
-    center;
-  background-position: 0 0;
-  position: absolute;
-  top: 6px;
-  right: -1px;
-  pointer-events: none;
-}
-
 .searchWrapper {
   width: auto;
 }
@@ -174,7 +162,7 @@
   padding: 5px;
   font-size: 13px;
   height: 25px;
-  border-right: 0;
+  border: 0;
   outline: none;
   box-shadow: none;
 }

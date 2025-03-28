@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { CircleX } from 'lucide-react';
 
 // CSS
 import header from '@/styles/common/header.module.css';
@@ -17,9 +16,9 @@ import {
 } from '@/types';
 
 // Pages
-import FriendPage from '@/components/pages/FriendPage';
-import HomePage from '@/components/pages/HomePage';
-import ServerPage from '@/components/pages/ServerPage';
+import FriendPage from '@/components/pages/Friend';
+import HomePage from '@/components/pages/Home';
+import ServerPage from '@/components/pages/Server';
 
 // Components
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -29,10 +28,10 @@ import { errorHandler, StandardizedError } from '@/utils/errorHandler';
 import { createDefault } from '@/utils/createDefault';
 
 // Providersx
-import ExpandedProvider from '@/providers/ExpandedContextProvider';
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
-import { useContextMenu } from '@/providers/ContextMenuProvider';
+import ExpandedProvider from '@/providers/Expanded';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
+import { useContextMenu } from '@/providers/ContextMenu';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -176,12 +175,11 @@ const Header: React.FC<HeaderProps> = React.memo(
                 }
               >
                 <div className={header['tabLable']}>{TabLable}</div>
-                <div className={header['tabBg']}></div>
+                <div className={header['tabBg']} />
                 {TabClose && (
-                  <CircleX
-                    onClick={() => handleLeaveServer(userId, serverId)}
-                    size={16}
+                  <div
                     className={header['tabClose']}
+                    onClick={() => handleLeaveServer(userId, serverId)}
                   />
                 )}
               </div>

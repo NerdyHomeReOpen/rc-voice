@@ -1,13 +1,36 @@
 import React, { useState } from 'react';
 
 // CSS
-import styles from '@/styles/serverPage.module.css';
-
-// Components
-import EmojiGrid from './EmojiGrid';
+import messageInputBox from '@/styles/messageInputBox.module.css';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/Language';
+
+// Components
+import emojis, { Emoji } from './emojis';
+
+interface EmojiGridProps {
+  onEmojiSelect?: (emoji: string) => void;
+}
+
+const EmojiGrid: React.FC<EmojiGridProps> = ({ onEmojiSelect }) => {
+  return (
+    <div className={messageInputBox['emojiGrid']}>
+      {emojis.map((emoji: Emoji) => (
+        <div
+          key={emoji.id}
+          className={messageInputBox['emoji']}
+          data-id={emoji.id + 1}
+          onClick={() => {
+            onEmojiSelect?.(`[emoji_${emoji.id}]`);
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+EmojiGrid.displayName = 'EmojiGrid';
 
 interface MessageInputBoxProps {
   onSendMessage?: (message: string) => void;
@@ -19,71 +42,67 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
     // Language
     const lang = useLanguage();
 
-    // Input Control
-    const [messageInput, setMessageInput] = useState<string>('');
-    const [isComposing, setIsComposing] = useState<boolean>(false);
+    // Constants
     const MAXLENGTH = 2000;
 
-    // Emoji Picker Control
+    // States
+    const [messageInput, setMessageInput] = useState<string>('');
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+    const [isComposing, setIsComposing] = useState<boolean>(false);
+
+    // Variables
+    const isWarning = messageInput.length >= MAXLENGTH;
+    const isLocked = locked;
 
     return (
       <div
-        className={`flex flex-1 flex-row justify-flex-start p-1 border rounded-lg ${
-          messageInput.length >= MAXLENGTH ? 'border-red-500' : ''
-        } ${locked ? 'opacity-50 pointer-events-none' : ''}`}
+        className={`${messageInputBox['messageInputBox']} 
+        ${isWarning ? messageInputBox['warning'] : ''} 
+        ${isLocked ? messageInputBox['locked'] : ''}`}
       >
         <div
-          className={styles['emojiIcon']}
-          onClick={() => !locked && setShowEmojiPicker(!showEmojiPicker)}
-        />
+          className={messageInputBox['emojiIcon']}
+          onClick={() => !isLocked && setShowEmojiPicker(!showEmojiPicker)}
+        >
+          {showEmojiPicker && (
+            <EmojiGrid
+              onEmojiSelect={(emojiTag) => {
+                if (isLocked) return;
+                setMessageInput((prev) => prev + emojiTag);
+              }}
+            />
+          )}
+        </div>
 
-        {showEmojiPicker && (
-          <EmojiGrid
-            onEmojiSelect={(emojiTag) => {
-              if (locked) return;
-              const content = messageInput + emojiTag;
-              if (content.length > MAXLENGTH) return;
-              setMessageInput(content);
-              setShowEmojiPicker(false);
-              const input = document.querySelector('textarea');
-              if (input) input.focus();
-            }}
-          />
-        )}
         <textarea
-          disabled={locked}
-          className={`w-full p-1 resize-none focus:outline-none 
-                [&::-webkit-scrollbar]:w-2 
-                [&::-webkit-scrollbar]:h-2 
-                [&::-webkit-scrollbar-thumb]:bg-gray-300 
-                [&::-webkit-scrollbar-thumb]:rounded-lg 
-                [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 
-                ${locked ? 'bg-transparent' : ''}`}
+          disabled={isLocked}
+          className={`${messageInputBox['textarea']} 
+          ${isLocked ? 'bg-transparent' : ''}`}
           rows={2}
           placeholder={
-            locked ? lang.tr.textChangeToForbiddenSpeech : lang.tr.inputMessage
+            isLocked
+              ? lang.tr.textChangeToForbiddenSpeech
+              : lang.tr.inputMessage
           }
           value={messageInput}
           onChange={(e) => {
-            if (locked) return;
+            if (isLocked) return;
             e.preventDefault();
-            const input = e.target.value;
-            setMessageInput(input);
+            setMessageInput(e.target.value);
           }}
           onPaste={(e) => {
-            if (locked) return;
+            if (isLocked) return;
             e.preventDefault();
-            const text = e.clipboardData.getData('text');
-            setMessageInput((prev) => prev + text);
+            setMessageInput((prev) => prev + e.clipboardData.getData('text'));
           }}
           onKeyDown={(e) => {
             if (
-              locked ||
               e.shiftKey ||
               e.key !== 'Enter' ||
               !messageInput.trim() ||
               messageInput.length > MAXLENGTH ||
+              isLocked ||
+              isWarning ||
               isComposing
             )
               return;
@@ -96,7 +115,7 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
           maxLength={MAXLENGTH}
           aria-label={lang.tr.messageInputBox}
         />
-        <div className="text-xs text-gray-400 self-end ml-2">
+        <div className={messageInputBox['messageInputLength']}>
           {messageInput.length}/{MAXLENGTH}
         </div>
       </div>

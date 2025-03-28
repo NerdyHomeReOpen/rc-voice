@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
+import { useSocket } from '@/providers/Socket';
 import { SocketServerEvent } from '@/types';
 
 type Offer = {

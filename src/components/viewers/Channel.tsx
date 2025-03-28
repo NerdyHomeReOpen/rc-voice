@@ -17,14 +17,14 @@ import {
 } from '@/types';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
-import { useSocket } from '@/providers/SocketProvider';
-import { useContextMenu } from '@/providers/ContextMenuProvider';
-import { useExpandedContext } from '@/providers/ExpandedContextProvider';
-import { useWebRTC } from '@/providers/WebRTCProvider';
+import { useLanguage } from '@/providers/Language';
+import { useSocket } from '@/providers/Socket';
+import { useContextMenu } from '@/providers/ContextMenu';
+import { useExpandedContext } from '@/providers/Expanded';
+import { useWebRTC } from '@/providers/WebRTC';
 
 // Components
-import BadgeViewer from '@/components/viewers/BadgeViewer';
+import BadgeViewer from '@/components/viewers/Badge';
 
 // Services
 import ipcService from '@/services/ipc.service';

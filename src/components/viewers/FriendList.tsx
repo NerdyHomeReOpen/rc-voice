@@ -8,11 +8,11 @@ import grade from '@/styles/common/grade.module.css';
 import { PopupType, User, FriendGroup, UserFriend } from '@/types';
 
 // Components
-import BadgeViewer from '@/components/viewers/BadgeViewer';
+import BadgeViewer from '@/components/viewers/Badge';
 
 // Providers
-import { useContextMenu } from '@/providers/ContextMenuProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useContextMenu } from '@/providers/ContextMenu';
+import { useLanguage } from '@/providers/Language';
 
 // Services
 import ipcService from '@/services/ipc.service';

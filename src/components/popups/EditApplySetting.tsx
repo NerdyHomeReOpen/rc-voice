@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Server } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
@@ -18,12 +18,12 @@ import ipcService from '@/services/ipc.service';
 // Utils
 import { createDefault } from '@/utils/createDefault';
 
-interface EditApplyModalProps {
+interface EditApplySettingPopupProps {
   serverId: string;
 }
 
-const EditApplyModal: React.FC<EditApplyModalProps> = React.memo(
-  (initialData: EditApplyModalProps) => {
+const EditApplySettingPopup: React.FC<EditApplySettingPopupProps> = React.memo(
+  (initialData: EditApplySettingPopupProps) => {
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
@@ -79,26 +79,23 @@ const EditApplyModal: React.FC<EditApplyModalProps> = React.memo(
         <div className={popup['popupBody']}>
           <div className={setting['body']}>
             <div className={popup['inputGroup']}>
-              {/** Check Group */}
-              <div className={setting['checkWrapper']} style={{ padding: 0 }}>
-                <label className={setting['checkBox']}>
-                  <input
-                    type="checkbox"
-                    className={setting['check']}
-                    checked={isReceiveApply || false}
-                    onChange={() => {
-                      setIsReceiveApply(!isReceiveApply);
-                    }}
-                  />
-                  <span>{lang.tr.isReceiveApply}</span>
+              <div className={`${popup['inputBox']} ${popup['row']}`}>
+                <label className={popup['label']}>
+                  {lang.tr.isReceiveApply}
                 </label>
+                <input
+                  type="checkbox"
+                  checked={isReceiveApply}
+                  onChange={() => {
+                    setIsReceiveApply(!isReceiveApply);
+                  }}
+                />
               </div>
               <div className={`${popup['inputBox']} ${popup['col']}`}>
                 <div className={popup['label']}>{lang.tr.setApplyNotice}</div>
                 <input
-                  className={popup['input']}
                   type="text"
-                  value={applyNotice || ''}
+                  value={applyNotice}
                   onChange={(e) => {
                     setApplyNotice(e.target.value);
                   }}
@@ -132,6 +129,6 @@ const EditApplyModal: React.FC<EditApplyModalProps> = React.memo(
   },
 );
 
-EditApplyModal.displayName = 'EditApplyModal';
+EditApplySettingPopup.displayName = 'EditApplySettingPopup';
 
-export default EditApplyModal;
+export default EditApplySettingPopup;

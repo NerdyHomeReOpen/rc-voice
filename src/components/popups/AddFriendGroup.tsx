@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { PopupType, SocketServerEvent, User } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
@@ -14,41 +14,32 @@ import setting from '@/styles/popups/editServer.module.css';
 // Services
 import ipcService from '@/services/ipc.service';
 
-interface AddFriendProps {
+interface AddFriendGroupPopupProps {
   userId: string;
 }
 
-const AddFriend: React.FC<AddFriendProps> = React.memo(
-  (initialData: AddFriendProps) => {
+const AddFriendGroupPopup: React.FC<AddFriendGroupPopupProps> = React.memo(
+  () => {
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
 
     // States
-    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [groupName, setGroupName] = useState<string>('');
 
-    // Variables
-    const { userId } = initialData;
-
-    // Handlers[]
-    const handleSearchUser = (searchQuery: string) => {
+    // Handlers
+    const handleAddSubGroups = (groupName: string) => {
       if (!socket) return;
-      socket.send.searchUser({ query: searchQuery });
+      socket.send.searchUser({ query: groupName });
     };
 
-    const handleUserSearch = useCallback(
-      (user: User | null) => {
-        if (!user) return;
-        if (user.id === userId) return;
-        ipcService.popup.open(PopupType.APPLY_FRIEND);
-        ipcService.initialData.onRequest(
-          PopupType.APPLY_FRIEND,
-          { userId: userId, targetId: user.id },
-          () => handleClose(),
-        );
-      },
-      [userId],
-    );
+    const handleUserSearch = useCallback((name: User | null) => {
+      if (!name) return;
+      ipcService.popup.open(PopupType.APPLY_FRIEND);
+      ipcService.initialData.onRequest(PopupType.APPLY_FRIEND, {}, () =>
+        handleClose(),
+      );
+    }, []);
 
     const handleClose = () => {
       ipcService.window.close();
@@ -80,13 +71,13 @@ const AddFriend: React.FC<AddFriendProps> = React.memo(
             <div className={popup['inputGroup']}>
               <div className={`${popup['inputBox']} ${popup['col']}`}>
                 <div className={popup['label']}>
-                  {lang.tr.pleaseInputFriendAccount}
+                  {lang.tr.pleaseInputFriendSubGroups}
                 </div>
                 <input
                   className={popup['input']}
                   type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
                   required
                 />
               </div>
@@ -97,10 +88,10 @@ const AddFriend: React.FC<AddFriendProps> = React.memo(
         <div className={popup['popupFooter']}>
           <button
             className={`${popup['button']} ${
-              !searchQuery.trim() ? popup['disabled'] : ''
+              !groupName.trim() ? popup['disabled'] : ''
             }`}
-            disabled={!searchQuery.trim()}
-            onClick={() => handleSearchUser(searchQuery)}
+            disabled={!groupName.trim()}
+            onClick={() => handleAddSubGroups(groupName)}
           >
             {lang.tr.confirm}
           </button>
@@ -113,6 +104,6 @@ const AddFriend: React.FC<AddFriendProps> = React.memo(
   },
 );
 
-AddFriend.displayName = 'AddFriend';
+AddFriendGroupPopup.displayName = 'AddFriendGroupPopup';
 
-export default AddFriend;
+export default AddFriendGroupPopup;

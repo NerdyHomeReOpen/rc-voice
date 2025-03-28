@@ -8,7 +8,7 @@ import setting from '@/styles/popups/editServer.module.css';
 import ipcService from '@/services/ipc.service';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/Language';
 
 enum DIALOG_ICON {
   ALERT = 'alert',

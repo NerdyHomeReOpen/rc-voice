@@ -10,24 +10,26 @@ import header from '@/styles/common/header.module.css';
 import { PopupType } from '@/types';
 
 // Components
-import CreateServer from '@/components/modals/CreateServerModal';
-import CreateChannel from '@/components/modals/AddChannelModal';
-import EditServer from '@/components/modals/EditServerModal';
-import EditChannel from '@/components/modals/EditChannelModal';
-import EditUser from '@/components/modals/UserSettingModal';
-import EditMember from '@/components/modals/EditMemberModal';
-import EditApply from '@/components/modals/EditApplyModal';
-import SystemSetting from '@/components/modals/SettingModal';
-import ApplyMember from '@/components/modals/ApplyMember';
-import ApplyFriend from '@/components/modals/ApplyFriend';
-import Dialog from '@/components/modals/Dialog';
-import AddFriend from '@/components/modals/AddFriend';
+import AddChannel from '@/components/popups/AddChannel';
+import AddFriend from '@/components/popups/AddFriend';
+import AddFriendGroup from '@/components/popups/AddFriendGroup';
+import ApplyFriend from '@/components/popups/ApplyFriend';
+import ApplyMember from '@/components/popups/ApplyMember';
+import ChannelSetting from '@/components/popups/ChannelSetting';
+import CreateServer from '@/components/popups/CreateServer';
+import Dialog from '@/components/popups/Dialog';
+import DirectMessageModal from '@/components/popups/DirectMessage';
+import EditApply from '@/components/popups/EditApplySetting';
+import EditMember from '@/components/popups/EditNickname';
+import EditServer from '@/components/popups/ServerSetting';
+import SystemSetting from '@/components/popups/SystemSetting';
+import UserSetting from '@/components/popups/UserSetting';
+
 // Services
 import ipcService from '@/services/ipc.service';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
-import AddFriendSubgroups from '@/components/modals/AddFriendSubgroups';
+import { useLanguage } from '@/providers/Language';
 
 interface HeaderProps {
   title: string;
@@ -81,12 +83,15 @@ const Header: React.FC<HeaderProps> = React.memo(({ title, buttons }) => {
 
 Header.displayName = 'Header';
 
-const Modal = React.memo(() => {
+const Popup = React.memo(() => {
   // Language
   const lang = useLanguage();
 
   // States
-  const [header, setHeader] = useState<ReactNode | null>(null);
+  const [headerTitle, setHeaderTitle] = useState<string>('');
+  const [headerButtons, setHeaderButtons] = useState<
+    ('minimize' | 'maxsize' | 'close')[]
+  >([]);
   const [content, setContent] = useState<ReactNode | null>(null);
   const [initialData, setInitialData] = useState<any | null>(null);
 
@@ -96,8 +101,6 @@ const Modal = React.memo(() => {
       const params = new URLSearchParams(window.location.search);
       const type = params.get('type') as PopupType;
       if (!type) return;
-
-      // 先獲取自動啟動狀態
       if (type === PopupType.SYSTEM_SETTING) {
         ipcService.autoLaunch.get((enabled) => {
           setInitialData({ autoLaunch: enabled });
@@ -108,7 +111,7 @@ const Modal = React.memo(() => {
         });
       }
     }
-  }, []); // 移除 initialData 依賴
+  }, []);
 
   useEffect(() => {
     if (!initialData) return;
@@ -119,82 +122,94 @@ const Modal = React.memo(() => {
 
     switch (type) {
       case PopupType.SYSTEM_SETTING:
-        setHeader(<Header title={lang.tr.systemSetting} buttons={['close']} />);
+        setHeaderTitle(lang.tr.systemSetting);
+        setHeaderButtons(['close']);
         setContent(<SystemSetting {...initialData} />);
         break;
       case PopupType.EDIT_APPLY:
-        setHeader(
-          <Header title={lang.tr.editApplySettings} buttons={['close']} />,
-        );
+        setHeaderTitle(lang.tr.editApplySettings);
+        setHeaderButtons(['close']);
         setContent(<EditApply {...initialData} />);
         break;
       case PopupType.EDIT_MEMBER:
-        setHeader(
-          <Header title={lang.tr.editMemberCard} buttons={['close']} />,
-        );
+        setHeaderTitle(lang.tr.editMemberCard);
+        setHeaderButtons(['close']);
         setContent(<EditMember {...initialData} />);
         break;
       case PopupType.EDIT_USER:
-        setHeader(<Header title={lang.tr.editUser} buttons={['close']} />);
-        setContent(<EditUser {...initialData} />);
+        setHeaderTitle(lang.tr.editUser);
+        setHeaderButtons(['close']);
+        setContent(<UserSetting {...initialData} />);
         break;
       case PopupType.CREATE_SERVER:
-        setHeader(<Header title={lang.tr.createServer} buttons={['close']} />);
+        setHeaderTitle(lang.tr.createServer);
+        setHeaderButtons(['close']);
         setContent(<CreateServer {...initialData} />);
         break;
       case PopupType.EDIT_SERVER:
-        setHeader(<Header title={lang.tr.editServer} buttons={['close']} />);
+        setHeaderTitle(lang.tr.editServer);
+        setHeaderButtons(['close']);
         setContent(<EditServer {...initialData} />);
         break;
       case PopupType.CREATE_CHANNEL:
-        setHeader(<Header title={lang.tr.createChannel} buttons={['close']} />);
-        setContent(<CreateChannel {...initialData} />);
+        setHeaderTitle(lang.tr.createChannel);
+        setHeaderButtons(['close']);
+        setContent(<AddChannel {...initialData} />);
         break;
       case PopupType.EDIT_CHANNEL:
-        setHeader(<Header title={lang.tr.editChannel} buttons={['close']} />);
-        setContent(<EditChannel {...initialData} />);
+        setHeaderTitle(lang.tr.editChannel);
+        setHeaderButtons(['close']);
+        setContent(<ChannelSetting {...initialData} />);
         break;
       case PopupType.APPLY_MEMBER:
-        setHeader(<Header title={lang.tr.applyMember} buttons={['close']} />);
+        setHeaderTitle(lang.tr.applyMember);
+        setHeaderButtons(['close']);
         setContent(<ApplyMember {...initialData} />);
         break;
       case PopupType.APPLY_FRIEND:
-        setHeader(<Header title={lang.tr.applyFriend} buttons={['close']} />);
+        setHeaderTitle(lang.tr.applyFriend);
+        setHeaderButtons(['close']);
         setContent(<ApplyFriend {...initialData} />);
         break;
       case PopupType.ADD_FRIEND:
-        setHeader(<Header title={lang.tr.addFriend} buttons={['close']} />);
+        setHeaderTitle(lang.tr.addFriend);
+        setHeaderButtons(['close']);
         setContent(<AddFriend {...initialData} />);
         break;
       case PopupType.ADD_FRIEND_SUBGROUPS:
-        setHeader(
-          <Header title={lang.tr.addFriendSubGroups} buttons={['close']} />,
-        );
-        setContent(<AddFriendSubgroups {...initialData} />);
+        setHeaderTitle(lang.tr.addFriendSubGroups);
+        setHeaderButtons(['close']);
+        setContent(<AddFriendGroup {...initialData} />);
         break;
       case PopupType.DIRECT_MESSAGE:
-        // setHeader(<Header title={lang.tr.directMessage} buttons={['close']} />);
-        // setContent(<DirectMessageModal onClose={() => {}} />);
+        setHeaderTitle(lang.tr.directMessage);
+        setHeaderButtons(['close']);
+        setContent(<DirectMessageModal {...initialData} />);
         break;
       case PopupType.DIALOG_ALERT:
       case PopupType.DIALOG_ALERT2:
-        setHeader(<Header title={lang.tr.dialogAlert} buttons={['close']} />);
+        setHeaderTitle(lang.tr.dialogAlert);
+        setHeaderButtons(['close']);
         setContent(<Dialog {...{ ...initialData, iconType: 'ALERT' }} />);
         break;
       case PopupType.DIALOG_SUCCESS:
-        setHeader(<Header title={lang.tr.dialogSuccess} buttons={['close']} />);
+        setHeaderTitle(lang.tr.dialogSuccess);
+        setHeaderButtons(['close']);
         setContent(<Dialog {...{ ...initialData, iconType: 'SUCCESS' }} />);
         break;
       case PopupType.DIALOG_WARNING:
-        setHeader(<Header title={lang.tr.dialogWarning} buttons={['close']} />);
+        setHeaderTitle(lang.tr.dialogWarning);
+        setHeaderButtons(['close']);
         setContent(<Dialog {...{ ...initialData, iconType: 'WARNING' }} />);
         break;
       case PopupType.DIALOG_ERROR:
-        setHeader(<Header title={lang.tr.dialogError} buttons={['close']} />);
+        setHeaderTitle(lang.tr.dialogError);
+        setHeaderButtons(['close']);
         setContent(<Dialog {...{ ...initialData, iconType: 'ERROR' }} />);
         break;
       case PopupType.DIALOG_INFO:
-        setHeader(<Header title={lang.tr.dialogInfo} buttons={['close']} />);
+        setHeaderTitle(lang.tr.dialogInfo);
+        setHeaderButtons(['close']);
         setContent(<Dialog {...{ ...initialData, iconType: 'INFO' }} />);
         break;
       default:
@@ -205,13 +220,13 @@ const Modal = React.memo(() => {
   return (
     <div className="wrapper">
       {/* Top Nevigation */}
-      {header}
+      <Header title={headerTitle} buttons={headerButtons} />
       {/* Main Content */}
       {content}
     </div>
   );
 });
 
-Modal.displayName = 'SettingPage';
+Popup.displayName = 'Popup';
 
-export default Modal;
+export default Popup;

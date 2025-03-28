@@ -6,15 +6,15 @@ import friendPage from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
 
 // Components
-import FriendListViewer from '@/components/viewers/FriendListViewer';
-import BadgeViewer from '@/components/viewers/BadgeViewer';
+import FriendListViewer from '@/components/viewers/FriendList';
+import BadgeViewer from '@/components/viewers/Badge';
 
 // Types
 import { User } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // Services
 import ipcService from '@/services/ipc.service';

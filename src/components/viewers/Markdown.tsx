@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react/display-name */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Components } from 'react-markdown';
@@ -63,32 +63,34 @@ const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
   );
   const sanitized = DOMPurify.sanitize(withEmojis, PURIFY_CONFIG);
   const components: Components = {
-    h1: ({ node, ...props }) => (
+    h1: ({ node, ...props }: any) => (
       <h1 className="text-2xl font-bold mb-2 text-gray-900" {...props} />
     ),
-    h2: ({ node, ...props }) => (
+    h2: ({ node, ...props }: any) => (
       <h2 className="text-xl font-bold mb-1 text-gray-800" {...props} />
     ),
-    h3: ({ node, ...props }) => (
+    h3: ({ node, ...props }: any) => (
       <h3 className="text-lg font-bold text-gray-700" {...props} />
     ),
-    p: ({ node, ...props }) => (
+    p: ({ node, ...props }: any) => (
       <div className="leading-relaxed text-gray-600" {...props} />
     ),
-    ul: ({ node, ...props }) => (
+    ul: ({ node, ...props }: any) => (
       <ul className="list-disc list-inside text-gray-600" {...props} />
     ),
-    li: ({ node, ...props }) => <li className="leading-normal" {...props} />,
-    ol: ({ node, ...props }) => (
+    li: ({ node, ...props }: any) => (
+      <li className="leading-normal" {...props} />
+    ),
+    ol: ({ node, ...props }: any) => (
       <ol className="list-decimal list-inside text-gray-600" {...props} />
     ),
-    blockquote: ({ node, ...props }) => (
+    blockquote: ({ node, ...props }: any) => (
       <blockquote
         className="border-l-4 border-gray-300 pl-4 italic text-gray-600 overflow-x-auto"
         {...props}
       />
     ),
-    a: ({ node, href, ...props }) => (
+    a: ({ node, href, ...props }: any) => (
       <a
         target="_blank"
         href={href}
@@ -96,7 +98,7 @@ const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
         {...props}
       />
     ),
-    table: ({ node, ...props }) => (
+    table: ({ node, ...props }: any) => (
       <div className="overflow-x-auto mb-4 max-w-full">
         <table
           className="w-full border-collapse border border-gray-200"
@@ -104,19 +106,19 @@ const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
         />
       </div>
     ),
-    th: ({ node, ...props }) => (
+    th: ({ node, ...props }: any) => (
       <th
         className="px-4 py-2 bg-gray-50 text-left text-sm font-semibold text-gray-600 border border-gray-200"
         {...props}
       />
     ),
-    td: ({ node, ...props }) => (
+    td: ({ node, ...props }: any) => (
       <td
         className="px-4 py-2 text-sm text-gray-600 border border-gray-200"
         {...props}
       />
     ),
-    hr: ({ node, ...props }) => (
+    hr: ({ node, ...props }: any) => (
       <hr className="my-6 border-t border-gray-200" {...props} />
     ),
   };
@@ -132,6 +134,8 @@ const Markdown: React.FC<MarkdownProps> = React.memo(({ markdownText }) => {
     </ReactMarkdown>
   );
 });
+
+Markdown.displayName = 'Markdown';
 
 interface MarkdownViewerProps {
   markdownText: string;

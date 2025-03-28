@@ -9,8 +9,8 @@ import applyMember from '@/styles/popups/applyFriend.module.css';
 import { PopupType, Server, MemberApplication, User } from '@/types';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
-import { useSocket } from '@/providers/SocketProvider';
+import { useLanguage } from '@/providers/Language';
+import { useSocket } from '@/providers/Socket';
 
 // Services
 import ipcService from '@/services/ipc.service';

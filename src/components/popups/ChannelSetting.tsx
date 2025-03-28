@@ -8,8 +8,8 @@ import setting from '@/styles/popups/editServer.module.css';
 import { Channel, Message, Server } from '@/types';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
-import { useSocket } from '@/providers/SocketProvider';
+import { useLanguage } from '@/providers/Language';
+import { useSocket } from '@/providers/Socket';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -18,13 +18,13 @@ import refreshService from '@/services/refresh.service';
 // Utils
 import { createDefault } from '@/utils/createDefault';
 
-interface EditChannelModalProps {
+interface ChannelSettingPopupProps {
   serverId: string;
   channelId: string;
 }
 
-const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
-  (initialData: EditChannelModalProps) => {
+const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
+  (initialData: ChannelSettingPopupProps) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
@@ -204,21 +204,23 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
                   </div>
                   <div className={`${popup['inputBox']} ${popup['col']}`}>
                     <div className={popup['label']}>{lang.tr.channelMode}</div>
-                    <select
-                      value={channelVoiceState.current}
-                      onChange={(e) =>
-                        setChannelVoiceState((prev) => ({
-                          ...prev,
-                          current: e.target.value as Channel['voiceMode'],
-                        }))
-                      }
-                    >
-                      <option value="free">{lang.tr.freeSpeech}</option>
-                      <option value="forbidden">
-                        {lang.tr.forbiddenSpeech}
-                      </option>
-                      <option value="queue">{lang.tr.queueSpeech}</option>
-                    </select>
+                    <div className={popup['selectBox']}>
+                      <select
+                        value={channelVoiceState.current}
+                        onChange={(e) =>
+                          setChannelVoiceState((prev) => ({
+                            ...prev,
+                            current: e.target.value as Channel['voiceMode'],
+                          }))
+                        }
+                      >
+                        <option value="free">{lang.tr.freeSpeech}</option>
+                        <option value="forbidden">
+                          {lang.tr.forbiddenSpeech}
+                        </option>
+                        <option value="queue">{lang.tr.queueSpeech}</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
                 <div className={setting['saperator']} />
@@ -490,13 +492,6 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
           <button
             className={popup['button']}
             onClick={() => {
-              const validUserLimit = Math.max(
-                0,
-                Math.min(999, channelUserLimit),
-              );
-              if (validUserLimit !== channelUserLimit)
-                setChannelUserLimit(validUserLimit);
-
               if (channelTextState.current !== channelTextState.original) {
                 handleSendMessage(
                   {
@@ -557,6 +552,6 @@ const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(
   },
 );
 
-EditChannelModal.displayName = 'EditChannelModal';
+ChannelSettingPopup.displayName = 'ChannelSettingPopup';
 
-export default EditChannelModal;
+export default ChannelSettingPopup;

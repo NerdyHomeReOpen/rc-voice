@@ -5,11 +5,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { User, DirectMessage } from '@/types';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
-import { useSocket } from '@/providers/SocketProvider';
+import { useLanguage } from '@/providers/Language';
+import { useSocket } from '@/providers/Socket';
 
 // Components
-import MessageViewer from '@/components/viewers/MessageViewer';
+import MessageViewer from '@/components/viewers/Message';
 import MessageInputBox from '@/components/MessageInputBox';
 
 // Services

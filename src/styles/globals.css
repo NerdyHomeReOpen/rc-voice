@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
   --background: 0.97 0.01 275;
   --foreground: 0.2 0.01 275;
@@ -15,6 +11,7 @@
 }
 
 * {
+  border: none;
   box-sizing: border-box;
   font-size: 1rem;
   font-family: SimSun, Arial, Helvetica, sans-serif;

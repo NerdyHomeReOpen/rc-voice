@@ -10,7 +10,7 @@ import { createValidators } from '@/utils/validators';
 import authService from '@/services/auth.service';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/Language';
 
 interface FormErrors {
   general?: string;

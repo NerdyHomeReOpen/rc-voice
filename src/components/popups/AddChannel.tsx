@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Channel, Server } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
@@ -18,14 +18,14 @@ import refreshService from '@/services/refresh.service';
 // Utils
 import { createDefault } from '@/utils/createDefault';
 
-interface AddChannelModalProps {
+interface AddChannelPopupProps {
   userId: string;
   categoryId: string | null;
   serverId: string;
 }
 
-const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
-  (initialData: AddChannelModalProps) => {
+const AddChannelPopup: React.FC<AddChannelPopupProps> = React.memo(
+  (initialData: AddChannelPopupProps) => {
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
@@ -126,6 +126,6 @@ const AddChannelModal: React.FC<AddChannelModalProps> = React.memo(
   },
 );
 
-AddChannelModal.displayName = 'CreateChannelModal';
+AddChannelPopup.displayName = 'AddChannelPopup';
 
-export default AddChannelModal;
+export default AddChannelPopup;

@@ -5,13 +5,13 @@ import styles from '@/styles/messageViewer.module.css';
 import permission from '@/styles/common/permission.module.css';
 
 // Components
-import MarkdownViewer from '@/components/viewers/MarkdownViewer';
+import MarkdownViewer from '@/components/viewers/Markdown';
 
 // Types
 import type { ChannelMessage, DirectMessage, InfoMessage } from '@/types';
 
 // Providers
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useLanguage } from '@/providers/Language';
 
 interface DirectMessageTabProps {
   messageGroup: DirectMessage & {
@@ -115,7 +115,7 @@ const InfoMessageTab: React.FC<InfoMessageTabProps> = React.memo(
         <div className={styles['infoIcon']} />
         <div className={styles['messageBox']}>
           {messageContents.map((content, index) => (
-            <div key={index} className="break-words">
+            <div key={index}>
               <MarkdownViewer
                 markdownText={
                   Object.prototype.hasOwnProperty.call(lang.tr, content)

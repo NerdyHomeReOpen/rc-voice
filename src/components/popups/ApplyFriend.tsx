@@ -10,8 +10,8 @@ import applyFriend from '@/styles/popups/applyFriend.module.css';
 import { FriendApplication, FriendGroup, PopupType, User } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -20,13 +20,13 @@ import refreshService from '@/services/refresh.service';
 // Utils
 import { createDefault } from '@/utils/createDefault';
 
-interface ApplyFriendModalProps {
+interface ApplyFriendPopupProps {
   userId: string;
   targetId: string;
 }
 
-const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
-  (initialData: ApplyFriendModalProps) => {
+const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
+  (initialData: ApplyFriendPopupProps) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
@@ -146,18 +146,19 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
                         {lang.tr.friendSelectGroup}
                       </div>
                       <div className={popup['row']}>
-                        <select
-                          className={popup['select']}
-                          onChange={(e) => {
-                            // FIXME
-                          }}
-                        >
-                          {userFriendGroups.map((group) => (
-                            <option key={group.id} value={group.id}>
-                              {group.name}
-                            </option>
-                          ))}
-                        </select>
+                        <div className={popup['selectBox']}>
+                          <select
+                            onChange={(e) => {
+                              // FIXME
+                            }}
+                          >
+                            {userFriendGroups.map((group) => (
+                              <option key={group.id} value={group.id}>
+                                {group.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <div className={popup['link']}>
                           {lang.tr.friendAddGroup}
                         </div>
@@ -272,18 +273,20 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
                         {lang.tr.friendSelectGroup}
                       </div>
                       <div className={popup['row']}>
-                        <select
-                          className={popup['select']}
-                          onChange={(e) => {
-                            // FIXME
-                          }}
-                        >
-                          {userFriendGroups.map((group) => (
-                            <option key={group.id} value={group.id}>
-                              {group.name}
-                            </option>
-                          ))}
-                        </select>
+                        <div className={popup['selectBox']}>
+                          <select
+                            className={popup['select']}
+                            onChange={(e) => {
+                              // FIXME
+                            }}
+                          >
+                            {userFriendGroups.map((group) => (
+                              <option key={group.id} value={group.id}>
+                                {group.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <div className={popup['link']}>
                           {lang.tr.friendAddGroup}
                         </div>
@@ -313,6 +316,6 @@ const ApplyFriendModal: React.FC<ApplyFriendModalProps> = React.memo(
   },
 );
 
-ApplyFriendModal.displayName = 'ApplyFriendModal';
+ApplyFriendPopup.displayName = 'ApplyFriendPopup';
 
-export default ApplyFriendModal;
+export default ApplyFriendPopup;

@@ -6,8 +6,8 @@ import React, { useEffect, useState } from 'react';
 import header from '@/styles/common/header.module.css';
 
 // Pages
-import LoginPage from '@/components/pages/LoginPage';
-import RegisterPage from '@/components/pages/RegisterPage';
+import LoginPage from '@/components/pages/Login';
+import RegisterPage from '@/components/pages/Register';
 
 // Services
 import ipcService from '@/services/ipc.service';

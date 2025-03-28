@@ -9,8 +9,8 @@ import createServer from '@/styles/popups/createServer.module.css';
 import { User, Server, PopupType } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -20,12 +20,12 @@ import refreshService from '@/services/refresh.service';
 // Utils
 import { createDefault } from '@/utils/createDefault';
 
-interface CreateServerModalProps {
+interface CreateServerPopupProps {
   userId: string;
 }
 
-const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
-  (initialData: CreateServerModalProps) => {
+const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
+  (initialData: CreateServerPopupProps) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
@@ -189,7 +189,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
                   <input
                     type="file"
                     id="avatar-upload"
-                    className="hidden"
+                    style={{ display: 'none' }}
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
@@ -292,6 +292,6 @@ const CreateServerModal: React.FC<CreateServerModalProps> = React.memo(
   },
 );
 
-CreateServerModal.displayName = 'CreateServerModal';
+CreateServerPopup.displayName = 'CreateServerPopup';
 
-export default CreateServerModal;
+export default CreateServerPopup;

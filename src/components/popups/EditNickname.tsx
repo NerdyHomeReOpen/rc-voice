@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 // Types
-import { Member, User } from '@/types';
+import { Member, User, Server } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
@@ -18,13 +18,13 @@ import ipcService from '@/services/ipc.service';
 // Utils
 import { createDefault } from '@/utils/createDefault';
 
-interface EditMemberModalProps {
+interface EditNicknamePopupProps {
   userId: string;
   serverId: string;
 }
 
-const EditMemberModal: React.FC<EditMemberModalProps> = React.memo(
-  (initialData: EditMemberModalProps) => {
+const EditNicknamePopup: React.FC<EditNicknamePopupProps> = React.memo(
+  (initialData: EditNicknamePopupProps) => {
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
@@ -36,7 +36,6 @@ const EditMemberModal: React.FC<EditMemberModalProps> = React.memo(
     const { userId, serverId } = initialData;
 
     // States
-    const [member, setMember] = useState(createDefault.member());
     const [memberNickname, setMemberNickname] = useState(
       createDefault.member().nickname,
     );
@@ -49,21 +48,16 @@ const EditMemberModal: React.FC<EditMemberModalProps> = React.memo(
 
     const handleUpdateMember = (
       member: Partial<Member>,
-      action: string | null,
+      userId: User['id'],
+      serverId: Server['id'],
     ) => {
       if (!socket) return;
-      socket.send.updateMember({
-        member,
-        userId,
-        serverId,
-        action,
-      });
+      socket.send.updateMember({ member, userId, serverId });
     };
 
     const handleMemberUpdate = (data: Member | null) => {
       if (!data) data = createDefault.member();
       setMemberNickname(data.nickname);
-      setMember(data);
     };
 
     const handleUserUpdate = (data: User | null) => {
@@ -119,11 +113,9 @@ const EditMemberModal: React.FC<EditMemberModalProps> = React.memo(
             className={`${popup['button']}`}
             onClick={() => {
               handleUpdateMember(
-                {
-                  ...member,
-                  nickname: memberNickname,
-                },
-                'nickname',
+                { nickname: memberNickname },
+                userId,
+                serverId,
               );
               handleClose();
             }}
@@ -139,6 +131,6 @@ const EditMemberModal: React.FC<EditMemberModalProps> = React.memo(
   },
 );
 
-EditMemberModal.displayName = 'EditMemberModal';
+EditNicknamePopup.displayName = 'EditNicknamePopup';
 
-export default EditMemberModal;
+export default EditNicknamePopup;

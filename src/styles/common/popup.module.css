@@ -204,34 +204,6 @@
   background: #d1d1d1;
 }
 
-.inputBox select {
-  border-radius: 3px;
-  flex: 1;
-  padding: 3px;
-  border: 1px solid #ffffff;
-  outline: none;
-  font-size: 12px;
-  width: 100%;
-  font-family: 'SimSun', sans-serif;
-}
-
-.inputBox select {
-  appearance: none;
-}
-
-.inputBoxBorder::before {
-  content: '';
-  background: url(../../../public/channel/spliter.png) no-repeat center center;
-  background-size: contain;
-  height: 20px;
-  width: 30px;
-  position: absolute;
-  right: 8px;
-  top: 13px;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
 .inputBox textarea {
   border: 1px solid #ddd;
   padding: 2px;
@@ -243,14 +215,62 @@
   resize: none;
 }
 
-.inputBoxBorder {
+.inputBox file {
+  display: none;
+}
+
+.inputBox .selectBox {
+  display: flex;
+  width: fit-content;
+  position: relative;
+}
+
+.inputBox .selectBox select {
   border: 1px solid #ddd;
-  padding-top: 0;
-  padding-bottom: 0;
+  padding: 2px;
+  padding-right: 25px;
   background: #fff;
   position: relative;
   display: inline-block;
-  width: 100px;
+  min-width: 100px;
+  max-width: 100%;
+  height: 2rem;
+  appearance: none;
+}
+
+.inputBox .selectBox::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 2rem;
+  width: 25px;
+  z-index: 1;
+  background-image: url(../../../public/channel/spliter.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+
+.inputBox .selectBox::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  right: 0;
+  width: 26px;
+  height: 12px;
+  background-image: url(../../../public/login_combobox_triangle.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  pointer-events: none;
+}
+
+.inputBox .selectBox:hover::after {
+  background-position: -26px 0px;
+}
+
+.inputBox .selectBox:active::after {
+  background-position: -52px 0px;
 }
 
 .hidden {

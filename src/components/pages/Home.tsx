@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import homePage from '@/styles/homePage.module.css';
 
 // Components
-import ServerListViewer from '@/components/viewers/ServerListViewer';
+import ServerListViewer from '@/components/viewers/ServerList';
 
 // Type
 import {
@@ -17,8 +17,8 @@ import {
 } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
 
 // Services
 import ipcService from '@/services/ipc.service';

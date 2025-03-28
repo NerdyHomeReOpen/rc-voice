@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -7,9 +6,6 @@ import setting from '@/styles/popups/editServer.module.css';
 import popup from '@/styles/common/popup.module.css';
 import permission from '@/styles/common/permission.module.css';
 
-// Components
-// import MarkdownViewer from '@/components/viewers/MarkdownViewer';
-
 // Types
 import {
   MemberApplication,
@@ -17,14 +13,13 @@ import {
   PopupType,
   ServerMember,
   Member,
-  Permission,
   User,
 } from '@/types';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useContextMenu } from '@/providers/ContextMenuProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
+import { useSocket } from '@/providers/Socket';
+import { useContextMenu } from '@/providers/ContextMenu';
+import { useLanguage } from '@/providers/Language';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -91,7 +86,6 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
     const refreshRef = useRef(false);
 
     // States
-    const [searchText, setSearchText] = useState('');
     const [serverName, setServerName] = useState<Server['name']>(
       createDefault.server().name,
     );
@@ -182,14 +176,14 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       });
     };
 
-    const handleUpdateMember = (
-      member: Partial<Member>,
-      userId: User['id'],
-      serverId: Server['id'],
-    ) => {
-      if (!socket) return;
-      socket.send.updateMember({ member, userId, serverId });
-    };
+    // const handleUpdateMember = (
+    //   member: Partial<Member>,
+    //   userId: User['id'],
+    //   serverId: Server['id'],
+    // ) => {
+    //   if (!socket) return;
+    //   socket.send.updateMember({ member, userId, serverId });
+    // };
 
     const handleCreateMember = (
       member: Partial<Member>,
@@ -238,51 +232,51 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       ipcService.window.close();
     };
 
-    const handleUserMove = () => {};
+    // const handleUserMove = () => {};
 
-    const handleKickServer = (member: ServerMember) => {
-      if (!socket) return;
-      ipcService.popup.open(PopupType.DIALOG_WARNING);
-      ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
-        iconType: 'warning',
-        title: `確定要踢出 ${member.name} 嗎？使用者可以再次加入。`,
-        submitTo: PopupType.DIALOG_WARNING,
-      });
-      ipcService.popup.onSubmit(PopupType.DIALOG_WARNING, () => {
-        handleUpdateMember(
-          {
-            id: member.id,
-            permissionLevel: Permission.Guest,
-            createdAt: 0,
-            nickname: '',
-          },
-          member.userId,
-          member.serverId,
-        );
-      });
-    };
+    // const handleKickServer = (member: ServerMember) => {
+    //   if (!socket) return;
+    //   ipcService.popup.open(PopupType.DIALOG_WARNING);
+    //   ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
+    //     iconType: 'warning',
+    //     title: `確定要踢出 ${member.name} 嗎？使用者可以再次加入。`,
+    //     submitTo: PopupType.DIALOG_WARNING,
+    //   });
+    //   ipcService.popup.onSubmit(PopupType.DIALOG_WARNING, () => {
+    //     handleUpdateMember(
+    //       {
+    //         id: member.id,
+    //         permissionLevel: Permission.Guest,
+    //         createdAt: 0,
+    //         nickname: '',
+    //       },
+    //       member.userId,
+    //       member.serverId,
+    //     );
+    //   });
+    // };
 
-    const handleBlockUser = (member: ServerMember) => {
-      if (!socket) return;
-      ipcService.popup.open(PopupType.DIALOG_WARNING);
-      ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
-        iconType: 'warning',
-        title: `確定要封鎖 ${member.name} 嗎？使用者將無法再次加入。`,
-        submitTo: PopupType.DIALOG_WARNING,
-      });
-      ipcService.popup.onSubmit(PopupType.DIALOG_WARNING, () => {
-        handleUpdateMember(
-          {
-            id: member.id,
-            permissionLevel: Permission.Guest,
-            nickname: '',
-            isBlocked: true,
-          },
-          member.userId,
-          member.serverId,
-        );
-      });
-    };
+    // const handleBlockUser = (member: ServerMember) => {
+    //   if (!socket) return;
+    //   ipcService.popup.open(PopupType.DIALOG_WARNING);
+    //   ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
+    //     iconType: 'warning',
+    //     title: `確定要封鎖 ${member.name} 嗎？使用者將無法再次加入。`,
+    //     submitTo: PopupType.DIALOG_WARNING,
+    //   });
+    //   ipcService.popup.onSubmit(PopupType.DIALOG_WARNING, () => {
+    //     handleUpdateMember(
+    //       {
+    //         id: member.id,
+    //         permissionLevel: Permission.Guest,
+    //         nickname: '',
+    //         isBlocked: true,
+    //       },
+    //       member.userId,
+    //       member.serverId,
+    //     );
+    //   });
+    // };
 
     const handleOpenApplySettings = () => {
       ipcService.popup.open(PopupType.EDIT_APPLY);
@@ -405,7 +399,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                     </div>
                     <div className={`${popup['inputBox']} ${popup['col']}`}>
                       <div className={popup['label']}>{lang.tr.type}</div>
-                      <div className={popup['inputBoxBorder']}>
+                      <div className={popup['selectBox']}>
                         <select
                           value={serverType}
                           onChange={(e) => {
@@ -418,7 +412,6 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                             {lang.tr.entertainment}
                           </option>
                         </select>
-                        <div className={setting['inputBoxDropDownIcon']}></div>
                       </div>
                     </div>
                   </div>
@@ -432,7 +425,7 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                     <input
                       type="file"
                       id="avatar-upload"
-                      className="hidden"
+                      style={{ display: 'none' }}
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -787,6 +780,20 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                   >
                     {lang.tr.editApply}
                   </button>
+                  <div className={setting['searchWrapper']}>
+                    <div className={setting['searchBorder']}>
+                      <div className={setting['searchIcon']}></div>
+                      <input
+                        className={setting['searchInput']}
+                        type="search"
+                        placeholder={lang.tr.searchMemberPlaceholder}
+                        value={applicationSearchText}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                          setApplicationSearchText(e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <table style={{ minHeight: '280px' }}>
@@ -939,8 +946,8 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                       {filteredBlockMembers.map((blockMember) => {
                         const {
                           id: blockMemberId,
-                          userId: blockMemberUserId,
-                          serverId: blockMemberServerId,
+                          // userId: blockMemberUserId,
+                          // serverId: blockMemberServerId,
                           nickname: blockMemberNickname,
                           name: blockMemberName,
                           contribution: blockMemberContribution,

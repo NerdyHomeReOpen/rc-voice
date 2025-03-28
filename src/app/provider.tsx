@@ -3,10 +3,10 @@
 import React from 'react';
 
 // Providers
-import SocketProvider from '@/providers/SocketProvider';
-import ContextMenuProvider from '@/providers/ContextMenuProvider';
-import LanguageProvider from '@/providers/LanguageProvider';
-import WebRTCProvider from '@/providers/WebRTCProvider';
+import SocketProvider from '@/providers/Socket';
+import ContextMenuProvider from '@/providers/ContextMenu';
+import LanguageProvider from '@/providers/Language';
+import WebRTCProvider from '@/providers/WebRTC';
 
 interface ProvidersProps {
   children: React.ReactNode;

@@ -8,14 +8,14 @@ import setting from '@/styles/popups/editServer.module.css';
 import popup from '@/styles/common/popup.module.css';
 
 // Providers
-import { useSocket } from '@/providers/SocketProvider';
-import { useLanguage } from '@/providers/LanguageProvider';
-import { useWebRTC } from '@/providers/WebRTCProvider';
+import { useSocket } from '@/providers/Socket';
+import { useLanguage } from '@/providers/Language';
+import { useWebRTC } from '@/providers/WebRTC';
 
 // Services
 import ipcService from '@/services/ipc.service';
 
-const SettingModal: React.FC = React.memo(() => {
+const SystemSettingPopup: React.FC = React.memo(() => {
   // Hooks
   const lang = useLanguage();
   const webRTC = useWebRTC();
@@ -188,38 +188,45 @@ const SettingModal: React.FC = React.memo(() => {
               <div className={popup['inputGroup']}>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <div className={popup['label']}>{lang.tr.inputDevice}</div>
-                  <select value={selectedInput} onChange={handleInputChange}>
-                    <option value="">
-                      {lang.tr.defaultMicrophone} (
-                      {inputDevices[0]?.label || lang.tr.unknownDevice})
-                    </option>
-                    {inputDevices.map((device) => (
-                      <option key={device.deviceId} value={device.deviceId}>
-                        {device.label ||
-                          `${lang.tr.microphone} ${
-                            inputDevices.indexOf(device) + 1
-                          }`}
+                  <div className={popup['selectBox']}>
+                    <select value={selectedInput} onChange={handleInputChange}>
+                      <option value="">
+                        {lang.tr.defaultMicrophone} (
+                        {inputDevices[0]?.label || lang.tr.unknownDevice})
                       </option>
-                    ))}
-                  </select>
+                      {inputDevices.map((device) => (
+                        <option key={device.deviceId} value={device.deviceId}>
+                          {device.label ||
+                            `${lang.tr.microphone} ${
+                              inputDevices.indexOf(device) + 1
+                            }`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <div className={popup['label']}>{lang.tr.outputDevice}</div>
-                  <select value={selectedOutput} onChange={handleOutputChange}>
-                    <option value="">
-                      {lang.tr.defaultSpeaker} (
-                      {outputDevices[0]?.label || lang.tr.unknownDevice})
-                    </option>
-                    {outputDevices.map((device) => (
-                      <option key={device.deviceId} value={device.deviceId}>
-                        {device.label ||
-                          `${lang.tr.speaker} ${
-                            outputDevices.indexOf(device) + 1
-                          }`}
+                  <div className={popup['selectBox']}>
+                    <select
+                      value={selectedOutput}
+                      onChange={handleOutputChange}
+                    >
+                      <option value="">
+                        {lang.tr.defaultSpeaker} (
+                        {outputDevices[0]?.label || lang.tr.unknownDevice})
                       </option>
-                    ))}
-                  </select>
+                      {outputDevices.map((device) => (
+                        <option key={device.deviceId} value={device.deviceId}>
+                          {device.label ||
+                            `${lang.tr.speaker} ${
+                              outputDevices.indexOf(device) + 1
+                            }`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -356,6 +363,6 @@ const SettingModal: React.FC = React.memo(() => {
   );
 });
 
-SettingModal.displayName = 'SettingModal';
+SystemSettingPopup.displayName = 'SystemSettingPopup';
 
-export default SettingModal;
+export default SystemSettingPopup;
