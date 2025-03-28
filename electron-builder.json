@@ -12,6 +12,12 @@
   ],
   "asar": true,
   "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+  "extraFiles": [
+    {
+      "from": ".env",
+      "to": ".env"
+    }
+  ],
   "win": {
     "icon": "./resources/icon.ico",
     "target": [
