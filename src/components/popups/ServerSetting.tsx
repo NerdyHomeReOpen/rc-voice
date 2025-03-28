@@ -176,14 +176,14 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
       });
     };
 
-    // const handleUpdateMember = (
-    //   member: Partial<Member>,
-    //   userId: User['id'],
-    //   serverId: Server['id'],
-    // ) => {
-    //   if (!socket) return;
-    //   socket.send.updateMember({ member, userId, serverId });
-    // };
+    const handleUpdateMember = (
+      member: Partial<Member>,
+      userId: User['id'],
+      serverId: Server['id'],
+    ) => {
+      if (!socket) return;
+      socket.send.updateMember({ member, userId, serverId });
+    };
 
     const handleCreateMember = (
       member: Partial<Member>,
@@ -658,8 +658,61 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
                                 {
                                   id: 'member-management',
                                   label: lang.tr.memberManagement,
-                                  onClick: () => {},
                                   show: !isCurrentUser,
+                                  icon: 'submenu',
+                                  hasSubmenu: true,
+                                  submenuItems: [
+                                    {
+                                      id: 'set-guest',
+                                      label: lang.tr.setGuest,
+                                      onClick: () =>
+                                        handleUpdateMember(
+                                          { permissionLevel: 1 },
+                                          memberUserId,
+                                          memberServerId,
+                                        ),
+                                    },
+                                    {
+                                      id: 'set-member',
+                                      label: lang.tr.setMember,
+                                      onClick: () =>
+                                        handleUpdateMember(
+                                          { permissionLevel: 2 },
+                                          memberUserId,
+                                          memberServerId,
+                                        ),
+                                    },
+                                    {
+                                      id: 'set-channel-admin',
+                                      label: lang.tr.setChannelAdmin,
+                                      onClick: () =>
+                                        handleUpdateMember(
+                                          { permissionLevel: 3 },
+                                          memberUserId,
+                                          memberServerId,
+                                        ),
+                                    },
+                                    {
+                                      id: 'set-category-admin',
+                                      label: lang.tr.setCategoryAdmin,
+                                      onClick: () =>
+                                        handleUpdateMember(
+                                          { permissionLevel: 4 },
+                                          memberUserId,
+                                          memberServerId,
+                                        ),
+                                    },
+                                    {
+                                      id: 'set-admin',
+                                      label: lang.tr.setAdmin,
+                                      onClick: () =>
+                                        handleUpdateMember(
+                                          { permissionLevel: 5 },
+                                          memberUserId,
+                                          memberServerId,
+                                        ),
+                                    },
+                                  ],
                                 },
                               ]);
                             }}

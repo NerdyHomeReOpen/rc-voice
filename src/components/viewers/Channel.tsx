@@ -437,15 +437,16 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       });
     };
 
-    const handleUpdateMember = (permissionLevel: number) => {
+    const handleUpdateMember = (
+      member: Partial<Member>,
+      userId: User['id'],
+      serverId: Server['id'],
+    ) => {
       if (!socket) return;
       socket.send.updateMember({
-        member: {
-          ...channelMember,
-          permissionLevel: permissionLevel,
-        },
+        member,
         userId,
-        serverId: channelMemberServerId,
+        serverId,
       });
     };
 
@@ -483,27 +484,52 @@ const UserTab: React.FC<UserTabProps> = React.memo(
                 {
                   id: 'set-guest',
                   label: lang.tr.setGuest,
-                  onClick: () => handleUpdateMember(1),
+                  onClick: () =>
+                    handleUpdateMember(
+                      { permissionLevel: 1 },
+                      channelMemberUserId,
+                      channelMemberServerId,
+                    ),
                 },
                 {
                   id: 'set-member',
                   label: lang.tr.setMember,
-                  onClick: () => handleUpdateMember(2),
+                  onClick: () =>
+                    handleUpdateMember(
+                      { permissionLevel: 2 },
+                      channelMemberUserId,
+                      channelMemberServerId,
+                    ),
                 },
                 {
                   id: 'set-channel-admin',
                   label: lang.tr.setChannelAdmin,
-                  onClick: () => handleUpdateMember(3),
+                  onClick: () =>
+                    handleUpdateMember(
+                      { permissionLevel: 3 },
+                      channelMemberUserId,
+                      channelMemberServerId,
+                    ),
                 },
                 {
                   id: 'set-category-admin',
                   label: lang.tr.setCategoryAdmin,
-                  onClick: () => handleUpdateMember(4),
+                  onClick: () =>
+                    handleUpdateMember(
+                      { permissionLevel: 4 },
+                      channelMemberUserId,
+                      channelMemberServerId,
+                    ),
                 },
                 {
                   id: 'set-admin',
                   label: lang.tr.setAdmin,
-                  onClick: () => handleUpdateMember(5),
+                  onClick: () =>
+                    handleUpdateMember(
+                      { permissionLevel: 5 },
+                      channelMemberUserId,
+                      channelMemberServerId,
+                    ),
                 },
               ],
             },
