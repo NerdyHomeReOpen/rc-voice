@@ -375,7 +375,11 @@ async function createPopup(type, height, width) {
 
 function connectSocket(token) {
   if (!token) return null;
-  if (socketInstance) return socketInstance;
+
+  if (socketInstance) {
+    socketInstance.disconnect();
+    socketInstance = disconnectSocket(socketInstance);
+  }
 
   const socket = io(WS_URL, {
     transports: ['websocket'],
@@ -396,9 +400,14 @@ function connectSocket(token) {
   }, {});
 
   socket.on('connect', () => {
+    Object.values(SocketClientEvent).forEach((event) => {
+      ipcMain.removeAllListeners(event);
+    });
+
     Object.entries(ipcHandlers).forEach(([event, handler]) => {
       ipcMain.on(event, handler);
     });
+
     Object.values(SocketServerEvent).forEach((event) => {
       socket.on(event, (data) => {
         BrowserWindow.getAllWindows().forEach((window) => {
@@ -406,6 +415,20 @@ function connectSocket(token) {
         });
       });
     });
+
+    console.log('Socket 連線成功');
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('Socket 斷開連線，原因:', reason);
+  });
+
+  socket.on('reconnect', (attemptNumber) => {
+    console.log('Socket 重新連線成功，嘗試次數:', attemptNumber);
+  });
+
+  socket.on('reconnect_error', (error) => {
+    console.error('Socket 重新連線失敗:', error);
   });
 
   socket.ipcHandlers = ipcHandlers;
@@ -419,6 +442,14 @@ function disconnectSocket(socket) {
     Object.entries(socket.ipcHandlers).forEach(([event, handler]) => {
       ipcMain.removeListener(event, handler);
     });
+  }
+
+  Object.values(SocketServerEvent).forEach((event) => {
+    socket.off(event);
+  });
+
+  if (socket.connected) {
+    socket.disconnect();
   }
 
   return null;
@@ -440,17 +471,17 @@ function configureAutoUpdater() {
     autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml');
   }
 
-  autoUpdater.on('error', (error) => {
-    if (isDev && error.message.includes('dev-app-update.yml')) {
-      console.log('開發環境中跳過更新檢查');
-      return;
-    }
-    dialog.showMessageBox({
-      type: 'error',
-      title: '更新錯誤',
-      message: '檢查更新時發生錯誤：' + error.message,
-    });
-  });
+  // autoUpdater.on('error', (error) => {
+  //   if (isDev && error.message.includes('dev-app-update.yml')) {
+  //     console.log('開發環境中跳過更新檢查');
+  //     return;
+  //   }
+  //   dialog.showMessageBox({
+  //     type: 'error',
+  //     title: '更新錯誤',
+  //     message: '檢查更新時發生錯誤：' + error.message,
+  //   });
+  // });
 
   autoUpdater.on('checking-for-update', () => {
     console.log('正在檢查更新...');
@@ -482,7 +513,7 @@ function configureAutoUpdater() {
         type: 'info',
         title: '安裝更新',
         message: `版本 ${info.version} 已下載完成，是否立即安裝？`,
-        buttons: ['立即安裝', '稍後安裝'],
+        buttons: ['立即安裝'],
       })
       .then((buttonIndex) => {
         if (buttonIndex.response === 0) {
@@ -551,7 +582,13 @@ app.on('ready', async () => {
   ipcMain.on('login', (_, token) => {
     mainWindow.show();
     authWindow.hide();
-    if (!socketInstance) socketInstance = connectSocket(token);
+
+    if (socketInstance) {
+      socketInstance.disconnect();
+      socketInstance = disconnectSocket(socketInstance);
+    }
+
+    socketInstance = connectSocket(token);
     socketInstance.connect();
   });
   ipcMain.on('logout', () => {
