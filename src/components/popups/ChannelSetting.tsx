@@ -64,6 +64,25 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       original: 'free',
     });
 
+    type SettingState<T> = {
+      current: T;
+      original: T;
+    };
+
+    const [guestSettings, setGuestSettings] = useState<{
+      forbidText: SettingState<boolean>;
+      forbidUrl: SettingState<boolean>;
+      maxLength: SettingState<number>;
+      waitTime: SettingState<number>;
+      interval: SettingState<number>;
+    }>({
+      forbidText: { current: false, original: false },
+      forbidUrl: { current: false, original: false },
+      maxLength: { current: 0, original: 0 },
+      waitTime: { current: 0, original: 0 },
+      interval: { current: 0, original: 0 },
+    });
+
     // Variables
     const { channelId, serverId } = initialData;
 
@@ -102,10 +121,145 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
         original: voiceMode,
       });
       setChannelOrder(data.order);
+
+      setGuestSettings({
+        forbidText: {
+          current: data.forbidGuestText || false,
+          original: data.forbidGuestText || false,
+        },
+        forbidUrl: {
+          current: data.forbidGuestUrl || false,
+          original: data.forbidGuestUrl || false,
+        },
+        maxLength: {
+          current: data.guestTextMaxLength || 2000,
+          original: data.guestTextMaxLength || 2000,
+        },
+        waitTime: {
+          current: data.guestTextWaitTime || 0,
+          original: data.guestTextWaitTime || 0,
+        },
+        interval: {
+          current: data.guestTextInterval || 0,
+          original: data.guestTextInterval || 0,
+        },
+      });
     };
 
     const handleClose = () => {
       ipcService.window.close();
+    };
+
+    const handleSubmitSetting = () => {
+      type ChangeRecord = {
+        from: string | number | boolean;
+        to: string | number | boolean;
+        message: string;
+      };
+
+      const changes: Record<string, ChangeRecord> = {};
+
+      if (channelTextState.current !== channelTextState.original) {
+        changes.chatMode = {
+          from: channelTextState.original,
+          to: channelTextState.current,
+          message:
+            channelTextState.current === 'free'
+              ? 'TEXT_CHANGE_TO_FREE_SPEECH'
+              : 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
+        };
+      }
+
+      if (channelVoiceState.current !== channelVoiceState.original) {
+        changes.voiceMode = {
+          from: channelVoiceState.original,
+          to: channelVoiceState.current,
+          message:
+            channelVoiceState.current === 'queue'
+              ? 'VOICE_CHANGE_TO_QUEUE'
+              : channelVoiceState.current === 'forbidden'
+              ? 'VOICE_CHANGE_TO_FORBIDDEN_SPEECH'
+              : 'VOICE_CHANGE_TO_FREE_SPEECH',
+        };
+      }
+
+      if (
+        guestSettings.forbidText.current !== guestSettings.forbidText.original
+      ) {
+        changes.forbidGuestText = {
+          from: guestSettings.forbidText.original,
+          to: guestSettings.forbidText.current,
+          message: 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
+        };
+      }
+
+      if (
+        guestSettings.forbidUrl.current !== guestSettings.forbidUrl.original
+      ) {
+        changes.forbidGuestUrl = {
+          from: guestSettings.forbidUrl.original,
+          to: guestSettings.forbidUrl.current,
+          message: guestSettings.forbidUrl.current
+            ? 'TEXT_CHANGE_TO_FORBIDDEN_URL'
+            : 'TEXT_CHANGE_TO_ALLOWED_URL',
+        };
+      }
+
+      if (
+        guestSettings.maxLength.current !== guestSettings.maxLength.original
+      ) {
+        changes.guestTextMaxLength = {
+          from: guestSettings.maxLength.original,
+          to: guestSettings.maxLength.current,
+          message: `TEXT_CHANGE_TO_MAX_LENGTH ${guestSettings.maxLength.current}`,
+        };
+      }
+
+      if (guestSettings.waitTime.current !== guestSettings.waitTime.original) {
+        changes.guestTextWaitTime = {
+          from: guestSettings.waitTime.original,
+          to: guestSettings.waitTime.current,
+          message: `TEXT_CHANGE_TO_WAIT_TIME ${guestSettings.waitTime.current}`,
+        };
+      }
+
+      if (guestSettings.interval.current !== guestSettings.interval.original) {
+        changes.guestTextInterval = {
+          from: guestSettings.interval.original,
+          to: guestSettings.interval.current,
+          message: `TEXT_CHANGE_TO_INTERVAL ${guestSettings.interval.current}`,
+        };
+      }
+
+      Object.values(changes).forEach(({ message }) => {
+        handleSendMessage(
+          {
+            type: 'info',
+            content: message,
+            timestamp: 0,
+          },
+          channelId,
+        );
+      });
+
+      handleUpdateChannel(
+        {
+          name: channelName,
+          visibility: channelVisibility,
+          userLimit: channelUserLimit,
+          chatMode: channelTextState.current,
+          voiceMode: channelVoiceState.current,
+          order: channelOrder,
+          forbidGuestText: guestSettings.forbidText.current,
+          forbidGuestUrl: guestSettings.forbidUrl.current,
+          guestTextMaxLength: guestSettings.maxLength.current,
+          guestTextWaitTime: guestSettings.waitTime.current,
+          guestTextInterval: guestSettings.interval.current,
+        },
+        channelId,
+        serverId,
+      );
+      handleClose();
     };
 
     // Effects
@@ -157,7 +311,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                       </div>
                       <input
                         type="text"
-                        value={channelName}
+                        value={channelName || ''}
                         onChange={(e) => setChannelName(e.target.value)}
                       />
                     </div>
@@ -166,7 +320,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                       <div className={popup['label']}>{lang.tr.userLimit}</div>
                       <input
                         type="number"
-                        value={channelUserLimit}
+                        value={channelUserLimit || 0}
                         disabled={
                           channelVisibility === 'readonly' || channelIsLobby
                         }
@@ -187,7 +341,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                       </div>
                       <input
                         type="number"
-                        value={channelOrder}
+                        value={channelOrder || 0}
                         min="-999"
                         max="999"
                         onChange={(e) => {
@@ -206,7 +360,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                     <div className={popup['label']}>{lang.tr.channelMode}</div>
                     <div className={popup['selectBox']}>
                       <select
-                        value={channelVoiceState.current}
+                        value={channelVoiceState.current || 'free'}
                         onChange={(e) =>
                           setChannelVoiceState((prev) => ({
                             ...prev,
@@ -416,68 +570,102 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                     </label>
                   </div>
 
-                  <div className={`${popup['inputBox']} ${popup['disabled']}`}>
+                  <div className={popup['inputBox']}>
                     <input
                       type="checkbox"
-                      checked={false}
-                      onChange={() => {}}
+                      checked={guestSettings.forbidText.current}
+                      onChange={(e) =>
+                        setGuestSettings((prev) => ({
+                          ...prev,
+                          forbidText: {
+                            ...prev.forbidText,
+                            current: e.target.checked,
+                          },
+                        }))
+                      }
                     />
                     <label className={popup['label']}>
                       {lang.tr.forbidGuestText}
                     </label>
                   </div>
 
-                  <div className={`${popup['inputBox']} ${popup['disabled']}`}>
+                  <div className={popup['inputBox']}>
                     <input
                       type="checkbox"
-                      checked={false}
-                      onChange={() => {}}
+                      checked={guestSettings.forbidUrl.current}
+                      onChange={(e) =>
+                        setGuestSettings((prev) => ({
+                          ...prev,
+                          forbidUrl: {
+                            ...prev.forbidUrl,
+                            current: e.target.checked,
+                          },
+                        }))
+                      }
                     />
                     <label className={popup['label']}>
                       {lang.tr.forbidGuestUrl}
                     </label>
                   </div>
 
-                  <div
-                    className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
-                  >
+                  <div className={`${popup['inputBox']} ${popup['row']}`}>
                     <div className={popup['label']}>
                       {lang.tr.guestTextMaxLength}
                     </div>
                     <input
-                      type="text"
-                      value={0}
-                      onChange={() => {}}
+                      type="number"
+                      value={guestSettings.maxLength.current}
+                      onChange={(e) =>
+                        setGuestSettings((prev) => ({
+                          ...prev,
+                          maxLength: {
+                            ...prev.maxLength,
+                            current: Math.max(0, parseInt(e.target.value) || 0),
+                          },
+                        }))
+                      }
                       style={{ width: '60px' }}
                     />
                     <div className={popup['label']}>{lang.tr.characters}</div>
                   </div>
 
-                  <div
-                    className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
-                  >
+                  <div className={`${popup['inputBox']} ${popup['row']}`}>
                     <div className={popup['label']}>
                       {lang.tr.guestTextWaitTime}
                     </div>
                     <input
-                      type="text"
-                      value={0}
-                      onChange={() => {}}
+                      type="number"
+                      value={guestSettings.waitTime.current}
+                      onChange={(e) =>
+                        setGuestSettings((prev) => ({
+                          ...prev,
+                          waitTime: {
+                            ...prev.waitTime,
+                            current: Math.max(0, parseInt(e.target.value) || 0),
+                          },
+                        }))
+                      }
                       style={{ width: '60px' }}
                     />
                     <div className={popup['label']}>{lang.tr.seconds}</div>
                   </div>
 
-                  <div
-                    className={`${popup['inputBox']} ${popup['row']} ${popup['disabled']}`}
-                  >
+                  <div className={`${popup['inputBox']} ${popup['row']}`}>
                     <div className={popup['label']}>
                       {lang.tr.guestTextInterval}
                     </div>
                     <input
-                      type="text"
-                      value={0}
-                      onChange={() => {}}
+                      type="number"
+                      value={guestSettings.interval.current}
+                      onChange={(e) =>
+                        setGuestSettings((prev) => ({
+                          ...prev,
+                          interval: {
+                            ...prev.interval,
+                            current: Math.max(0, parseInt(e.target.value) || 0),
+                          },
+                        }))
+                      }
                       style={{ width: '60px' }}
                     />
                     <div className={popup['label']}>{lang.tr.seconds}</div>
@@ -491,51 +679,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
         <div className={popup['popupFooter']}>
           <button
             className={popup['button']}
-            onClick={() => {
-              if (channelTextState.current !== channelTextState.original) {
-                handleSendMessage(
-                  {
-                    type: 'info',
-                    content:
-                      channelTextState.current === 'free'
-                        ? 'TEXT_CHANGE_TO_FREE_SPEECH'
-                        : 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
-                    timestamp: 0,
-                  },
-                  channelId,
-                );
-              }
-
-              if (channelVoiceState.current !== channelVoiceState.original) {
-                handleSendMessage(
-                  {
-                    type: 'info',
-                    content:
-                      channelVoiceState.current === 'queue'
-                        ? 'VOICE_CHANGE_TO_QUEUE'
-                        : channelVoiceState.current === 'forbidden'
-                        ? 'VOICE_CHANGE_TO_FORBIDDEN_SPEECH'
-                        : 'VOICE_CHANGE_TO_FREE_SPEECH',
-                    timestamp: 0,
-                  },
-                  channelId,
-                );
-              }
-
-              handleUpdateChannel(
-                {
-                  name: channelName,
-                  visibility: channelVisibility,
-                  userLimit: channelUserLimit,
-                  chatMode: channelTextState.current,
-                  voiceMode: channelVoiceState.current,
-                  order: channelOrder,
-                },
-                channelId,
-                serverId,
-              );
-              handleClose();
-            }}
+            onClick={() => handleSubmitSetting()}
           >
             {lang.tr.confirm}
           </button>

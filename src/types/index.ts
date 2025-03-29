@@ -302,6 +302,11 @@ export interface Translation {
   addFriendSubGroups: string;
   getHelp: string;
   discord: string;
+  TEXT_CHANGE_TO_FORBIDDEN_URL: string;
+  TEXT_CHANGE_TO_ALLOWED_URL: string;
+  TEXT_CHANGE_TO_MAX_LENGTH: string;
+  TEXT_CHANGE_TO_WAIT_TIME: string;
+  TEXT_CHANGE_TO_INTERVAL: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -616,6 +621,12 @@ export const translations: Record<LanguageKey, Translation> = {
     addFriendSubGroups: '請填寫分組名稱',
     getHelp: '獲得協助',
     discord: 'Discord',
+    TEXT_CHANGE_TO_FORBIDDEN_URL:
+      '此頻道已被設定為禁止訪客發送包含URL的文字訊息',
+    TEXT_CHANGE_TO_ALLOWED_URL: '此頻道已被設定為允許訪客發送包含URL的文字訊息',
+    TEXT_CHANGE_TO_MAX_LENGTH: '遊客發送文字訊息的最大長度已變更為: {0}',
+    TEXT_CHANGE_TO_WAIT_TIME: '遊客允許發送文字訊息的等待時間已變更為: {0} 秒',
+    TEXT_CHANGE_TO_INTERVAL: '遊客每次發送文字訊息的相隔時間已變更為: {0} 秒',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -926,6 +937,11 @@ export const translations: Record<LanguageKey, Translation> = {
     addFriendSubGroups: '请输入分组名称',
     getHelp: 'Get Help',
     discord: 'Discord',
+    TEXT_CHANGE_TO_FORBIDDEN_URL: '此频道被设定为禁止访客发送包含URL的文字消息',
+    TEXT_CHANGE_TO_ALLOWED_URL: '此频道被设定为允许访客发送包含URL的文字消息',
+    TEXT_CHANGE_TO_MAX_LENGTH: '游客发送文字消息的最大长度已变更为: {0} 字',
+    TEXT_CHANGE_TO_WAIT_TIME: '游客允许发送文字消息的等待时间已变更为: {0} 秒',
+    TEXT_CHANGE_TO_INTERVAL: '游客每次发送文字消息的相隔时间已变更为: {0} 秒',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -1252,6 +1268,16 @@ export const translations: Record<LanguageKey, Translation> = {
     addFriendSubGroups: 'Please fill in the subgroup name',
     getHelp: 'Get Help',
     discord: 'Discord',
+    TEXT_CHANGE_TO_FORBIDDEN_URL:
+      'This channel has been set to forbid guests from sending messages containing URLs',
+    TEXT_CHANGE_TO_ALLOWED_URL:
+      'This channel has been set to allow guests to send messages containing URLs',
+    TEXT_CHANGE_TO_MAX_LENGTH:
+      'The maximum length of guest text messages has been changed to: {0} characters',
+    TEXT_CHANGE_TO_WAIT_TIME:
+      'The wait time before guests can send messages has been changed to: {0} seconds',
+    TEXT_CHANGE_TO_INTERVAL:
+      'The interval between guest messages has been changed to: {0} seconds',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1576,6 +1602,13 @@ export const translations: Record<LanguageKey, Translation> = {
     addFriendSubGroups: 'サブグループ名を記入してください',
     getHelp: 'ヘルプを取得',
     discord: 'Discord',
+    TEXT_CHANGE_TO_FORBIDDEN_URL:
+      'このチャンネルはゲストのURL含むメッセージを禁止しています',
+    TEXT_CHANGE_TO_ALLOWED_URL:
+      'このチャンネルはゲストのURL含むメッセージを許可しています',
+    TEXT_CHANGE_TO_MAX_LENGTH: 'ゲストのテキストメッセージ最大長: {0} 文字',
+    TEXT_CHANGE_TO_WAIT_TIME: 'ゲストのメッセージ待機時間: {0} 秒',
+    TEXT_CHANGE_TO_INTERVAL: 'ゲストのメッセージ間隔: {0}',
   },
 };
 
@@ -1607,6 +1640,7 @@ export type User = {
   currentServerId: string;
   lastActiveAt: number;
   createdAt: number;
+  vip: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   badges?: Badge[];
   friends?: UserFriend[];
@@ -1703,6 +1737,11 @@ export type Channel = BaseChannel & {
   voiceMode: 'free' | 'queue' | 'forbidden';
   chatMode: 'free' | 'forbidden';
   categoryId: string | null;
+  forbidGuestText: boolean;
+  forbidGuestUrl: boolean;
+  guestTextMaxLength: number;
+  guestTextWaitTime: number;
+  guestTextInterval: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   messages?: ChannelMessage[];
 };

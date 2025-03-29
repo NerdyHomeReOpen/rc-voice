@@ -61,6 +61,11 @@
   background-position: -36px 0;
 }
 
+.disabled {
+  color: #8f8f8f;
+  pointer-events: none;
+}
+
 .emojiGrid {
   position: absolute;
   top: -15rem;
@@ -328,4 +333,17 @@
 
 .emoji[data-id='61'] {
   background-image: url('../../public/smiles/61.gif');
+}
+
+.error {
+  border-color: #ff4d4f;
+}
+
+.errorMessage {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  color: #ff4d4f;
+  font-size: 12px;
+  line-height: 1.5;
 }

@@ -54,10 +54,12 @@ interface ChannelMessageTabProps {
   messageGroup: ChannelMessage & {
     contents: string[];
   };
+  isGuest?: boolean;
+  forbidGuestUrl?: boolean;
 }
 
 const ChannelMessageTab: React.FC<ChannelMessageTabProps> = React.memo(
-  ({ messageGroup }) => {
+  ({ messageGroup, isGuest = false, forbidGuestUrl = false }) => {
     // Hooks
     const lang = useLanguage();
 
@@ -88,7 +90,11 @@ const ChannelMessageTab: React.FC<ChannelMessageTabProps> = React.memo(
           </div>
           {messageContents.map((content, index) => (
             <div key={index} className={styles['content']}>
-              <MarkdownViewer markdownText={content} />
+              <MarkdownViewer
+                markdownText={content}
+                isGuest={isGuest}
+                forbidGuestUrl={forbidGuestUrl}
+              />
             </div>
           ))}
         </div>
@@ -103,6 +109,8 @@ interface InfoMessageTabProps {
   messageGroup: InfoMessage & {
     contents: string[];
   };
+  isGuest?: boolean;
+  forbidGuestUrl?: boolean;
 }
 
 const InfoMessageTab: React.FC<InfoMessageTabProps> = React.memo(
@@ -110,19 +118,29 @@ const InfoMessageTab: React.FC<InfoMessageTabProps> = React.memo(
     const lang = useLanguage();
     const { contents: messageContents } = messageGroup;
 
+    const getTranslatedContent = (content: string) => {
+      if (content.includes(' ')) {
+        const [key, ...params] = content.split(' ');
+        if (Object.prototype.hasOwnProperty.call(lang.tr, key)) {
+          let translatedText = lang.tr[key as keyof typeof lang.tr];
+          params.forEach((param, index) => {
+            translatedText = translatedText.replace(`{${index}}`, param);
+          });
+          return translatedText;
+        }
+      }
+      return Object.prototype.hasOwnProperty.call(lang.tr, content)
+        ? lang.tr[content as keyof typeof lang.tr]
+        : content;
+    };
+
     return (
       <>
         <div className={styles['infoIcon']} />
         <div className={styles['messageBox']}>
           {messageContents.map((content, index) => (
             <div key={index}>
-              <MarkdownViewer
-                markdownText={
-                  Object.prototype.hasOwnProperty.call(lang.tr, content)
-                    ? lang.tr[content as keyof typeof lang.tr]
-                    : content
-                }
-              />
+              <MarkdownViewer markdownText={getTranslatedContent(content)} />
             </div>
           ))}
         </div>
@@ -139,10 +157,12 @@ type MessageGroup = (DirectMessage | ChannelMessage | InfoMessage) & {
 
 interface MessageViewerProps {
   messages: DirectMessage[] | ChannelMessage[] | InfoMessage[];
+  isGuest?: boolean;
+  forbidGuestUrl?: boolean;
 }
 
 const MessageViewer: React.FC<MessageViewerProps> = React.memo(
-  ({ messages }) => {
+  ({ messages, isGuest = false, forbidGuestUrl = false }) => {
     // Variables
     const sortedMessages = [...messages].sort(
       (a, b) => a.timestamp - b.timestamp,
@@ -186,9 +206,17 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
           return (
             <div key={messageGroup.id} className={styles['messageWrapper']}>
               {messageGroup.type === 'info' ? (
-                <InfoMessageTab messageGroup={messageGroup} />
+                <InfoMessageTab
+                  messageGroup={messageGroup}
+                  isGuest={isGuest}
+                  forbidGuestUrl={forbidGuestUrl}
+                />
               ) : messageGroup.type === 'general' ? (
-                <ChannelMessageTab messageGroup={messageGroup} />
+                <ChannelMessageTab
+                  messageGroup={messageGroup}
+                  isGuest={isGuest}
+                  forbidGuestUrl={forbidGuestUrl}
+                />
               ) : messageGroup.type === 'dm' ? (
                 <DirectMessageTab messageGroup={messageGroup} />
               ) : null}

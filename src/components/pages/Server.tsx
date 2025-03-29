@@ -74,6 +74,8 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const [usersInServer, setUsersInServer] = useState<Member[]>(
       server.users || [],
     );
+    const [lastMessageTime, setLastMessageTime] = useState<number>(0);
+    const [joinTime, setJoinTime] = useState<number>(Date.now());
 
     // Variables
     const { id: userId, currentChannelId: userCurrentChannelId } = user;
@@ -91,8 +93,14 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       bitrate: channelBitrate,
       chatMode: channelChatMode,
       voiceMode: channelVoiceMode,
+      forbidGuestText,
+      forbidGuestUrl,
+      guestTextMaxLength,
+      guestTextWaitTime,
+      guestTextInterval,
     } = currentChannel;
     const { permissionLevel: memberPermissionLevel } = member;
+    const isGuest = memberPermissionLevel === 1;
 
     // Handlers
     const handleSendMessage = (
@@ -318,6 +326,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       setUsersInServer(updatedUsersInServer);
     }, [serverMembers, serverId]);
 
+    useEffect(() => {
+      if (currentChannel?.id !== userCurrentChannelId) setJoinTime(Date.now());
+    }, [currentChannel?.id, userCurrentChannelId]);
+
     return (
       <div className={styles['serverWrapper']}>
         {/* Main Content */}
@@ -437,10 +449,18 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
           {/* Right Content */}
           <div className={styles['mainContent']}>
             <div className={styles['announcementArea']}>
-              <MarkdownViewer markdownText={serverAnnouncement} />
+              <MarkdownViewer
+                markdownText={serverAnnouncement}
+                isGuest={isGuest}
+                forbidGuestUrl={forbidGuestUrl}
+              />
             </div>
             <div className={styles['messageArea']}>
-              <MessageViewer messages={channelMessages} />
+              <MessageViewer
+                messages={channelMessages}
+                isGuest={isGuest}
+                forbidGuestUrl={forbidGuestUrl}
+              />
             </div>
             <div className={styles['inputArea']}>
               <MessageInputBox
@@ -455,10 +475,19 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                     },
                     currentChannelId,
                   );
+                  setLastMessageTime(Date.now());
                 }}
                 locked={
                   channelChatMode === 'forbidden' && memberPermissionLevel < 3
                 }
+                isGuest={isGuest}
+                forbidGuestText={forbidGuestText}
+                forbidGuestUrl={forbidGuestUrl}
+                guestTextMaxLength={guestTextMaxLength}
+                guestTextWaitTime={guestTextWaitTime}
+                guestTextInterval={guestTextInterval}
+                lastMessageTime={lastMessageTime}
+                joinTime={joinTime}
               />
             </div>
             <div className={styles['buttonArea']}>

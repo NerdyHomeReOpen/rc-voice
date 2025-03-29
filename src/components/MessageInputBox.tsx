@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // CSS
 import messageInputBox from '@/styles/messageInputBox.module.css';
@@ -35,30 +35,155 @@ EmojiGrid.displayName = 'EmojiGrid';
 interface MessageInputBoxProps {
   onSendMessage?: (message: string) => void;
   locked?: boolean;
+  isGuest?: boolean;
+  forbidGuestText?: boolean;
+  forbidGuestUrl?: boolean;
+  guestTextMaxLength?: number;
+  guestTextWaitTime?: number;
+  guestTextInterval?: number;
+  lastMessageTime?: number;
+  joinTime?: number;
 }
 
 const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
-  ({ onSendMessage, locked = false }) => {
+  ({
+    onSendMessage,
+    locked = false,
+    isGuest = false,
+    forbidGuestText = false,
+    forbidGuestUrl = false,
+    guestTextMaxLength = 0,
+    guestTextWaitTime = 0,
+    guestTextInterval = 0,
+    lastMessageTime = 0,
+    joinTime = Date.now(),
+  }) => {
     // Language
     const lang = useLanguage();
-
-    // Constants
-    const MAXLENGTH = 2000;
 
     // States
     const [messageInput, setMessageInput] = useState<string>('');
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
     const [isComposing, setIsComposing] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [hasSentMessage, setHasSentMessage] = useState<boolean>(false);
+    const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
     // Variables
-    const isWarning = messageInput.length >= MAXLENGTH;
     const isLocked = locked;
+    const timeSinceJoin = currentTime - joinTime;
+    const timeSinceLastMessage = currentTime - lastMessageTime;
+    const canSendMessage = !isGuest || !forbidGuestText;
+    const isWaiting =
+      guestTextWaitTime > 0 &&
+      isGuest &&
+      !hasSentMessage &&
+      timeSinceJoin < guestTextWaitTime * 1000;
+    const isInInterval =
+      isGuest &&
+      hasSentMessage &&
+      guestTextInterval > 0 &&
+      !isWaiting &&
+      timeSinceLastMessage < guestTextInterval * 1000;
+    const isOverLength = isGuest && messageInput.length > guestTextMaxLength;
+    const MAXLENGTH = isGuest ? guestTextMaxLength : 2000;
+    const isWarning = messageInput.length >= MAXLENGTH;
+
+    useEffect(() => {
+      setHasSentMessage(false);
+      setMessageInput('');
+      setErrorMessage('');
+      setCurrentTime(Date.now());
+    }, [joinTime]);
+
+    useEffect(() => {
+      if (!isGuest || (!isWaiting && !isInInterval)) return;
+
+      setCurrentTime(Date.now());
+
+      const interval = setInterval(() => {
+        setCurrentTime(Date.now());
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }, [isGuest, isWaiting, isInInterval]);
+
+    const getPlaceholder = () => {
+      if (isLocked) return lang.tr.textChangeToForbiddenSpeech;
+      if (isGuest && forbidGuestText) return lang.tr.forbidGuestText;
+      if (isGuest && isWaiting) {
+        const remainingTime = Math.max(
+          0,
+          Math.floor((guestTextWaitTime * 1000 - timeSinceJoin) / 1000),
+        );
+        return `${lang.tr.guestTextWaitTime} ${remainingTime} ${lang.tr.seconds}`;
+      }
+      if (isGuest && isInInterval && guestTextInterval > 0) {
+        const remainingTime = Math.max(
+          0,
+          Math.floor((guestTextInterval * 1000 - timeSinceLastMessage) / 1000),
+        );
+        return `${lang.tr.guestTextInterval} ${remainingTime} ${lang.tr.seconds}`;
+      }
+      if (isGuest && isOverLength)
+        return `${lang.tr.guestTextMaxLength} ${guestTextMaxLength} ${lang.tr.characters}`;
+      return lang.tr.inputMessage;
+    };
+
+    const validateMessage = (message: string): boolean => {
+      if (isGuest && forbidGuestText) {
+        setErrorMessage(lang.tr.forbidGuestText);
+        return false;
+      }
+      if (isGuest && isWaiting) {
+        const remainingTime = Math.max(
+          0,
+          Math.floor((guestTextWaitTime * 1000 - timeSinceJoin) / 1000),
+        );
+        setErrorMessage(
+          `${lang.tr.guestTextWaitTime} ${remainingTime} ${lang.tr.seconds}`,
+        );
+        return false;
+      }
+      if (isGuest && isInInterval && guestTextInterval > 0) {
+        const remainingTime = Math.max(
+          0,
+          Math.floor((guestTextInterval * 1000 - timeSinceLastMessage) / 1000),
+        );
+        setErrorMessage(
+          `${lang.tr.guestTextInterval} ${remainingTime} ${lang.tr.seconds}`,
+        );
+        return false;
+      }
+      if (isGuest && message.length > guestTextMaxLength) {
+        setErrorMessage(
+          `${lang.tr.guestTextMaxLength} ${guestTextMaxLength} ${lang.tr.characters}`,
+        );
+        return false;
+      }
+      if (isGuest && forbidGuestUrl && message.includes('http')) {
+        setErrorMessage(lang.tr.forbidGuestUrl);
+        return false;
+      }
+      return true;
+    };
+
+    const handleSendMessage = () => {
+      if (validateMessage(messageInput)) {
+        onSendMessage?.(messageInput);
+        setMessageInput('');
+        setErrorMessage('');
+        setHasSentMessage(true);
+      }
+    };
 
     return (
       <div
         className={`${messageInputBox['messageInputBox']} 
         ${isWarning ? messageInputBox['warning'] : ''} 
-        ${isLocked ? messageInputBox['locked'] : ''}`}
+        ${isLocked ? messageInputBox['locked'] : ''}
+        ${errorMessage ? messageInputBox['error'] : ''}
+        ${isLocked || !canSendMessage ? messageInputBox['disabled'] : ''}`}
       >
         <div
           className={messageInputBox['emojiIcon']}
@@ -75,20 +200,16 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
         </div>
 
         <textarea
-          disabled={isLocked}
           className={`${messageInputBox['textarea']} 
           ${isLocked ? 'bg-transparent' : ''}`}
           rows={2}
-          placeholder={
-            isLocked
-              ? lang.tr.textChangeToForbiddenSpeech
-              : lang.tr.inputMessage
-          }
+          placeholder={getPlaceholder()}
           value={messageInput}
           onChange={(e) => {
             if (isLocked) return;
             e.preventDefault();
             setMessageInput(e.target.value);
+            setErrorMessage('');
           }}
           onPaste={(e) => {
             if (isLocked) return;
@@ -107,8 +228,7 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
             )
               return;
             e.preventDefault();
-            onSendMessage?.(messageInput);
-            setMessageInput('');
+            handleSendMessage();
           }}
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
@@ -118,6 +238,9 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
         <div className={messageInputBox['messageInputLength']}>
           {messageInput.length}/{MAXLENGTH}
         </div>
+        {errorMessage && (
+          <div className={messageInputBox['errorMessage']}>{errorMessage}</div>
+        )}
       </div>
     );
   },
