@@ -29,6 +29,7 @@ export const createDefault = {
     currentServerId: '',
     lastActiveAt: 0,
     createdAt: 0,
+    vip: 0,
     ...overrides,
   }),
 
@@ -48,6 +49,11 @@ export const createDefault = {
     serverId: '',
     categoryId: '',
     createdAt: 0,
+    guestTextMaxLength: 2000,
+    guestTextWaitTime: 0,
+    guestTextInterval: 0,
+    forbidGuestText: false,
+    forbidGuestUrl: false,
     ...overrides,
   }),
 
