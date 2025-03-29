@@ -51,11 +51,14 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
     const [userLevel, setUserLevel] = useState<User['level']>(
       createDefault.user().level,
     );
+    const [userVip, setUserVip] = useState<User['vip']>(
+      createDefault.user().vip,
+    );
 
     // Variables
     const { userId } = initialData;
+    console.log(userId);
     const userGrade = Math.min(56, Math.ceil(userLevel / 5)); // 56 is max level
-    const userVip = 0; // REMOVE: only for testing
     const currentYear = new Date().getFullYear();
     const userAge = 20; // REMOVE: only for testing
     const years = Array.from(
@@ -79,6 +82,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
       setUserAvatar(data.avatar);
       setUserAvatarUrl(data.avatarUrl);
       setUserLevel(data.level);
+      setUserVip(data.vip);
     };
 
     const handleClose = () => {
@@ -106,22 +110,28 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
             />
             <div
               className={popup['row']}
-              style={{ alignItems: 'center', gap: '2px' }}
+              style={{ alignItems: 'center', gap: '5px' }}
             >
               <div className={popup['h3']}>{userName}</div>
-              <div
-                className={`${vip['vipIcon']} ${vip[`vip-small-${userVip}`]}`}
-              />
+              {userVip > 0 && (
+                <div
+                  className={`${vip['vipIcon']} ${vip[`vip-small-${userVip}`]}`}
+                />
+              )}
               <div
                 className={`${grade['grade']} ${grade[`lv-${userGrade}`]}`}
               />
             </div>
-            <div className={popup['p1']}>{userName}</div>
-            <div className={popup['p1']}>
-              {lang.tr[userGender === 'Male' ? 'female' : 'female']} . {userAge}
-              . Taiwan
+            <div className={popup['p1']} style={{ color: '#fff' }}>
+              @{userName}
             </div>
-            <div className={popup['p1']}>{userSignature}</div>
+            <div className={popup['p1']} style={{ color: '#fff' }}>
+              {lang.tr[userGender === 'Male' ? 'male' : 'female']} . {userAge}.
+              Taiwan
+            </div>
+            <div className={popup['p1']} style={{ color: '#fff' }}>
+              {userSignature}
+            </div>
 
             <div className={popup['tab']}>
               <div
@@ -136,145 +146,140 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
           </div>
           <div className={setting['body']}>
             <div className={popup['col']}>
-              <div className={popup['col']}>
-                <div className={popup['row']}>
-                  <div className={`${popup['inputBox']} ${popup['col']}`}>
-                    <label
-                      className={popup['label']}
-                      htmlFor="profile-form-nickname"
-                    >
-                      {lang.tr.nickname}
-                    </label>
-                    <input
-                      type="text"
-                      id="profile-form-nickname"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                    />
-                  </div>
-
-                  <div className={`${popup['inputBox']} ${popup['col']}`}>
-                    <label
-                      className={popup['label']}
-                      htmlFor="profile-form-gender"
-                    >
-                      {lang.tr.gender}
-                    </label>
-                    <div className={popup['selectBox']}>
-                      <select
-                        value={userGender}
-                        onChange={(e) =>
-                          setUserGender(e.target.value as User['gender'])
-                        }
-                      >
-                        <option value="Male">{lang.tr.male}</option>
-                        <option value="Female">{lang.tr.female}</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={popup['row']}>
-                  <div
-                    className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
+              <div className={popup['row']}>
+                <div className={`${popup['inputBox']} ${popup['col']}`}>
+                  <label
+                    className={popup['label']}
+                    htmlFor="profile-form-nickname"
                   >
-                    <label
-                      className={popup['label']}
-                      htmlFor="profile-form-country"
-                    >
-                      {lang.tr.country}
-                    </label>
-                    <div className={popup['selectBox']}>
-                      <select>
-                        <option value="taiwan">{lang.tr.taiwan}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div
-                    className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
-                  >
-                    <label
-                      className={popup['label']}
-                      htmlFor="profile-form-birthdate"
-                    >
-                      {lang.tr.birthdate}
-                    </label>
-                    <div className={popup['row']}>
-                      <div className={popup['selectBox']}>
-                        <select
-                          id="birthYear"
-                          // value={userBirthYear}
-                          // onChange={(e) => setUserBirthYear(e.target.value)}
-                        >
-                          {years.map((year) => (
-                            <option key={year} value={year}>
-                              {year}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className={popup['selectBox']}>
-                        <select
-                          className={popup['input']}
-                          id="birthMonth"
-                          // value={userBirthMonth}
-                          // onChange={(e) => setUserBirthMonth(e.target.value)}
-                        >
-                          {months.map((month) => (
-                            <option key={month} value={month}>
-                              {month.toString().padStart(2, '0')}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className={popup['selectBox']}>
-                        <select
-                          className={popup['input']}
-                          id="birthDay"
-                          // value={userBirthDay}
-                          // onChange={(e) => setUserBirthDay(e.target.value)}
-                        >
-                          {days.map((day) => (
-                            <option key={day} value={day}>
-                              {day.toString().padStart(2, '0')}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+                    {lang.tr.nickname}
+                  </label>
+                  <input
+                    type="text"
+                    id="profile-form-nickname"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                  />
                 </div>
 
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <label
                     className={popup['label']}
-                    htmlFor="profile-form-signature"
+                    htmlFor="profile-form-gender"
                   >
-                    {lang.tr.signature}
+                    {lang.tr.gender}
                   </label>
-                  <input
-                    type="text"
-                    id="profile-form-signature"
-                    value={userSignature}
-                    onChange={(e) => setUserSignature(e.target.value)}
-                  />
+                  <div className={popup['selectBox']}>
+                    <select
+                      value={userGender}
+                      onChange={(e) =>
+                        setUserGender(e.target.value as User['gender'])
+                      }
+                    >
+                      <option value="Male">{lang.tr.male}</option>
+                      <option value="Female">{lang.tr.female}</option>
+                    </select>
+                  </div>
                 </div>
+              </div>
 
+              <div className={popup['row']}>
                 <div
                   className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
                 >
                   <label
                     className={popup['label']}
-                    htmlFor="profile-form-about"
+                    htmlFor="profile-form-country"
                   >
-                    {lang.tr.about}
+                    {lang.tr.country}
                   </label>
-                  <textarea
-                    id="profile-form-about"
-                    // value={userAbout}
-                    // onChange={(e) => setUserAbout(e.target.value)}
-                  />
+                  <div className={popup['selectBox']}>
+                    <select>
+                      <option value="taiwan">{lang.tr.taiwan}</option>
+                    </select>
+                  </div>
                 </div>
+                <div
+                  className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
+                >
+                  <label
+                    className={popup['label']}
+                    htmlFor="profile-form-birthdate"
+                  >
+                    {lang.tr.birthdate}
+                  </label>
+                  <div className={popup['row']}>
+                    <div className={popup['selectBox']}>
+                      <select
+                        id="birthYear"
+                        // value={userBirthYear}
+                        // onChange={(e) => setUserBirthYear(e.target.value)}
+                      >
+                        {years.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={popup['selectBox']}>
+                      <select
+                        className={popup['input']}
+                        id="birthMonth"
+                        // value={userBirthMonth}
+                        // onChange={(e) => setUserBirthMonth(e.target.value)}
+                      >
+                        {months.map((month) => (
+                          <option key={month} value={month}>
+                            {month.toString().padStart(2, '0')}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={popup['selectBox']}>
+                      <select
+                        className={popup['input']}
+                        id="birthDay"
+                        // value={userBirthDay}
+                        // onChange={(e) => setUserBirthDay(e.target.value)}
+                      >
+                        {days.map((day) => (
+                          <option key={day} value={day}>
+                            {day.toString().padStart(2, '0')}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`${popup['inputBox']} ${popup['col']}`}>
+                <label
+                  className={popup['label']}
+                  htmlFor="profile-form-signature"
+                >
+                  {lang.tr.signature}
+                </label>
+                <input
+                  type="text"
+                  id="profile-form-signature"
+                  value={userSignature}
+                  onChange={(e) => setUserSignature(e.target.value)}
+                />
+              </div>
+
+              <div
+                className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
+              >
+                <label className={popup['label']} htmlFor="profile-form-about">
+                  {lang.tr.about}
+                </label>
+                <textarea
+                  id="profile-form-about"
+                  // value={userAbout}
+                  // onChange={(e) => setUserAbout(e.target.value)}
+                />
               </div>
             </div>
           </div>
