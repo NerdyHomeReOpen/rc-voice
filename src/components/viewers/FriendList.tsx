@@ -46,7 +46,11 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
     const socket = useSocket();
 
     // Variables
-    const { id: friendGroupId, name: friendGroupName } = friendGroup;
+    const {
+      id: friendGroupId,
+      name: friendGroupName,
+      order: friendGroupOrder,
+    } = friendGroup;
     const friendGroupFriends =
       friendGroupId === ''
         ? friends
@@ -64,16 +68,17 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
           onContextMenu={(e) => {
             contextMenu.showContextMenu(e.pageX, e.pageY, [
               {
-                id: 'rename',
-                label: lang.tr.friendRenameGroup,
+                id: 'edit',
+                label: lang.tr.editFriendGroup,
                 show: friendGroupId !== '',
                 onClick: () => {
-                  ipcService.popup.open(PopupType.RENAME_FRIEND_GROUP);
+                  ipcService.popup.open(PopupType.EDIT_FRIEND_GROUP);
                   ipcService.initialData.onRequest(
-                    PopupType.RENAME_FRIEND_GROUP,
+                    PopupType.EDIT_FRIEND_GROUP,
                     {
                       friendGroupId,
                       friendGroupName,
+                      friendGroupOrder,
                     },
                   );
                 },
@@ -338,6 +343,8 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
     //   // ipcService.popup.open(PopupType.CREATE_FRIEND_GROUP);
     // };
 
+    console.log([defaultFriendGroup, ...userFriendGroups]);
+
     return (
       <>
         {/* Navigation Tabs */}
@@ -377,14 +384,16 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
             </div>
             {/* Friend Groups */}
             <div className={styles['friendGroups']}>
-              {[defaultFriendGroup, ...userFriendGroups].map((friendGroup) => (
-                <FriendGroupTab
-                  key={friendGroup.id}
-                  user={user}
-                  friendGroup={friendGroup}
-                  friends={filteredFriends}
-                />
-              ))}
+              {[defaultFriendGroup, ...userFriendGroups]
+                .sort((a, b) => a.order - b.order)
+                .map((friendGroup) => (
+                  <FriendGroupTab
+                    key={friendGroup.id}
+                    user={user}
+                    friendGroup={friendGroup}
+                    friends={filteredFriends}
+                  />
+                ))}
             </div>
             {/* Bottom Buttons */}
             <div className={styles['bottomButtons']}>

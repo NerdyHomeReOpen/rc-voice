@@ -612,6 +612,11 @@ app.on('ready', async () => {
 
   // Popup handlers
   ipcMain.on('open-popup', async (_, type, height, width) => {
+    if (popups[type] && !popups[type].isDestroyed()) {
+      popups[type].focus();
+      return;
+    }
+
     createPopup(type, height, width);
   });
   ipcMain.on('popup-submit', (_, to) => {

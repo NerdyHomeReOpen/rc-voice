@@ -14,22 +14,24 @@ import setting from '@/styles/popups/editServer.module.css';
 // Services
 import ipcService from '@/services/ipc.service';
 
-interface RenameFriendGroupPopupProps {
+interface EditFriendGroupPopupProps {
   friendGroupId: string;
   friendGroupName: string;
+  friendGroupOrder: number;
 }
 
-const RenameFriendGroupPopup: React.FC<RenameFriendGroupPopupProps> =
-  React.memo((initialData: RenameFriendGroupPopupProps) => {
+const EditFriendGroupPopup: React.FC<EditFriendGroupPopupProps> = React.memo(
+  (initialData: EditFriendGroupPopupProps) => {
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
 
     // Variables
-    const { friendGroupId, friendGroupName } = initialData;
+    const { friendGroupId, friendGroupName, friendGroupOrder } = initialData;
 
     // States
     const [groupName, setGroupName] = useState<string>(friendGroupName);
+    const [groupOrder, setGroupOrder] = useState<number>(friendGroupOrder);
 
     // Handlers
     const handleUpdateFriendGroup = (
@@ -78,7 +80,7 @@ const RenameFriendGroupPopup: React.FC<RenameFriendGroupPopupProps> =
             <div className={popup['inputGroup']}>
               <div className={`${popup['inputBox']} ${popup['col']}`}>
                 <div className={popup['label']}>
-                  {lang.tr.pleaseInputFriendSubGroups}
+                  {lang.tr.pleaseInputFriendGroupName}
                 </div>
                 <input
                   className={popup['input']}
@@ -87,6 +89,19 @@ const RenameFriendGroupPopup: React.FC<RenameFriendGroupPopupProps> =
                   value={groupName}
                   maxLength={20}
                   onChange={(e) => setGroupName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className={`${popup['inputBox']} ${popup['col']}`}>
+                <div className={popup['label']}>{lang.tr.friendGroupOrder}</div>
+                <input
+                  className={popup['input']}
+                  type="number"
+                  placeholder={groupOrder.toString()}
+                  value={groupOrder}
+                  max={999}
+                  min={-999}
+                  onChange={(e) => setGroupOrder(parseInt(e.target.value) || 0)}
                   required
                 />
               </div>
@@ -99,11 +114,15 @@ const RenameFriendGroupPopup: React.FC<RenameFriendGroupPopupProps> =
             className={`${popup['button']} ${
               !groupName.trim() ? popup['disabled'] : ''
             }`}
-            disabled={!groupName.trim() || groupName === friendGroupName}
+            disabled={
+              !groupName.trim() ||
+              (groupName === friendGroupName && groupOrder === friendGroupOrder)
+            }
             onClick={() => {
               handleUpdateFriendGroup(
                 {
                   name: groupName,
+                  order: groupOrder,
                 },
                 friendGroupId,
               );
@@ -118,8 +137,9 @@ const RenameFriendGroupPopup: React.FC<RenameFriendGroupPopupProps> =
         </div>
       </div>
     );
-  });
+  },
+);
 
-RenameFriendGroupPopup.displayName = 'RenameFriendGroupPopup';
+EditFriendGroupPopup.displayName = 'EditFriendGroupPopup';
 
-export default RenameFriendGroupPopup;
+export default EditFriendGroupPopup;

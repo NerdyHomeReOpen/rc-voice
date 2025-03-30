@@ -115,7 +115,7 @@ export interface Translation {
   friendLabel: string;
   friendSelectGroup: string;
   friendAddGroup: string;
-  friendRenameGroup: string;
+  editFriendGroup: string;
   friendNote: string;
   max120content: string;
   sendRequest: string;
@@ -268,7 +268,8 @@ export interface Translation {
   VOICE_CHANGE_TO_FORBIDDEN_SPEECH: string;
   VOICE_CHANGE_TO_QUEUE: string;
   pleaseInputFriendAccount: string;
-  pleaseInputFriendSubGroups: string;
+  pleaseInputFriendGroupName: string;
+  friendGroupOrder: string;
   basicInfo: string;
   channelAnnouncement: string;
   accessPermissions: string;
@@ -443,7 +444,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendLabel: '您將添加以下聯絡人',
     friendSelectGroup: '選擇分組：',
     friendAddGroup: '添加分組',
-    friendRenameGroup: '重命名分組',
+    editFriendGroup: '編輯分組',
     friendNote: '附言：',
     max120content: '最多只能輸入120個字元',
     sendRequest: '傳送請求',
@@ -598,7 +599,8 @@ export const translations: Record<LanguageKey, Translation> = {
     VOICE_CHANGE_TO_FORBIDDEN_SPEECH: '該頻道語音已被設為僅管理員發言',
     VOICE_CHANGE_TO_QUEUE: '頻道被設為排麥才能發言，請點擊"拿麥發言"等候發言',
     pleaseInputFriendAccount: '請輸入好友帳號:',
-    pleaseInputFriendSubGroups: '請填寫分組名稱:',
+    pleaseInputFriendGroupName: '請填寫分組名稱:',
+    friendGroupOrder: '分組排序:',
     basicInfo: '基本資料',
     channelAnnouncement: '頻道公告',
     accessPermissions: '訪問許可權',
@@ -771,7 +773,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendLabel: '您将添加以下联系人',
     friendSelectGroup: '选择分组：',
     friendAddGroup: '添加分组',
-    friendRenameGroup: '重命名分组',
+    editFriendGroup: '编辑分组',
     friendNote: '附言：',
     max120content: '最多只能输入120个字符',
     sendRequest: '发送请求',
@@ -926,7 +928,8 @@ export const translations: Record<LanguageKey, Translation> = {
     VOICE_CHANGE_TO_FORBIDDEN_SPEECH: '频道语音已被设为仅管理员发言',
     VOICE_CHANGE_TO_QUEUE: '频道被设为排麦才能发言，请点击"拿麦发言"等候发言',
     pleaseInputFriendAccount: '请输入好友账号:',
-    pleaseInputFriendSubGroups: '请填写分组名称:',
+    pleaseInputFriendGroupName: '请填写分组名称:',
+    friendGroupOrder: '分组排序:',
     basicInfo: '基本资料',
     channelAnnouncement: '频道公告',
     accessPermissions: '访问权限',
@@ -1099,7 +1102,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendLabel: 'You will add the following contact',
     friendSelectGroup: 'Select group:',
     friendAddGroup: 'Add group',
-    friendRenameGroup: 'Rename group',
+    editFriendGroup: 'Edit group',
     friendNote: 'Note:',
     max120content: 'You can enter up to 120 characters',
     sendRequest: 'Send request',
@@ -1267,7 +1270,8 @@ export const translations: Record<LanguageKey, Translation> = {
     VOICE_CHANGE_TO_QUEUE:
       'The channel voice has been set to queue, please click "Take mic" to wait for speech',
     pleaseInputFriendAccount: 'Please input friend account:',
-    pleaseInputFriendSubGroups: 'Please input subgroup name:',
+    pleaseInputFriendGroupName: 'Please input group name:',
+    friendGroupOrder: 'Group Order:',
     basicInfo: 'Basic Info',
     channelAnnouncement: 'Channel Announcement',
     accessPermissions: 'Access Permissions',
@@ -1448,7 +1452,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendLabel: '次の連絡先を追加します',
     friendSelectGroup: 'グループを選択：',
     friendAddGroup: 'グループを追加',
-    friendRenameGroup: 'グループを名前変更',
+    editFriendGroup: 'グループを編集',
     friendNote: 'メモ：',
     max120content: '最大120文字まで入力できます',
     sendRequest: 'リクエストを送信',
@@ -1615,7 +1619,8 @@ export const translations: Record<LanguageKey, Translation> = {
     VOICE_CHANGE_TO_QUEUE:
       'チャンネルの音声は排麦才能発言に設定されています。"マイクを取る"をクリックして発言を待ってください',
     pleaseInputFriendAccount: 'フレンドアカウントを入力してください:',
-    pleaseInputFriendSubGroups: 'サブグループ名を入力してください:',
+    pleaseInputFriendGroupName: 'グループ名を入力してください:',
+    friendGroupOrder: 'グループ排序を入力してください:',
     basicInfo: '基本情報',
     channelAnnouncement: 'チャンネルお知らせ',
     accessPermissions: 'アクセス権限',
@@ -2003,7 +2008,7 @@ export enum PopupType {
   APPLY_FRIEND = 'applyFriend',
   ADD_FRIEND = 'addFriend',
   ADD_FRIEND_SUBGROUPS = 'addSubGroups',
-  RENAME_FRIEND_GROUP = 'renameFriendGroup',
+  EDIT_FRIEND_GROUP = 'editFriendGroup',
   DIRECT_MESSAGE = 'directMessage',
   DIALOG_ALERT = 'dialogAlert',
   DIALOG_ALERT2 = 'dialogAlert2',
@@ -2026,7 +2031,7 @@ export const PopupSize = {
   [PopupType.APPLY_MEMBER]: { height: 420, width: 540 },
   [PopupType.ADD_FRIEND]: { height: 220, width: 400 },
   [PopupType.ADD_FRIEND_SUBGROUPS]: { height: 220, width: 400 },
-  [PopupType.RENAME_FRIEND_GROUP]: { height: 220, width: 400 },
+  [PopupType.EDIT_FRIEND_GROUP]: { height: 220, width: 400 },
   [PopupType.DIRECT_MESSAGE]: { height: 200, width: 300 },
   [PopupType.DIALOG_ALERT]: { height: 220, width: 400 },
   [PopupType.DIALOG_ALERT2]: { height: 220, width: 400 },
