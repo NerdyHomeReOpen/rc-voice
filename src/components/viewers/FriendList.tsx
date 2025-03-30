@@ -5,7 +5,14 @@ import styles from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
 import vip from '@/styles/common/vip.module.css';
 // Types
-import { PopupType, User, FriendGroup, UserFriend, Server } from '@/types';
+import {
+  PopupType,
+  User,
+  FriendGroup,
+  UserFriend,
+  Server,
+  // Friend,
+} from '@/types';
 
 // Components
 import BadgeViewer from '@/components/viewers/Badge';
@@ -23,10 +30,11 @@ import refreshService from '@/services/refresh.service';
 interface FriendGroupTabProps {
   friendGroup: FriendGroup;
   friends: UserFriend[];
+  user: User;
 }
 
 const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
-  ({ friendGroup, friends }) => {
+  ({ friendGroup, friends, user }) => {
     // Hooks
     const lang = useLanguage();
     const contextMenu = useContextMenu();
@@ -110,7 +118,7 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
         {expanded && friends && (
           <div className={styles['tabContent']}>
             {friendGroupFriends.map((friend) => (
-              <FriendCard key={friend.id} friend={friend} />
+              <FriendCard key={friend.id} user={user} friend={friend} />
             ))}
           </div>
         )}
@@ -122,6 +130,7 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
 FriendGroupTab.displayName = 'FriendGroupTab';
 
 interface FriendCardProps {
+  user: User;
   friend: UserFriend;
 }
 
@@ -170,10 +179,24 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   //   });
   // };
 
+  // Handlers
   const handleServerUpdate = (server: Server | null) => {
     if (!server) return;
     setFriendServerName(server.name);
   };
+
+  // const handleUpdateFriend = (
+  //   friend: Partial<Friend>,
+  //   userId: User['id'],
+  //   targetId: User['id'],
+  // ) => {
+  //   if (!socket) return;
+  //   socket.send.updateFriend({
+  //     friend,
+  //     userId,
+  //     targetId,
+  //   });
+  // };
 
   const handleDeleteFriend = (friendId: UserFriend['id']) => {
     ipcService.popup.open(PopupType.DIALOG_ALERT);
@@ -212,6 +235,13 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
               id: 'delete',
               label: lang.tr.deleteFriend,
               onClick: () => handleDeleteFriend(friendId),
+            },
+            {
+              id: 'edit',
+              label: '編輯分組',
+              onClick: () => {
+                // Open Edit Group Modal
+              },
             },
           ]);
         }}
@@ -350,6 +380,7 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
               {[defaultFriendGroup, ...userFriendGroups].map((friendGroup) => (
                 <FriendGroupTab
                   key={friendGroup.id}
+                  user={user}
                   friendGroup={friendGroup}
                   friends={filteredFriends}
                 />

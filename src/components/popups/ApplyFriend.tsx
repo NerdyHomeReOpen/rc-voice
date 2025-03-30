@@ -320,6 +320,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                         <div className={popup['selectBox']}>
                           <select
                             className={popup['select']}
+                            value={selectedFriendGroupId}
                             onChange={(e) =>
                               setSelectedFriendGroupId(e.target.value)
                             }
