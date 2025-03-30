@@ -63,24 +63,28 @@
 }
 
 .emojiGrid {
+  display: grid;
   position: absolute;
   top: -15rem;
   left: 0;
   width: fit-content;
   height: fit-content;
-  display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: 5px;
   padding: 5px;
   background-color: #fff;
+  border: 1px solid #ccc;
   border-radius: 5px;
   box-shadow: 0 0 10px rgb(0 0 0 / 10%);
 }
 
 .emoji {
-  min-width: 18px;
-  min-height: 18px;
+  min-width: 19px;
+  min-height: 19px;
   cursor: pointer;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: auto;
 }
 
 .emoji:hover {
