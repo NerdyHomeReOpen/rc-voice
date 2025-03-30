@@ -46,7 +46,10 @@ const ServerListSection: React.FC<ServerListSectionProps> = ({
       <ServerListViewer user={user} servers={displayedServers} />
       {hasMore && (
         <button
-          className={`${homePage['viewMoreBtn']} ${expanded ? 'more' : 'less'}`}
+          className={`
+            ${homePage['viewMoreBtn']} 
+            ${expanded ? homePage['more'] : homePage['less']}
+          `}
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? lang.tr.viewLess : lang.tr.viewMore}

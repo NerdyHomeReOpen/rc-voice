@@ -271,48 +271,60 @@
 }
 
 .viewMoreBtn {
+  position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
-  width: 96px;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid #cbcccd;
+  border-radius: 5px;
+  background: #fff;
   padding: 5px;
   margin: 8px auto 16px;
-  background: transparent;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  color: #000;
-  cursor: pointer;
-  position: relative;
-  padding-left: 20px;
+  gap: 5px;
+}
+
+.viewMoreBtn:hover {
+  background: #f5f5f5;
 }
 
 .more::before {
   content: '';
   display: inline-block;
-  background: url('../../public/btn_fold_person.png') no-repeat center center;
-  background-size: auto;
-  min-width: 14px;
-  min-height: 14px;
-  background-position: 0 0;
-  position: absolute;
-  left: 10px;
+  min-width: 16px;
+  min-height: 16px;
   transform: rotate(180deg);
+  background-image: url('../../public/btn_fold_person.png');
+  background-size: auto;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+}
+
+.more:hover::before {
+  background-position: -16px 0;
+}
+
+.more:active::before {
+  background-position: -32px 0;
 }
 
 .less::before {
   content: '';
   display: inline-block;
-  background: url('../../public/btn_fold_person.png') no-repeat center center;
+  min-width: 16px;
+  min-height: 16px;
+  background-image: url('../../public/btn_fold_person.png');
   background-size: auto;
-  min-width: 14px;
-  min-height: 14px;
+  background-repeat: no-repeat;
   background-position: 0 0;
-  position: absolute;
-  left: 10px;
 }
 
-.viewMoreBtn:hover {
-  background: #f5f5f5;
+.less:hover::before {
+  background-position: -16px 0;
+}
+
+.less:active::before {
+  background-position: -32px 0;
 }
 
 .searchDropdown {
