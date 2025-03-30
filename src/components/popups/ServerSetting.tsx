@@ -944,9 +944,9 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                             <td>{applicationName}</td>
                             <td>{applicationDescription}</td>
                             <td>
-                              {new Date(
-                                applicationCreatedDate,
-                              ).toLocaleString()}
+                              {new Date(applicationCreatedDate)
+                                .toISOString()
+                                .slice(0, 10)}
                             </td>
                           </tr>
                         );

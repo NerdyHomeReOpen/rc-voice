@@ -112,6 +112,8 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       leftGapTime > 0 && memberPermissionLevel === 1;
     const isForbidByGuestTextWait =
       leftWaitTime > 0 && memberPermissionLevel === 1;
+    const textMaxLength =
+      memberPermissionLevel === 1 ? channelGuestTextMaxLength || 100 : 2000;
 
     // Handlers
     const handleSendMessage = (
@@ -495,7 +497,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                     ? `${lang.tr.guestTextWaitTime} ${leftWaitTime} ${lang.tr.seconds}`
                     : lang.tr.inputMessage
                 }
-                maxLength={channelGuestTextMaxLength}
+                maxLength={textMaxLength}
               />
             </div>
             <div className={styles['buttonArea']}>
