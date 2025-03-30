@@ -32,6 +32,7 @@ import ipcService from '@/services/ipc.service';
 
 // Providers
 import { useLanguage } from '@/providers/Language';
+import WebRTCProvider from '@/providers/WebRTC';
 
 interface HeaderProps {
   title: string;
@@ -230,12 +231,14 @@ const Popup = React.memo(() => {
   }, [lang, initialData]);
 
   return (
-    <div className="wrapper">
-      {/* Top Nevigation */}
-      <Header title={headerTitle} buttons={headerButtons} />
-      {/* Main Content */}
-      {content}
-    </div>
+    <WebRTCProvider>
+      <div className="wrapper">
+        {/* Top Nevigation */}
+        <Header title={headerTitle} buttons={headerButtons} />
+        {/* Main Content */}
+        {content}
+      </div>
+    </WebRTCProvider>
   );
 });
 

@@ -493,13 +493,18 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const updateOutputDevice = async (deviceId: string) => {
     if (!deviceId) return;
     try {
+      console.log('Attempting to set output device to:', deviceId);
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const deviceInfo = devices.find(d => d.deviceId === deviceId);
+      console.log('New output stream device info:', deviceInfo);
+
       // Check if browser supports setSinkId API
       if (typeof HTMLMediaElement.prototype.setSinkId === 'function') {
         Object.values(peerAudioRefs.current).forEach((audio) => {
           audio
             .setSinkId(deviceId)
             .catch((err) =>
-              console.error('Error updating audio output device:', err),
+              console.error('Error updating audio output device (peerAudioRefs):', err),
             );
         });
 
@@ -507,7 +512,9 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         const audioElements = document.querySelectorAll(
           'audio[style*="display: none"]',
         );
+        console.log('Found hidden audio elements:', audioElements);
         audioElements.forEach((audio) => {
+          console.log('Hidden audio element:', audio);
           if (audio instanceof HTMLMediaElement && audio.setSinkId) {
             audio
               .setSinkId(deviceId)
