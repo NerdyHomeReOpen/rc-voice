@@ -350,7 +350,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                 lang.tr.announcement,
                 lang.tr.memberManagement,
                 lang.tr.accessPermission,
-                lang.tr.memberApplicationManagement,
+                `${lang.tr.memberApplicationManagement} (${serverApplications.length})`,
                 lang.tr.blacklistManagement,
               ].map((title, index) => (
                 <div
