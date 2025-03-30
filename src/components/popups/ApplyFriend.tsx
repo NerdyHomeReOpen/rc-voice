@@ -41,7 +41,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
     const [targetName, setTargetName] = useState<User['name']>(
       createDefault.user().name,
     );
-    const [targetAvatar, setTargetAvatar] = useState<User['avatar']>(
+    const [targetAvatarUrl, setTargetAvatarUrl] = useState<User['avatar']>(
       createDefault.user().avatar,
     );
     const [applicationDescription, setApplicationDescription] = useState<
@@ -73,7 +73,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
     const handleTargetUpdate = (data: User | null) => {
       if (!data) data = createDefault.user();
       setTargetName(data.name);
-      setTargetAvatar(data.avatar);
+      setTargetAvatarUrl(data.avatarUrl);
     };
 
     const handleFriendApplicationUpdate = useCallback(
@@ -131,7 +131,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                     <div className={applyFriend['avatarWrapper']}>
                       <div
                         className={applyFriend['avatarPicture']}
-                        style={{ backgroundImage: `url(${targetAvatar})` }}
+                        style={{ backgroundImage: `url(${targetAvatarUrl})` }}
                       />
                     </div>
                     <div className={applyFriend['userInfoWrapper']}>
@@ -221,7 +221,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                     <div className={applyFriend['avatarWrapper']}>
                       <div
                         className={applyFriend['avatarPicture']}
-                        style={{ backgroundImage: `url(${targetAvatar})` }}
+                        style={{ backgroundImage: `url(${targetAvatarUrl})` }}
                       />
                     </div>
                     <div className={applyFriend['userInfoWrapper']}>
@@ -262,7 +262,10 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                   <div className={popup['label']}>{lang.tr.friendLabel}</div>
                   <div className={popup['row']}>
                     <div className={applyFriend['avatarWrapper']}>
-                      <div className={applyFriend['avatarPicture']} />
+                      <div
+                        className={applyFriend['avatarPicture']}
+                        style={{ backgroundImage: `url(${targetAvatarUrl})` }}
+                      />
                     </div>
                     <div className={applyFriend['userInfoWrapper']}>
                       <div className={applyFriend['userAccount']}>
