@@ -18,6 +18,7 @@ import vip from '@/styles/common/vip.module.css';
 // Utils
 import { createDefault } from '@/utils/createDefault';
 import refreshService from '@/services/refresh.service';
+import apiService from '@/services/api.service';
 
 interface UserSettingPopupProps {
   userId: string;
@@ -79,7 +80,6 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
       setUserName(data.name);
       setUserGender(data.gender);
       setUserSignature(data.signature);
-      setUserAvatar(data.avatar);
       setUserAvatarUrl(data.avatarUrl);
       setUserLevel(data.level);
       setUserVip(data.vip);
@@ -107,6 +107,31 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
             <div
               className={popup['avatar']}
               style={{ backgroundImage: `url(${userAvatarUrl})` }}
+              onClick={() => {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (!file) return;
+
+                  const reader = new FileReader();
+                  reader.onloadend = async () => {
+                    const formData = new FormData();
+                    formData.append('_type', 'user');
+                    formData.append('_fileName', userAvatar);
+                    formData.append('_file', reader.result as string);
+                    const data = await apiService.post('/upload', formData);
+                    if (data) {
+                      setUserAvatar(data.avatar);
+                      setUserAvatarUrl(data.avatarUrl);
+                      console.log(data);
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                };
+                fileInput.click();
+              }}
             />
             <div
               className={popup['row']}
