@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // CSS
 import popup from '@/styles/common/popup.module.css';
@@ -110,16 +110,21 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
       setTargetAvatarUrl(data.avatarUrl);
     };
 
-    const handleFriendApplicationUpdate = useCallback(
-      (data: FriendApplication | null) => {
-        setSection(data ? (data.receiverId === userId ? 2 : 1) : 0);
-        if (!data) data = createDefault.friendApplication();
-        setApplicationDescription(data.description);
-        setApplicationSenderId(data.senderId);
-        setApplicationReceiverId(data.receiverId);
-      },
-      [userId],
-    );
+    const handleSentApplicationUpdate = (data: FriendApplication | null) => {
+      setSection(data ? 1 : 0);
+      if (!data) data = createDefault.friendApplication();
+      setApplicationDescription(data.description);
+      setApplicationSenderId(data.senderId);
+      setApplicationReceiverId(data.receiverId);
+    };
+
+    const handleReceivedApplicationUpdate = (
+      data: FriendApplication | null,
+    ) => {
+      setSection(data ? 2 : 0);
+      if (!data) data = createDefault.friendApplication();
+      setApplicationDescription(data.description);
+    };
 
     const handleOpenSuccessDialog = (message: string) => {
       ipcService.popup.open(PopupType.DIALOG_SUCCESS);
@@ -145,14 +150,19 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
         handleUserUpdate(user);
         const target = await refreshService.user({ userId: targetId });
         handleTargetUpdate(target);
-        const friendApplication = await refreshService.friendApplication({
+        const sentApplication = await refreshService.friendApplication({
           senderId: userId,
           receiverId: targetId,
         });
-        handleFriendApplicationUpdate(friendApplication);
+        handleSentApplicationUpdate(sentApplication);
+        const receivedApplication = await refreshService.friendApplication({
+          senderId: targetId,
+          receiverId: userId,
+        });
+        handleReceivedApplicationUpdate(receivedApplication);
       };
       refresh();
-    }, [userId, targetId, socket, handleFriendApplicationUpdate]);
+    }, [userId, targetId, socket]);
 
     switch (section) {
       // Friend Application Form

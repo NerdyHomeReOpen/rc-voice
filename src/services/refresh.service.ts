@@ -51,15 +51,15 @@ export const refreshService = {
   },
 
   friend: async ({
-    user1Id,
-    user2Id,
+    userId,
+    targetId,
   }: {
-    user1Id: User['id'];
-    user2Id: User['id'];
+    userId: User['id'];
+    targetId: User['id'];
   }): Promise<Friend | null> => {
     const friend = await apiService.post('/refresh/friend', {
-      user1Id,
-      user2Id,
+      userId,
+      targetId,
     });
     return friend;
   },

@@ -163,8 +163,8 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
     signature: friendSignature,
     vip: friendVip,
     level: friendLevel,
-    // user1Id: friendUserId1,
-    // user2Id: friendUserId2,
+    userId: friendUserId,
+    targetId: friendTargetId,
     badges: friendBadges = [],
     currentServerId: friendCurrentServerId,
   } = friend;
@@ -190,18 +190,13 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
     setFriendServerName(server.name);
   };
 
-  // const handleUpdateFriend = (
-  //   friend: Partial<Friend>,
-  //   userId: User['id'],
-  //   targetId: User['id'],
-  // ) => {
-  //   if (!socket) return;
-  //   socket.send.updateFriend({
-  //     friend,
-  //     userId,
-  //     targetId,
-  //   });
-  // };
+  const handleOpenEditFriend = (userId: User['id'], targetId: User['id']) => {
+    ipcService.popup.open(PopupType.EDIT_FRIEND);
+    ipcService.initialData.onRequest(PopupType.EDIT_FRIEND, {
+      userId,
+      targetId,
+    });
+  };
 
   const handleDeleteFriend = (friendId: UserFriend['id']) => {
     ipcService.popup.open(PopupType.DIALOG_ALERT);
@@ -241,13 +236,11 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
               label: lang.tr.deleteFriend,
               onClick: () => handleDeleteFriend(friendId),
             },
-            // {
-            //   id: 'edit',
-            //   label: '編輯分組',
-            //   onClick: () => {
-            //     // Open Edit Group Modal
-            //   },
-            // },
+            {
+              id: 'edit',
+              label: '編輯分組',
+              onClick: () => handleOpenEditFriend(friendUserId, friendTargetId),
+            },
           ]);
         }}
         // onDoubleClick={() => {

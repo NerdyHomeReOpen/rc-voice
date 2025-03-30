@@ -1845,8 +1845,8 @@ export type Friend = {
   id: string;
   isBlocked: boolean;
   friendGroupId: string;
-  user1Id: string;
-  user2Id: string;
+  userId: string;
+  targetId: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
   directMessages?: DirectMessage[]; // Change to another sheet
@@ -1997,6 +1997,7 @@ export enum SocketServerEvent {
 }
 
 export enum PopupType {
+  EDIT_FRIEND = 'editFriend',
   EDIT_USER = 'editUser',
   CREATE_SERVER = 'createServer',
   EDIT_SERVER = 'editServer',
@@ -2020,6 +2021,7 @@ export enum PopupType {
 }
 
 export const PopupSize = {
+  [PopupType.EDIT_FRIEND]: { height: 220, width: 400 },
   [PopupType.EDIT_APPLY]: { height: 220, width: 400 },
   [PopupType.EDIT_MEMBER]: { height: 220, width: 400 },
   [PopupType.EDIT_USER]: { height: 650, width: 500 },

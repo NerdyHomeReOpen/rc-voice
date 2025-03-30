@@ -19,7 +19,9 @@ import ChannelSetting from '@/components/popups/ChannelSetting';
 import CreateServer from '@/components/popups/CreateServer';
 import Dialog from '@/components/popups/Dialog';
 import DirectMessageModal from '@/components/popups/DirectMessage';
-import EditApply from '@/components/popups/EditApplySetting';
+import EditApplySetting from '@/components/popups/EditApplySetting';
+import EditFriend from '@/components/popups/EditFriend';
+import EditFriendGroup from '@/components/popups/EditFriendGroup';
 import EditMember from '@/components/popups/EditNickname';
 import EditServer from '@/components/popups/ServerSetting';
 import SystemSetting from '@/components/popups/SystemSetting';
@@ -30,7 +32,6 @@ import ipcService from '@/services/ipc.service';
 
 // Providers
 import { useLanguage } from '@/providers/Language';
-import EditFriendGroup from '@/components/popups/EditFriendGroup';
 
 interface HeaderProps {
   title: string;
@@ -122,6 +123,11 @@ const Popup = React.memo(() => {
     if (!type) return;
 
     switch (type) {
+      case PopupType.EDIT_FRIEND:
+        setHeaderTitle('編輯好友');
+        setHeaderButtons(['close']);
+        setContent(<EditFriend {...initialData} />);
+        break;
       case PopupType.SYSTEM_SETTING:
         setHeaderTitle(lang.tr.systemSetting);
         setHeaderButtons(['close']);
@@ -130,7 +136,7 @@ const Popup = React.memo(() => {
       case PopupType.EDIT_APPLY:
         setHeaderTitle(lang.tr.editApplySettings);
         setHeaderButtons(['close']);
-        setContent(<EditApply {...initialData} />);
+        setContent(<EditApplySetting {...initialData} />);
         break;
       case PopupType.EDIT_MEMBER:
         setHeaderTitle(lang.tr.editMemberCard);
