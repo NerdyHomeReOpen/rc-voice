@@ -27,7 +27,8 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { errorHandler, StandardizedError } from '@/utils/errorHandler';
 import { createDefault } from '@/utils/createDefault';
 
-// Providersx
+// Providers
+import WebRTCProvider from '@/providers/WebRTC';
 import ExpandedProvider from '@/providers/Expanded';
 import { useSocket } from '@/providers/Socket';
 import { useLanguage } from '@/providers/Language';
@@ -384,16 +385,18 @@ const Home = () => {
   };
 
   return (
-    <div className="wrapper">
-      <Header
-        user={user}
-        server={server}
-        selectedId={selectedTabId}
-        setSelectedTabId={setSelectedTabId}
-      />
-      {/* Main Content */}
-      <div className="content">{getMainContent()}</div>
-    </div>
+    <WebRTCProvider>
+      <div className="wrapper">
+        <Header
+          user={user}
+          server={server}
+          selectedId={selectedTabId}
+          setSelectedTabId={setSelectedTabId}
+        />
+        {/* Main Content */}
+        <div className="content">{getMainContent()}</div>
+      </div>
+    </WebRTCProvider>
   );
 };
 
