@@ -14,6 +14,9 @@ import { useSocket } from '@/providers/Socket';
 // Types
 import { SocketServerEvent } from '@/types';
 
+// Services
+import ipcService from '@/services/ipc.service';
+
 type Offer = {
   from: string;
   offer: {
@@ -274,9 +277,22 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       };
       peerConnections.current[rtcConnection] = peerConnection;
 
-      if (localStream.current) {
+      if (localStream.current && audioContext.current && destinationNode.current) {
+        const processedAudioTrack = destinationNode.current.stream.getAudioTracks()[0];
+        if (processedAudioTrack) {
+          peerConnection.addTrack(processedAudioTrack, destinationNode.current.stream);
+        } else if (localStream.current) {
+          localStream.current.getTracks().forEach((track) => {
+            if (track.kind === 'audio') {
+              peerConnection.addTrack(track, localStream.current!);
+            }
+          });
+        }
+      } else if (localStream.current) {
         localStream.current.getTracks().forEach((track) => {
-          peerConnection.addTrack(track, localStream.current!);
+          if (track.kind === 'audio') {
+            peerConnection.addTrack(track, localStream.current!);
+          }
         });
       }
     } catch (error) {
@@ -338,37 +354,46 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     try {
       if (!audioContext.current) {
         audioContext.current = new AudioContext();
-        sourceNode.current = audioContext.current.createMediaStreamSource(
-          localStream.current,
-        );
         gainNode.current = audioContext.current.createGain();
         destinationNode.current =
           audioContext.current.createMediaStreamDestination();
-
-        if (gainNode.current) {
-          gainNode.current.gain.value = volume / 100;
-        }
-
-        sourceNode.current.connect(gainNode.current);
-        gainNode.current.connect(destinationNode.current);
-
-        if (destinationNode.current.stream.getAudioTracks().length > 0) {
-          const processedTrack =
-            destinationNode.current.stream.getAudioTracks()[0];
-          Object.values(peerConnections.current).forEach((connection) => {
-            const senders = connection.getSenders();
-            const audioSender = senders.find((s) => s.track?.kind === 'audio');
-            if (audioSender) {
-              audioSender.replaceTrack(processedTrack).catch((error) => {
-                console.error('Error replacing audio track:', error);
-              });
-            }
-          });
-        }
       }
 
       if (gainNode.current) {
         gainNode.current.gain.value = volume / 100;
+      }
+
+      if (audioContext.current) {
+        if (sourceNode.current) {
+          sourceNode.current.disconnect();
+        }
+        sourceNode.current = audioContext.current.createMediaStreamSource(
+          localStream.current,
+        );
+        if (gainNode.current) {
+          sourceNode.current.connect(gainNode.current);
+          if (destinationNode.current) {
+            gainNode.current.connect(destinationNode.current);
+
+            if (destinationNode.current.stream.getAudioTracks().length > 0) {
+              const processedTrack =
+                destinationNode.current.stream.getAudioTracks()[0];
+              Object.values(peerConnections.current).forEach((connection) => {
+                const senders = connection.getSenders();
+                const audioSender = senders.find((s) => s.track?.kind === 'audio');
+                if (audioSender) {
+                  audioSender.replaceTrack(null).then(() => {
+                    audioSender.replaceTrack(processedTrack).catch((error) => {
+                      console.error('Error replacing audio track:', error);
+                    });
+                  }).catch((error) => {
+                    console.error('Error removing audio track:', error);
+                  });
+                }
+              });
+            }
+          }
+        }
       }
 
       setMicVolume(volume);
@@ -388,42 +413,42 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     }
   };
 
-  // Effects
+  // Effect to initialize Audio Context
   useEffect(() => {
-    if (!socket) return;
+    if (!audioContext.current) {
+      audioContext.current = new AudioContext();
+      gainNode.current = audioContext.current.createGain();
+      destinationNode.current =
+        audioContext.current.createMediaStreamDestination();
 
-    const eventHandlers = {
-      [SocketServerEvent.RTC_JOIN]: handleRTCJoin,
-      [SocketServerEvent.RTC_LEAVE]: handleRTCLeave,
-      [SocketServerEvent.RTC_OFFER]: handleRTCOffer,
-      [SocketServerEvent.RTC_ANSWER]: handleRTCAnswer,
-      [SocketServerEvent.RTC_ICE_CANDIDATE]: handleRTCIceCandidate,
-    };
-    const unsubscribe: (() => void)[] = [];
-
-    Object.entries(eventHandlers).map(([event, handler]) => {
-      const unsub = socket.on[event as SocketServerEvent](handler);
-      unsubscribe.push(unsub);
-    });
+      if (gainNode.current) {
+        gainNode.current.gain.value = micVolume / 100; // Set initial volume
+      }
+    }
 
     return () => {
-      unsubscribe.forEach((unsub) => unsub());
+      if (audioContext.current) {
+        audioContext.current.close();
+        audioContext.current = null;
+      }
     };
-  }, [socket]);
+  }, []);
 
+  // Effect to get initial media stream and handle device updates
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
         localStream.current = stream;
-        stream.getTracks().forEach((track) => {
-          track.enabled = !isMute;
-          Object.values(peerConnections.current).forEach((peerConnection) => {
-            peerConnection.addTrack(track, stream);
-          });
-        });
+        updateMicVolume(micVolume); // Process the initial stream
       })
       .catch((err) => console.error('Error accessing microphone', err));
+
+    ipcService.audio.get((devices) => {
+      updateInputDevice(devices.input || '');
+      updateOutputDevice(devices.output || '');
+      console.log('devices:', devices);
+    });
 
     return () => {
       if (localStream.current) {
@@ -453,66 +478,13 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       // Update local stream reference
       localStream.current = newStream;
 
-      // If audio processing context exists, need to recreate
-      if (audioContext.current) {
-        // Disconnect old connection
-        if (sourceNode.current) {
-          sourceNode.current.disconnect();
-        }
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const deviceInfo = devices.find(d => d.deviceId === deviceId);
+      console.log('New input stream device info:', deviceInfo);
 
-        // Create new audio source
-        sourceNode.current =
-          audioContext.current.createMediaStreamSource(newStream);
+      // Process the new stream and update peer connections
+      updateMicVolume(micVolume);
 
-        // Connect to gain node and destination node
-        if (gainNode.current && destinationNode.current) {
-          sourceNode.current.connect(gainNode.current);
-          gainNode.current.connect(destinationNode.current);
-
-          // Get processed audio track
-          const processedTrack =
-            destinationNode.current.stream.getAudioTracks()[0];
-
-          // Update all peer connection senders
-          Object.values(peerConnections.current).forEach((peerConnection) => {
-            const senders = peerConnection.getSenders();
-            const audioSender = senders.find((s) => s.track?.kind === 'audio');
-            if (audioSender) {
-              audioSender.replaceTrack(processedTrack).catch((error) => {
-                console.error('Error replacing audio track:', error);
-              });
-            }
-          });
-        } else {
-          // If gain node is not set, use new track directly
-          newStream.getAudioTracks().forEach((track) => {
-            Object.values(peerConnections.current).forEach((peerConnection) => {
-              const senders = peerConnection.getSenders();
-              const audioSender = senders.find(
-                (s) => s.track?.kind === 'audio',
-              );
-              if (audioSender) {
-                audioSender.replaceTrack(track).catch((error) => {
-                  console.error('Error replacing audio track:', error);
-                });
-              }
-            });
-          });
-        }
-      } else {
-        // If audio processing context does not exist, update all connected tracks directly
-        newStream.getAudioTracks().forEach((track) => {
-          Object.values(peerConnections.current).forEach((peerConnection) => {
-            const senders = peerConnection.getSenders();
-            const audioSender = senders.find((s) => s.track?.kind === 'audio');
-            if (audioSender) {
-              audioSender.replaceTrack(track).catch((error) => {
-                console.error('Error replacing audio track:', error);
-              });
-            }
-          });
-        });
-      }
     } catch (err) {
       console.error('Error accessing microphone device:', err);
     }
@@ -556,6 +528,29 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       console.error('Error setting audio output device:', err);
     }
   };
+
+  // Effect for socket event listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const eventHandlers = {
+      [SocketServerEvent.RTC_JOIN]: handleRTCJoin,
+      [SocketServerEvent.RTC_LEAVE]: handleRTCLeave,
+      [SocketServerEvent.RTC_OFFER]: handleRTCOffer,
+      [SocketServerEvent.RTC_ANSWER]: handleRTCAnswer,
+      [SocketServerEvent.RTC_ICE_CANDIDATE]: handleRTCIceCandidate,
+    };
+    const unsubscribe: (() => void)[] = [];
+
+    Object.entries(eventHandlers).map(([event, handler]) => {
+      const unsub = socket.on[event as SocketServerEvent](handler);
+      unsubscribe.push(unsub);
+    });
+
+    return () => {
+      unsubscribe.forEach((unsub) => unsub());
+    };
+  }, [socket]);
 
   // Clean up Audio Context when component unmounts
   useEffect(() => {
