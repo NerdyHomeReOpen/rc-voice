@@ -438,6 +438,17 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       });
     };
 
+    const handleOpenApplyFriend = (
+      userId: User['id'],
+      targetId: User['id'],
+    ) => {
+      ipcService.popup.open(PopupType.APPLY_FRIEND);
+      ipcService.initialData.onRequest(PopupType.APPLY_FRIEND, {
+        userId,
+        targetId,
+      });
+    };
+
     const handleUpdateMember = (
       member: Partial<Member>,
       userId: User['id'],
@@ -460,6 +471,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         }}
         onContextMenu={(e) => {
           contextMenu.showContextMenu(e.pageX, e.pageY, [
+            {
+              id: 'apply-friend',
+              label: '新增好友',
+              onClick: () => handleOpenApplyFriend(userId, channelMemberUserId),
+              show: !isCurrentUser,
+            },
             {
               id: 'edit-nickname',
               label: '修改群名片',
