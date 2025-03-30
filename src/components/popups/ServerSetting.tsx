@@ -164,12 +164,11 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
     };
 
     const handleDeleteMemberApplication = (
-      applicationId: MemberApplication['id'],
       userId: User['id'],
       serverId: Server['id'],
     ) => {
       if (!socket) return;
-      socket.send.deleteMemberApplication({ applicationId, userId, serverId });
+      socket.send.deleteMemberApplication({ userId, serverId });
     };
 
     const handleCreateMember = (
@@ -902,7 +901,6 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                                   label: lang.tr.acceptApplication,
                                   onClick: () => {
                                     handleDeleteMemberApplication(
-                                      applicationId,
                                       applicationUserId,
                                       applicationServerId,
                                     );
@@ -923,7 +921,6 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                                   label: lang.tr.denyApplication,
                                   onClick: () => {
                                     handleDeleteMemberApplication(
-                                      applicationId,
                                       applicationUserId,
                                       applicationServerId,
                                     );
