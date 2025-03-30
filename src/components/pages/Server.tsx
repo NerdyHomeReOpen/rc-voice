@@ -99,15 +99,19 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       lastMessageTime: memberLastMessageTime,
       lastJoinChannelTime: memberLastJoinChannelTime,
     } = member;
+    const leftGapTime =
+      channelGuestTextGapTime -
+      Math.floor((currentTime - memberLastJoinChannelTime) / 1000);
+    const leftWaitTime =
+      channelGuestTextWaitTime -
+      Math.floor((currentTime - memberLastMessageTime) / 1000);
     const isForbidByChatMode = channelForbidText && memberPermissionLevel < 3;
     const isForbidByGuestText =
       channelForbidGuestText && memberPermissionLevel === 1;
     const isForbidByGuestTextGap =
-      currentTime - memberLastJoinChannelTime < channelGuestTextGapTime &&
-      memberPermissionLevel === 1;
+      leftGapTime > 0 && memberPermissionLevel === 1;
     const isForbidByGuestTextWait =
-      currentTime - memberLastMessageTime < channelGuestTextWaitTime &&
-      memberPermissionLevel === 1;
+      leftWaitTime > 0 && memberPermissionLevel === 1;
 
     // Handlers
     const handleSendMessage = (
@@ -486,14 +490,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                     currentChannelId,
                   );
                 }}
-                // locked={
-                //   channelChatMode === 'forbidden' && memberPermissionLevel < 3
-                // }
-                // isGuest={isGuest}
-                // guestTextWaitTime={guestTextWaitTime}
-                // guestTextInterval={guestTextInterval}
-                // lastMessageTime={lastMessageTime}
-                // joinTime={joinTime}
                 disabled={
                   isForbidByGuestText ||
                   isForbidByGuestTextGap ||
@@ -506,9 +502,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                     : isForbidByGuestText
                     ? lang.tr.forbidGuestText
                     : isForbidByGuestTextGap
-                    ? `${lang.tr.guestTextGapTime} ${channelGuestTextGapTime} ${lang.tr.seconds}`
+                    ? `${lang.tr.guestTextGapTime} ${leftGapTime} ${lang.tr.seconds}`
                     : isForbidByGuestTextWait
-                    ? `${lang.tr.guestTextWaitTime} ${channelGuestTextWaitTime} ${lang.tr.seconds}`
+                    ? `${lang.tr.guestTextWaitTime} ${leftWaitTime} ${lang.tr.seconds}`
                     : lang.tr.inputMessage
                 }
                 maxLength={channelGuestTextMaxLength}
@@ -530,14 +526,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                               currentChannelId,
                               serverId,
                             );
-                            handleSendMessage(
-                              {
-                                type: 'info',
-                                content: 'VOICE_CHANGE_TO_FREE_SPEECH',
-                                timestamp: 0,
-                              },
-                              currentChannelId,
-                            );
                           },
                         },
                         {
@@ -548,14 +536,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                               { voiceMode: 'forbidden' },
                               currentChannelId,
                               serverId,
-                            );
-                            handleSendMessage(
-                              {
-                                type: 'info',
-                                content: 'VOICE_CHANGE_TO_FORBIDDEN_SPEECH',
-                                timestamp: 0,
-                              },
-                              currentChannelId,
                             );
                           },
                         },
@@ -570,14 +550,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                               currentChannelId,
                               serverId,
                             );
-                            handleSendMessage(
-                              {
-                                type: 'info',
-                                content: 'VOICE_CHANGE_TO_QUEUE',
-                                timestamp: 0,
-                              },
-                              currentChannelId,
-                            );
                           },
                           submenuItems: [
                             {
@@ -586,13 +558,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                               disabled: channelVoiceMode === 'queue',
                               onClick: () => {
                                 // handleUpdateChannel({ queueMode: 'forbidden' }, currentChannelId, serverId);
-                                handleSendMessage(
-                                  {
-                                    type: 'info',
-                                    content: 'VOICE_CHANGE_TO_FORBIDDEN_QUEUE',
-                                  },
-                                  currentChannelId,
-                                );
                               },
                             },
                             {
@@ -601,13 +566,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                               disabled: channelVoiceMode === 'queue',
                               onClick: () => {
                                 // handleUpdateChannel({ queueMode: 'control' }, currentChannelId, serverId);
-                                handleSendMessage(
-                                  {
-                                    type: 'info',
-                                    content: 'VOICE_CHANGE_TO_CONTROL_QUEUE',
-                                  },
-                                  currentChannelId,
-                                );
                               },
                             },
                           ],

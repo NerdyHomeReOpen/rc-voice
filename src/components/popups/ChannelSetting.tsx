@@ -71,25 +71,6 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       Channel['forbidGuestUrl']
     >(createDefault.channel().forbidGuestUrl);
 
-    // type SettingState<T> = {
-    //   current: T;
-    //   original: T;
-    // };
-
-    // const [guestSettings, setGuestSettings] = useState<{
-    //   forbidText: SettingState<boolean>;
-    //   forbidUrl: SettingState<boolean>;
-    //   maxLength: SettingState<number>;
-    //   waitTime: SettingState<number>;
-    //   interval: SettingState<number>;
-    // }>({
-    //   forbidText: { current: false, original: false },
-    //   forbidUrl: { current: false, original: false },
-    //   maxLength: { current: 0, original: 0 },
-    //   waitTime: { current: 0, original: 0 },
-    //   interval: { current: 0, original: 0 },
-    // });
-
     // Variables
     const { channelId, serverId } = initialData;
 
@@ -102,14 +83,6 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       if (!socket) return;
       socket.send.updateChannel({ channel, channelId, serverId });
     };
-
-    // const handleSendMessage = (
-    //   message: Partial<Message>,
-    //   channelId: Channel['id'],
-    // ): void => {
-    //   if (!socket) return;
-    //   socket.send.message({ message, channelId });
-    // };
 
     const handleChannelUpdate = (data: Channel | null) => {
       if (!data) data = createDefault.channel();
@@ -124,125 +97,11 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       setChannelGuestTextMaxLength(data.guestTextMaxLength);
       setChannelGuestTextWaitTime(data.guestTextWaitTime);
       setChannelGuestTextGapTime(data.guestTextGapTime);
-      // const chatMode = data.chatMode || 'free';
-      // setChannelTextState({
-      //   current: chatMode,
-      //   original: chatMode,
-      // });
-      // const voiceMode = data.voiceMode || 'free';
-      // setChannelVoiceState({
-      //   current: voiceMode,
-      //   original: voiceMode,
-      // });
-      // setChannelOrder(data.order);
-
-      // setGuestSettings({
-      //   forbidText: {
-      //     current: data.forbidGuestText || false,
-      //     original: data.forbidGuestText || false,
-      //   },
-      //   forbidUrl: {
-      //     current: data.forbidGuestUrl || false,
-      //     original: data.forbidGuestUrl || false,
-      //   },
-      //   maxLength: {
-      //     current: data.guestTextMaxLength || 2000,
-      //     original: data.guestTextMaxLength || 2000,
-      //   },
-      //   waitTime: {
-      //     current: data.guestTextWaitTime || 0,
-      //     original: data.guestTextWaitTime || 0,
-      //   }
-      // });
     };
 
     const handleClose = () => {
       ipcService.window.close();
     };
-
-    // const handleSubmitSetting = () => {
-    // type ChangeRecord = {
-    //   from: string | number | boolean;
-    //   to: string | number | boolean;
-    //   message: string;
-    // };
-    // const changes: Record<string, ChangeRecord> = {};
-    // if (channelTextState.current !== channelTextState.original) {
-    //   changes.chatMode = {
-    //     from: channelTextState.original,
-    //     to: channelTextState.current,
-    //     message:
-    //       channelTextState.current === 'free'
-    //         ? 'TEXT_CHANGE_TO_FREE_SPEECH'
-    //         : 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
-    //   };
-    // }
-    // if (channelVoiceState.current !== channelVoiceState.original) {
-    //   changes.voiceMode = {
-    //     from: channelVoiceState.original,
-    //     to: channelVoiceState.current,
-    //     message:
-    //       channelVoiceState.current === 'queue'
-    //         ? 'VOICE_CHANGE_TO_QUEUE'
-    //         : channelVoiceState.current === 'forbidden'
-    //         ? 'VOICE_CHANGE_TO_FORBIDDEN_SPEECH'
-    //         : 'VOICE_CHANGE_TO_FREE_SPEECH',
-    //   };
-    // }
-    // if (
-    //   guestSettings.forbidText.current !== guestSettings.forbidText.original
-    // ) {
-    //   changes.forbidGuestText = {
-    //     from: guestSettings.forbidText.original,
-    //     to: guestSettings.forbidText.current,
-    //     message: 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
-    //   };
-    // }
-    // if (
-    //   guestSettings.forbidUrl.current !== guestSettings.forbidUrl.original
-    // ) {
-    //   changes.forbidGuestUrl = {
-    //     from: guestSettings.forbidUrl.original,
-    //     to: guestSettings.forbidUrl.current,
-    //     message: guestSettings.forbidUrl.current
-    //       ? 'TEXT_CHANGE_TO_FORBIDDEN_URL'
-    //       : 'TEXT_CHANGE_TO_ALLOWED_URL',
-    //   };
-    // }
-    // if (
-    //   guestSettings.maxLength.current !== guestSettings.maxLength.original
-    // ) {
-    //   changes.guestTextMaxLength = {
-    //     from: guestSettings.maxLength.original,
-    //     to: guestSettings.maxLength.current,
-    //     message: `TEXT_CHANGE_TO_MAX_LENGTH ${guestSettings.maxLength.current}`,
-    //   };
-    // }
-    // if (guestSettings.waitTime.current !== guestSettings.waitTime.original) {
-    //   changes.guestTextWaitTime = {
-    //     from: guestSettings.waitTime.original,
-    //     to: guestSettings.waitTime.current,
-    //     message: `TEXT_CHANGE_TO_WAIT_TIME ${guestSettings.waitTime.current}`,
-    //   };
-    // }
-    // if (guestSettings.interval.current !== guestSettings.interval.original) {
-    //   changes.guestTextInterval = {
-    //     from: guestSettings.interval.original,
-    //     to: guestSettings.interval.current,
-    //     message: `TEXT_CHANGE_TO_INTERVAL ${guestSettings.interval.current}`,
-    //   };
-    // }
-    // Object.values(changes).forEach(({ message }) => {
-    //   handleSendMessage(
-    //     {
-    //       type: 'info',
-    //       content: message,
-    //       timestamp: 0,
-    //     },
-    //     channelId,
-    //   );
-    // });
-    // };
 
     // Effects
     useEffect(() => {
