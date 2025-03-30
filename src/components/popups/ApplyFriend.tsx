@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 // CSS
@@ -130,7 +129,10 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                   <div className={popup['label']}>{lang.tr.friendLabel}</div>
                   <div className={popup['row']}>
                     <div className={applyFriend['avatarWrapper']}>
-                      <div className={applyFriend['avatarPicture']} />
+                      <div
+                        className={applyFriend['avatarPicture']}
+                        style={{ backgroundImage: `url(${targetAvatar})` }}
+                      />
                     </div>
                     <div className={applyFriend['userInfoWrapper']}>
                       <div className={applyFriend['userAccount']}>
@@ -148,7 +150,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                       <div className={popup['row']}>
                         <div className={popup['selectBox']}>
                           <select
-                            onChange={(e) => {
+                            onChange={() => {
                               // FIXME
                             }}
                           >
@@ -217,7 +219,10 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                   <div className={popup['label']}>{lang.tr.friendLabel}</div>
                   <div className={popup['row']}>
                     <div className={applyFriend['avatarWrapper']}>
-                      <div className={applyFriend['avatarPicture']} />
+                      <div
+                        className={applyFriend['avatarPicture']}
+                        style={{ backgroundImage: `url(${targetAvatar})` }}
+                      />
                     </div>
                     <div className={applyFriend['userInfoWrapper']}>
                       <div className={applyFriend['userAccount']}>
@@ -276,7 +281,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                         <div className={popup['selectBox']}>
                           <select
                             className={popup['select']}
-                            onChange={(e) => {
+                            onChange={() => {
                               // FIXME
                             }}
                           >

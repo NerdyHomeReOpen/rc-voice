@@ -30,13 +30,13 @@ import refreshService from '@/services/refresh.service';
 import { createDefault } from '@/utils/createDefault';
 import { createSorter } from '@/utils/createSorter';
 
-interface ServerSettingModalProps {
+interface ServerSettingPopupProps {
   serverId: string;
   userId: string;
 }
 
-const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
-  (initialData: ServerSettingModalProps) => {
+const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
+  (initialData: ServerSettingPopupProps) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
@@ -1067,6 +1067,6 @@ const EditServerModal: React.FC<ServerSettingModalProps> = React.memo(
   },
 );
 
-EditServerModal.displayName = 'EditServerModal';
+ServerSettingPopup.displayName = 'ServerSettingPopup';
 
-export default EditServerModal;
+export default ServerSettingPopup;

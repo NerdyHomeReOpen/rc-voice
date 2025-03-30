@@ -34,15 +34,6 @@ EmojiGrid.displayName = 'EmojiGrid';
 
 interface MessageInputBoxProps {
   onSendMessage?: (message: string) => void;
-  // locked?: boolean;
-  // isGuest?: boolean;
-  // forbidGuestText?: boolean;
-  // forbidGuestUrl?: boolean;
-  // guestTextMaxLength?: number;
-  // guestTextWaitTime?: number;
-  // guestTextInterval?: number;
-  // lastMessageTime?: number;
-  // joinTime?: number;
   disabled?: boolean;
   warning?: boolean;
   placeholder?: string;
@@ -52,15 +43,6 @@ interface MessageInputBoxProps {
 const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
   ({
     onSendMessage,
-    // locked = false,
-    // isGuest = false,
-    // forbidGuestText = false,
-    // forbidGuestUrl = false,
-    // guestTextMaxLength = 2000,
-    // guestTextWaitTime = 0,
-    // guestTextInterval = 0,
-    // lastMessageTime = 0,
-    // joinTime = Date.now(),
     disabled = false,
     warning = false,
     placeholder = '',
@@ -73,116 +55,10 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
     const [messageInput, setMessageInput] = useState<string>('');
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
     const [isComposing, setIsComposing] = useState<boolean>(false);
-    // const [errorMessage, setErrorMessage] = useState<string>('');
-    // const [hasSentMessage, setHasSentMessage] = useState<boolean>(false);
-    // const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
     // Variables
     const isDisabled = disabled;
     const isWarning = warning || messageInput.length >= maxLength;
-    // const isLocked = locked;
-    // const timeSinceJoin = currentTime - joinTime;
-    // const timeSinceLastMessage = currentTime - lastMessageTime;
-    // const isWaiting =
-    //   guestTextWaitTime > 0 &&
-    //   isGuest &&
-    //   !hasSentMessage &&
-    //   timeSinceJoin < guestTextWaitTime * 1000;
-    // const isInInterval =
-    //   isGuest &&
-    //   hasSentMessage &&
-    //   guestTextInterval > 0 &&
-    //   !isWaiting &&
-    //   timeSinceLastMessage < guestTextInterval * 1000;
-    // const isOverLength = isGuest && messageInput.length > guestTextMaxLength;
-
-    // useEffect(() => {
-    //   setHasSentMessage(false);
-    //   setMessageInput('');
-    //   setErrorMessage('');
-    //   setCurrentTime(Date.now());
-    // }, [joinTime]);
-
-    // useEffect(() => {
-    //   if (!isGuest || (!isWaiting && !isInInterval)) return;
-
-    //   setCurrentTime(Date.now());
-
-    //   const interval = setInterval(() => {
-    //     setCurrentTime(Date.now());
-    //   }, 1000);
-
-    //   return () => clearInterval(interval);
-    // }, [isGuest, isWaiting, isInInterval]);
-
-    // const getPlaceholder = () => {
-    //   if (isLocked) return lang.tr.textChangeToForbiddenSpeech;
-    //   if (isGuest && forbidGuestText) return lang.tr.forbidGuestText;
-    //   if (isGuest && isWaiting) {
-    //     const remainingTime = Math.max(
-    //       0,
-    //       Math.floor((guestTextWaitTime * 1000 - timeSinceJoin) / 1000),
-    //     );
-    //     return `${lang.tr.guestTextWaitTime} ${remainingTime} ${lang.tr.seconds}`;
-    //   }
-    //   if (isGuest && isInInterval && guestTextInterval > 0) {
-    //     const remainingTime = Math.max(
-    //       0,
-    //       Math.floor((guestTextInterval * 1000 - timeSinceLastMessage) / 1000),
-    //     );
-    //     return `${lang.tr.guestTextInterval} ${remainingTime} ${lang.tr.seconds}`;
-    //   }
-    //   if (isGuest && isOverLength)
-    //     return `${lang.tr.guestTextMaxLength} ${guestTextMaxLength} ${lang.tr.characters}`;
-    //   return lang.tr.inputMessage;
-    // };
-
-    // const validateMessage = (message: string): boolean => {
-    //   if (isGuest && forbidGuestText) {
-    //     setErrorMessage(lang.tr.forbidGuestText);
-    //     return false;
-    //   }
-    //   if (isGuest && isWaiting) {
-    //     const remainingTime = Math.max(
-    //       0,
-    //       Math.floor((guestTextWaitTime * 1000 - timeSinceJoin) / 1000),
-    //     );
-    //     setErrorMessage(
-    //       `${lang.tr.guestTextWaitTime} ${remainingTime} ${lang.tr.seconds}`,
-    //     );
-    //     return false;
-    //   }
-    //   if (isGuest && isInInterval && guestTextInterval > 0) {
-    //     const remainingTime = Math.max(
-    //       0,
-    //       Math.floor((guestTextInterval * 1000 - timeSinceLastMessage) / 1000),
-    //     );
-    //     setErrorMessage(
-    //       `${lang.tr.guestTextInterval} ${remainingTime} ${lang.tr.seconds}`,
-    //     );
-    //     return false;
-    //   }
-    //   if (isGuest && message.length > guestTextMaxLength) {
-    //     setErrorMessage(
-    //       `${lang.tr.guestTextMaxLength} ${guestTextMaxLength} ${lang.tr.characters}`,
-    //     );
-    //     return false;
-    //   }
-    //   if (isGuest && forbidGuestUrl && message.includes('http')) {
-    //     setErrorMessage(lang.tr.forbidGuestUrl);
-    //     return false;
-    //   }
-    //   return true;
-    // };
-
-    // const handleSendMessage = () => {
-    //   if (validateMessage(messageInput)) {
-    //     onSendMessage?.(messageInput);
-    //     setMessageInput('');
-    //     setErrorMessage('');
-    //     setHasSentMessage(true);
-    //   }
-    // };
 
     return (
       <div
@@ -242,9 +118,6 @@ const MessageInputBox: React.FC<MessageInputBoxProps> = React.memo(
         <div className={messageInputBox['messageInputLength']}>
           {messageInput.length}/{maxLength}
         </div>
-        {/* {errorMessage && (
-          <div className={messageInputBox['errorMessage']}>{errorMessage}</div>
-        )} */}
       </div>
     );
   },

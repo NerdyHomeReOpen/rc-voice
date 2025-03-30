@@ -19,13 +19,15 @@ enum DIALOG_ICON {
   SUCCESS = 'success',
 }
 
-interface DialogProps {
+interface DialogPopupProps {
   iconType: keyof typeof DIALOG_ICON;
   title: React.ReactNode;
   submitTo: string;
 }
 
-const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
+const DialogPopup: React.FC<DialogPopupProps> = (
+  initialData: DialogPopupProps,
+) => {
   // Hooks
   const lang = useLanguage();
 
@@ -67,6 +69,6 @@ const Dialog: React.FC<DialogProps> = (initialData: DialogProps) => {
   );
 };
 
-Dialog.displayName = 'Dialog';
+DialogPopup.displayName = 'DialogPopup';
 
-export default Dialog;
+export default DialogPopup;

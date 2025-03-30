@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import packageJson from '../../../package.json';
 const version = packageJson.version;
@@ -9,7 +8,6 @@ import popup from '@/styles/common/popup.module.css';
 import styles from '@/styles/popups/systemSetting.module.css';
 
 // Providers
-import { useSocket } from '@/providers/Socket';
 import { useLanguage } from '@/providers/Language';
 import { useWebRTC } from '@/providers/WebRTC';
 
@@ -65,10 +63,10 @@ const SystemSettingPopup: React.FC = React.memo(() => {
     if (selectedInput) {
       navigator.mediaDevices
         .getUserMedia({ audio: { deviceId: selectedInput } })
-        .then((stream) => {
-          console.log('使用選擇的輸入裝置:', selectedInput);
-          // 這裡可以將 stream 傳遞給音訊處理的邏輯
-        })
+        // .then((stream) => {
+        //   console.log('使用選擇的輸入裝置:', selectedInput);
+        //   // 這裡可以將 stream 傳遞給音訊處理的邏輯
+        // })
         .catch((err) => console.error('無法存取麥克風', err));
     }
   }, [selectedInput]);

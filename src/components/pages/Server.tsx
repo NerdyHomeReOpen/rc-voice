@@ -340,18 +340,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       return () => clearInterval(timer);
     }, []);
 
-    // useEffect(() => {
-    //   if (!serverMembers) return;
-    //   const updatedUsersInServer = serverMembers.filter(
-    //     (member) => member.currentServerId === serverId,
-    //   );
-    //   setUsersInServer(updatedUsersInServer);
-    // }, [serverMembers, serverId]);
-
-    // useEffect(() => {
-    //   if (currentChannel?.id !== userCurrentChannelId) setJoinTime(Date.now());
-    // }, [currentChannel?.id, userCurrentChannelId]);
-
     return (
       <div className={styles['serverWrapper']}>
         {/* Main Content */}
