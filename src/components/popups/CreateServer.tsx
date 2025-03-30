@@ -34,7 +34,6 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
     const refreshRef = useRef(false);
 
     // Constant
-    const MAX_GROUPS = 3;
     const SERVER_TYPES: { value: Server['type']; name: string }[] = [
       {
         value: 'game',
@@ -53,6 +52,9 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
     // States
     const [userOwnedServers, setUserOwnedServers] = useState<Server[]>(
       createDefault.user().ownedServers || [],
+    );
+    const [userLevel, setUserLevel] = useState<User['level']>(
+      createDefault.user().level || 0,
     );
     const [serverName, setServerName] = useState<Server['name']>(
       createDefault.server().name,
@@ -73,6 +75,8 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
 
     // Variables
     const { userId } = initialData;
+    const MAX_GROUPS =
+      userLevel >= 16 ? 5 : userLevel >= 6 && userLevel < 16 ? 4 : 3;
     const remainingGroups = MAX_GROUPS - userOwnedServers.length;
     const canCreate = remainingGroups > 0;
 
@@ -85,6 +89,7 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
     const handleUserUpdate = (data: User | null) => {
       if (!data) data = createDefault.user();
       setUserOwnedServers(data.ownedServers || []);
+      setUserLevel(data.level || 0);
     };
 
     const handleOpenErrorDialog = (message: string) => {
