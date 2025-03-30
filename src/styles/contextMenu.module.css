@@ -42,8 +42,8 @@
 .contextMenu .option[data-type='setting']::before {
   left: 3px;
   content: '';
-  width: 16px;
-  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
   background-image: url('../../public/set.png');
   background-size: auto;
   background-repeat: no-repeat;
@@ -53,8 +53,8 @@
 .contextMenu .option[data-type='message']::before {
   left: 3px;
   content: '';
-  width: 16px;
-  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
   background-image: url('../../public/message.png');
   background-size: auto;
   background-repeat: no-repeat;
@@ -64,8 +64,8 @@
 .contextMenu .option[data-type='skin']::before {
   left: 3px;
   content: '';
-  width: 16px;
-  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
   background-image: url('../../public/skin.png');
   background-size: auto;
   background-repeat: no-repeat;
@@ -75,8 +75,8 @@
 .contextMenu .option[data-type='exit']::before {
   left: 3px;
   content: '';
-  width: 16px;
-  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
   background-image: url('../../public/exit.png');
   background-size: auto;
   background-repeat: no-repeat;
@@ -86,9 +86,64 @@
 .contextMenu .option[data-type='submenu']::before {
   right: 3px;
   content: '';
-  width: 16px;
-  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
   background-image: url('../../public/ctrl/icon_submenu.png');
+  background-size: auto;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.contextMenu .option[data-type='memberapply']::before {
+  left: 3px;
+  content: '';
+  min-width: 20px;
+  min-height: 16px;
+  background-image: url('../../public/channel/icon_memberapply.png');
+  background-size: auto;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.contextMenu .option[data-type='editGroupcard']::before {
+  left: 3px;
+  content: '';
+  min-width: 20px;
+  min-height: 16px;
+  background-image: url('../../public/channel/icon_editGroupcard.png');
+  background-size: auto;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.contextMenu .option[data-type='locateme']::before {
+  left: 3px;
+  content: '';
+  min-width: 20px;
+  min-height: 16px;
+  background-image: url('../../public/channel/icon_locateme.png');
+  background-size: auto;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.contextMenu .option[data-type='uncollect']::before {
+  left: 3px;
+  content: '';
+  min-width: 20px;
+  min-height: 16px;
+  background-image: url('../../public/channel/icon_uncollect.png');
+  background-size: auto;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.contextMenu .option[data-type='collect']::before {
+  left: 3px;
+  content: '';
+  min-width: 20px;
+  min-height: 16px;
+  background-image: url('../../public/channel/icon_collect.png');
   background-size: auto;
   background-repeat: no-repeat;
   background-position: center center;
