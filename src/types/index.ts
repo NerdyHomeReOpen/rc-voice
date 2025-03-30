@@ -114,6 +114,7 @@ export interface Translation {
   friendApply: string;
   friendLabel: string;
   friendSelectGroup: string;
+  friendApplySent: string;
   friendAddGroup: string;
   editFriendGroup: string;
   friendNote: string;
@@ -443,6 +444,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendApply: '好友申請已發送，正等待對方的確認！',
     friendLabel: '您將添加以下聯絡人',
     friendSelectGroup: '選擇分組：',
+    friendApplySent: '申請已送出，請等待對方回覆',
     friendAddGroup: '添加分組',
     editFriendGroup: '編輯分組',
     friendNote: '附言：',
@@ -772,6 +774,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendApply: '好友申请已发送，正等待对方的确认！',
     friendLabel: '您将添加以下联系人',
     friendSelectGroup: '选择分组：',
+    friendApplySent: '申请已送出，请等待对方回覆',
     friendAddGroup: '添加分组',
     editFriendGroup: '编辑分组',
     friendNote: '附言：',
@@ -1101,6 +1104,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendApply: 'Friend request sent, waiting for confirmation!',
     friendLabel: 'You will add the following contact',
     friendSelectGroup: 'Select group:',
+    friendApplySent: 'Application sent, waiting for confirmation',
     friendAddGroup: 'Add group',
     editFriendGroup: 'Edit group',
     friendNote: 'Note:',
@@ -1451,6 +1455,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendApply: '友達リクエストが送信されました。確認を待っています！',
     friendLabel: '次の連絡先を追加します',
     friendSelectGroup: 'グループを選択：',
+    friendApplySent: '申請已送出，請等待對方回覆',
     friendAddGroup: 'グループを追加',
     editFriendGroup: 'グループを編集',
     friendNote: 'メモ：',

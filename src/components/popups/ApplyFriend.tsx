@@ -192,30 +192,6 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                   <div className={applyFriend['split']} />
                   <div className={popup['inputGroup']}>
                     <div className={`${popup['inputBox']} ${popup['col']}`}>
-                      <div className={popup['label']}>
-                        {lang.tr.friendSelectGroup}
-                      </div>
-                      <div className={popup['row']}>
-                        <div className={popup['selectBox']}>
-                          <select
-                            onChange={() => {
-                              // FIXME
-                            }}
-                          >
-                            {userFriendGroups.map((group) => (
-                              <option key={group.id} value={group.id}>
-                                {group.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className={popup['link']}>
-                          {lang.tr.friendAddGroup}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={`${popup['inputBox']} ${popup['col']}`}>
                       <div className={popup['label']}>{lang.tr.friendNote}</div>
                       <textarea
                         rows={2}
@@ -235,10 +211,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
 
             <div className={popup['popupFooter']}>
               <button
-                className={`${popup['button']} ${
-                  !applicationDescription.trim() ? popup['disabled'] : ''
-                }`}
-                disabled={!applicationDescription.trim()}
+                className={popup['button']}
                 onClick={() => {
                   handleCreateFriendApplication(
                     { description: applicationDescription },
@@ -282,7 +255,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                   <div className={applyFriend['split']} />
                   <div className={popup['inputGroup']}>
                     <div className={popup['hint']}>
-                      {'申請已送出，請等待對方回覆'}
+                      {lang.tr.friendApplySent}
                     </div>
                   </div>
                 </div>
@@ -291,10 +264,10 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
 
             <div className={popup['popupFooter']}>
               <button className={popup['button']} onClick={() => setSection(0)}>
-                {'修改'}
+                {lang.tr.modify}
               </button>
               <button className={popup['button']} onClick={() => handleClose()}>
-                {'確認'}
+                {lang.tr.confirm}
               </button>
             </div>
           </div>
@@ -337,6 +310,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                               setSelectedFriendGroupId(e.target.value)
                             }
                           >
+                            <option value={''}>{lang.tr.none}</option>
                             {userFriendGroups.map((group) => (
                               <option key={group.id} value={group.id}>
                                 {group.name}
@@ -371,7 +345,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                   handleClose();
                 }}
               >
-                {'添加'}
+                {lang.tr.add}
               </button>
               <button className={popup['button']} onClick={() => handleClose()}>
                 {lang.tr.cancel}

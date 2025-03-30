@@ -232,14 +232,14 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
         onContextMenu={(e) => {
           contextMenu.showContextMenu(e.pageX, e.pageY, [
             {
+              id: 'edit',
+              label: lang.tr.editFriendGroup,
+              onClick: () => handleOpenEditFriend(friendUserId, friendTargetId),
+            },
+            {
               id: 'delete',
               label: lang.tr.deleteFriend,
               onClick: () => handleDeleteFriend(friendId),
-            },
-            {
-              id: 'edit',
-              label: '編輯分組',
-              onClick: () => handleOpenEditFriend(friendUserId, friendTargetId),
             },
           ]);
         }}
