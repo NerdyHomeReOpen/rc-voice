@@ -71,6 +71,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const [speakerVolume, setSpeakerVolume] = useState(
       webRTC.speakerVolume || 100,
     );
+    const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
     // Variables
     const { id: userId, currentChannelId: userCurrentChannelId } = user;
@@ -102,9 +103,11 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const isForbidByGuestText =
       channelForbidGuestText && memberPermissionLevel === 1;
     const isForbidByGuestTextGap =
-      memberLastJoinChannelTime - Date.now() < channelGuestTextGapTime;
+      currentTime - memberLastJoinChannelTime < channelGuestTextGapTime &&
+      memberPermissionLevel === 1;
     const isForbidByGuestTextWait =
-      memberLastMessageTime - Date.now() < channelGuestTextWaitTime;
+      currentTime - memberLastMessageTime < channelGuestTextWaitTime &&
+      memberPermissionLevel === 1;
 
     // Handlers
     const handleSendMessage = (
@@ -266,6 +269,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
 
       const eventHandlers = {
         [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
+        [SocketServerEvent.MEMBER_UPDATE]: handleMemberUpdate,
       };
       const unsubscribe: (() => void)[] = [];
 
@@ -324,6 +328,13 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       if (!webRTC.updateBitrate || !channelBitrate) return;
       webRTC.updateBitrate(channelBitrate);
     }, [webRTC, webRTC.updateBitrate, channelBitrate]);
+
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setCurrentTime(Date.now());
+      }, 1000);
+      return () => clearInterval(timer);
+    }, []);
 
     // useEffect(() => {
     //   if (!serverMembers) return;
@@ -498,7 +509,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                     ? `${lang.tr.guestTextGapTime} ${channelGuestTextGapTime} ${lang.tr.seconds}`
                     : isForbidByGuestTextWait
                     ? `${lang.tr.guestTextWaitTime} ${channelGuestTextWaitTime} ${lang.tr.seconds}`
-                    : ''
+                    : lang.tr.inputMessage
                 }
                 maxLength={channelGuestTextMaxLength}
               />
