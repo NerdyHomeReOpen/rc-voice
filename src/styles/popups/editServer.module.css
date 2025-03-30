@@ -129,6 +129,9 @@
 
 .memberName {
   color: #6e849b;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .noteText {
