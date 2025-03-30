@@ -6,7 +6,13 @@ import setting from '@/styles/popups/editServer.module.css';
 import applyFriend from '@/styles/popups/applyFriend.module.css';
 
 // Types
-import { FriendApplication, FriendGroup, PopupType, User } from '@/types';
+import {
+  Friend,
+  FriendApplication,
+  FriendGroup,
+  PopupType,
+  User,
+} from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/Socket';
@@ -47,22 +53,33 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
     const [applicationDescription, setApplicationDescription] = useState<
       FriendApplication['description']
     >(createDefault.friendApplication().description);
+    const [selectedFriendGroupId, setSelectedFriendGroupId] =
+      useState<FriendGroup['id']>('');
 
     // Variables
     const { userId, targetId } = initialData;
 
     // Handlers
-    const handleCreateFriendApplication = (
+    const handleUpdateFriendApplication = (
       friendApplication: Partial<FriendApplication>,
       senderId: User['id'],
       receiverId: User['id'],
     ) => {
       if (!socket) return;
-      socket.send.createFriendApplication({
+      socket.send.updateFriendApplication({
         friendApplication,
         senderId,
         receiverId,
       });
+    };
+
+    const handleCreateFriend = (
+      friend: Partial<Friend>,
+      senderId: User['id'],
+      receiverId: User['id'],
+    ) => {
+      if (!socket) return;
+      socket.send.createFriend({ friend, senderId, receiverId });
     };
 
     const handleUserUpdate = (data: User | null) => {
@@ -192,7 +209,7 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                 }`}
                 disabled={!applicationDescription.trim()}
                 onClick={() => {
-                  handleCreateFriendApplication(
+                  handleUpdateFriendApplication(
                     { description: applicationDescription },
                     userId,
                     targetId,
@@ -284,9 +301,9 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                         <div className={popup['selectBox']}>
                           <select
                             className={popup['select']}
-                            onChange={() => {
-                              // FIXME
-                            }}
+                            onChange={(e) =>
+                              setSelectedFriendGroupId(e.target.value)
+                            }
                           >
                             {userFriendGroups.map((group) => (
                               <option key={group.id} value={group.id}>
@@ -309,7 +326,17 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
               <button
                 className={popup['button']}
                 onClick={() => {
-                  // Add Friend
+                  handleUpdateFriendApplication(
+                    { applicationStatus: 'accepted' },
+                    userId,
+                    targetId,
+                  );
+                  handleCreateFriend(
+                    { friendGroupId: selectedFriendGroupId },
+                    userId,
+                    targetId,
+                  );
+                  handleClose();
                 }}
               >
                 {'添加'}
