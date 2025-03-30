@@ -61,6 +61,7 @@ export interface Translation {
   moveToMyChannel: string;
   kickOut: string;
   block: string;
+  editNickname: string;
   memberManagement: string;
   inviteToBeMember: string;
   rightClickToProcess: string;
@@ -377,6 +378,7 @@ export const translations: Record<LanguageKey, Translation> = {
     moveToMyChannel: '移至我的頻道',
     kickOut: '踢出群',
     block: '封鎖',
+    editNickname: '修改群名片',
     memberManagement: '會員管理',
     inviteToBeMember: '邀請成為會員',
     rightClickToProcess: '右鍵可以進行處理',
@@ -694,6 +696,7 @@ export const translations: Record<LanguageKey, Translation> = {
     moveToMyChannel: '移至我的频道',
     kickOut: '踢出群',
     block: '封锁',
+    editNickname: '修改群名片',
     memberManagement: '会员管理',
     inviteToBeMember: '邀请成为会员',
     rightClickToProcess: '右键可以进行处理',
@@ -1010,6 +1013,7 @@ export const translations: Record<LanguageKey, Translation> = {
     moveToMyChannel: 'Move to My Channel',
     kickOut: 'Kick Out',
     block: 'Block',
+    editNickname: 'Edit Nickname',
     memberManagement: 'Member Management',
     inviteToBeMember: 'Invite to be Member',
     rightClickToProcess: 'Right-click to process',
@@ -1347,6 +1351,7 @@ export const translations: Record<LanguageKey, Translation> = {
     moveToMyChannel: '私のチャンネルに移動',
     kickOut: '追い出す',
     block: 'ブロック',
+    editNickname: 'ニックネームを編集',
     memberManagement: 'メンバー管理',
     inviteToBeMember: 'メンバーに招待',
     rightClickToProcess: '右クリックで処理',
