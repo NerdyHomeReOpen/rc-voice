@@ -109,9 +109,11 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const isForbidByGuestText =
       channelForbidGuestText && memberPermissionLevel === 1;
     const isForbidByGuestTextGap =
-      leftGapTime > 0 && memberPermissionLevel === 1;
+      channelGuestTextGapTime && leftGapTime > 0 && memberPermissionLevel === 1;
     const isForbidByGuestTextWait =
-      leftWaitTime > 0 && memberPermissionLevel === 1;
+      channelGuestTextWaitTime &&
+      leftWaitTime > 0 &&
+      memberPermissionLevel === 1;
     const textMaxLength =
       memberPermissionLevel === 1 ? channelGuestTextMaxLength || 100 : 2000;
 
