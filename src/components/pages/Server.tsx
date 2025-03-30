@@ -394,8 +394,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                       [
                         {
                           id: 'invitation',
-                          label: '申請會員',
+                          label: lang.tr.invitation,
                           show: memberPermissionLevel < 2,
+                          icon: 'memberapply',
                           onClick: () =>
                             handleOpenApplyMember(userId, serverId),
                         },
@@ -417,12 +418,14 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                         },
                         {
                           id: 'editNickname',
-                          label: '編輯群名片',
+                          label: lang.tr.editNickname,
+                          icon: 'editGroupcard',
                           onClick: () => handleOpenEditMember(serverId, userId),
                         },
                         {
                           id: 'locateMe',
-                          label: '定位我自己',
+                          label: lang.tr.locateMe,
+                          icon: 'locateme',
                           onClick: () => handleLocateUser(),
                         },
                         {
@@ -436,7 +439,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                         // },
                         {
                           id: 'favorite',
-                          label: isFavorite ? '取消收藏' : '加入收藏',
+                          label: isFavorite
+                            ? lang.tr.unfavorite
+                            : lang.tr.favorite,
+                          icon: isFavorite ? 'collect' : 'uncollect',
                           onClick: () => handleAddFavoriteServer(serverId),
                         },
                       ].filter(Boolean) as ContextMenuItem[],

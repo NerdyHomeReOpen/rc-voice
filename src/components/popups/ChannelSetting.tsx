@@ -441,7 +441,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                       value={channelGuestTextMaxLength}
                       onChange={(e) =>
                         setChannelGuestTextMaxLength(
-                          Math.max(0, parseInt(e.target.value)),
+                          Math.max(0, parseInt(e.target.value) || 0),
                         )
                       }
                       style={{ width: '60px' }}
@@ -458,7 +458,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                       value={channelGuestTextWaitTime}
                       onChange={(e) =>
                         setChannelGuestTextWaitTime(
-                          Math.max(0, parseInt(e.target.value)),
+                          Math.max(0, parseInt(e.target.value) || 0),
                         )
                       }
                       style={{ width: '60px' }}
@@ -475,7 +475,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                       value={channelGuestTextGapTime}
                       onChange={(e) =>
                         setChannelGuestTextGapTime(
-                          Math.max(0, parseInt(e.target.value)),
+                          Math.max(0, parseInt(e.target.value) || 0),
                         )
                       }
                       style={{ width: '60px' }}

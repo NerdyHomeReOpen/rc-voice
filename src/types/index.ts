@@ -303,12 +303,18 @@ export interface Translation {
   getHelp: string;
   discord: string;
   TEXT_CHANGE_TO_FORBIDDEN_URL: string;
+  TEXT_CHANGE_TO_FORBIDDEN_TEXT: string;
+  TEXT_CHANGE_TO_ALLOWED_TEXT: string;
   TEXT_CHANGE_TO_ALLOWED_URL: string;
   TEXT_CHANGE_TO_MAX_LENGTH: string;
   TEXT_CHANGE_TO_WAIT_TIME: string;
-  TEXT_CHANGE_TO_INTERVAL: string;
+  TEXT_CHANGE_TO_GAP_TIME: string;
   vipUpgradeBoost: string;
   GUEST_SEND_AN_EXTERNAL_LINK: string;
+  invitation: string;
+  locateMe: string;
+  favorite: string;
+  unfavorite: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -625,12 +631,18 @@ export const translations: Record<LanguageKey, Translation> = {
     discord: 'Discord',
     TEXT_CHANGE_TO_FORBIDDEN_URL:
       '此頻道已被設定為禁止訪客發送包含URL的文字訊息',
+    TEXT_CHANGE_TO_FORBIDDEN_TEXT: '此頻道已被設定為禁止訪客發送文字訊息',
+    TEXT_CHANGE_TO_ALLOWED_TEXT: '此頻道已被設定為允許訪客發送文字訊息',
     TEXT_CHANGE_TO_ALLOWED_URL: '此頻道已被設定為允許訪客發送包含URL的文字訊息',
     TEXT_CHANGE_TO_MAX_LENGTH: '遊客發送文字訊息的最大長度已變更為: {0}',
     TEXT_CHANGE_TO_WAIT_TIME: '遊客允許發送文字訊息的等待時間已變更為: {0} 秒',
-    TEXT_CHANGE_TO_INTERVAL: '遊客每次發送文字訊息的相隔時間已變更為: {0} 秒',
+    TEXT_CHANGE_TO_GAP_TIME: '遊客每次發送文字訊息的相隔時間已變更為: {0} 秒',
     vipUpgradeBoost: '(會員{0}倍升級加速中)',
     GUEST_SEND_AN_EXTERNAL_LINK: '[遊客發送了一個外部連結]',
+    invitation: '申請會員',
+    locateMe: '定位我自己',
+    favorite: '加入收藏',
+    unfavorite: '取消收藏',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -942,12 +954,18 @@ export const translations: Record<LanguageKey, Translation> = {
     getHelp: 'Get Help',
     discord: 'Discord',
     TEXT_CHANGE_TO_FORBIDDEN_URL: '此频道被设定为禁止访客发送包含URL的文字消息',
+    TEXT_CHANGE_TO_FORBIDDEN_TEXT: '此频道被设定为禁止访客发送文字消息',
+    TEXT_CHANGE_TO_ALLOWED_TEXT: '此频道被设定为允许访客发送文字消息',
     TEXT_CHANGE_TO_ALLOWED_URL: '此频道被设定为允许访客发送包含URL的文字消息',
     TEXT_CHANGE_TO_MAX_LENGTH: '游客发送文字消息的最大长度已变更为: {0} 字',
     TEXT_CHANGE_TO_WAIT_TIME: '游客允许发送文字消息的等待时间已变更为: {0} 秒',
-    TEXT_CHANGE_TO_INTERVAL: '游客每次发送文字消息的相隔时间已变更为: {0} 秒',
+    TEXT_CHANGE_TO_GAP_TIME: '游客每次发送文字消息的相隔时间已变更为: {0} 秒',
     vipUpgradeBoost: '(会员{0}倍升级加速中)',
     GUEST_SEND_AN_EXTERNAL_LINK: '[游客发送了一个外部链接]',
+    invitation: '申请会员',
+    locateMe: '定位我自己',
+    favorite: '加入收藏',
+    unfavorite: '取消收藏',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -1276,16 +1294,24 @@ export const translations: Record<LanguageKey, Translation> = {
     discord: 'Discord',
     TEXT_CHANGE_TO_FORBIDDEN_URL:
       'This channel has been set to forbid guests from sending messages containing URLs',
+    TEXT_CHANGE_TO_FORBIDDEN_TEXT:
+      'This channel has been set to forbid guests from sending text messages',
+    TEXT_CHANGE_TO_ALLOWED_TEXT:
+      'This channel has been set to allow guests to send text messages',
     TEXT_CHANGE_TO_ALLOWED_URL:
       'This channel has been set to allow guests to send messages containing URLs',
     TEXT_CHANGE_TO_MAX_LENGTH:
       'The maximum length of guest text messages has been changed to: {0} characters',
     TEXT_CHANGE_TO_WAIT_TIME:
       'The wait time before guests can send messages has been changed to: {0} seconds',
-    TEXT_CHANGE_TO_INTERVAL:
+    TEXT_CHANGE_TO_GAP_TIME:
       'The interval between guest messages has been changed to: {0} seconds',
     vipUpgradeBoost: '(Member {0}x upgrade boost active)',
     GUEST_SEND_AN_EXTERNAL_LINK: '[Guest sent an external link]',
+    invitation: 'Apply for membership',
+    locateMe: 'Locate myself',
+    favorite: 'Add to favorites',
+    unfavorite: 'Remove from favorites',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1612,13 +1638,21 @@ export const translations: Record<LanguageKey, Translation> = {
     discord: 'Discord',
     TEXT_CHANGE_TO_FORBIDDEN_URL:
       'このチャンネルはゲストのURL含むメッセージを禁止しています',
+    TEXT_CHANGE_TO_FORBIDDEN_TEXT:
+      'このチャンネルはゲストのテキストメッセージを禁止しています',
+    TEXT_CHANGE_TO_ALLOWED_TEXT:
+      'このチャンネルはゲストのテキストメッセージを許可しています',
     TEXT_CHANGE_TO_ALLOWED_URL:
       'このチャンネルはゲストのURL含むメッセージを許可しています',
     TEXT_CHANGE_TO_MAX_LENGTH: 'ゲストのテキストメッセージ最大長: {0} 文字',
     TEXT_CHANGE_TO_WAIT_TIME: 'ゲストのメッセージ待機時間: {0} 秒',
-    TEXT_CHANGE_TO_INTERVAL: 'ゲストのメッセージ間隔: {0}',
+    TEXT_CHANGE_TO_GAP_TIME: 'ゲストのメッセージ間隔: {0}',
     vipUpgradeBoost: '(メンバー{0}倍アップグレードブースト中)',
     GUEST_SEND_AN_EXTERNAL_LINK: '[ゲストが外部リンクを送信しました]',
+    invitation: 'メンバー申請',
+    locateMe: '自分を定位',
+    favorite: 'お気に入りに追加',
+    unfavorite: 'お気に入りから削除',
   },
 };
 
