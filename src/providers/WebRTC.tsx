@@ -112,20 +112,29 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   };
 
   const handleRTCOffer = async ({ from, offer }: Offer) => {
-    if (!peerConnections.current[from]) await createPeerConnection(from);
     try {
-      // Receive offer
+      if (!peerConnections.current[from]) {
+        await createPeerConnection(from);
+      } else if (peerConnections.current[from].signalingState === 'stable') {
+        console.warn(
+          'Connection already in stable state, preparing to handle new offer',
+        );
+        await removePeerConnection(from);
+        await createPeerConnection(from);
+      }
 
+      // Receive offer
       const offerDes = new RTCSessionDescription({
         type: offer.type,
         sdp: offer.sdp,
       });
       await peerConnections.current[from].setRemoteDescription(offerDes);
+
       // Create answer
       const answer = await peerConnections.current[from].createAnswer();
       await peerConnections.current[from].setLocalDescription(answer);
-      // Send answer
 
+      // Send answer
       handleSendRTCAnswer(from, answer);
     } catch (error) {
       console.error('Error setting remote description:', error);
@@ -425,37 +434,130 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   }, []);
 
   const updateInputDevice = async (deviceId: string) => {
-    // if (!deviceId) return;
-    // const newStream = await navigator.mediaDevices.getUserMedia({
-    //   audio: { deviceId: { exact: deviceId } },
-    // });
-    // newStream.getAudioTracks().forEach((track) => {
-    //   track.enabled = !isMute;
-    // });
-    // if (localStream.current) {
-    //   localStream.current.getTracks().forEach((track) => track.stop());
-    // }
-    // localStream.current = newStream;
-    // Object.values(peerConnections.current).forEach((peerConnection) => {
-    //   const senders = peerConnection.getSenders();
-    //   senders.forEach((sender) => {
-    //     if (sender.track?.kind === 'audio') {
-    //       sender.replaceTrack(newStream.getAudioTracks()[0]);
-    //     }
-    //   });
-    // });
+    if (!deviceId) return;
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: { exact: deviceId } },
+      });
+
+      // Set mute state of new audio stream to match current state
+      newStream.getAudioTracks().forEach((track) => {
+        track.enabled = !isMute;
+      });
+
+      // Stop all tracks of current stream
+      if (localStream.current) {
+        localStream.current.getTracks().forEach((track) => track.stop());
+      }
+
+      // Update local stream reference
+      localStream.current = newStream;
+
+      // If audio processing context exists, need to recreate
+      if (audioContext.current) {
+        // Disconnect old connection
+        if (sourceNode.current) {
+          sourceNode.current.disconnect();
+        }
+
+        // Create new audio source
+        sourceNode.current =
+          audioContext.current.createMediaStreamSource(newStream);
+
+        // Connect to gain node and destination node
+        if (gainNode.current && destinationNode.current) {
+          sourceNode.current.connect(gainNode.current);
+          gainNode.current.connect(destinationNode.current);
+
+          // Get processed audio track
+          const processedTrack =
+            destinationNode.current.stream.getAudioTracks()[0];
+
+          // Update all peer connection senders
+          Object.values(peerConnections.current).forEach((peerConnection) => {
+            const senders = peerConnection.getSenders();
+            const audioSender = senders.find((s) => s.track?.kind === 'audio');
+            if (audioSender) {
+              audioSender.replaceTrack(processedTrack).catch((error) => {
+                console.error('Error replacing audio track:', error);
+              });
+            }
+          });
+        } else {
+          // If gain node is not set, use new track directly
+          newStream.getAudioTracks().forEach((track) => {
+            Object.values(peerConnections.current).forEach((peerConnection) => {
+              const senders = peerConnection.getSenders();
+              const audioSender = senders.find(
+                (s) => s.track?.kind === 'audio',
+              );
+              if (audioSender) {
+                audioSender.replaceTrack(track).catch((error) => {
+                  console.error('Error replacing audio track:', error);
+                });
+              }
+            });
+          });
+        }
+      } else {
+        // If audio processing context does not exist, update all connected tracks directly
+        newStream.getAudioTracks().forEach((track) => {
+          Object.values(peerConnections.current).forEach((peerConnection) => {
+            const senders = peerConnection.getSenders();
+            const audioSender = senders.find((s) => s.track?.kind === 'audio');
+            if (audioSender) {
+              audioSender.replaceTrack(track).catch((error) => {
+                console.error('Error replacing audio track:', error);
+              });
+            }
+          });
+        });
+      }
+    } catch (err) {
+      console.error('Error accessing microphone device:', err);
+    }
   };
 
   const updateOutputDevice = async (deviceId: string) => {
-    // if (!deviceId) return;
-    // Object.values(peerAudioRefs.current).forEach((audio) => {
-    //   audio
-    //     .setSinkId(deviceId)
-    //     .catch((err) => console.error('更新音訊輸出裝置失敗:', err));
-    // });
+    if (!deviceId) return;
+    try {
+      // Check if browser supports setSinkId API
+      if (typeof HTMLMediaElement.prototype.setSinkId === 'function') {
+        Object.values(peerAudioRefs.current).forEach((audio) => {
+          audio
+            .setSinkId(deviceId)
+            .catch((err) =>
+              console.error('Error updating audio output device:', err),
+            );
+        });
+
+        // Update hidden audio elements
+        const audioElements = document.querySelectorAll(
+          'audio[style*="display: none"]',
+        );
+        audioElements.forEach((audio) => {
+          if (audio instanceof HTMLMediaElement && audio.setSinkId) {
+            audio
+              .setSinkId(deviceId)
+              .catch((err) =>
+                console.error(
+                  'Error updating hidden audio element output device:',
+                  err,
+                ),
+              );
+          }
+        });
+      } else {
+        console.warn(
+          'This browser does not support setSinkId API, cannot switch audio output device',
+        );
+      }
+    } catch (err) {
+      console.error('Error setting audio output device:', err);
+    }
   };
 
-  // 在組件卸載時清理 Audio Context
+  // Clean up Audio Context when component unmounts
   useEffect(() => {
     return () => {
       if (audioContext.current) {

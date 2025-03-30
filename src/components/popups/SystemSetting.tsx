@@ -50,7 +50,6 @@ const SystemSettingPopup: React.FC = React.memo(() => {
       setSelectedOutput(devices.output || '');
     });
 
-    // 獲取可用的音訊設備
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       const inputs = devices.filter((device) => device.kind === 'audioinput');
       const outputs = devices.filter((device) => device.kind === 'audiooutput');
@@ -63,13 +62,12 @@ const SystemSettingPopup: React.FC = React.memo(() => {
     if (selectedInput) {
       navigator.mediaDevices
         .getUserMedia({ audio: { deviceId: selectedInput } })
-        // .then((stream) => {
-        //   console.log('使用選擇的輸入裝置:', selectedInput);
-        //   // 這裡可以將 stream 傳遞給音訊處理的邏輯
-        // })
-        .catch((err) => console.error('無法存取麥克風', err));
+        .then(() => {
+          webRTC.updateInputDevice?.(selectedInput);
+        })
+        .catch((err) => console.error('Error accessing microphone:', err));
     }
-  }, [selectedInput]);
+  }, [selectedInput, webRTC]);
 
   const handleConfirm = () => {
     ipcService.autoLaunch.set(autoLaunch);
@@ -191,9 +189,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
             <div className={popup['col']}>
               <div className={popup['label']}>{lang.tr.voiceSettings}</div>
               <div className={popup['inputGroup']}>
-                <div
-                  className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
-                >
+                <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <div className={popup['label']}>{lang.tr.inputDevice}</div>
                   <div className={popup['selectBox']}>
                     <select
@@ -218,10 +214,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                     </select>
                   </div>
                 </div>
-
-                <div
-                  className={`${popup['inputBox']} ${popup['col']} ${popup['disabled']}`}
-                >
+                <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <div className={popup['label']}>{lang.tr.outputDevice}</div>
                   <div className={popup['selectBox']}>
                     <select
