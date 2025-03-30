@@ -13,6 +13,7 @@ import BadgeViewer from '@/components/viewers/Badge';
 // Providers
 import { useContextMenu } from '@/providers/ContextMenu';
 import { useLanguage } from '@/providers/Language';
+import { useSocket } from '@/providers/Socket';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -33,11 +34,18 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
     // States
     const [expanded, setExpanded] = useState<boolean>(true);
 
+    // Socket
+    const socket = useSocket();
+
     // Variables
     const { id: friendGroupId, name: friendGroupName } = friendGroup;
-    const friendGroupFriends = friends.filter(
-      (fd) => fd.friendGroupId === friendGroupId,
-    );
+    const friendGroupFriends =
+      friendGroupId === ''
+        ? friends
+        : friends.filter((fd) => fd.friendGroupId === friendGroupId);
+    const friendsInServer = friendGroupFriends.filter(
+      (fd) => fd.currentServerId,
+    ).length;
 
     return (
       <div key={friendGroupId}>
@@ -48,10 +56,40 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
           onContextMenu={(e) => {
             contextMenu.showContextMenu(e.pageX, e.pageY, [
               {
+                id: 'rename',
+                label: lang.tr.friendRenameGroup,
+                show: friendGroupId !== '',
+                onClick: () => {
+                  ipcService.popup.open(PopupType.RENAME_FRIEND_GROUP);
+                  ipcService.initialData.onRequest(
+                    PopupType.RENAME_FRIEND_GROUP,
+                    {
+                      friendGroupId,
+                      friendGroupName,
+                    },
+                  );
+                },
+              },
+              {
                 id: 'delete',
                 label: lang.tr.delete,
+                show: friendGroupId !== '',
                 onClick: () => {
                   // Open Delete Group Modal
+                  ipcService.popup.open(PopupType.DIALOG_ALERT);
+                  ipcService.initialData.onRequest(PopupType.DIALOG_ALERT, {
+                    iconType: 'warning',
+                    title: lang.tr.deleteFriendGroupDialog.replace(
+                      '{0}',
+                      friendGroupName,
+                    ),
+                    submitTo: PopupType.DIALOG_ALERT,
+                  });
+                  ipcService.popup.onSubmit(PopupType.DIALOG_ALERT, () => {
+                    socket.send.deleteFriendGroup({
+                      friendGroupId,
+                    });
+                  });
                 },
               },
             ]);
@@ -63,7 +101,9 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
             }`}
           />
           <span className={styles['tabLable']}>{friendGroupName}</span>
-          <span className={styles['tabCount']}>{`(${friends.length})`}</span>
+          <span
+            className={styles['tabCount']}
+          >{`(${friendsInServer}/${friendGroupFriends.length})`}</span>
         </div>
 
         {/* Expanded Sections */}
@@ -90,6 +130,9 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   const lang = useLanguage();
   const contextMenu = useContextMenu();
 
+  // Socket
+  const socket = useSocket();
+
   // Refs
   const refreshed = useRef(false);
 
@@ -106,28 +149,44 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
     signature: friendSignature,
     vip: friendVip,
     level: friendLevel,
-    user1Id: friendUserId1,
-    user2Id: friendUserId2,
+    // user1Id: friendUserId1,
+    // user2Id: friendUserId2,
     badges: friendBadges = [],
     currentServerId: friendCurrentServerId,
   } = friend;
   const friendGrade = Math.min(56, Math.ceil(friendLevel / 5)); // 56 is max level
 
   // Handlers
-  const handleOpenDirectMessage = (
-    userId: User['id'],
-    targetId: User['id'],
-  ) => {
-    ipcService.popup.open(PopupType.DIRECT_MESSAGE);
-    ipcService.initialData.onRequest(PopupType.DIRECT_MESSAGE, {
-      userId,
-      targetId,
-    });
-  };
+  // const handleOpenDirectMessage = (
+  //   userId: User['id'],
+  //   targetId: User['id'],
+  //   targetName: User['name'],
+  // ) => {
+  //   ipcService.popup.open(PopupType.DIRECT_MESSAGE);
+  //   ipcService.initialData.onRequest(PopupType.DIRECT_MESSAGE, {
+  //     userId,
+  //     targetId,
+  //     targetName,
+  //   });
+  // };
 
   const handleServerUpdate = (server: Server | null) => {
     if (!server) return;
     setFriendServerName(server.name);
+  };
+
+  const handleDeleteFriend = (friendId: UserFriend['id']) => {
+    ipcService.popup.open(PopupType.DIALOG_ALERT);
+    ipcService.initialData.onRequest(PopupType.DIALOG_ALERT, {
+      iconType: 'warning',
+      title: lang.tr.deleteFriendDialog.replace('{0}', friendName),
+      submitTo: PopupType.DIALOG_ALERT,
+    });
+    ipcService.popup.onSubmit(PopupType.DIALOG_ALERT, () => {
+      socket.send.deleteFriend({
+        friendId,
+      });
+    });
   };
 
   useEffect(() => {
@@ -152,15 +211,13 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
             {
               id: 'delete',
               label: lang.tr.deleteFriend,
-              onClick: () => {
-                // Open Delete Friend Modal
-              },
+              onClick: () => handleDeleteFriend(friendId),
             },
           ]);
         }}
-        onDoubleClick={() => {
-          handleOpenDirectMessage(friendUserId1, friendUserId2);
-        }}
+        // onDoubleClick={() => {
+        //   handleOpenDirectMessage(friendUserId1, friendUserId2, friendName);
+        // }}
       >
         <div
           className={styles['avatarPicture']}
@@ -217,11 +274,16 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
       friends: userFriends = [],
       friendGroups: userFriendGroups = [],
     } = user;
+    userFriends.sort((a, b) => {
+      if (a.currentServerId && !b.currentServerId) return -1;
+      if (!a.currentServerId && b.currentServerId) return 1;
+      return 0;
+    });
     const filteredFriends = userFriends.filter((fd) =>
       fd.name.includes(searchQuery),
     );
     const defaultFriendGroup: FriendGroup = createDefault.friendGroup({
-      name: '我的好友',
+      name: `${lang.tr.myFriends}`,
       order: 0,
       userId,
     });
@@ -237,7 +299,9 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
 
     const handleOpenAddSubGroups = () => {
       ipcService.popup.open(PopupType.ADD_FRIEND_SUBGROUPS);
-      ipcService.initialData.onRequest(PopupType.ADD_FRIEND_SUBGROUPS, {});
+      ipcService.initialData.onRequest(PopupType.ADD_FRIEND_SUBGROUPS, {
+        userId,
+      });
     };
 
     // const handleOpenCreateGroupPopup = () => {

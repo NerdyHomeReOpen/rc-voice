@@ -14,29 +14,30 @@ import setting from '@/styles/popups/editServer.module.css';
 // Services
 import ipcService from '@/services/ipc.service';
 
-interface AddFriendGroupPopupProps {
-  userId: string;
+interface RenameFriendGroupPopupProps {
+  friendGroupId: string;
+  friendGroupName: string;
 }
 
-const AddFriendGroupPopup: React.FC<AddFriendGroupPopupProps> = React.memo(
-  (initialData: AddFriendGroupPopupProps) => {
+const RenameFriendGroupPopup: React.FC<RenameFriendGroupPopupProps> =
+  React.memo((initialData: RenameFriendGroupPopupProps) => {
     // Hooks
     const socket = useSocket();
     const lang = useLanguage();
 
-    // States
-    const [groupName, setGroupName] = useState<string>('');
-
     // Variables
-    const { userId } = initialData;
+    const { friendGroupId, friendGroupName } = initialData;
+
+    // States
+    const [groupName, setGroupName] = useState<string>(friendGroupName);
 
     // Handlers
-    const handleAddSubGroups = (
+    const handleUpdateFriendGroup = (
       group: Partial<FriendGroup>,
-      userId: User['id'],
+      friendGroupId: FriendGroup['id'],
     ) => {
       if (!socket) return;
-      socket.send.createFriendGroup({ group, userId });
+      socket.send.updateFriendGroup({ group, friendGroupId });
     };
 
     const handleUserSearch = useCallback((name: User | null) => {
@@ -82,6 +83,7 @@ const AddFriendGroupPopup: React.FC<AddFriendGroupPopupProps> = React.memo(
                 <input
                   className={popup['input']}
                   type="text"
+                  placeholder={groupName}
                   value={groupName}
                   maxLength={20}
                   onChange={(e) => setGroupName(e.target.value)}
@@ -97,13 +99,13 @@ const AddFriendGroupPopup: React.FC<AddFriendGroupPopupProps> = React.memo(
             className={`${popup['button']} ${
               !groupName.trim() ? popup['disabled'] : ''
             }`}
-            disabled={!groupName.trim()}
+            disabled={!groupName.trim() || groupName === friendGroupName}
             onClick={() => {
-              handleAddSubGroups(
+              handleUpdateFriendGroup(
                 {
                   name: groupName,
                 },
-                userId,
+                friendGroupId,
               );
               handleClose();
             }}
@@ -116,9 +118,8 @@ const AddFriendGroupPopup: React.FC<AddFriendGroupPopupProps> = React.memo(
         </div>
       </div>
     );
-  },
-);
+  });
 
-AddFriendGroupPopup.displayName = 'AddFriendGroupPopup';
+RenameFriendGroupPopup.displayName = 'RenameFriendGroupPopup';
 
-export default AddFriendGroupPopup;
+export default RenameFriendGroupPopup;

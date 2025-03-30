@@ -30,6 +30,7 @@ import ipcService from '@/services/ipc.service';
 
 // Providers
 import { useLanguage } from '@/providers/Language';
+import RenameFriendGroup from '@/components/popups/RenameFriendGroup';
 
 interface HeaderProps {
   title: string;
@@ -180,6 +181,11 @@ const Popup = React.memo(() => {
         setHeaderTitle(lang.tr.addFriendSubGroups);
         setHeaderButtons(['close']);
         setContent(<AddFriendGroup {...initialData} />);
+        break;
+      case PopupType.RENAME_FRIEND_GROUP:
+        setHeaderTitle(lang.tr.friendRenameGroup);
+        setHeaderButtons(['close']);
+        setContent(<RenameFriendGroup {...initialData} />);
         break;
       case PopupType.DIRECT_MESSAGE:
         setHeaderTitle(lang.tr.directMessage);

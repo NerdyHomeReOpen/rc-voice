@@ -115,6 +115,7 @@ export interface Translation {
   friendLabel: string;
   friendSelectGroup: string;
   friendAddGroup: string;
+  friendRenameGroup: string;
   friendNote: string;
   max120content: string;
   sendRequest: string;
@@ -315,6 +316,9 @@ export interface Translation {
   locateMe: string;
   favorite: string;
   unfavorite: string;
+  deleteFriendDialog: string;
+  deleteFriendGroupDialog: string;
+  myFriends: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -439,6 +443,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendLabel: '您將添加以下聯絡人',
     friendSelectGroup: '選擇分組：',
     friendAddGroup: '添加分組',
+    friendRenameGroup: '重命名分組',
     friendNote: '附言：',
     max120content: '最多只能輸入120個字元',
     sendRequest: '傳送請求',
@@ -643,6 +648,9 @@ export const translations: Record<LanguageKey, Translation> = {
     locateMe: '定位我自己',
     favorite: '加入收藏',
     unfavorite: '取消收藏',
+    deleteFriendDialog: '確定要刪除好友 {0} 嗎？',
+    deleteFriendGroupDialog: '確定要刪除分組 {0} 嗎？',
+    myFriends: '我的好友',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -763,6 +771,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendLabel: '您将添加以下联系人',
     friendSelectGroup: '选择分组：',
     friendAddGroup: '添加分组',
+    friendRenameGroup: '重命名分组',
     friendNote: '附言：',
     max120content: '最多只能输入120个字符',
     sendRequest: '发送请求',
@@ -966,6 +975,9 @@ export const translations: Record<LanguageKey, Translation> = {
     locateMe: '定位我自己',
     favorite: '加入收藏',
     unfavorite: '取消收藏',
+    deleteFriendDialog: '确定要删除好友 {0} 吗？',
+    deleteFriendGroupDialog: '确定要删除分组 {0} 吗？',
+    myFriends: '我的好友',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -1087,6 +1099,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendLabel: 'You will add the following contact',
     friendSelectGroup: 'Select group:',
     friendAddGroup: 'Add group',
+    friendRenameGroup: 'Rename group',
     friendNote: 'Note:',
     max120content: 'You can enter up to 120 characters',
     sendRequest: 'Send request',
@@ -1312,6 +1325,9 @@ export const translations: Record<LanguageKey, Translation> = {
     locateMe: 'Locate myself',
     favorite: 'Add to favorites',
     unfavorite: 'Remove from favorites',
+    deleteFriendDialog: 'Are you sure you want to delete friend {0}?',
+    deleteFriendGroupDialog: 'Are you sure you want to delete group {0}?',
+    myFriends: 'My Friends',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1432,6 +1448,7 @@ export const translations: Record<LanguageKey, Translation> = {
     friendLabel: '次の連絡先を追加します',
     friendSelectGroup: 'グループを選択：',
     friendAddGroup: 'グループを追加',
+    friendRenameGroup: 'グループを名前変更',
     friendNote: 'メモ：',
     max120content: '最大120文字まで入力できます',
     sendRequest: 'リクエストを送信',
@@ -1653,6 +1670,9 @@ export const translations: Record<LanguageKey, Translation> = {
     locateMe: '自分を定位',
     favorite: 'お気に入りに追加',
     unfavorite: 'お気に入りから削除',
+    deleteFriendDialog: '本当に友達を削除しますか？',
+    deleteFriendGroupDialog: '本当に分組を削除しますか？',
+    myFriends: '友達',
   },
 };
 
@@ -1983,6 +2003,7 @@ export enum PopupType {
   APPLY_FRIEND = 'applyFriend',
   ADD_FRIEND = 'addFriend',
   ADD_FRIEND_SUBGROUPS = 'addSubGroups',
+  RENAME_FRIEND_GROUP = 'renameFriendGroup',
   DIRECT_MESSAGE = 'directMessage',
   DIALOG_ALERT = 'dialogAlert',
   DIALOG_ALERT2 = 'dialogAlert2',
@@ -2005,6 +2026,7 @@ export const PopupSize = {
   [PopupType.APPLY_MEMBER]: { height: 420, width: 540 },
   [PopupType.ADD_FRIEND]: { height: 220, width: 400 },
   [PopupType.ADD_FRIEND_SUBGROUPS]: { height: 220, width: 400 },
+  [PopupType.RENAME_FRIEND_GROUP]: { height: 220, width: 400 },
   [PopupType.DIRECT_MESSAGE]: { height: 200, width: 300 },
   [PopupType.DIALOG_ALERT]: { height: 220, width: 400 },
   [PopupType.DIALOG_ALERT2]: { height: 220, width: 400 },
