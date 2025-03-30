@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 // CSS
 import styles from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
 import vip from '@/styles/common/vip.module.css';
 // Types
-import { PopupType, User, FriendGroup, UserFriend } from '@/types';
+import { PopupType, User, FriendGroup, UserFriend, Server } from '@/types';
 
 // Components
 import BadgeViewer from '@/components/viewers/Badge';
@@ -17,6 +17,7 @@ import { useLanguage } from '@/providers/Language';
 // Services
 import ipcService from '@/services/ipc.service';
 import { createDefault } from '@/utils/createDefault';
+import refreshService from '@/services/refresh.service';
 
 interface FriendGroupTabProps {
   friendGroup: FriendGroup;
@@ -89,6 +90,14 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   const lang = useLanguage();
   const contextMenu = useContextMenu();
 
+  // Refs
+  const refreshed = useRef(false);
+
+  // States
+  const [friendServerName, setFriendServerName] = useState<Server['name']>(
+    createDefault.server().name,
+  );
+
   // Variables
   const {
     id: friendId,
@@ -100,6 +109,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
     user1Id: friendUserId1,
     user2Id: friendUserId2,
     badges: friendBadges = [],
+    currentServerId: friendCurrentServerId,
   } = friend;
   const friendGrade = Math.min(56, Math.ceil(friendLevel / 5)); // 56 is max level
 
@@ -114,6 +124,23 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
       targetId,
     });
   };
+
+  const handleServerUpdate = (server: Server | null) => {
+    if (!server) return;
+    setFriendServerName(server.name);
+  };
+
+  useEffect(() => {
+    if (!friendCurrentServerId || refreshed.current) return;
+    const refresh = async () => {
+      refreshed.current = true;
+      const server = await refreshService.server({
+        serverId: friendCurrentServerId,
+      });
+      handleServerUpdate(server);
+    };
+    refresh();
+  }, [friendCurrentServerId]);
 
   return (
     <div key={friendId}>
@@ -137,20 +164,32 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
       >
         <div
           className={styles['avatarPicture']}
-          style={{ backgroundImage: `url(${friendAvatarUrl})` }}
+          style={{
+            backgroundImage: `url(${friendAvatarUrl})`,
+            filter: !friendServerName ? 'grayscale(100%)' : '',
+          }}
         />
         <div className={styles['baseInfoBox']}>
           <div className={styles['container']}>
-            <div
-              className={`${vip['vipIcon']} ${vip[`vip-small-${friendVip}`]}`}
-            />
+            {friendVip > 0 && (
+              <div
+                className={`${vip['vipIcon']} ${vip[`vip-small-${friendVip}`]}`}
+              />
+            )}
             <div className={styles['name']}>{friendName}</div>
             <div
               className={`${grade['grade']} ${grade[`lv-${friendGrade}`]}`}
             />
             <BadgeViewer badges={friendBadges} />
           </div>
-          <div className={styles['signature']}>{friendSignature}</div>
+          {friendServerName ? (
+            <>
+              <div className={styles['location']} />
+              <div className={styles['serverName']}>{friendServerName}</div>
+            </>
+          ) : (
+            <div className={styles['signature']}>{friendSignature}</div>
+          )}
         </div>
       </div>
     </div>

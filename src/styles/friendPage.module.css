@@ -367,6 +367,24 @@
   max-width: 185px;
 }
 
+.friendCard .serverName {
+  font-size: 0.9rem;
+  color:#3a9abe;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friendCard .location::before {
+  content: '';
+  min-height: 16px;
+  min-width: 16px;
+  background-image: url('../../public/mylocation.png');
+  background-size: auto;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
 .recentList {
   display: flex;
   flex-direction: column;
