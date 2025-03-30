@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 // CSS
 import styles from '@/styles/serverPage.module.css';
 import grade from '@/styles/common/grade.module.css';
+import vip from '@/styles/common/vip.module.css';
 import permission from '@/styles/common/permission.module.css';
 
 // Types
@@ -555,32 +556,33 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         }}
       >
         <div className={`${styles['userState']}`} />
-
         <div
-          className={`${styles['userIcon']} ${
-            permission[channelMemberGender]
-          } ${permission[`lv-${channelMemberPermission}`]}`}
+          className={`
+            ${permission[channelMemberGender]} 
+            ${permission[`lv-${channelMemberPermission}`]}
+          `}
         />
         {channelMemberVip > 0 && (
           <div
-            className={`${styles['vipIcon']} ${
-              styles[`vip-${channelMemberVip}`]
-            }`}
+            className={`
+              ${vip['vipIcon']} 
+              ${vip[`vip-small-${channelMemberVip}`]}
+            `}
           />
         )}
         <div
-          className={`${styles['userTabName']} ${
-            channelMemberNickname && channelMemberName
-              ? styles['channelMemberName']
-              : ''
-          }`}
+          className={`
+            ${styles['userTabName']} 
+            ${channelMemberNickname ? styles['channelMemberName'] : ''}
+          `}
         >
           {channelMemberNickname || channelMemberName}
         </div>
         <div
-          className={`${styles['userGrade']} ${
-            grade[`lv-${channelMemberGrade}`]
-          }`}
+          className={`
+            ${grade['grade']} 
+            ${grade[`lv-${channelMemberGrade}`]}
+          `}
         />
         <BadgeViewer badges={channelMemberBadges} maxDisplay={3} />
         {isCurrentUser && <div className={styles['myLocationIcon']} />}

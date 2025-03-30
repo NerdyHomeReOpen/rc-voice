@@ -324,28 +324,16 @@
   color: #777;
 }
 
-.userList .userTab .channelMemberName {
+.userList .userTab .userTabName.member {
   color: #6e849b;
 }
 
-.userList .userTab .userIcon {
-  display: flex;
-}
-
-.userList .userTab .userGrade {
-  width: 15px;
-  height: 15px;
-  background: url('../../public/usergrade.png') no-repeat center center;
-  background-size: auto;
-  background-position: 0 0;
-  cursor: pointer;
-}
-
 .userList .userTab .userState {
-  background: url('../../public/channel/mic_queue_state.png') no-repeat center
-    center;
-  height: 12px;
-  width: 12px;
+  min-height: 12px;
+  min-width: 12px;
+  background-image: url('../../public/channel/mic_queue_state.png');
+  background-size: auto;
+  background-repeat: no-repeat;
   background-position: -36px 0;
   left: 0;
 }
@@ -735,35 +723,6 @@
 
 .bottomNav:has(.navItem:last-child.active)::before {
   left: calc(75% - 35px);
-}
-
-.vipIcon {
-  min-width: 14px;
-  min-height: 14px;
-  background: url('../../public/channel/vip_icons.png') no-repeat center;
-  background-size: cover;
-  border: none;
-  background-position: 0 0;
-}
-
-.vipIcon.vip-1 {
-  background-position: 0 0;
-}
-
-.vipIcon.vip-2 {
-  background-position: -14px 0;
-}
-
-.vipIcon.vip-3 {
-  background-position: -28px 0;
-}
-
-.vipIcon.vip-4 {
-  background-position: -42px 0;
-}
-
-.vipIcon.vip-5 {
-  background-position: -56px 0;
 }
 
 .navItem {
