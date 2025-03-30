@@ -321,6 +321,8 @@ export interface Translation {
   deleteFriendDialog: string;
   deleteFriendGroupDialog: string;
   myFriends: string;
+  acceptApplication: string;
+  denyApplication: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -655,6 +657,8 @@ export const translations: Record<LanguageKey, Translation> = {
     deleteFriendDialog: '確定要刪除好友 {0} 嗎？',
     deleteFriendGroupDialog: '確定要刪除分組 {0} 嗎？',
     myFriends: '我的好友',
+    acceptApplication: '接受申請',
+    denyApplication: '拒絕申請',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -984,6 +988,8 @@ export const translations: Record<LanguageKey, Translation> = {
     deleteFriendDialog: '确定要删除好友 {0} 吗？',
     deleteFriendGroupDialog: '确定要删除分组 {0} 吗？',
     myFriends: '我的好友',
+    acceptApplication: '接受申请',
+    denyApplication: '拒绝申请',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -1336,6 +1342,8 @@ export const translations: Record<LanguageKey, Translation> = {
     deleteFriendDialog: 'Are you sure you want to delete friend {0}?',
     deleteFriendGroupDialog: 'Are you sure you want to delete group {0}?',
     myFriends: 'My Friends',
+    acceptApplication: 'Accept application',
+    denyApplication: 'Deny application',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1683,6 +1691,8 @@ export const translations: Record<LanguageKey, Translation> = {
     deleteFriendDialog: '本当に友達を削除しますか？',
     deleteFriendGroupDialog: '本当に分組を削除しますか？',
     myFriends: '友達',
+    acceptApplication: '申請を承認',
+    denyApplication: '申請を拒否',
   },
 };
 

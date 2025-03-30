@@ -163,17 +163,13 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
       socket.send.updateServer({ server, serverId });
     };
 
-    const handleUpdateApplication = (
-      memberApplication: Partial<MemberApplication>,
+    const handleDeleteMemberApplication = (
+      applicationId: MemberApplication['id'],
       userId: User['id'],
       serverId: Server['id'],
     ) => {
       if (!socket) return;
-      socket.send.updateMemberApplication({
-        memberApplication,
-        userId,
-        serverId,
-      });
+      socket.send.deleteMemberApplication({ applicationId, userId, serverId });
     };
 
     const handleCreateMember = (
@@ -903,10 +899,10 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                               contextMenu.showContextMenu(e.pageX, e.pageY, [
                                 {
                                   id: 'accept',
-                                  label: '接受申請',
+                                  label: lang.tr.acceptApplication,
                                   onClick: () => {
-                                    handleUpdateApplication(
-                                      { applicationStatus: 'accepted' },
+                                    handleDeleteMemberApplication(
+                                      applicationId,
                                       applicationUserId,
                                       applicationServerId,
                                     );
@@ -924,10 +920,10 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                                 },
                                 {
                                   id: 'deny',
-                                  label: '拒絕申請',
+                                  label: lang.tr.denyApplication,
                                   onClick: () => {
-                                    handleUpdateApplication(
-                                      { applicationStatus: 'rejected' },
+                                    handleDeleteMemberApplication(
+                                      applicationId,
                                       applicationUserId,
                                       applicationServerId,
                                     );
