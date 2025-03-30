@@ -538,6 +538,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         }}
       >
         <div className={`${styles['userState']}`} />
+
+        <div
+          className={`${styles['userIcon']} ${
+            permission[channelMemberGender]
+          } ${permission[`lv-${channelMemberPermission}`]}`}
+        />
         {channelMemberVip > 0 && (
           <div
             className={`${styles['vipIcon']} ${
@@ -545,11 +551,6 @@ const UserTab: React.FC<UserTabProps> = React.memo(
             }`}
           />
         )}
-        <div
-          className={`${styles['userIcon']} ${
-            permission[channelMemberGender]
-          } ${permission[`lv-${channelMemberPermission}`]}`}
-        />
         <div
           className={`${styles['userTabName']} ${
             channelMemberNickname && channelMemberName
