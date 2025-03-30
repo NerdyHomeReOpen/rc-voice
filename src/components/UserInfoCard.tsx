@@ -40,6 +40,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = React.memo(
       vip: memberVip,
     } = member;
     const memberGrade = Math.min(56, Math.ceil(memberLevel / 5));
+    const vipBoostMultiplier = Math.min(2, 1 + memberVip * 0.2);
 
     return (
       <div
@@ -71,7 +72,10 @@ const UserInfoCard: React.FC<UserInfoCardProps> = React.memo(
               {/* VIP Info Text */}
               {memberVip > 0 && (
                 <div className={userInfoCard['vipText']}>
-                  (會員{Math.min(2, 1 + memberVip * 0.2)}倍升級加速中)
+                  {lang.tr.vipUpgradeBoost.replace(
+                    '{0}',
+                    vipBoostMultiplier.toString(),
+                  )}
                 </div>
               )}
               {/* Xp Section */}

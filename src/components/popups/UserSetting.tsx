@@ -58,7 +58,6 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
 
     // Variables
     const { userId } = initialData;
-    console.log(userId);
     const userGrade = Math.min(56, Math.ceil(userLevel / 5)); // 56 is max level
     const currentYear = new Date().getFullYear();
     const userAge = 20; // REMOVE: only for testing
@@ -125,7 +124,6 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
                     if (data) {
                       setUserAvatar(data.avatar);
                       setUserAvatarUrl(data.avatarUrl);
-                      console.log(data);
                     }
                   };
                   reader.readAsDataURL(file);
@@ -147,7 +145,13 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
                 className={`${grade['grade']} ${grade[`lv-${userGrade}`]}`}
               />
             </div>
-            <div className={popup['p1']} style={{ color: '#fff' }}>
+            <div
+              className={popup['p1']}
+              style={{ color: '#fff' }}
+              onClick={() => {
+                navigator.clipboard.writeText(userId);
+              }}
+            >
               @{userName}
             </div>
             <div className={popup['p1']} style={{ color: '#fff' }}>

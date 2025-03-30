@@ -98,6 +98,26 @@
   margin-left: 2rem;
 }
 
+.vipIcon.vip-1 {
+  background-position: 0 0;
+}
+
+.vipIcon.vip-2 {
+  background-position: -14px 0;
+}
+
+.vipIcon.vip-3 {
+  background-position: -28px 0;
+}
+
+.vipIcon.vip-4 {
+  background-position: -42px 0;
+}
+
+.vipIcon.vip-5 {
+  background-position: -56px 0;
+}
+
 .signatureBox {
   display: flex;
   min-width: 30%;

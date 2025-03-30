@@ -177,7 +177,6 @@ export interface Translation {
   takeMic: string;
   takenMic: string;
   mixing: string;
-  with: string;
   in: string;
   chatWithMembers: string;
   warningDeleteChannel: string;
@@ -307,6 +306,7 @@ export interface Translation {
   TEXT_CHANGE_TO_MAX_LENGTH: string;
   TEXT_CHANGE_TO_WAIT_TIME: string;
   TEXT_CHANGE_TO_INTERVAL: string;
+  vipUpgradeBoost: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -494,9 +494,8 @@ export const translations: Record<LanguageKey, Translation> = {
     takeMic: '拿麥發言',
     takenMic: '已拿麥',
     mixing: '混音',
-    with: '與',
     in: '在',
-    chatWithMembers: '位成員聊天',
+    chatWithMembers: '與 {0} 位成員聊天',
     warningDeleteChannel: '確定要刪除此頻道嗎？',
     add: '新增',
     delete: '刪除',
@@ -627,6 +626,7 @@ export const translations: Record<LanguageKey, Translation> = {
     TEXT_CHANGE_TO_MAX_LENGTH: '遊客發送文字訊息的最大長度已變更為: {0}',
     TEXT_CHANGE_TO_WAIT_TIME: '遊客允許發送文字訊息的等待時間已變更為: {0} 秒',
     TEXT_CHANGE_TO_INTERVAL: '遊客每次發送文字訊息的相隔時間已變更為: {0} 秒',
+    vipUpgradeBoost: '(會員{0}倍升級加速中)',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -810,9 +810,8 @@ export const translations: Record<LanguageKey, Translation> = {
     takeMic: '拿麦发言',
     takenMic: '已拿麦',
     mixing: '混音',
-    with: '与',
     in: '在',
-    chatWithMembers: '位成员聊天',
+    chatWithMembers: '与 {0} 位成员聊天',
     warningDeleteChannel: '确定要删除此频道吗？',
     add: '新增',
     delete: '删除',
@@ -942,6 +941,7 @@ export const translations: Record<LanguageKey, Translation> = {
     TEXT_CHANGE_TO_MAX_LENGTH: '游客发送文字消息的最大长度已变更为: {0} 字',
     TEXT_CHANGE_TO_WAIT_TIME: '游客允许发送文字消息的等待时间已变更为: {0} 秒',
     TEXT_CHANGE_TO_INTERVAL: '游客每次发送文字消息的相隔时间已变更为: {0} 秒',
+    vipUpgradeBoost: '(会员{0}倍升级加速中)',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -1130,9 +1130,8 @@ export const translations: Record<LanguageKey, Translation> = {
     takeMic: 'Take mic',
     takenMic: 'Mic taken',
     mixing: 'Mixing',
-    with: 'with',
     in: 'in',
-    chatWithMembers: 'members chatting',
+    chatWithMembers: 'Chat with {0} members',
     warningDeleteChannel: 'Are you sure you want to delete this channel?',
     add: 'Add',
     delete: 'Delete',
@@ -1278,6 +1277,7 @@ export const translations: Record<LanguageKey, Translation> = {
       'The wait time before guests can send messages has been changed to: {0} seconds',
     TEXT_CHANGE_TO_INTERVAL:
       'The interval between guest messages has been changed to: {0} seconds',
+    vipUpgradeBoost: '(Member {0}x upgrade boost active)',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1465,9 +1465,8 @@ export const translations: Record<LanguageKey, Translation> = {
     takeMic: 'マイクを取る',
     takenMic: 'マイクを取った',
     mixing: 'ミキシング',
-    with: 'と',
     in: 'で',
-    chatWithMembers: 'メンバーとチャット',
+    chatWithMembers: '{0}人のメンバーとチャット',
     warningDeleteChannel: 'このチャンネルを削除してもよろしいですか？',
     add: '追加',
     delete: '削除',
@@ -1609,6 +1608,7 @@ export const translations: Record<LanguageKey, Translation> = {
     TEXT_CHANGE_TO_MAX_LENGTH: 'ゲストのテキストメッセージ最大長: {0} 文字',
     TEXT_CHANGE_TO_WAIT_TIME: 'ゲストのメッセージ待機時間: {0} 秒',
     TEXT_CHANGE_TO_INTERVAL: 'ゲストのメッセージ間隔: {0}',
+    vipUpgradeBoost: '(メンバー{0}倍アップグレードブースト中)',
   },
 };
 

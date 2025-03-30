@@ -416,6 +416,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       level: channelMemberLevel,
       gender: channelMemberGender,
       badges: channelMemberBadges = [],
+      vip: channelMemberVip,
     } = channelMember;
     const channelMemberGrade = Math.min(56, Math.ceil(channelMemberLevel / 5)); // 56 is max leve
     const isCurrentUser = userId === channelMemberUserId;
@@ -537,6 +538,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         }}
       >
         <div className={`${styles['userState']}`} />
+        {channelMemberVip > 0 && (
+          <div
+            className={`${styles['vipIcon']} ${
+              styles[`vip-${channelMemberVip}`]
+            }`}
+          />
+        )}
         <div
           className={`${styles['userIcon']} ${
             permission[channelMemberGender]
