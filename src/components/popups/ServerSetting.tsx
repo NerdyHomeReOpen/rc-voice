@@ -176,15 +176,6 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
       });
     };
 
-    const handleUpdateMember = (
-      member: Partial<Member>,
-      userId: User['id'],
-      serverId: Server['id'],
-    ) => {
-      if (!socket) return;
-      socket.send.updateMember({ member, userId, serverId });
-    };
-
     const handleCreateMember = (
       member: Partial<Member>,
       userId: User['id'],
@@ -192,6 +183,15 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
     ) => {
       if (!socket) return;
       socket.send.createMember({ member, userId, serverId });
+    };
+
+    const handleUpdateMember = (
+      member: Partial<Member>,
+      userId: User['id'],
+      serverId: Server['id'],
+    ) => {
+      if (!socket) return;
+      socket.send.updateMember({ member, userId, serverId });
     };
 
     const handleServerUpdate = (data: Server | null) => {
