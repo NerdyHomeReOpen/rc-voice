@@ -300,7 +300,7 @@ export interface Translation {
   female: string;
   taiwan: string;
   wealthValue: string;
-  addFriendSubGroups: string;
+  addFriendGroup: string;
   getHelp: string;
   discord: string;
   TEXT_CHANGE_TO_FORBIDDEN_URL: string;
@@ -631,7 +631,7 @@ export const translations: Record<LanguageKey, Translation> = {
     female: '女性',
     taiwan: '台灣',
     wealthValue: '0',
-    addFriendSubGroups: '請填寫分組名稱',
+    addFriendGroup: '請填寫分組名稱',
     getHelp: '獲得協助',
     discord: 'Discord',
     TEXT_CHANGE_TO_FORBIDDEN_URL:
@@ -959,7 +959,7 @@ export const translations: Record<LanguageKey, Translation> = {
     female: '女性',
     taiwan: '台湾',
     wealthValue: '0',
-    addFriendSubGroups: '请输入分组名称',
+    addFriendGroup: '请输入分组名称',
     getHelp: 'Get Help',
     discord: 'Discord',
     TEXT_CHANGE_TO_FORBIDDEN_URL: '此频道被设定为禁止访客发送包含URL的文字消息',
@@ -1302,7 +1302,7 @@ export const translations: Record<LanguageKey, Translation> = {
     female: 'Female',
     taiwan: 'Taiwan',
     wealthValue: '0',
-    addFriendSubGroups: 'Please fill in the subgroup name',
+    addFriendGroup: 'Please fill in the subgroup name',
     getHelp: 'Get Help',
     discord: 'Discord',
     TEXT_CHANGE_TO_FORBIDDEN_URL:
@@ -1650,7 +1650,7 @@ export const translations: Record<LanguageKey, Translation> = {
     female: '女性',
     taiwan: '台湾',
     wealthValue: '0',
-    addFriendSubGroups: 'サブグループ名を記入してください',
+    addFriendGroup: 'サブグループ名を記入してください',
     getHelp: 'ヘルプを取得',
     discord: 'Discord',
     TEXT_CHANGE_TO_FORBIDDEN_URL:
@@ -2002,7 +2002,7 @@ export enum PopupType {
   APPLY_MEMBER = 'applyMember',
   APPLY_FRIEND = 'applyFriend',
   ADD_FRIEND = 'addFriend',
-  ADD_FRIEND_SUBGROUPS = 'addSubGroups',
+  ADD_FRIEND_GROUP = 'addFriendGroup',
   RENAME_FRIEND_GROUP = 'renameFriendGroup',
   DIRECT_MESSAGE = 'directMessage',
   DIALOG_ALERT = 'dialogAlert',
@@ -2025,7 +2025,7 @@ export const PopupSize = {
   [PopupType.APPLY_FRIEND]: { height: 420, width: 540 },
   [PopupType.APPLY_MEMBER]: { height: 420, width: 540 },
   [PopupType.ADD_FRIEND]: { height: 220, width: 400 },
-  [PopupType.ADD_FRIEND_SUBGROUPS]: { height: 220, width: 400 },
+  [PopupType.ADD_FRIEND_GROUP]: { height: 220, width: 400 },
   [PopupType.RENAME_FRIEND_GROUP]: { height: 220, width: 400 },
   [PopupType.DIRECT_MESSAGE]: { height: 200, width: 300 },
   [PopupType.DIALOG_ALERT]: { height: 220, width: 400 },
