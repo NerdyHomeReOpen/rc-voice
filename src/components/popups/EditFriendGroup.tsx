@@ -78,32 +78,48 @@ const EditFriendGroupPopup: React.FC<EditFriendGroupPopupProps> = React.memo(
         <div className={popup['popupBody']}>
           <div className={setting['body']}>
             <div className={popup['inputGroup']}>
-              <div className={`${popup['inputBox']} ${popup['col']}`}>
-                <div className={popup['label']}>
-                  {lang.tr.pleaseInputFriendGroupName}
+              <div className={`${popup['row']}`}>
+                <div
+                  className={`${popup['inputBox']} ${popup['col']}`}
+                  style={{
+                    flex: '3',
+                  }}
+                >
+                  <div className={popup['label']}>
+                    {lang.tr.pleaseInputFriendGroupName}
+                  </div>
+                  <input
+                    className={popup['input']}
+                    type="text"
+                    placeholder={groupName}
+                    value={groupName}
+                    maxLength={20}
+                    onChange={(e) => setGroupName(e.target.value)}
+                    required
+                  />
                 </div>
-                <input
-                  className={popup['input']}
-                  type="text"
-                  placeholder={groupName}
-                  value={groupName}
-                  maxLength={20}
-                  onChange={(e) => setGroupName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className={`${popup['inputBox']} ${popup['col']}`}>
-                <div className={popup['label']}>{lang.tr.friendGroupOrder}</div>
-                <input
-                  className={popup['input']}
-                  type="number"
-                  placeholder={groupOrder.toString()}
-                  value={groupOrder}
-                  max={999}
-                  min={-999}
-                  onChange={(e) => setGroupOrder(parseInt(e.target.value) || 0)}
-                  required
-                />
+                <div
+                  className={`${popup['inputBox']} ${popup['col']}`}
+                  style={{
+                    flex: '1',
+                  }}
+                >
+                  <div className={popup['label']}>
+                    {lang.tr.friendGroupOrder}
+                  </div>
+                  <input
+                    className={popup['input']}
+                    type="number"
+                    placeholder={groupOrder.toString()}
+                    value={groupOrder}
+                    max={999}
+                    min={-999}
+                    onChange={(e) =>
+                      setGroupOrder(parseInt(e.target.value) || 0)
+                    }
+                    required
+                  />
+                </div>
               </div>
             </div>
           </div>
