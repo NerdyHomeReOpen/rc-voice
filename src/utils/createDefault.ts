@@ -10,6 +10,7 @@ import {
   Member,
   Friend,
   UserFriend,
+  FriendGroup,
 } from '@/types';
 
 export const createDefault = {
@@ -85,6 +86,15 @@ export const createDefault = {
     friendGroupId: '',
     user1Id: '',
     user2Id: '',
+    createdAt: 0,
+    ...overrides,
+  }),
+
+  friendGroup: (overrides: Partial<FriendGroup> = {}): FriendGroup => ({
+    id: '',
+    name: '',
+    order: 0,
+    userId: '',
     createdAt: 0,
     ...overrides,
   }),

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 // CSS
 import friendPage from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
+import vip from '@/styles/common/vip.module.css';
 
 // Components
 import FriendListViewer from '@/components/viewers/FriendList';
@@ -134,18 +135,13 @@ const FriendPageComponent: React.FC<FriendPageProps> = React.memo(
             <div className={friendPage['container']}>
               <div className={friendPage['levelIcon']} />
               <div
-                className={`
-                ${friendPage['userGrade']} 
-                ${grade[`lv-${userGrade}`]}
-              `}
+                className={`${grade['grade']} ${grade[`lv-${userGrade}`]}`}
               />
               <div className={friendPage['wealthIcon']} />
               <label className={friendPage['wealthValue']}>0</label>
               {userVip > 0 && (
                 <div
-                  className={`${friendPage['vipIcon']} ${
-                    friendPage[`vip-${userVip}`]
-                  }`}
+                  className={`${vip['vipIcon']} ${vip[`vip-small-${userVip}`]}`}
                 />
               )}
             </div>

@@ -51,8 +51,8 @@
 .baseInfoBox .container {
   display: flex;
   height: 20px;
-  gap: 7px;
   align-items: center;
+  gap: 5px;
 }
 
 .levelIcon {
@@ -61,15 +61,6 @@
   background: url('../../public/im/LV.png') no-repeat center center;
   background-size: auto;
   background-position: 0 0;
-}
-
-.userGrade {
-  min-width: 15px;
-  min-height: 15px;
-  background: url('../../public/usergrade.png') no-repeat center center;
-  background-size: auto;
-  background-position: 0 0;
-  cursor: pointer;
 }
 
 .wealthIcon {
@@ -85,37 +76,6 @@
 .wealthValue {
   color: #7e7c6e;
   text-align: left;
-}
-
-.vipIcon {
-  min-width: 14px;
-  min-height: 14px;
-  background: url('../../public/channel/vip_icons.png') no-repeat center;
-  background-size: cover;
-  border: none;
-  cursor: pointer;
-  background-position: 0 0;
-  margin-left: 2rem;
-}
-
-.vipIcon.vip-1 {
-  background-position: 0 0;
-}
-
-.vipIcon.vip-2 {
-  background-position: -14px 0;
-}
-
-.vipIcon.vip-3 {
-  background-position: -28px 0;
-}
-
-.vipIcon.vip-4 {
-  background-position: -42px 0;
-}
-
-.vipIcon.vip-5 {
-  background-position: -56px 0;
 }
 
 .signatureBox {
@@ -396,7 +356,6 @@
 .friendCard .name {
   font-weight: bold;
   font-size: 1rem;
-  font-family: sans-serif;
 }
 
 .friendCard .signature {

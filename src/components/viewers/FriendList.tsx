@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 // CSS
 import styles from '@/styles/friendPage.module.css';
 import grade from '@/styles/common/grade.module.css';
-
+import vip from '@/styles/common/vip.module.css';
 // Types
 import { PopupType, User, FriendGroup, UserFriend } from '@/types';
 
@@ -16,6 +16,7 @@ import { useLanguage } from '@/providers/Language';
 
 // Services
 import ipcService from '@/services/ipc.service';
+import { createDefault } from '@/utils/createDefault';
 
 interface FriendGroupTabProps {
   friendGroup: FriendGroup;
@@ -94,6 +95,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
     name: friendName,
     avatarUrl: friendAvatarUrl,
     signature: friendSignature,
+    vip: friendVip,
     level: friendLevel,
     user1Id: friendUserId1,
     user2Id: friendUserId2,
@@ -139,9 +141,12 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
         />
         <div className={styles['baseInfoBox']}>
           <div className={styles['container']}>
+            <div
+              className={`${vip['vipIcon']} ${vip[`vip-small-${friendVip}`]}`}
+            />
             <div className={styles['name']}>{friendName}</div>
             <div
-              className={`${styles['userGrade']} ${grade[`lv-${friendGrade}`]}`}
+              className={`${grade['grade']} ${grade[`lv-${friendGrade}`]}`}
             />
             <BadgeViewer badges={friendBadges} />
           </div>
@@ -163,6 +168,10 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
     // Hooks
     const lang = useLanguage();
 
+    // States
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [selectedTabId, setSelectedTabId] = useState<number>(0);
+
     // Variables
     const {
       id: userId,
@@ -172,18 +181,11 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
     const filteredFriends = userFriends.filter((fd) =>
       fd.name.includes(searchQuery),
     );
-    const defaultFriendGroup: FriendGroup = {
-      id: 'default',
+    const defaultFriendGroup: FriendGroup = createDefault.friendGroup({
       name: '我的好友',
       order: 0,
       userId,
-      createdAt: Date.now(),
-      friends: userFriends,
-    };
-
-    // States
-    const [searchQuery, setSearchQuery] = useState<string>('');
-    const [selectedTabId, setSelectedTabId] = useState<number>(0);
+    });
 
     // Handlers
     const handleOpenAddFriend = (userId: User['id'], targetId: User['id']) => {
