@@ -48,6 +48,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  overflow: hidden;
   height: 100%;
   gap: 10px;
 }
@@ -364,10 +365,9 @@
 .friendCard .signature {
   font-size: 0.9rem;
   color: #888;
-  white-space: nowrap;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
-  max-width: 185px;
 }
 
 .friendCard .serverName {
