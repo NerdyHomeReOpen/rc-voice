@@ -307,6 +307,7 @@ export interface Translation {
   TEXT_CHANGE_TO_WAIT_TIME: string;
   TEXT_CHANGE_TO_INTERVAL: string;
   vipUpgradeBoost: string;
+  GUEST_SEND_AN_EXTERNAL_LINK: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -627,6 +628,7 @@ export const translations: Record<LanguageKey, Translation> = {
     TEXT_CHANGE_TO_WAIT_TIME: '遊客允許發送文字訊息的等待時間已變更為: {0} 秒',
     TEXT_CHANGE_TO_INTERVAL: '遊客每次發送文字訊息的相隔時間已變更為: {0} 秒',
     vipUpgradeBoost: '(會員{0}倍升級加速中)',
+    GUEST_SEND_AN_EXTERNAL_LINK: '[遊客發送了一個外部連結]',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -942,6 +944,7 @@ export const translations: Record<LanguageKey, Translation> = {
     TEXT_CHANGE_TO_WAIT_TIME: '游客允许发送文字消息的等待时间已变更为: {0} 秒',
     TEXT_CHANGE_TO_INTERVAL: '游客每次发送文字消息的相隔时间已变更为: {0} 秒',
     vipUpgradeBoost: '(会员{0}倍升级加速中)',
+    GUEST_SEND_AN_EXTERNAL_LINK: '[游客发送了一个外部链接]',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -1278,6 +1281,7 @@ export const translations: Record<LanguageKey, Translation> = {
     TEXT_CHANGE_TO_INTERVAL:
       'The interval between guest messages has been changed to: {0} seconds',
     vipUpgradeBoost: '(Member {0}x upgrade boost active)',
+    GUEST_SEND_AN_EXTERNAL_LINK: '[Guest sent an external link]',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1609,6 +1613,7 @@ export const translations: Record<LanguageKey, Translation> = {
     TEXT_CHANGE_TO_WAIT_TIME: 'ゲストのメッセージ待機時間: {0} 秒',
     TEXT_CHANGE_TO_INTERVAL: 'ゲストのメッセージ間隔: {0}',
     vipUpgradeBoost: '(メンバー{0}倍アップグレードブースト中)',
+    GUEST_SEND_AN_EXTERNAL_LINK: '[ゲストが外部リンクを送信しました]',
   },
 };
 

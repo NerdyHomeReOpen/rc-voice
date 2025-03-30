@@ -32,6 +32,13 @@ const DirectMessageTab: React.FC<DirectMessageTabProps> = React.memo(
     } = messageGroup;
     const timestamp = lang.getFormatTimestamp(messageTimestamp);
 
+    const processContent = (content: string) => {
+      return content.replace(
+        /{{GUEST_SEND_AN_EXTERNAL_LINK}}/g,
+        lang.tr.GUEST_SEND_AN_EXTERNAL_LINK,
+      );
+    };
+
     return (
       <div className={styles['messageBox']}>
         <div className={styles['header']}>
@@ -40,7 +47,7 @@ const DirectMessageTab: React.FC<DirectMessageTabProps> = React.memo(
         </div>
         {messageContents.map((content, index) => (
           <div key={index} className={styles['content']}>
-            <MarkdownViewer markdownText={content} />
+            <MarkdownViewer markdownText={processContent(content)} />
           </div>
         ))}
       </div>
@@ -73,6 +80,13 @@ const ChannelMessageTab: React.FC<ChannelMessageTabProps> = React.memo(
     } = messageGroup;
     const timestamp = lang.getFormatTimestamp(messageTimestamp);
 
+    const processContent = (content: string) => {
+      return content.replace(
+        /{{GUEST_SEND_AN_EXTERNAL_LINK}}/g,
+        lang.tr.GUEST_SEND_AN_EXTERNAL_LINK,
+      );
+    };
+
     return (
       <>
         <div
@@ -90,7 +104,7 @@ const ChannelMessageTab: React.FC<ChannelMessageTabProps> = React.memo(
           {messageContents.map((content, index) => (
             <div key={index} className={styles['content']}>
               <MarkdownViewer
-                markdownText={content}
+                markdownText={processContent(content)}
                 forbidGuestUrl={forbidGuestUrl}
               />
             </div>
