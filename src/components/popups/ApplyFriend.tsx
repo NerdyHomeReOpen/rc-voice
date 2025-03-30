@@ -124,6 +124,8 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
       setSection(data ? 2 : 0);
       if (!data) data = createDefault.friendApplication();
       setApplicationDescription(data.description);
+      setApplicationSenderId(data.senderId);
+      setApplicationReceiverId(data.receiverId);
     };
 
     const handleOpenSuccessDialog = (message: string) => {
