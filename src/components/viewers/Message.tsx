@@ -54,12 +54,11 @@ interface ChannelMessageTabProps {
   messageGroup: ChannelMessage & {
     contents: string[];
   };
-  isGuest?: boolean;
   forbidGuestUrl?: boolean;
 }
 
 const ChannelMessageTab: React.FC<ChannelMessageTabProps> = React.memo(
-  ({ messageGroup, isGuest = false, forbidGuestUrl = false }) => {
+  ({ messageGroup, forbidGuestUrl = false }) => {
     // Hooks
     const lang = useLanguage();
 
@@ -92,7 +91,6 @@ const ChannelMessageTab: React.FC<ChannelMessageTabProps> = React.memo(
             <div key={index} className={styles['content']}>
               <MarkdownViewer
                 markdownText={content}
-                isGuest={isGuest}
                 forbidGuestUrl={forbidGuestUrl}
               />
             </div>
@@ -109,7 +107,6 @@ interface InfoMessageTabProps {
   messageGroup: InfoMessage & {
     contents: string[];
   };
-  isGuest?: boolean;
   forbidGuestUrl?: boolean;
 }
 
@@ -157,12 +154,11 @@ type MessageGroup = (DirectMessage | ChannelMessage | InfoMessage) & {
 
 interface MessageViewerProps {
   messages: DirectMessage[] | ChannelMessage[] | InfoMessage[];
-  isGuest?: boolean;
   forbidGuestUrl?: boolean;
 }
 
 const MessageViewer: React.FC<MessageViewerProps> = React.memo(
-  ({ messages, isGuest = false, forbidGuestUrl = false }) => {
+  ({ messages, forbidGuestUrl = false }) => {
     // Variables
     const sortedMessages = [...messages].sort(
       (a, b) => a.timestamp - b.timestamp,
@@ -208,13 +204,11 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
               {messageGroup.type === 'info' ? (
                 <InfoMessageTab
                   messageGroup={messageGroup}
-                  isGuest={isGuest}
                   forbidGuestUrl={forbidGuestUrl}
                 />
               ) : messageGroup.type === 'general' ? (
                 <ChannelMessageTab
                   messageGroup={messageGroup}
-                  isGuest={isGuest}
                   forbidGuestUrl={forbidGuestUrl}
                 />
               ) : messageGroup.type === 'dm' ? (

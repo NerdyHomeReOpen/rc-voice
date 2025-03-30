@@ -5,7 +5,7 @@ import popup from '@/styles/common/popup.module.css';
 import setting from '@/styles/popups/editServer.module.css';
 
 // Types
-import { Channel, Message, Server } from '@/types';
+import { Channel, Server } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/Language';
@@ -49,39 +49,46 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
     const [channelOrder, setChannelOrder] = useState<Channel['order']>(
       createDefault.channel().order,
     );
-    const [channelTextState, setChannelTextState] = useState<{
-      current: Channel['chatMode'];
-      original: Channel['chatMode'];
-    }>({
-      current: 'free',
-      original: 'free',
-    });
-    const [channelVoiceState, setChannelVoiceState] = useState<{
-      current: Channel['voiceMode'];
-      original: Channel['voiceMode'];
-    }>({
-      current: 'free',
-      original: 'free',
-    });
+    const [channelForbidText, setChannelForbidText] = useState<
+      Channel['forbidText']
+    >(createDefault.channel().forbidText);
+    const [channelVoiceMode, setChannelVoiceMode] = useState<
+      Channel['voiceMode']
+    >(createDefault.channel().voiceMode);
+    const [channelGuestTextMaxLength, setChannelGuestTextMaxLength] = useState<
+      Channel['guestTextMaxLength']
+    >(createDefault.channel().guestTextMaxLength);
+    const [channelGuestTextWaitTime, setChannelGuestTextWaitTime] = useState<
+      Channel['guestTextWaitTime']
+    >(createDefault.channel().guestTextWaitTime);
+    const [channelGuestTextGapTime, setChannelGuestTextGapTime] = useState<
+      Channel['guestTextGapTime']
+    >(createDefault.channel().guestTextGapTime);
+    const [channelGuestTextForbid, setChannelGuestTextForbid] = useState<
+      Channel['forbidGuestText']
+    >(createDefault.channel().forbidGuestText);
+    const [channelGuestTextForbidUrl, setChannelGuestTextForbidUrl] = useState<
+      Channel['forbidGuestUrl']
+    >(createDefault.channel().forbidGuestUrl);
 
-    type SettingState<T> = {
-      current: T;
-      original: T;
-    };
+    // type SettingState<T> = {
+    //   current: T;
+    //   original: T;
+    // };
 
-    const [guestSettings, setGuestSettings] = useState<{
-      forbidText: SettingState<boolean>;
-      forbidUrl: SettingState<boolean>;
-      maxLength: SettingState<number>;
-      waitTime: SettingState<number>;
-      interval: SettingState<number>;
-    }>({
-      forbidText: { current: false, original: false },
-      forbidUrl: { current: false, original: false },
-      maxLength: { current: 0, original: 0 },
-      waitTime: { current: 0, original: 0 },
-      interval: { current: 0, original: 0 },
-    });
+    // const [guestSettings, setGuestSettings] = useState<{
+    //   forbidText: SettingState<boolean>;
+    //   forbidUrl: SettingState<boolean>;
+    //   maxLength: SettingState<number>;
+    //   waitTime: SettingState<number>;
+    //   interval: SettingState<number>;
+    // }>({
+    //   forbidText: { current: false, original: false },
+    //   forbidUrl: { current: false, original: false },
+    //   maxLength: { current: 0, original: 0 },
+    //   waitTime: { current: 0, original: 0 },
+    //   interval: { current: 0, original: 0 },
+    // });
 
     // Variables
     const { channelId, serverId } = initialData;
@@ -96,13 +103,13 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       socket.send.updateChannel({ channel, channelId, serverId });
     };
 
-    const handleSendMessage = (
-      message: Partial<Message>,
-      channelId: Channel['id'],
-    ): void => {
-      if (!socket) return;
-      socket.send.message({ message, channelId });
-    };
+    // const handleSendMessage = (
+    //   message: Partial<Message>,
+    //   channelId: Channel['id'],
+    // ): void => {
+    //   if (!socket) return;
+    //   socket.send.message({ message, channelId });
+    // };
 
     const handleChannelUpdate = (data: Channel | null) => {
       if (!data) data = createDefault.channel();
@@ -110,157 +117,132 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       setChannelIsLobby(data.isLobby);
       setChannelVisibility(data.visibility);
       setChannelUserLimit(data.userLimit);
-      const chatMode = data.chatMode || 'free';
-      setChannelTextState({
-        current: chatMode,
-        original: chatMode,
-      });
-      const voiceMode = data.voiceMode || 'free';
-      setChannelVoiceState({
-        current: voiceMode,
-        original: voiceMode,
-      });
-      setChannelOrder(data.order);
+      setChannelVoiceMode(data.voiceMode);
+      setChannelForbidText(data.forbidText);
+      setChannelGuestTextForbid(data.forbidGuestText);
+      setChannelGuestTextForbidUrl(data.forbidGuestUrl);
+      setChannelGuestTextMaxLength(data.guestTextMaxLength);
+      setChannelGuestTextWaitTime(data.guestTextWaitTime);
+      setChannelGuestTextGapTime(data.guestTextGapTime);
+      // const chatMode = data.chatMode || 'free';
+      // setChannelTextState({
+      //   current: chatMode,
+      //   original: chatMode,
+      // });
+      // const voiceMode = data.voiceMode || 'free';
+      // setChannelVoiceState({
+      //   current: voiceMode,
+      //   original: voiceMode,
+      // });
+      // setChannelOrder(data.order);
 
-      setGuestSettings({
-        forbidText: {
-          current: data.forbidGuestText || false,
-          original: data.forbidGuestText || false,
-        },
-        forbidUrl: {
-          current: data.forbidGuestUrl || false,
-          original: data.forbidGuestUrl || false,
-        },
-        maxLength: {
-          current: data.guestTextMaxLength || 2000,
-          original: data.guestTextMaxLength || 2000,
-        },
-        waitTime: {
-          current: data.guestTextWaitTime || 0,
-          original: data.guestTextWaitTime || 0,
-        },
-        interval: {
-          current: data.guestTextInterval || 0,
-          original: data.guestTextInterval || 0,
-        },
-      });
+      // setGuestSettings({
+      //   forbidText: {
+      //     current: data.forbidGuestText || false,
+      //     original: data.forbidGuestText || false,
+      //   },
+      //   forbidUrl: {
+      //     current: data.forbidGuestUrl || false,
+      //     original: data.forbidGuestUrl || false,
+      //   },
+      //   maxLength: {
+      //     current: data.guestTextMaxLength || 2000,
+      //     original: data.guestTextMaxLength || 2000,
+      //   },
+      //   waitTime: {
+      //     current: data.guestTextWaitTime || 0,
+      //     original: data.guestTextWaitTime || 0,
+      //   }
+      // });
     };
 
     const handleClose = () => {
       ipcService.window.close();
     };
 
-    const handleSubmitSetting = () => {
-      type ChangeRecord = {
-        from: string | number | boolean;
-        to: string | number | boolean;
-        message: string;
-      };
-
-      const changes: Record<string, ChangeRecord> = {};
-
-      if (channelTextState.current !== channelTextState.original) {
-        changes.chatMode = {
-          from: channelTextState.original,
-          to: channelTextState.current,
-          message:
-            channelTextState.current === 'free'
-              ? 'TEXT_CHANGE_TO_FREE_SPEECH'
-              : 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
-        };
-      }
-
-      if (channelVoiceState.current !== channelVoiceState.original) {
-        changes.voiceMode = {
-          from: channelVoiceState.original,
-          to: channelVoiceState.current,
-          message:
-            channelVoiceState.current === 'queue'
-              ? 'VOICE_CHANGE_TO_QUEUE'
-              : channelVoiceState.current === 'forbidden'
-              ? 'VOICE_CHANGE_TO_FORBIDDEN_SPEECH'
-              : 'VOICE_CHANGE_TO_FREE_SPEECH',
-        };
-      }
-
-      if (
-        guestSettings.forbidText.current !== guestSettings.forbidText.original
-      ) {
-        changes.forbidGuestText = {
-          from: guestSettings.forbidText.original,
-          to: guestSettings.forbidText.current,
-          message: 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
-        };
-      }
-
-      if (
-        guestSettings.forbidUrl.current !== guestSettings.forbidUrl.original
-      ) {
-        changes.forbidGuestUrl = {
-          from: guestSettings.forbidUrl.original,
-          to: guestSettings.forbidUrl.current,
-          message: guestSettings.forbidUrl.current
-            ? 'TEXT_CHANGE_TO_FORBIDDEN_URL'
-            : 'TEXT_CHANGE_TO_ALLOWED_URL',
-        };
-      }
-
-      if (
-        guestSettings.maxLength.current !== guestSettings.maxLength.original
-      ) {
-        changes.guestTextMaxLength = {
-          from: guestSettings.maxLength.original,
-          to: guestSettings.maxLength.current,
-          message: `TEXT_CHANGE_TO_MAX_LENGTH ${guestSettings.maxLength.current}`,
-        };
-      }
-
-      if (guestSettings.waitTime.current !== guestSettings.waitTime.original) {
-        changes.guestTextWaitTime = {
-          from: guestSettings.waitTime.original,
-          to: guestSettings.waitTime.current,
-          message: `TEXT_CHANGE_TO_WAIT_TIME ${guestSettings.waitTime.current}`,
-        };
-      }
-
-      if (guestSettings.interval.current !== guestSettings.interval.original) {
-        changes.guestTextInterval = {
-          from: guestSettings.interval.original,
-          to: guestSettings.interval.current,
-          message: `TEXT_CHANGE_TO_INTERVAL ${guestSettings.interval.current}`,
-        };
-      }
-
-      Object.values(changes).forEach(({ message }) => {
-        handleSendMessage(
-          {
-            type: 'info',
-            content: message,
-            timestamp: 0,
-          },
-          channelId,
-        );
-      });
-
-      handleUpdateChannel(
-        {
-          name: channelName,
-          visibility: channelVisibility,
-          userLimit: channelUserLimit,
-          chatMode: channelTextState.current,
-          voiceMode: channelVoiceState.current,
-          order: channelOrder,
-          forbidGuestText: guestSettings.forbidText.current,
-          forbidGuestUrl: guestSettings.forbidUrl.current,
-          guestTextMaxLength: guestSettings.maxLength.current,
-          guestTextWaitTime: guestSettings.waitTime.current,
-          guestTextInterval: guestSettings.interval.current,
-        },
-        channelId,
-        serverId,
-      );
-      handleClose();
-    };
+    // const handleSubmitSetting = () => {
+    // type ChangeRecord = {
+    //   from: string | number | boolean;
+    //   to: string | number | boolean;
+    //   message: string;
+    // };
+    // const changes: Record<string, ChangeRecord> = {};
+    // if (channelTextState.current !== channelTextState.original) {
+    //   changes.chatMode = {
+    //     from: channelTextState.original,
+    //     to: channelTextState.current,
+    //     message:
+    //       channelTextState.current === 'free'
+    //         ? 'TEXT_CHANGE_TO_FREE_SPEECH'
+    //         : 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
+    //   };
+    // }
+    // if (channelVoiceState.current !== channelVoiceState.original) {
+    //   changes.voiceMode = {
+    //     from: channelVoiceState.original,
+    //     to: channelVoiceState.current,
+    //     message:
+    //       channelVoiceState.current === 'queue'
+    //         ? 'VOICE_CHANGE_TO_QUEUE'
+    //         : channelVoiceState.current === 'forbidden'
+    //         ? 'VOICE_CHANGE_TO_FORBIDDEN_SPEECH'
+    //         : 'VOICE_CHANGE_TO_FREE_SPEECH',
+    //   };
+    // }
+    // if (
+    //   guestSettings.forbidText.current !== guestSettings.forbidText.original
+    // ) {
+    //   changes.forbidGuestText = {
+    //     from: guestSettings.forbidText.original,
+    //     to: guestSettings.forbidText.current,
+    //     message: 'TEXT_CHANGE_TO_FORBIDDEN_SPEECH',
+    //   };
+    // }
+    // if (
+    //   guestSettings.forbidUrl.current !== guestSettings.forbidUrl.original
+    // ) {
+    //   changes.forbidGuestUrl = {
+    //     from: guestSettings.forbidUrl.original,
+    //     to: guestSettings.forbidUrl.current,
+    //     message: guestSettings.forbidUrl.current
+    //       ? 'TEXT_CHANGE_TO_FORBIDDEN_URL'
+    //       : 'TEXT_CHANGE_TO_ALLOWED_URL',
+    //   };
+    // }
+    // if (
+    //   guestSettings.maxLength.current !== guestSettings.maxLength.original
+    // ) {
+    //   changes.guestTextMaxLength = {
+    //     from: guestSettings.maxLength.original,
+    //     to: guestSettings.maxLength.current,
+    //     message: `TEXT_CHANGE_TO_MAX_LENGTH ${guestSettings.maxLength.current}`,
+    //   };
+    // }
+    // if (guestSettings.waitTime.current !== guestSettings.waitTime.original) {
+    //   changes.guestTextWaitTime = {
+    //     from: guestSettings.waitTime.original,
+    //     to: guestSettings.waitTime.current,
+    //     message: `TEXT_CHANGE_TO_WAIT_TIME ${guestSettings.waitTime.current}`,
+    //   };
+    // }
+    // if (guestSettings.interval.current !== guestSettings.interval.original) {
+    //   changes.guestTextInterval = {
+    //     from: guestSettings.interval.original,
+    //     to: guestSettings.interval.current,
+    //     message: `TEXT_CHANGE_TO_INTERVAL ${guestSettings.interval.current}`,
+    //   };
+    // }
+    // Object.values(changes).forEach(({ message }) => {
+    //   handleSendMessage(
+    //     {
+    //       type: 'info',
+    //       content: message,
+    //       timestamp: 0,
+    //     },
+    //     channelId,
+    //   );
+    // });
+    // };
 
     // Effects
     useEffect(() => {
@@ -360,12 +342,11 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                     <div className={popup['label']}>{lang.tr.channelMode}</div>
                     <div className={popup['selectBox']}>
                       <select
-                        value={channelVoiceState.current || 'free'}
+                        value={channelVoiceMode}
                         onChange={(e) =>
-                          setChannelVoiceState((prev) => ({
-                            ...prev,
-                            current: e.target.value as Channel['voiceMode'],
-                          }))
+                          setChannelVoiceMode(
+                            e.target.value as Channel['voiceMode'],
+                          )
                         }
                       >
                         <option value="free">{lang.tr.freeSpeech}</option>
@@ -556,13 +537,9 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                   <div className={popup['inputBox']}>
                     <input
                       type="checkbox"
-                      checked={channelTextState.current == 'forbidden'}
+                      checked={channelForbidText}
                       onChange={(e) => {
-                        const newMode = e.target.checked ? 'forbidden' : 'free';
-                        setChannelTextState((prev) => ({
-                          ...prev,
-                          current: newMode,
-                        }));
+                        setChannelForbidText(e.target.checked);
                       }}
                     />
                     <label className={popup['label']}>
@@ -573,15 +550,9 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                   <div className={popup['inputBox']}>
                     <input
                       type="checkbox"
-                      checked={guestSettings.forbidText.current}
+                      checked={channelGuestTextForbid}
                       onChange={(e) =>
-                        setGuestSettings((prev) => ({
-                          ...prev,
-                          forbidText: {
-                            ...prev.forbidText,
-                            current: e.target.checked,
-                          },
-                        }))
+                        setChannelGuestTextForbid(e.target.checked)
                       }
                     />
                     <label className={popup['label']}>
@@ -592,15 +563,9 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                   <div className={popup['inputBox']}>
                     <input
                       type="checkbox"
-                      checked={guestSettings.forbidUrl.current}
+                      checked={channelGuestTextForbidUrl}
                       onChange={(e) =>
-                        setGuestSettings((prev) => ({
-                          ...prev,
-                          forbidUrl: {
-                            ...prev.forbidUrl,
-                            current: e.target.checked,
-                          },
-                        }))
+                        setChannelGuestTextForbidUrl(e.target.checked)
                       }
                     />
                     <label className={popup['label']}>
@@ -614,15 +579,11 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                     </div>
                     <input
                       type="number"
-                      value={guestSettings.maxLength.current}
+                      value={channelGuestTextMaxLength}
                       onChange={(e) =>
-                        setGuestSettings((prev) => ({
-                          ...prev,
-                          maxLength: {
-                            ...prev.maxLength,
-                            current: Math.max(0, parseInt(e.target.value) || 0),
-                          },
-                        }))
+                        setChannelGuestTextMaxLength(
+                          Math.max(0, parseInt(e.target.value)),
+                        )
                       }
                       style={{ width: '60px' }}
                     />
@@ -635,15 +596,11 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                     </div>
                     <input
                       type="number"
-                      value={guestSettings.waitTime.current}
+                      value={channelGuestTextWaitTime}
                       onChange={(e) =>
-                        setGuestSettings((prev) => ({
-                          ...prev,
-                          waitTime: {
-                            ...prev.waitTime,
-                            current: Math.max(0, parseInt(e.target.value) || 0),
-                          },
-                        }))
+                        setChannelGuestTextWaitTime(
+                          Math.max(0, parseInt(e.target.value)),
+                        )
                       }
                       style={{ width: '60px' }}
                     />
@@ -652,19 +609,15 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
 
                   <div className={`${popup['inputBox']} ${popup['row']}`}>
                     <div className={popup['label']}>
-                      {lang.tr.guestTextInterval}
+                      {lang.tr.guestTextGapTime}
                     </div>
                     <input
                       type="number"
-                      value={guestSettings.interval.current}
+                      value={channelGuestTextGapTime}
                       onChange={(e) =>
-                        setGuestSettings((prev) => ({
-                          ...prev,
-                          interval: {
-                            ...prev.interval,
-                            current: Math.max(0, parseInt(e.target.value) || 0),
-                          },
-                        }))
+                        setChannelGuestTextGapTime(
+                          Math.max(0, parseInt(e.target.value)),
+                        )
                       }
                       style={{ width: '60px' }}
                     />
@@ -679,7 +632,26 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
         <div className={popup['popupFooter']}>
           <button
             className={popup['button']}
-            onClick={() => handleSubmitSetting()}
+            onClick={() => {
+              handleUpdateChannel(
+                {
+                  name: channelName,
+                  visibility: channelVisibility,
+                  userLimit: channelUserLimit,
+                  voiceMode: channelVoiceMode,
+                  order: channelOrder,
+                  forbidText: channelForbidText,
+                  forbidGuestText: channelGuestTextForbid,
+                  forbidGuestUrl: channelGuestTextForbidUrl,
+                  guestTextMaxLength: channelGuestTextMaxLength,
+                  guestTextWaitTime: channelGuestTextWaitTime,
+                  guestTextGapTime: channelGuestTextGapTime,
+                },
+                channelId,
+                serverId,
+              );
+              handleClose();
+            }}
           >
             {lang.tr.confirm}
           </button>

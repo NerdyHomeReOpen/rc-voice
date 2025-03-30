@@ -290,7 +290,7 @@ export interface Translation {
   forbidGuestUrl: string;
   guestTextMaxLength: string;
   guestTextWaitTime: string;
-  guestTextInterval: string;
+  guestTextGapTime: string;
   characters: string;
   seconds: string;
   groups: string;
@@ -609,7 +609,7 @@ export const translations: Record<LanguageKey, Translation> = {
     forbidGuestUrl: '禁止訪客發送包含URL的文字訊息',
     guestTextMaxLength: '遊客發送文字訊息的最大長度:',
     guestTextWaitTime: '遊客允許發送文字訊息的等待時間:',
-    guestTextInterval: '遊客每次發送文字訊息的相隔時間:',
+    guestTextGapTime: '遊客每次發送文字訊息的相隔時間:',
     characters: '字元',
     seconds: '秒',
     groups: '語音群',
@@ -925,7 +925,7 @@ export const translations: Record<LanguageKey, Translation> = {
     forbidGuestUrl: '禁止访客发送包含URL的文字消息',
     guestTextMaxLength: '游客发送文字消息的最大长度:',
     guestTextWaitTime: '游客允许发送文字消息的等待时间:',
-    guestTextInterval: '游客每次发送文字消息的相隔时间:',
+    guestTextGapTime: '游客每次发送文字消息的相隔时间:',
     characters: '字符',
     seconds: '秒',
     groups: '语音群',
@@ -1256,7 +1256,7 @@ export const translations: Record<LanguageKey, Translation> = {
     forbidGuestUrl: 'Forbid guests from sending messages containing URLs',
     guestTextMaxLength: 'Maximum length of guest text messages:',
     guestTextWaitTime: 'Wait time before guests can send messages:',
-    guestTextInterval: 'Interval between guest messages:',
+    guestTextGapTime: 'Interval between guest messages:',
     characters: 'characters',
     seconds: 'seconds',
     groups: 'Voice Groups',
@@ -1590,7 +1590,7 @@ export const translations: Record<LanguageKey, Translation> = {
     forbidGuestUrl: 'ゲストのURL含むメッセージを禁止',
     guestTextMaxLength: 'ゲストのテキストメッセージ最大長:',
     guestTextWaitTime: 'ゲストのメッセージ待機時間:',
-    guestTextInterval: 'ゲストのメッセージ間隔:',
+    guestTextGapTime: 'ゲストのメッセージ間隔:',
     characters: '文字',
     seconds: '秒',
     groups: 'ボイスグループ',
@@ -1732,16 +1732,16 @@ export type Channel = BaseChannel & {
   type: 'channel';
   bitrate: number;
   userLimit: number;
+  guestTextGapTime: number;
+  guestTextWaitTime: number;
+  guestTextMaxLength: number;
   isLobby: boolean;
   slowmode: boolean;
-  voiceMode: 'free' | 'queue' | 'forbidden';
-  chatMode: 'free' | 'forbidden';
-  categoryId: string | null;
+  forbidText: boolean;
   forbidGuestText: boolean;
   forbidGuestUrl: boolean;
-  guestTextMaxLength: number;
-  guestTextWaitTime: number;
-  guestTextInterval: number;
+  voiceMode: 'free' | 'queue' | 'forbidden';
+  categoryId: string | null;
   // THESE WERE NOT SAVE IN THE DATABASE
   messages?: ChannelMessage[];
 };
@@ -1760,6 +1760,8 @@ export type Member = {
   isBlocked: boolean;
   nickname: string | null;
   contribution: number;
+  lastMessageTime: number;
+  lastJoinChannelTime: number;
   permissionLevel: Permission;
   userId: string;
   serverId: string;

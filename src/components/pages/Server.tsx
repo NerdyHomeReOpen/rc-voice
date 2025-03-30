@@ -71,11 +71,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const [speakerVolume, setSpeakerVolume] = useState(
       webRTC.speakerVolume || 100,
     );
-    const [usersInServer, setUsersInServer] = useState<Member[]>(
-      server.users || [],
-    );
-    const [lastMessageTime, setLastMessageTime] = useState<number>(0);
-    const [joinTime, setJoinTime] = useState<number>(Date.now());
 
     // Variables
     const { id: userId, currentChannelId: userCurrentChannelId } = user;
@@ -85,22 +80,31 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       avatarUrl: serverAvatarUrl,
       displayId: serverDisplayId,
       announcement: serverAnnouncement,
-      members: serverMembers = [],
+      users: serverUsers = [],
     } = server;
     const {
       id: currentChannelId,
       messages: channelMessages = [],
       bitrate: channelBitrate,
-      chatMode: channelChatMode,
       voiceMode: channelVoiceMode,
-      forbidGuestText,
-      forbidGuestUrl,
-      guestTextMaxLength,
-      guestTextWaitTime,
-      guestTextInterval,
+      forbidText: channelForbidText,
+      forbidGuestText: channelForbidGuestText,
+      guestTextMaxLength: channelGuestTextMaxLength,
+      guestTextWaitTime: channelGuestTextWaitTime,
+      guestTextGapTime: channelGuestTextGapTime,
     } = currentChannel;
-    const { permissionLevel: memberPermissionLevel } = member;
-    const isGuest = memberPermissionLevel === 1;
+    const {
+      permissionLevel: memberPermissionLevel,
+      lastMessageTime: memberLastMessageTime,
+      lastJoinChannelTime: memberLastJoinChannelTime,
+    } = member;
+    const isForbidByChatMode = channelForbidText && memberPermissionLevel < 3;
+    const isForbidByGuestText =
+      channelForbidGuestText && memberPermissionLevel === 1;
+    const isForbidByGuestTextGap =
+      memberLastJoinChannelTime - Date.now() < channelGuestTextGapTime;
+    const isForbidByGuestTextWait =
+      memberLastMessageTime - Date.now() < channelGuestTextWaitTime;
 
     // Handlers
     const handleSendMessage = (
@@ -300,7 +304,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
         details: `${lang.tr.in} ${serverName}`,
         state: `${lang.tr.chatWithMembers.replace(
           '{0}',
-          usersInServer.length.toString(),
+          serverUsers.length.toString(),
         )}`,
         largeImageKey: 'app_icon',
         largeImageText: 'RC Voice',
@@ -314,24 +318,24 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
           },
         ],
       });
-    }, [lang, serverName, usersInServer]);
+    }, [lang, serverName, serverUsers]);
 
     useEffect(() => {
       if (!webRTC.updateBitrate || !channelBitrate) return;
       webRTC.updateBitrate(channelBitrate);
     }, [webRTC, webRTC.updateBitrate, channelBitrate]);
 
-    useEffect(() => {
-      if (!serverMembers) return;
-      const updatedUsersInServer = serverMembers.filter(
-        (member) => member.currentServerId === serverId,
-      );
-      setUsersInServer(updatedUsersInServer);
-    }, [serverMembers, serverId]);
+    // useEffect(() => {
+    //   if (!serverMembers) return;
+    //   const updatedUsersInServer = serverMembers.filter(
+    //     (member) => member.currentServerId === serverId,
+    //   );
+    //   setUsersInServer(updatedUsersInServer);
+    // }, [serverMembers, serverId]);
 
-    useEffect(() => {
-      if (currentChannel?.id !== userCurrentChannelId) setJoinTime(Date.now());
-    }, [currentChannel?.id, userCurrentChannelId]);
+    // useEffect(() => {
+    //   if (currentChannel?.id !== userCurrentChannelId) setJoinTime(Date.now());
+    // }, [currentChannel?.id, userCurrentChannelId]);
 
     return (
       <div className={styles['serverWrapper']}>
@@ -364,7 +368,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                   <div className={styles['idText']}>{serverDisplayId}</div>
                   <div className={styles['memberIcon']} />
                   <div className={styles['memberText']}>
-                    {usersInServer.length}
+                    {serverUsers.length}
                   </div>
                 </div>
               </div>
@@ -452,18 +456,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
           {/* Right Content */}
           <div className={styles['mainContent']}>
             <div className={styles['announcementArea']}>
-              <MarkdownViewer
-                markdownText={serverAnnouncement}
-                isGuest={isGuest}
-                forbidGuestUrl={forbidGuestUrl}
-              />
+              <MarkdownViewer markdownText={serverAnnouncement} />
             </div>
             <div className={styles['messageArea']}>
-              <MessageViewer
-                messages={channelMessages}
-                isGuest={isGuest}
-                forbidGuestUrl={forbidGuestUrl}
-              />
+              <MessageViewer messages={channelMessages} />
             </div>
             <div className={styles['inputArea']}>
               <MessageInputBox
@@ -478,19 +474,33 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                     },
                     currentChannelId,
                   );
-                  setLastMessageTime(Date.now());
                 }}
-                locked={
-                  channelChatMode === 'forbidden' && memberPermissionLevel < 3
+                // locked={
+                //   channelChatMode === 'forbidden' && memberPermissionLevel < 3
+                // }
+                // isGuest={isGuest}
+                // guestTextWaitTime={guestTextWaitTime}
+                // guestTextInterval={guestTextInterval}
+                // lastMessageTime={lastMessageTime}
+                // joinTime={joinTime}
+                disabled={
+                  isForbidByGuestText ||
+                  isForbidByGuestTextGap ||
+                  isForbidByGuestTextWait ||
+                  isForbidByChatMode
                 }
-                isGuest={isGuest}
-                forbidGuestText={forbidGuestText}
-                forbidGuestUrl={forbidGuestUrl}
-                guestTextMaxLength={guestTextMaxLength}
-                guestTextWaitTime={guestTextWaitTime}
-                guestTextInterval={guestTextInterval}
-                lastMessageTime={lastMessageTime}
-                joinTime={joinTime}
+                placeholder={
+                  isForbidByChatMode
+                    ? lang.tr.forbidOnlyAdminText
+                    : isForbidByGuestText
+                    ? lang.tr.forbidGuestText
+                    : isForbidByGuestTextGap
+                    ? `${lang.tr.guestTextGapTime} ${channelGuestTextGapTime} ${lang.tr.seconds}`
+                    : isForbidByGuestTextWait
+                    ? `${lang.tr.guestTextWaitTime} ${channelGuestTextWaitTime} ${lang.tr.seconds}`
+                    : ''
+                }
+                maxLength={channelGuestTextMaxLength}
               />
             </div>
             <div className={styles['buttonArea']}>
