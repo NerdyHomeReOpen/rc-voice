@@ -473,13 +473,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(
           contextMenu.showContextMenu(e.pageX, e.pageY, [
             {
               id: 'apply-friend',
-              label: '新增好友',
+              label: lang.tr.addFriend,
               onClick: () => handleOpenApplyFriend(userId, channelMemberUserId),
               show: !isCurrentUser,
             },
             {
               id: 'edit-nickname',
-              label: '修改群名片',
+              label: lang.tr.editNickname,
               onClick: () =>
                 handleOpenEditMember(
                   channelMember.serverId,

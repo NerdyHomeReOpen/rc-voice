@@ -285,6 +285,17 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
       });
     };
 
+    const handleOpenApplyFriend = (
+      userId: User['id'],
+      targetId: User['id'],
+    ) => {
+      ipcService.popup.open(PopupType.APPLY_FRIEND);
+      ipcService.initialData.onRequest(PopupType.APPLY_FRIEND, {
+        userId,
+        targetId,
+      });
+    };
+
     const handleOpenEditMember = (
       serverId: Server['id'],
       userId: User['id'],
@@ -595,19 +606,20 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                                 //   onClick: () => {},
                                 //   show: !isCurrentUser,
                                 // },
-                                // {
-                                //   id: 'add-friend',
-                                //   label: '新增好友',
-                                //   onClick: () => {},
-                                //   show: !isCurrentUser,
-                                // },
+                                {
+                                  id: 'apply-friend',
+                                  label: lang.tr.addFriend,
+                                  onClick: () =>
+                                    handleOpenApplyFriend(userId, memberUserId),
+                                  show: !isCurrentUser,
+                                },
                                 // {
                                 //   label: '拒聽此人語音',
                                 //   onClick: () => {},
                                 // },
                                 {
                                   id: 'edit-nickname',
-                                  label: '修改群名片',
+                                  label: lang.tr.editNickname,
                                   onClick: () =>
                                     handleOpenEditMember(
                                       memberServerId,
