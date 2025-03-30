@@ -241,13 +241,13 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
               label: lang.tr.deleteFriend,
               onClick: () => handleDeleteFriend(friendId),
             },
-            {
-              id: 'edit',
-              label: '編輯分組',
-              onClick: () => {
-                // Open Edit Group Modal
-              },
-            },
+            // {
+            //   id: 'edit',
+            //   label: '編輯分組',
+            //   onClick: () => {
+            //     // Open Edit Group Modal
+            //   },
+            // },
           ]);
         }}
         // onDoubleClick={() => {
@@ -324,26 +324,19 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
     });
 
     // Handlers
-    const handleOpenAddFriend = (userId: User['id'], targetId: User['id']) => {
+    const handleOpenAddFriend = (userId: User['id']) => {
       ipcService.popup.open(PopupType.ADD_FRIEND);
       ipcService.initialData.onRequest(PopupType.ADD_FRIEND, {
         userId,
-        targetId,
       });
     };
 
-    const handleOpenAddSubGroups = () => {
-      ipcService.popup.open(PopupType.ADD_FRIEND_SUBGROUPS);
-      ipcService.initialData.onRequest(PopupType.ADD_FRIEND_SUBGROUPS, {
+    const handleOpenAddFriendGroup = () => {
+      ipcService.popup.open(PopupType.ADD_FRIEND_GROUP);
+      ipcService.initialData.onRequest(PopupType.ADD_FRIEND_GROUP, {
         userId,
       });
     };
-
-    // const handleOpenCreateGroupPopup = () => {
-    //   // ipcService.popup.open(PopupType.CREATE_FRIEND_GROUP);
-    // };
-
-    console.log([defaultFriendGroup, ...userFriendGroups]);
 
     return (
       <>
@@ -400,14 +393,14 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
               <div
                 className={styles['button']}
                 datatype="addGroup"
-                onClick={() => handleOpenAddSubGroups()}
+                onClick={() => handleOpenAddFriendGroup()}
               >
                 {lang.tr.friendAddGroup}
               </div>
               <div
                 className={styles['button']}
                 datatype="addFriend"
-                onClick={() => handleOpenAddFriend(userId, '_')}
+                onClick={() => handleOpenAddFriend(userId)}
               >
                 {lang.tr.addFriend}
               </div>

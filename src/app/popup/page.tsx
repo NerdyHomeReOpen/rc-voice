@@ -177,8 +177,8 @@ const Popup = React.memo(() => {
         setHeaderButtons(['close']);
         setContent(<AddFriend {...initialData} />);
         break;
-      case PopupType.ADD_FRIEND_SUBGROUPS:
-        setHeaderTitle(lang.tr.addFriendSubGroups);
+      case PopupType.ADD_FRIEND_GROUP:
+        setHeaderTitle(lang.tr.addFriendGroup);
         setHeaderButtons(['close']);
         setContent(<AddFriendGroup {...initialData} />);
         break;
