@@ -45,12 +45,15 @@
 }
 
 .baseInfoBox {
-  padding: 3px 2px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  gap: 10px;
 }
 
 .baseInfoBox .container {
   display: flex;
-  height: 20px;
   align-items: center;
   gap: 5px;
 }
@@ -369,13 +372,13 @@
 
 .friendCard .serverName {
   font-size: 0.9rem;
-  color:#3a9abe;
+  color: #3a9abe;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.friendCard .location::before {
+.friendCard .location {
   content: '';
   min-height: 16px;
   min-width: 16px;

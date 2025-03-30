@@ -183,10 +183,10 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
             <BadgeViewer badges={friendBadges} />
           </div>
           {friendServerName ? (
-            <>
+            <div className={styles['container']}>
               <div className={styles['location']} />
               <div className={styles['serverName']}>{friendServerName}</div>
-            </>
+            </div>
           ) : (
             <div className={styles['signature']}>{friendSignature}</div>
           )}
