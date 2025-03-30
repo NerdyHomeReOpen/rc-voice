@@ -301,7 +301,7 @@ async function createAuthWindow() {
 
   if (app.isPackaged || !isDev) {
     appServe(authWindow).then(() => {
-      authWindow.loadURL('app://./auth.html');
+      authWindow.loadURL('app://-/auth.html');
     });
   } else {
     authWindow.loadURL(`${baseUri}/auth`);
@@ -355,7 +355,7 @@ async function createPopup(type, height, width) {
 
   if (app.isPackaged || !isDev) {
     appServe(popups[type]).then(() => {
-      popups[type].loadURL(`app://./popup.html?type=${type}`);
+      popups[type].loadURL(`app://-/popup.html?type=${type}`);
     });
   } else {
     popups[type].loadURL(`${baseUri}/popup?type=${type}`);
