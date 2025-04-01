@@ -43,13 +43,24 @@ const memberHandler = {
       const operatorMember = await Get.member(operator.id, server.id);
 
       if (operator.id === user.id) {
-        // throw new StandardizedError(
-        //   '你不能新增自己為成員',
-        //   'ValidationError',
-        //   'CREATEMEMBER',
-        //   'PERMISSION_DENIED',
-        //   403,
-        // );
+        if (newMember.permissionLevel !== 1 && server.ownerId != operator.id) {
+          throw new StandardizedError(
+            '你無法新增非遊客權限的成員',
+            'ValidationError',
+            'CREATEMEMBER',
+            'PERMISSION_DENIED',
+            403,
+          );
+        }
+        if (newMember.permissionLevel !== 6 && server.ownerId === operator.id) {
+          throw new StandardizedError(
+            '你必須是群組創建者',
+            'ValidationError',
+            'CREATEMEMBER',
+            'PERMISSION_DENIED',
+            403,
+          );
+        }
       } else {
         if (operatorMember.permissionLevel < 5) {
           throw new StandardizedError(

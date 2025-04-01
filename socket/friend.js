@@ -52,7 +52,7 @@ const friendHandler = {
       // Validate operation
       if (operator.id !== user.id) {
         throw new StandardizedError(
-          '您沒有權限新增非自己的好友',
+          '你沒有權限新增非自己的好友',
           'ValidationError',
           'CREATEFRIEND',
           'PERMISSION_DENIED',
@@ -61,7 +61,7 @@ const friendHandler = {
       }
       if (user.id === target.id) {
         throw new StandardizedError(
-          '您不能將自己加入好友',
+          '你不能將自己加入好友',
           'ValidationError',
           'CREATEFRIEND',
           'SELF_OPERATION',
@@ -157,7 +157,7 @@ const friendHandler = {
       // Validate operation
       if (operator.id !== user.id) {
         throw new StandardizedError(
-          '您沒有權限修改非自己的好友',
+          '你沒有權限修改非自己的好友',
           'ValidationError',
           'UPDATEFRIEND',
           'PERMISSION_DENIED',
@@ -234,7 +234,7 @@ const friendHandler = {
       // Validate operation
       if (operator.id !== user.id) {
         throw new StandardizedError(
-          '您沒有權限刪除非自己的好友',
+          '你沒有權限刪除非自己的好友',
           'ValidationError',
           'DELETEFRIEND',
           'PERMISSION_DENIED',

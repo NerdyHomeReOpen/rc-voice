@@ -286,7 +286,7 @@ const serverHandler = {
 
       if (userOwnedServers.length >= MAX_GROUPS) {
         throw new StandardizedError(
-          '您已經創建了最大數量的群組',
+          '你已經創建了最大數量的群組',
           'ValidationError',
           'CREATESERVER',
           'SERVER_LIMIT',
@@ -403,7 +403,7 @@ const serverHandler = {
       const permission = member.permissionLevel;
       if (!permission || permission < 5) {
         throw new StandardizedError(
-          '您沒有權限更新群組',
+          '你沒有權限更新群組',
           'ValidationError',
           'UPDATESERVER',
           'USER_PERMISSION',

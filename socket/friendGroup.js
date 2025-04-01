@@ -47,7 +47,7 @@ const friendGroupHandler = {
       // Validate operation
       if (operator.id !== user.id) {
         throw new StandardizedError(
-          '您沒有權限新增非自己的好友群組',
+          '你沒有權限新增非自己的好友群組',
           'ValidationError',
           'CREATEFRIENDGROUP',
           'PERMISSION_DENIED',
@@ -129,7 +129,7 @@ const friendGroupHandler = {
       // Validate operation
       if (operator.id !== friendGroup.userId) {
         throw new StandardizedError(
-          '您沒有權限修改非自己的好友群組',
+          '你沒有權限修改非自己的好友群組',
           'ValidationError',
           'UPDATEFRIENDGROUP',
           'PERMISSION_DENIED',
@@ -200,7 +200,7 @@ const friendGroupHandler = {
       // Validate operation
       if (operator.id !== friendGroup.userId) {
         throw new StandardizedError(
-          '您沒有權限刪除非自己的好友群組',
+          '你沒有權限刪除非自己的好友群組',
           'ValidationError',
           'DELETEFRIENDGROUP',
           'PERMISSION_DENIED',
