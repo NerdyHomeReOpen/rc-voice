@@ -90,7 +90,6 @@ const serverHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
           userSocket = _socket;
-          console.log(`userSocket.id: ${userSocket.id}`);
         }
       });
 
@@ -222,7 +221,6 @@ const serverHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
           userSocket = _socket;
-          console.log(`userSocket.id: ${userSocket.id}`);
         }
       });
 
