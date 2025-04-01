@@ -71,6 +71,16 @@ const friendApplicationHandler = {
         );
       }
 
+      if (!receiverSocket) {
+        throw new StandardizedError(
+          '無法發送好友申請對方沒在線',
+          'ValidationError',
+          'CREATEFRIENDAPPLICATION',
+          'FRIEND_OFFLINE',
+          404,
+        );
+      }
+
       // Create friend application
       const applicationId = `fa_${senderId}-${receiverId}`;
       await Set.friendApplication(applicationId, {
@@ -82,11 +92,11 @@ const friendApplicationHandler = {
 
       // Emit updated data (to the receiver)
       io.to(receiverSocket.id).emit('userUpdate', {
-        friendApplications: await Get.userFriendApplications(receiver.id),
+        friendApplications: await Get.userFriendApplications(receiverId),
       });
 
       new Logger('FriendApplication').success(
-        `Friend application(${applicationId}) of User(${sender.id}) and User(${receiver.id}) created by User(${operator.id})`,
+        `Friend application(${applicationId}) of User(${senderId}) and User(${receiverId}) created by User(${operator.id})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
