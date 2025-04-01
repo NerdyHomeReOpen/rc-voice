@@ -17,8 +17,6 @@ const channelHandler = require('./channel');
 
 const userHandler = {
   searchUser: async (io, socket, data) => {
-    // const users = (await db.get('users')) || {};
-
     try {
       // data = {
       //   query:
@@ -36,11 +34,10 @@ const userHandler = {
         );
       }
 
-      // Validate operation
+      // Validate socket
       await Func.validate.socket(socket);
-      // TODO: implement search results
 
-      // Emit data (only to the user)
+      // Emit data (to the operator)
       io.to(socket.id).emit('userSearch', await Get.searchUser(query));
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -53,7 +50,7 @@ const userHandler = {
         );
       }
 
-      // Emit data (only to the user)
+      // Emit data (to the operator)
       io.to(socket.id).emit('error', error);
 
       new Logger('WebSocket').error(
@@ -63,25 +60,32 @@ const userHandler = {
   },
 
   connectUser: async (io, socket) => {
-    const users = (await db.get('users')) || {};
-
     try {
-      // Validate data
-      const userId = await Func.validate.socket(socket);
-      const user = await Func.validate.user(users[userId]);
+      // Validate socket
+      const operatorId = await Func.validate.socket(socket);
+
+      // Get data
+      const operator = await Get.user(operatorId);
 
       // Check if user is already connected
       io.sockets.sockets.forEach((_socket) => {
-        if (_socket.userId === socket.userId && _socket.id !== socket.id) {
+        if (_socket.userId === operator.id && _socket.id !== socket.id) {
           _socket.disconnect();
+          throw new StandardizedError(
+            '有其他裝置登入此帳號，強制登出',
+            'ValidationError',
+            'CONNECTUSER',
+            'ANOTHER_DEVICE_LOGIN',
+            403,
+          );
         }
       });
 
-      // Emit data (only to the user)
-      io.to(socket.id).emit('userUpdate', await Get.user(user.id));
+      // Emit data (to the operator)
+      io.to(socket.id).emit('userUpdate', operator);
 
       new Logger('WebSocket').success(
-        `User(${user.id}) connected with socket(${socket.id})`,
+        `User(${operator.id}) connected with socket(${socket.id})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -94,7 +98,7 @@ const userHandler = {
         );
       }
 
-      // Emit data (only to the user)
+      // Emit data (to the operator)
       io.to(socket.id).emit('userUpdate', null);
       io.to(socket.id).emit('error', error);
 
@@ -105,41 +109,40 @@ const userHandler = {
   },
 
   disconnectUser: async (io, socket) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-
     try {
-      // Validate data
-      const userId = await Func.validate.socket(socket);
-      const user = await Func.validate.user(users[userId]);
+      // Validate socket
+      const operatorId = await Func.validate.socket(socket);
+
+      // Get data
+      const operator = await Get.user(operatorId);
 
       // Disconnect server or channel
       if (user.currentServerId) {
         await serverHandler.disconnectServer(io, socket, {
-          serverId: user.currentServerId,
-          userId: user.id,
+          serverId: operator.currentServerId,
+          userId: operator.id,
         });
       } else if (user.currentChannelId) {
         await channelHandler.disconnectChannel(io, socket, {
-          channelId: user.currentChannelId,
-          userId: user.id,
+          channelId: operator.currentChannelId,
+          userId: operator.id,
         });
       }
 
       // Remove maps
-      Map.deleteUserIdSessionIdMap(userId, socket.sessionId);
-      Map.deleteUserIdSocketIdMap(userId, socket.id);
+      Map.deleteUserIdSessionIdMap(operator.id, socket.sessionId);
+      Map.deleteUserIdSocketIdMap(operator.id, socket.id);
 
       // Update user
       const user_update = {
         lastActiveAt: Date.now(),
       };
-      await Set.user(userId, user_update);
+      await Set.user(operator.id, user_update);
 
-      // Emit data (only to the user)
+      // Emit data (to the operator)
       io.to(socket.id).emit('userUpdate', user_update);
 
-      new Logger('WebSocket').success(`User(${userId}) disconnected`);
+      new Logger('WebSocket').success(`User(${operator.id}) disconnected`);
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
@@ -151,7 +154,7 @@ const userHandler = {
         );
       }
 
-      // Emit data (only to the user)
+      // Emit data (to the operator)
       io.to(socket.id).emit('userUpdate', null);
       io.to(socket.id).emit('error', error);
 
@@ -162,9 +165,6 @@ const userHandler = {
   },
 
   updateUser: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-
     try {
       // Validate data
       const { user: _editedUser, userId } = data;
@@ -177,35 +177,34 @@ const userHandler = {
           401,
         );
       }
-      const user = await Func.validate.user(users[userId]);
       const editedUser = await Func.validate.user(_editedUser);
 
-      // Validate operation
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
 
-      // Handle favorite servers
-      if (editedUser.favoriteServerId) {
-        const userServer = await Get.server(editedUser.favoriteServerId);
-        if (userServer) {
-          const userServerId = `us_${userId}_${editedUser.favoriteServerId}`;
-          const userFavoriteServers = await Get.userFavServers(userId);
-          await Set.userServer(userServerId, {
-            favorite: !userFavoriteServers.some(
-              (server) => server.id === editedUser.favoriteServerId,
-            ),
-            userId: userId,
-            serverId: editedUser.favoriteServerId,
-            timestamp: Date.now(),
-          });
-        }
+      // Get data
+      const operator = await Get.user(operatorId);
+      const user = await Get.user(userId);
+      const userSocket = Object.values(io.sockets.sockets).find(
+        (s) => s.userId === user.id,
+      );
+
+      // Validate operation
+      if (operator.id !== user.id) {
+        throw new StandardizedError(
+          '你無法更新其他使用者的資料',
+          'ValidationError',
+          'UPDATEUSER',
+          'PERMISSION_DENIED',
+          403,
+        );
       }
 
       // Update user data
       await Set.user(user.id, editedUser);
 
-      // Emit data (only to the user)
-      io.to(socket.id).emit('userUpdate', editedUser);
+      // Emit data (to the operator)
+      io.to(userSocket.id).emit('userUpdate', editedUser);
 
       new Logger('WebSocket').success(
         `User(${user.id}) updated by User(${operator.id})`,
@@ -221,7 +220,7 @@ const userHandler = {
         );
       }
 
-      // Emit data (only to the user)
+      // Emit data (to the operator)
       io.to(socket.id).emit('error', error);
 
       new Logger('WebSocket').error(
