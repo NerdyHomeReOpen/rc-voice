@@ -22,6 +22,7 @@ const MIME_TYPES = {
 };
 
 const PORT = process.env.PORT || 4500;
+const SERVER_URL = process.env.SERVER_URL || "http://localhost";
 const CONTENT_TYPE_JSON = { 'Content-Type': 'application/json' };
 
 const UPLOADS_PATH = 'uploads';
@@ -45,6 +46,7 @@ module.exports = {
   XP_SYSTEM,
   CLEANUP_INTERVAL_MS,
   PORT,
+  SERVER_URL,
   MIME_TYPES,
   CONTENT_TYPE_JSON,
   UPLOADS_PATH,

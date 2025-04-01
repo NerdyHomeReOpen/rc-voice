@@ -23,6 +23,7 @@ const {
 // Constants
 const {
   PORT,
+  SERVER_URL,
   CONTENT_TYPE_JSON,
   MIME_TYPES,
   UPLOADS_PATH,
@@ -744,7 +745,7 @@ const server = http.createServer((req, res) => {
           data: {
             avatar: fileName,
             avatarUrl: `${
-              process.env.SERVER_URL
+              SERVER_URL
             }:${PORT}/images/${Path()}/${fullFileName}`,
           },
         });

@@ -4,13 +4,19 @@ const db = new QuickDB();
 // Utils
 const xpSystem = require('./xp');
 
+// Constants
+const {
+  PORT,
+  SERVER_URL,
+} = require('../constant');
+
 const set = {
   user: async (id, data) => {
     const users = await db.get('users');
     users[id] = {
       name: '',
       avatar: '',
-      avatarUrl: `${process.env.SERVER_URL}:${process.env.PORT}/images/userAvatars/`,
+      avatarUrl: `${SERVER_URL}:${PORT}/images/userAvatars/`,
       signature: '',
       status: 'online',
       gender: 'Male',
@@ -71,7 +77,7 @@ const set = {
     servers[id] = {
       name: '',
       avatar: '',
-      avatarUrl: `${process.env.SERVER_URL}:${process.env.PORT}/images/serverAvatars/`,
+      avatarUrl: `${SERVER_URL}:${PORT}/images/serverAvatars/`,
       announcement: '',
       applyNotice: '',
       description: '',
