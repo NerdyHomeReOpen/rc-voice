@@ -134,7 +134,7 @@ const friendApplicationHandler = {
         _editedApplication,
       );
 
-      // Validate operation
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
@@ -145,6 +145,17 @@ const friendApplicationHandler = {
       const receiverSocket = Object.values(io.sockets.sockets).find(
         (s) => s.userId === receiverId,
       );
+
+      // Validate operation
+      if (operator.id !== sender.id) {
+        throw new StandardizedError(
+          '您沒有權限修改非自己的好友申請',
+          'ValidationError',
+          'UPDATEFRIENDAPPLICATION',
+          'PERMISSION_DENIED',
+          403,
+        );
+      }
 
       // Update friend application
       await Set.friendApplication(application.id, editedApplication);
@@ -202,6 +213,17 @@ const friendApplicationHandler = {
       const sender = await Get.user(senderId);
       const receiver = await Get.user(receiverId);
       const application = await Get.friendApplication(senderId, receiverId);
+
+      // Validate operation
+      if (operator.id !== sender.id) {
+        throw new StandardizedError(
+          '您沒有權限刪除非自己的好友申請',
+          'ValidationError',
+          'DELETEFRIENDAPPLICATION',
+          'PERMISSION_DENIED',
+          403,
+        );
+      }
 
       await db.delete(`friendApplications.${application.id}`);
 
