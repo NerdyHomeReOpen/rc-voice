@@ -46,7 +46,7 @@ const channelHandler = {
       console.log(`io.sockets.sockets: ${JSON.stringify(io.sockets.sockets)}`);
       console.log(`user.id: ${user.id}`);
       io.sockets.sockets.forEach((_socket) => {
-        console.log(`_socket: ${_socket}`);
+        console.log(`_socket.userId: ${_socket.userId}`);
       });
       const userSocket = Object.values(io.sockets.sockets).find(
         (s) => s.userId === user.id,
