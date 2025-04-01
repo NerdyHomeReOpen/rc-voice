@@ -224,9 +224,14 @@ const channelHandler = {
       const channel = await Get.channel(channelId);
       const server = await Get.server(channel.serverId);
       const operatorMember = await Get.member(operator.id, server.id);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
+      let userSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === user.id) {
+          userSocket = _socket;
+          userSocket.id = _socket.userId;
+          console.log(`userSocket.id: ${userSocket.id}`);
+        }
+      });
 
       // Validate operation
       if (operator.id === user.id) {

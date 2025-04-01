@@ -127,9 +127,14 @@ const friendGroupHandler = {
       const operator = await Get.user(operatorId);
       const friendGroup = await Get.friendGroup(friendGroupId);
       const user = await Get.user(friendGroup.userId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
+      let userSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === user.id) {
+          userSocket = _socket;
+          userSocket.id = _socket.userId;
+          console.log(`userSocket.id: ${userSocket.id}`);
+        }
+      });
 
       // Validate operation
       if (operator.id !== user.id) {
@@ -198,9 +203,14 @@ const friendGroupHandler = {
       const operator = await Get.user(operatorId);
       const friendGroup = await Get.friendGroup(friendGroupId);
       const user = await Get.user(friendGroup.userId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
+      let userSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === user.id) {
+          userSocket = _socket;
+          userSocket.id = _socket.userId;
+          console.log(`userSocket.id: ${userSocket.id}`);
+        }
+      });
 
       // Validate operation
       if (operator.id !== user.id) {
