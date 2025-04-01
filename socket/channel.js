@@ -45,12 +45,12 @@ const channelHandler = {
       const operatorMember = await Get.member(operator.id, server.id);
       console.log(`io.sockets.sockets: ${JSON.stringify(io.sockets.sockets)}`);
       console.log(`user.id: ${user.id}`);
-      io.sockets.sockets.forEach((_socket) => {
-        console.log(`_socket.userId: ${_socket.userId}`);
-      });
       const userSocket = Object.values(io.sockets.sockets).find(
         (s) => s.userId === user.id,
-      );
+      ).then((s) => {
+        s.id = s.userId;
+        return s;
+      });
 
       // Validate operation
       if (operator.id === user.id) {
