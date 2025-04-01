@@ -46,6 +46,7 @@ const channelHandler = {
       console.log(`user.id: ${user.id}`);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
+        console.log(`_socket.userId: ${_socket.userId}`);
         if (_socket.userId === operator.id && _socket.id !== socket.id) {
           userSocket = _socket;
         }
