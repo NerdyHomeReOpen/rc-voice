@@ -86,7 +86,9 @@ const serverHandler = {
       const user = await Get.user(userId);
       const server = await Get.server(serverId);
       const operatorMember = await Get.member(operator.id, server.id);
-      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
+      const userSocket = Object.values(io.sockets.sockets).find(
+        (s) => s.userId === user.id,
+      );
 
       // Validate operation
       if (operator.id !== user.id) {
@@ -212,7 +214,9 @@ const serverHandler = {
       const user = await Get.user(userId);
       const server = await Get.server(serverId);
       const operatorMember = await Get.member(operator.id, server.id);
-      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
+      const userSocket = Object.values(io.sockets.sockets).find(
+        (s) => s.userId === user.id,
+      );
 
       // Validate operation
       if (operator.id !== user.id) {

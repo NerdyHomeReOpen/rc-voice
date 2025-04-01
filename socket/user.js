@@ -68,14 +68,10 @@ const userHandler = {
       // Check if user is already connected
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === operator.id && _socket.id !== socket.id) {
+          io.to(_socket.id).emit('openPopup', {
+            popupType: 'anotherDeviceLogin',
+          });
           _socket.disconnect();
-          throw new StandardizedError(
-            '偵測到有其他裝置登入此帳號，請登出後再試一次',
-            'ValidationError',
-            'CONNECTUSER',
-            'ANOTHER_DEVICE_LOGIN',
-            403,
-          );
         }
       });
 
@@ -183,7 +179,9 @@ const userHandler = {
       // Get data
       const operator = await Get.user(operatorId);
       const user = await Get.user(userId);
-      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
+      const userSocket = Object.values(io.sockets.sockets).find(
+        (s) => s.userId === user.id,
+      );
 
       // Validate operation
       if (operator.id !== user.id) {
