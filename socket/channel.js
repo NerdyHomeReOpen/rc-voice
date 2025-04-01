@@ -93,7 +93,7 @@ const channelHandler = {
           );
         if (operatorMember.permissionLevel < 5)
           throw new StandardizedError(
-            '你沒有權限移動其他用戶到該頻道',
+            '你沒有足夠的權限移動其他用戶到該頻道',
             'ValidationError',
             'CONNECTCHANNEL',
             'PERMISSION_DENIED',
@@ -106,7 +106,7 @@ const channelHandler = {
           operatorMember.permissionLevel < 2
         )
           throw new StandardizedError(
-            '你沒有權限移動其他用戶到該頻道',
+            '你沒有足夠的權限移動其他用戶到該頻道',
             'ValidationError',
             'CONNECTCHANNEL',
             'PERMISSION_DENIED',
@@ -118,7 +118,7 @@ const channelHandler = {
           operatorMember.permissionLevel < 3
         )
           throw new StandardizedError(
-            '你沒有權限移動其他用戶到該頻道',
+            '你沒有足夠的權限移動其他用戶到該頻道',
             'ValidationError',
             'CONNECTCHANNEL',
             'PERMISSION_DENIED',
@@ -227,7 +227,7 @@ const channelHandler = {
       } else {
         if (operatorMember.permissionLevel < 5)
           throw new StandardizedError(
-            '你沒有權限踢除其他用戶',
+            '你沒有足夠的權限踢除其他用戶',
             'ValidationError',
             'DISCONNECTCHANNEL',
             'PERMISSION_DENIED',

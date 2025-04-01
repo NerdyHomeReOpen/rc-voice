@@ -48,7 +48,7 @@ const memberApplicationHandler = {
       // Validate operator
       if (operator.id !== user.id) {
         throw new StandardizedError(
-          '你沒有權限創建非自己的會員申請',
+          '無法創建非自己的會員申請',
           'ValidationError',
           'CREATEMEMBERAPPLICATION',
           'PERMISSION_DENIED',
@@ -132,7 +132,7 @@ const memberApplicationHandler = {
       if (operator.id === user.id) {
         if (memberApplication.status !== 'pending') {
           throw new StandardizedError(
-            '申請已經被處理過，無法更新',
+            '無法更新已經被處理過的申請',
             'ValidationError',
             'UPDATEMEMBERAPPLICATION',
             'APPLICATION_ALREADY_PROCESSED',
@@ -142,7 +142,7 @@ const memberApplicationHandler = {
       } else {
         if (operatorMember.permissionLevel < 5) {
           throw new StandardizedError(
-            '你沒有權限更新其他成員的會員申請',
+            '你沒有足夠的權限更新其他成員的會員申請',
             'ValidationError',
             'UPDATEMEMBERAPPLICATION',
             'PERMISSION_DENIED',
@@ -151,7 +151,7 @@ const memberApplicationHandler = {
         }
         if (memberApplication.status !== 'pending') {
           throw new StandardizedError(
-            '申請已經被處理過，無法更新',
+            '無法更新已經被處理過的申請',
             'ValidationError',
             'UPDATEMEMBERAPPLICATION',
             'APPLICATION_ALREADY_PROCESSED',
@@ -224,7 +224,7 @@ const memberApplicationHandler = {
       if (operator.id === user.id) {
         if (application.status !== 'pending') {
           throw new StandardizedError(
-            '申請已經被處理過，無法刪除',
+            '無法刪除已經被處理過的申請',
             'ValidationError',
             'DELETEMEMBERAPPLICATION',
             'APPLICATION_ALREADY_PROCESSED',
@@ -234,22 +234,22 @@ const memberApplicationHandler = {
       } else {
         if (operatorMember.permissionLevel < 5) {
           throw new StandardizedError(
-            '你沒有權限刪除其他成員的會員申請',
+            '你沒有足夠的權限刪除其他成員的會員申請',
             'ValidationError',
             'DELETEMEMBERAPPLICATION',
             'PERMISSION_DENIED',
             403,
           );
         }
-        // if (application.status !== 'pending') {
-        //   throw new StandardizedError(
-        //     '申請已經被處理過，無法刪除',
-        //     'ValidationError',
-        //     'DELETEMEMBERAPPLICATION',
-        //     'APPLICATION_ALREADY_PROCESSED',
-        //     403,
-        //   );
-        // }
+        if (application.status !== 'pending') {
+          throw new StandardizedError(
+            '無法刪除已經被處理過的申請',
+            'ValidationError',
+            'DELETEMEMBERAPPLICATION',
+            'APPLICATION_ALREADY_PROCESSED',
+            403,
+          );
+        }
       }
 
       // Delete member application

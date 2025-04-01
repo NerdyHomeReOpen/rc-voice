@@ -51,7 +51,7 @@ const friendApplicationHandler = {
       // Validate operation
       if (operator.id !== sender.id) {
         throw new StandardizedError(
-          '你沒有權限創建非自己的好友申請',
+          '無法創建非自己的好友申請',
           'ValidationError',
           'CREATEFRIENDAPPLICATION',
           'PERMISSION_DENIED',
@@ -60,7 +60,7 @@ const friendApplicationHandler = {
       }
       if (sender.id === receiver.id) {
         throw new StandardizedError(
-          '你不能發送好友申請給自己',
+          '無法發送好友申請給自己',
           'ValidationError',
           'CREATEFRIENDAPPLICATION',
           'SELF_OPERATION',
@@ -149,7 +149,7 @@ const friendApplicationHandler = {
       // Validate operation
       if (operator.id !== sender.id) {
         throw new StandardizedError(
-          '你沒有權限修改非自己的好友申請',
+          '無法修改非自己的好友申請',
           'ValidationError',
           'UPDATEFRIENDAPPLICATION',
           'PERMISSION_DENIED',
@@ -218,7 +218,7 @@ const friendApplicationHandler = {
       // Validate operation
       if (operator.id !== sender.id) {
         throw new StandardizedError(
-          '你沒有權限刪除非自己的好友申請',
+          '你刪除非自己的好友申請',
           'ValidationError',
           'DELETEFRIENDAPPLICATION',
           'PERMISSION_DENIED',

@@ -45,7 +45,7 @@ const memberHandler = {
       if (operator.id === user.id) {
         if (newMember.permissionLevel !== 1 && server.ownerId != operator.id) {
           throw new StandardizedError(
-            '你必須是遊客',
+            '必須是遊客',
             'ValidationError',
             'CREATEMEMBER',
             'PERMISSION_DENIED',
@@ -54,7 +54,7 @@ const memberHandler = {
         }
         if (newMember.permissionLevel !== 6 && server.ownerId === operator.id) {
           throw new StandardizedError(
-            '你必須是群組創建者',
+            '必須是群組創建者',
             'ValidationError',
             'CREATEMEMBER',
             'PERMISSION_DENIED',
@@ -73,7 +73,7 @@ const memberHandler = {
         }
         if (newMember.permissionLevel >= operatorMember.permissionLevel) {
           throw new StandardizedError(
-            '你無法新增權限高於自己的成員',
+            '無法新增權限高於自己的成員',
             'ValidationError',
             'CREATEMEMBER',
             'PERMISSION_TOO_HIGH',
@@ -164,7 +164,7 @@ const memberHandler = {
       if (operator.id === user.id) {
         if (editedMember.permissionLevel) {
           throw new StandardizedError(
-            '你沒有權限更改自己的權限',
+            '無法更改自己的權限',
             'ValidationError',
             'UPDATEMEMBER',
             'PERMISSION_DENIED',
@@ -183,7 +183,7 @@ const memberHandler = {
         }
         if (member.permissionLevel > 5) {
           throw new StandardizedError(
-            '你無法更改群創建者的權限',
+            '無法更改群創建者的權限',
             'ValidationError',
             'UPDATEMEMBER',
             'PERMISSION_DENIED',
@@ -196,7 +196,7 @@ const memberHandler = {
           !operatorMember.permissionLevel > 5
         ) {
           throw new StandardizedError(
-            '你無法更改非會員使用者的權限',
+            '你沒有足夠的權限更改非會員使用者的權限',
             'ValidationError',
             'UPDATEMEMBER',
             'PERMISSION_DENIED',
@@ -208,7 +208,7 @@ const memberHandler = {
           !operatorMember.permissionLevel > 5
         ) {
           throw new StandardizedError(
-            '你無法更改會員為非會員',
+            '無法更改會員為非會員',
             'ValidationError',
             'UPDATEMEMBER',
             'PERMISSION_DENIED',
@@ -226,7 +226,7 @@ const memberHandler = {
         }
         if (editedMember.permissionLevel >= operatorMember.permissionLevel) {
           throw new StandardizedError(
-            '你無法設置高於自己的權限',
+            '無法設置高於自己的權限',
             'ValidationError',
             'UPDATEMEMBER',
             'PERMISSION_TOO_HIGH',

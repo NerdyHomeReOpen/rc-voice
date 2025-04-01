@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
 // Utils
 const utils = require('../utils');
 const {
@@ -72,7 +70,7 @@ const userHandler = {
         if (_socket.userId === operator.id && _socket.id !== socket.id) {
           _socket.disconnect();
           throw new StandardizedError(
-            '有其他裝置登入此帳號，強制登出',
+            '偵測到有其他裝置登入此帳號，請登出後再試一次',
             'ValidationError',
             'CONNECTUSER',
             'ANOTHER_DEVICE_LOGIN',
@@ -192,7 +190,7 @@ const userHandler = {
       // Validate operation
       if (operator.id !== user.id) {
         throw new StandardizedError(
-          '你無法更新其他使用者的資料',
+          '無法更新其他使用者的資料',
           'ValidationError',
           'UPDATEUSER',
           'PERMISSION_DENIED',

@@ -92,7 +92,7 @@ const serverHandler = {
       // Validate operation
       if (operator.id !== user.id) {
         throw new StandardizedError(
-          '你無法移動其他用戶的群組',
+          '無法移動其他用戶的群組',
           'ValidationError',
           'CONNECTSERVER',
           'PERMISSION_DENIED',
@@ -221,7 +221,7 @@ const serverHandler = {
       if (operator.id !== user.id) {
         if (server.id !== user.currentServerId) {
           throw new StandardizedError(
-            '你無法踢出不在該群組的用戶',
+            '無法踢出不在該群組的用戶',
             'ValidationError',
             'DISCONNECTSERVER',
             'PERMISSION_DENIED',
@@ -230,7 +230,7 @@ const serverHandler = {
         }
         if (operatorMember.permissionLevel < 5) {
           throw new StandardizedError(
-            '你沒有權限踢出其他用戶',
+            '你沒有足夠的權限踢出其他用戶',
             'ValidationError',
             'DISCONNECTSERVER',
             'PERMISSION_DENIED',
@@ -316,10 +316,10 @@ const serverHandler = {
       // Validate operation
       if (operator.ownedServers.length >= MAX_GROUPS) {
         throw new StandardizedError(
-          '你的可擁有群組數量已達上限',
+          '可擁有群組數量已達上限',
           'ValidationError',
           'CREATESERVER',
-          'USER_LIMIT',
+          'LIMIT_REACHED',
           403,
         );
       }
@@ -431,7 +431,7 @@ const serverHandler = {
       // Validate operation
       if (operatorMember.permissionLevel < 5) {
         throw new StandardizedError(
-          '你沒有權限更新群組',
+          '你沒有足夠的權限更新該群組',
           'ValidationError',
           'UPDATESERVER',
           'PERMISSION_DENIED',
