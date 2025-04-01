@@ -43,7 +43,7 @@ const channelHandler = {
       const channel = await Get.channel(channelId);
       const server = await Get.server(channel.serverId);
       const operatorMember = await Get.member(operator.id, server.id);
-      console.log(`io.sockets.sockets: ${io.sockets.sockets.size}`);
+      console.log(`io.sockets.sockets: ${JSON.stringify(io.sockets.sockets)}`);
       console.log(`user.id: ${user.id}`);
       const userSocket = Object.values(io.sockets.sockets).find(
         (s) => s.userId === user.id,
