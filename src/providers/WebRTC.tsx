@@ -48,8 +48,6 @@ interface WebRTCContextType {
   updateBitrate?: (newBitrate: number) => void;
   updateMicVolume?: (volume: number) => void;
   updateSpeakerVolume?: (volume: number) => void;
-  updateInputDevice?: (deviceId: string) => void;
-  updateOutputDevice?: (deviceId: string) => void;
   isMute?: boolean;
   bitrate?: number;
   micVolume?: number;
@@ -406,7 +404,82 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     }
   };
 
-  // Effect to initialize Audio Context
+  const updateInputDevice = async (deviceId: string) => {
+    try {
+      if (!deviceId) return;
+
+      // Get new audio stream
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: { exact: deviceId } },
+      });
+
+      // Set mute state of new audio stream to match current state
+      newStream.getAudioTracks().forEach((track) => {
+        track.enabled = !isMute;
+      });
+
+      // Stop all tracks of current stream
+      if (localStream.current) {
+        localStream.current.getTracks().forEach((track) => track.stop());
+      }
+
+      // Update local stream reference
+      localStream.current = newStream;
+
+      // Get device info
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const deviceInfo = devices.find((d) => d.deviceId === deviceId);
+      console.log('New input stream device info:', deviceInfo);
+
+      // Process the new stream and update peer connections
+      updateMicVolume(micVolume);
+    } catch (err) {
+      console.error('Error accessing microphone device:', err);
+    }
+  };
+
+  const updateOutputDevice = async (deviceId: string) => {
+    try {
+      if (!deviceId) return;
+
+      // Get device info
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const deviceInfo = devices.find((d) => d.deviceId === deviceId);
+      console.log('New output stream device info:', deviceInfo);
+
+      // Check if browser supports setSinkId API
+      // if (typeof HTMLMediaElement.prototype.setSinkId === 'function') {
+      //   Object.values(peerAudioRefs.current).forEach((audio) => {
+      //     audio
+      //       .setSinkId(deviceId)
+      //       .catch((err) =>
+      //         console.error(
+      //           'Error updating audio output device (peerAudioRefs):',
+      //           err,
+      //         ),
+      //       );
+      //   });
+
+      // Update hidden audio elements
+      Object.values(peerAudioRefs.current).forEach((audio) =>
+        audio
+          .setSinkId(deviceId)
+          .catch((err) =>
+            console.error(
+              'Error updating hidden audio element output device:',
+              err,
+            ),
+          ),
+      );
+
+      // Update speaker volume
+      updateSpeakerVolume(speakerVolume);
+    } catch (err) {
+      console.error('Error setting audio output device:', err);
+    }
+  };
+
+  // Effects
   useEffect(() => {
     if (!localStream.current) return;
 
@@ -430,7 +503,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     };
   }, [localStream.current]);
 
-  // Effect to get initial media stream and handle device updates
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -440,11 +512,12 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       })
       .catch((err) => console.error('Error accessing microphone', err));
 
-    ipcService.audio.get((devices) => {
-      updateInputDevice(devices.input || '');
-      updateOutputDevice(devices.output || '');
-      console.log('devices:', devices);
-    });
+    // ipcService.audio.get('input', (input) => {
+    //   updateInputDevice(input || '');
+    // });
+    // ipcService.audio.get('output', (output) => {
+    //   updateOutputDevice(output || '');
+    // });
 
     return () => {
       if (localStream.current) {
@@ -467,87 +540,15 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     };
   }, []);
 
-  const updateInputDevice = async (deviceId: string) => {
-    if (!deviceId) return;
-    try {
-      const newStream = await navigator.mediaDevices.getUserMedia({
-        audio: { deviceId: { exact: deviceId } },
-      });
+  useEffect(() => {
+    ipcService.audio.update('input', (input) => {
+      updateInputDevice(input || '');
+    });
+    ipcService.audio.update('output', (output) => {
+      updateOutputDevice(output || '');
+    });
+  }, []);
 
-      // Set mute state of new audio stream to match current state
-      newStream.getAudioTracks().forEach((track) => {
-        track.enabled = !isMute;
-      });
-
-      // Stop all tracks of current stream
-      if (localStream.current) {
-        localStream.current.getTracks().forEach((track) => track.stop());
-      }
-
-      // Update local stream reference
-      localStream.current = newStream;
-
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const deviceInfo = devices.find((d) => d.deviceId === deviceId);
-      console.log('New input stream device info:', deviceInfo);
-
-      // Process the new stream and update peer connections
-      updateMicVolume(micVolume);
-    } catch (err) {
-      console.error('Error accessing microphone device:', err);
-    }
-  };
-
-  const updateOutputDevice = async (deviceId: string) => {
-    if (!deviceId) return;
-    try {
-      console.log('Attempting to set output device to:', deviceId);
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const deviceInfo = devices.find((d) => d.deviceId === deviceId);
-      console.log('New output stream device info:', deviceInfo);
-
-      // Check if browser supports setSinkId API
-      if (typeof HTMLMediaElement.prototype.setSinkId === 'function') {
-        Object.values(peerAudioRefs.current).forEach((audio) => {
-          audio
-            .setSinkId(deviceId)
-            .catch((err) =>
-              console.error(
-                'Error updating audio output device (peerAudioRefs):',
-                err,
-              ),
-            );
-        });
-
-        // Update hidden audio elements
-        const audioElements = document.querySelectorAll(
-          'audio[style*="display: none"]',
-        );
-        console.log('Found hidden audio elements:', audioElements);
-        audioElements.forEach((audio) => {
-          console.log('Hidden audio element:', audio);
-          if (audio instanceof HTMLMediaElement && audio.setSinkId) {
-            audio
-              .setSinkId(deviceId)
-              .catch((err) =>
-                console.error(
-                  'Error updating hidden audio element output device:',
-                  err,
-                ),
-              );
-          }
-        });
-      } else {
-        console.warn(
-          'This browser does not support setSinkId API, cannot switch audio output device',
-        );
-      }
-    } catch (err) {
-      console.error('Error setting audio output device:', err);
-    }
-  };
-
-  // Effect for socket event listeners
   useEffect(() => {
     if (!socket) return;
 
@@ -587,8 +588,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         updateBitrate,
         updateMicVolume,
         updateSpeakerVolume,
-        updateInputDevice,
-        updateOutputDevice,
         isMute,
         bitrate,
         micVolume,

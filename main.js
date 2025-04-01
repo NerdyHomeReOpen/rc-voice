@@ -669,18 +669,22 @@ app.on('ready', async () => {
   });
 
   // Audio device handlers
-  ipcMain.on('set-audio-device', (_, { deviceId, type }) => {
+  ipcMain.on('set-audio-device', (_, deviceId, type) => {
     if (type === 'input') {
       store.set('audioInputDevice', deviceId);
     } else if (type === 'output') {
       store.set('audioOutputDevice', deviceId);
     }
-  });
-  ipcMain.on('get-audio-device', (event) => {
-    event.reply('audio-device-status', {
-      input: store.get('audioInputDevice'),
-      output: store.get('audioOutputDevice'),
+    BrowserWindow.getAllWindows().forEach((window) => {
+      window.webContents.send('audio-device-status', type, deviceId);
     });
+  });
+  ipcMain.on('get-audio-device', (event, type) => {
+    if (type === 'input') {
+      event.reply('audio-device-status', type, store.get('audioInputDevice'));
+    } else if (type === 'output') {
+      event.reply('audio-device-status', type, store.get('audioOutputDevice'));
+    }
   });
 
   // Open external url handlers

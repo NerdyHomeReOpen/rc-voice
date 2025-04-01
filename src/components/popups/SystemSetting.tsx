@@ -9,7 +9,6 @@ import styles from '@/styles/popups/systemSetting.module.css';
 
 // Providers
 import { useLanguage } from '@/providers/Language';
-import { useWebRTC } from '@/providers/WebRTC';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -17,7 +16,6 @@ import ipcService from '@/services/ipc.service';
 const SystemSettingPopup: React.FC = React.memo(() => {
   // Hooks
   const lang = useLanguage();
-  const webRTC = useWebRTC();
 
   // States
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
@@ -30,10 +28,6 @@ const SystemSettingPopup: React.FC = React.memo(() => {
   const [startMinimized, setStartMinimized] = useState<boolean>(false);
   const [notificationSound, setNotificationSound] = useState<boolean>(true);
 
-  useEffect(() => {
-    ipcService.autoLaunch.get(setAutoLaunch);
-  }, []);
-
   const handleAutoLaunchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const enabled = e.target.checked;
     setAutoLaunch(enabled);
@@ -45,9 +39,16 @@ const SystemSettingPopup: React.FC = React.memo(() => {
   };
 
   useEffect(() => {
-    ipcService.audio.get((devices) => {
-      setSelectedInput(devices.input || '');
-      setSelectedOutput(devices.output || '');
+    ipcService.autoLaunch.get((enabled) => {
+      setAutoLaunch(enabled);
+    });
+
+    ipcService.audio.get('input', (input) => {
+      setSelectedInput(input || '');
+    });
+
+    ipcService.audio.get('output', (output) => {
+      setSelectedOutput(output || '');
     });
 
     navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -57,36 +58,6 @@ const SystemSettingPopup: React.FC = React.memo(() => {
       setOutputDevices(outputs);
     });
   }, []);
-
-  useEffect(() => {
-    if (selectedInput) {
-      navigator.mediaDevices
-        .getUserMedia({ audio: { deviceId: selectedInput } })
-        .then(() => {
-          webRTC.updateInputDevice?.(selectedInput);
-        })
-        .catch((err) => console.error('Error accessing microphone:', err));
-    }
-  }, [selectedInput, webRTC]);
-
-  const handleConfirm = () => {
-    ipcService.autoLaunch.set(autoLaunch);
-    ipcService.audio.set(selectedInput, 'input');
-    ipcService.audio.set(selectedOutput, 'output');
-    handleClose();
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const deviceId = e.target.value;
-    setSelectedInput(deviceId);
-    webRTC.updateInputDevice?.(deviceId);
-  };
-
-  const handleOutputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const deviceId = e.target.value;
-    setSelectedOutput(deviceId);
-    webRTC.updateOutputDevice?.(deviceId);
-  };
 
   return (
     <div className={popup['popupContainer']}>
@@ -194,7 +165,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                   <div className={popup['selectBox']}>
                     <select
                       value={selectedInput}
-                      onChange={handleInputChange}
+                      onChange={(e) => setSelectedInput(e.target.value)}
                       style={{
                         maxWidth: '250px',
                       }}
@@ -219,7 +190,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                   <div className={popup['selectBox']}>
                     <select
                       value={selectedOutput}
-                      onChange={handleOutputChange}
+                      onChange={(e) => setSelectedOutput(e.target.value)}
                       style={{
                         maxWidth: '250px',
                       }}
@@ -359,7 +330,15 @@ const SystemSettingPopup: React.FC = React.memo(() => {
       </div>
 
       <div className={popup['popupFooter']}>
-        <button className={popup['button']} onClick={handleConfirm}>
+        <button
+          className={popup['button']}
+          onClick={() => {
+            ipcService.autoLaunch.set(autoLaunch);
+            ipcService.audio.set(selectedInput, 'input');
+            ipcService.audio.set(selectedOutput, 'output');
+            handleClose();
+          }}
+        >
           {lang.tr.confirm}
         </button>
         <button

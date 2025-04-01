@@ -32,7 +32,6 @@ import ipcService from '@/services/ipc.service';
 
 // Providers
 import { useLanguage } from '@/providers/Language';
-import WebRTCProvider from '@/providers/WebRTC';
 
 interface HeaderProps {
   title: string;
@@ -108,15 +107,9 @@ const Popup = React.memo(() => {
       const params = new URLSearchParams(window.location.search);
       const type = params.get('type') as PopupType;
       if (!type) return;
-      if (type === PopupType.SYSTEM_SETTING) {
-        ipcService.autoLaunch.get((enabled) => {
-          setInitialData({ autoLaunch: enabled });
-        });
-      } else {
-        ipcService.initialData.request(type, (data) => {
-          setInitialData(data);
-        });
-      }
+      ipcService.initialData.request(type, (data) => {
+        setInitialData(data);
+      });
     }
   }, []);
 
