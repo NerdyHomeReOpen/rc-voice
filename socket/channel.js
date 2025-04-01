@@ -48,6 +48,7 @@ const channelHandler = {
         (s) => s.userId === user.id,
       );
 
+      console.log(`userSocket: ${userSocket}`);
       userSocket.id = userSocket.userId;
       console.log(`userSocket.id: ${userSocket.id}`);
 
