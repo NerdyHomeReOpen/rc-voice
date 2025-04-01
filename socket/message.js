@@ -14,10 +14,6 @@ const {
 
 const messageHandler = {
   sendMessage: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-    const channels = (await db.get('channels')) || {};
-
     try {
       // data = {
       //   channelId: string,
@@ -41,11 +37,13 @@ const messageHandler = {
 
       // Validate operation
       const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
 
-      // TODO: Add validation for operator
+      // Get data
+      const operator = await Get.user(operatorId);
       const channel = await Get.channel(channelId);
-      const operatorMember = await Get.member(operator.id, channel.serverId);
+      const server = await Get.server(channel.serverId);
+      const operatorMember = await Get.member(operator.id, server.id);
+
       if (channel.forbidGuestUrl && operatorMember.permissionLevel === 1) {
         newMessage.content = newMessage.content.replace(
           /https?:\/\/[^\s]+/g,
@@ -79,7 +77,7 @@ const messageHandler = {
         ],
       });
 
-      new Logger('WebSocket').success(
+      new Logger('Message').success(
         `User(${operator.id}) sent ${newMessage.content} to channel(${channel.id})`,
       );
     } catch (error) {
@@ -93,20 +91,16 @@ const messageHandler = {
         );
       }
 
-      // Emit error data (only to the user)
+      // Emit error data (to the operator)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
+      new Logger('Message').error(
         'Error sending message: ' + error.error_message,
       );
     }
   },
 
   sendDirectMessage: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-    const friends = (await db.get('friends')) || {};
-
     try {
       // data = {
       //   friendId: string,
@@ -130,9 +124,9 @@ const messageHandler = {
 
       // Validate operation
       const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
 
-      // TODO: Add validation for operator
+      // Get data
+      const operator = await Get.user(operatorId);
       const friend = await Get.friend(friendId);
 
       // Create new message
@@ -149,7 +143,7 @@ const messageHandler = {
         directMessages: await Get.friendDirectMessages(friend.id),
       });
 
-      new Logger('WebSocket').success(
+      new Logger('Message').success(
         `User(${operator.id}) sent ${newDirectMessage.content} to User(${friend.id})`,
       );
     } catch (error) {
@@ -163,10 +157,10 @@ const messageHandler = {
         );
       }
 
-      // Emit error data (only to the user)
+      // Emit error data (to the operator)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
+      new Logger('Message').error(
         'Error sending direct message: ' + error.error_message,
       );
     }
