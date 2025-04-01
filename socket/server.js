@@ -15,6 +15,7 @@ const {
 // Handlers
 const channelHandler = require('./channel');
 const memberHandler = require('./member');
+
 const serverHandler = {
   searchServer: async (io, socket, data) => {
     try {
@@ -332,7 +333,7 @@ const serverHandler = {
       await Set.server(serverId, {
         ...newServer,
         name: newServer.name.trim(),
-        description: newServer.description.trim(),
+        slogan: newServer.slogan.trim(),
         displayId: await Func.generateUniqueDisplayId(),
         lobbyId: channelId,
         ownerId: operator.id,
