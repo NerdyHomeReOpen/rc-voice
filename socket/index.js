@@ -83,10 +83,10 @@ module.exports = (io) => {
   });
 
   io.on('connection', (socket) => {
-    console.log(`io.sockets.sockets after connection: ${JSON.stringify(io.sockets.sockets)}`);
+    console.log(`io.sockets.sockets after connection: ${JSON.stringify(Array.from(io.sockets.sockets))}`);
     // Connect
     userHandler.connectUser(io, socket);
-    console.log(`io.sockets.sockets before connection: ${JSON.stringify(io.sockets.sockets)}`);
+    console.log(`io.sockets.sockets before connection: ${JSON.stringify(Array.from(io.sockets.sockets))}`);
     // Disconnect
     socket.on('disconnect', () => userHandler.disconnectUser(io, socket));
     // User

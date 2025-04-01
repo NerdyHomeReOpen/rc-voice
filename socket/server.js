@@ -38,7 +38,7 @@ const serverHandler = {
       // Validate socket
       await Func.validate.socket(socket);
 
-      console.log(`io.sockets.sockets: ${JSON.stringify(io.sockets.sockets)}`);
+      console.log(`io.sockets.sockets: ${JSON.stringify(Array.from(io.sockets.sockets))}`);
       io.to(socket.id).emit('serverSearch', await Get.searchServer(query));
     } catch (error) {
       if (!(error instanceof StandardizedError)) {

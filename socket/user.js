@@ -73,9 +73,9 @@ const userHandler = {
           });
           _socket.disconnect();
         }
-        console.log(`io.sockets.sockets: ${JSON.stringify(io.sockets.sockets)}`);
+        console.log(`io.sockets.sockets: ${JSON.stringify(Array.from(io.sockets.sockets))}`);
       });
-      console.log(`io.sockets.sockets: ${JSON.stringify(io.sockets.sockets)}`);
+      console.log(`io.sockets.sockets: ${JSON.stringify(Array.from(io.sockets.sockets))}`);
 
       // Emit data (to the operator)
       io.to(socket.id).emit('userUpdate', operator);
