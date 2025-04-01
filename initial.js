@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { QuickDB } = require('quick.db');
-const db = new QuickDB();
+const db = new QuickDB({ filePath: './json.sqlite' });
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -93,8 +93,23 @@ const deleteExtraUploads = async () => {
   }
 };
 
+const deleteSqlite = async () => {
+  const dbFilePath = path.join(__dirname, 'json.sqlite');
+  try {
+    await fs.unlink(dbFilePath);
+    console.log('Previous database file (json.sqlite) removed.');
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.log('No previous database file (json.sqlite) found.');
+    } else {
+      console.error('Error removing previous database file:', error);
+    }
+  }
+};
+
 const main = async () => {
   await deleteExtraUploads();
+  await deleteSqlite();
   await init();
 };
 
