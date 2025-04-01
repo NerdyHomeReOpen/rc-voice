@@ -34,7 +34,7 @@ const channelHandler = {
         );
       }
 
-      // Validate operation
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
@@ -209,7 +209,7 @@ const channelHandler = {
           400,
         );
       }
-      // Validate operation
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
@@ -307,7 +307,7 @@ const channelHandler = {
       }
       const newChannel = await Func.validate.channel(_newChannel);
 
-      // Validate operation
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
@@ -396,7 +396,7 @@ const channelHandler = {
       }
       const editedChannel = await Func.validate.channel(_editedChannel);
 
-      // Validate operation
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
@@ -592,7 +592,7 @@ const channelHandler = {
         );
       }
 
-      // Validate operation
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
