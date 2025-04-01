@@ -232,7 +232,16 @@ const channelHandler = {
           console.log(`userSocket.id: ${userSocket.id}`);
         }
       });
-      console.log(`userSocket.id: ${userSocket.id}`);
+
+      if (!userSocket) {
+        throw new StandardizedError(
+          '無法找到使用者的 Socket',
+          'ValidationError',
+          'DISCONNECTCHANNEL',
+          'SOCKET_NOT_FOUND',
+          404,
+        );
+      }
 
       // Validate operation
       if (operator.id === user.id) {
