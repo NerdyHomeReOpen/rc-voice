@@ -45,7 +45,7 @@ const memberHandler = {
       if (operator.id === user.id) {
         if (newMember.permissionLevel !== 1 && server.ownerId != operator.id) {
           throw new StandardizedError(
-            '你無法新增非遊客權限的成員',
+            '你必須是遊客',
             'ValidationError',
             'CREATEMEMBER',
             'PERMISSION_DENIED',
