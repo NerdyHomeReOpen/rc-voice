@@ -73,7 +73,9 @@ const userHandler = {
           });
           _socket.disconnect();
         }
+        console.log(`io.sockets.sockets: ${io.sockets.sockets.size}`);
       });
+      console.log(`io.sockets.sockets: ${io.sockets.sockets.size}`);
 
       // Emit data (to the operator)
       io.to(socket.id).emit('userUpdate', operator);
