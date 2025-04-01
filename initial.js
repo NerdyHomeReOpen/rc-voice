@@ -79,6 +79,18 @@ const deleteExtraUploads = async () => {
   } catch (error) {
     console.error('Error deleting extra user avatars:', error);
   }
+
+  const dbFilePath = path.join(__dirname, 'json.sqlite');
+  try {
+    await fs.unlink(dbFilePath);
+    console.log('Previous database file (json.sqlite) removed.');
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.log('No previous database file (json.sqlite) found.');
+    } else {
+      console.error('Error removing previous database file:', error);
+    }
+  }
 };
 
 const main = async () => {
