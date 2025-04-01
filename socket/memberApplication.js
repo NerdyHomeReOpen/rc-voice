@@ -13,10 +13,6 @@ const {
 
 const memberApplicationHandler = {
   createMemberApplication: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-    const servers = (await db.get('servers')) || {};
-
     try {
       // data = {
       //   userId: string,
@@ -26,9 +22,8 @@ const memberApplicationHandler = {
       //   },
       // }
 
-      // Get data
+      // Validate data
       const { memberApplication: _newApplication, userId, serverId } = data;
-      console.log(data);
       if (!_newApplication || !userId || !serverId) {
         throw new StandardizedError(
           '無效的資料',
@@ -38,20 +33,32 @@ const memberApplicationHandler = {
           401,
         );
       }
-      const user = await Func.validate.user(users[userId]);
-      const server = await Func.validate.server(servers[serverId]);
       const memberApplication = await Func.validate.memberApplication(
         _newApplication,
       );
 
       // Validate operation
       const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
-      // TODO: Add validation for operator
+
+      // Get data
+      const operator = await Get.user(operatorId);
+      const user = await Get.user(userId);
+      const server = await Get.server(serverId);
+
+      // Validate operator
+      if (operator.id !== user.id) {
+        throw new StandardizedError(
+          '你沒有權限創建非自己的會員申請',
+          'ValidationError',
+          'CREATEMEMBERAPPLICATION',
+          'PERMISSION_DENIED',
+          403,
+        );
+      }
 
       // Create member application
       const applicationId = `ma_${user.id}-${server.id}`;
-      const application = await Set.memberApplications(applicationId, {
+      await Set.memberApplications(applicationId, {
         ...memberApplication,
         userId: user.id,
         serverId: server.id,
@@ -63,11 +70,10 @@ const memberApplicationHandler = {
         memberApplications: await Get.serverApplications(server.id),
       });
 
-      new Logger('WebSocket').success(
-        `Member application(${application.id}) of User(${user.id}) and server(${server.id}) created by User(${operator.id})`,
+      new Logger('MemberApplication').success(
+        `Member application(${applicationId}) of User(${user.id}) and server(${server.id}) created by User(${operator.id})`,
       );
     } catch (error) {
-      // Emit error data (only to the user)
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
           `創建申請時發生無法預期的錯誤: ${error.message}`,
@@ -78,21 +84,16 @@ const memberApplicationHandler = {
         );
       }
 
-      // Emit data (only to the user)
+      // Emit error data (to the operator)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
+      new Logger('MemberApplication').error(
         `Error creating member application: ${error.error_message}`,
       );
     }
   },
 
   updateMemberApplication: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-    const servers = (await db.get('servers')) || {};
-    const memberApplications = (await db.get('memberApplications')) || {};
-
     try {
       // data = {
       //   userId: string,
@@ -113,50 +114,50 @@ const memberApplicationHandler = {
           401,
         );
       }
-      const user = await Func.validate.user(users[userId]);
-      const server = await Func.validate.server(servers[serverId]);
-      const memberApplication = await Func.validate.memberApplication(
-        memberApplications[`ma_${user.id}-${server.id}`],
-      );
       const editedApplication = await Func.validate.memberApplication(
         _editedApplication,
       );
 
       // Validate operation
       const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
-      // TODO: Add validation for operator
 
-      if (!memberApplication) {
-        await db.delete(`memberApplications.${memberApplication.id}`);
-        throw new StandardizedError(
-          '申請不存在',
-          'ValidationError',
-          'UPDATEMEMBERAPPLICATION',
-          'APPLICATION_NOT_FOUND',
-          404,
-        );
-      }
-      const applyMember = await Get.member(memberApplication.userId, server.id);
-      if (applyMember && applyMember.permissionLevel > 1) {
-        await db.delete(`memberApplications.${memberApplication.id}`);
-        throw new StandardizedError(
-          '該使用者已經是伺服器成員',
-          'ValidationError',
-          'UPDATEMEMBERAPPLICATION',
-          'USER_ALREADY_MEMBER',
-          403,
-        );
-      }
-      const authorMember = await Get.member(operator.id, server.id);
-      if (authorMember.permissionLevel < 5) {
-        throw new StandardizedError(
-          '您沒有權限執行此操作',
-          'ValidationError',
-          'UPDATEMEMBERAPPLICATION',
-          'PERMISSION_DENIED',
-          403,
-        );
+      // Get data
+      const operator = await Get.user(operatorId);
+      const user = await Get.user(userId);
+      const server = await Get.server(serverId);
+      const memberApplication = await Get.memberApplication(userId, serverId);
+      const operatorMember = await Get.member(operator.id, server.id);
+
+      // Validate operator
+      if (operator.id === user.id) {
+        if (memberApplication.status !== 'pending') {
+          throw new StandardizedError(
+            '申請已經被處理過，無法更新',
+            'ValidationError',
+            'UPDATEMEMBERAPPLICATION',
+            'APPLICATION_ALREADY_PROCESSED',
+            403,
+          );
+        }
+      } else {
+        if (operatorMember.permissionLevel < 5) {
+          throw new StandardizedError(
+            '你沒有權限更新其他成員的會員申請',
+            'ValidationError',
+            'UPDATEMEMBERAPPLICATION',
+            'PERMISSION_DENIED',
+            403,
+          );
+        }
+        if (memberApplication.status !== 'pending') {
+          throw new StandardizedError(
+            '申請已經被處理過，無法更新',
+            'ValidationError',
+            'UPDATEMEMBERAPPLICATION',
+            'APPLICATION_ALREADY_PROCESSED',
+            403,
+          );
+        }
       }
 
       // Update member application
@@ -167,11 +168,10 @@ const memberApplicationHandler = {
         memberApplications: await Get.serverApplications(server.id),
       });
 
-      new Logger('WebSocket').success(
+      new Logger('MemberApplication').success(
         `Member application(${memberApplication.id}) of User(${user.id}) and server(${server.id}) updated by User(${operator.id})`,
       );
     } catch (error) {
-      // Emit error data (only to the user)
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
           `更新申請時發生無法預期的錯誤: ${error.message}`,
@@ -182,21 +182,16 @@ const memberApplicationHandler = {
         );
       }
 
-      // Emit data (only to the user)
+      // Emit error data (to the operator)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
+      new Logger('MemberApplication').error(
         `Error updating member application: ${error.error_message}`,
       );
     }
   },
 
   deleteMemberApplication: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-    const servers = (await db.get('servers')) || {};
-    const memberApplications = (await db.get('memberApplications')) || {};
-
     try {
       // data = {
       //   userId: string,
@@ -214,18 +209,50 @@ const memberApplicationHandler = {
           401,
         );
       }
-      const user = await Func.validate.user(users[userId]);
-      const server = await Func.validate.server(servers[serverId]);
-      const application = await Func.validate.memberApplication(
-        memberApplications[`ma_${user.id}-${server.id}`],
-      );
+
+      // Validate operator
+      const operatorId = await Func.validate.socket(socket);
+
+      // Get data
+      const operator = await Get.user(operatorId);
+      const user = await Get.user(userId);
+      const server = await Get.server(serverId);
+      const application = await Get.memberApplication(userId, serverId);
+      const operatorMember = await Get.member(operator.id, server.id);
 
       // Validate operation
-      const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
-      // TODO: Add validation for operator
+      if (operator.id === user.id) {
+        if (application.status !== 'pending') {
+          throw new StandardizedError(
+            '申請已經被處理過，無法刪除',
+            'ValidationError',
+            'DELETEMEMBERAPPLICATION',
+            'APPLICATION_ALREADY_PROCESSED',
+            403,
+          );
+        }
+      } else {
+        if (operatorMember.permissionLevel < 5) {
+          throw new StandardizedError(
+            '你沒有權限刪除其他成員的會員申請',
+            'ValidationError',
+            'DELETEMEMBERAPPLICATION',
+            'PERMISSION_DENIED',
+            403,
+          );
+        }
+        // if (application.status !== 'pending') {
+        //   throw new StandardizedError(
+        //     '申請已經被處理過，無法刪除',
+        //     'ValidationError',
+        //     'DELETEMEMBERAPPLICATION',
+        //     'APPLICATION_ALREADY_PROCESSED',
+        //     403,
+        //   );
+        // }
+      }
 
-      // Remove member application
+      // Delete member application
       await db.delete(`memberApplications.${application.id}`);
 
       // Emit updated data to all users in the server
@@ -233,11 +260,10 @@ const memberApplicationHandler = {
         memberApplications: await Get.serverApplications(server.id),
       });
 
-      new Logger('WebSocket').success(
+      new Logger('MemberApplication').success(
         `Member application(${application.id}) of User(${user.id}) and server(${server.id}) deleted by User(${operator.id})`,
       );
     } catch (error) {
-      // Emit error data (only to the user)
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
           `刪除申請時發生無法預期的錯誤: ${error.message}`,
@@ -248,10 +274,10 @@ const memberApplicationHandler = {
         );
       }
 
-      // Emit data (only to the user)
+      // Emit error data (to the operator)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
+      new Logger('MemberApplication').error(
         `Error deleting member application: ${error.error_message}`,
       );
     }
