@@ -44,9 +44,12 @@ const friendApplicationHandler = {
       const operator = await Get.user(operatorId);
       const sender = await Get.user(senderId);
       const receiver = await Get.user(receiverId);
-      const receiverSocket = io.sockets.sockets.find(
-        (s) => s.userId === receiverId,
-      );
+      let receiverSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === receiverId) {
+          receiverSocket = _socket;
+        }
+      });
 
       // Validate operation
       if (operator.id !== sender.id) {
@@ -142,9 +145,12 @@ const friendApplicationHandler = {
       const sender = await Get.user(senderId);
       const receiver = await Get.user(receiverId);
       const application = await Get.friendApplication(senderId, receiverId);
-      const receiverSocket = io.sockets.sockets.find(
-        (s) => s.userId === receiverId,
-      );
+      let receiverSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === receiverId) {
+          receiverSocket = _socket;
+        }
+      });
 
       // Validate operation
       if (operator.id !== sender.id) {
