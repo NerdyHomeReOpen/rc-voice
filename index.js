@@ -218,9 +218,9 @@ const server = http.createServer((req, res) => {
         const accountPasswords = (await db.get(`accountPasswords`)) || {};
 
         // Validate data
-        const { account, password, username } = data;
+        const { account, confirmPassword, username } = data;
         Func.validate.account(account.trim());
-        Func.validate.password(password.trim());
+        Func.validate.password(confirmPassword.trim());
         Func.validate.nickname(username.trim());
 
         const exists = accountPasswords[account];
