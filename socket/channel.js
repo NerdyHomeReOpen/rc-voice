@@ -46,15 +46,12 @@ const channelHandler = {
       console.log(`user.id: ${user.id}`);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
-        console.log(`_socket.userId: ${_socket.userId}`);
-        if (_socket.userId === operator.id && _socket.id !== socket.id) {
+        if (_socket.userId === user.id) {
           userSocket = _socket;
+          userSocket.id = _socket.userId;
+          console.log(`userSocket.id: ${userSocket.id}`);
         }
       });
-
-      console.log(`userSocket: ${userSocket}`);
-      userSocket.id = userSocket.userId;
-      console.log(`userSocket.id: ${userSocket.id}`);
 
       // Validate operation
       if (operator.id === user.id) {
