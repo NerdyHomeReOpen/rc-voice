@@ -22,7 +22,7 @@ const friendApplicationHandler = {
       //   },
       // }
 
-      // Get data
+      // Validate data
       const { friendApplication: _newApplication, senderId, receiverId } = data;
       if (!_newApplication || !senderId || !receiverId) {
         throw new StandardizedError(
@@ -115,7 +115,7 @@ const friendApplicationHandler = {
       //   },
       // }
 
-      // Get data
+      // Validate data
       const {
         friendApplication: _editedApplication,
         senderId,
@@ -194,6 +194,7 @@ const friendApplicationHandler = {
       //   receiverId: string,
       // }
 
+      // Validate data
       const { senderId, receiverId } = data;
       if (!senderId || !receiverId) {
         throw new StandardizedError(

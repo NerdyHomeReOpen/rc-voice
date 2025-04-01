@@ -270,6 +270,16 @@ const get = {
       .filter((msg) => msg);
   },
 
+  // Friend Group
+  friendGroup: async (friendGroupId) => {
+    const friendGroups = (await db.get('friendGroups')) || {};
+    const friendGroup = friendGroups[friendGroupId];
+    if (!friendGroup) return null;
+    return {
+      ...friendGroup,
+    };
+  },
+
   // Member
   member: async (userId, serverId) => {
     const members = (await db.get('members')) || {};
