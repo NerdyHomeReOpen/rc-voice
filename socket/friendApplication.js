@@ -44,7 +44,7 @@ const friendApplicationHandler = {
       const operator = await Get.user(operatorId);
       const sender = await Get.user(senderId);
       const receiver = await Get.user(receiverId);
-      const receiverSocket = Object.values(io.sockets.sockets).find(
+      const receiverSocket = io.sockets.sockets.find(
         (s) => s.userId === receiverId,
       );
 
@@ -142,7 +142,7 @@ const friendApplicationHandler = {
       const sender = await Get.user(senderId);
       const receiver = await Get.user(receiverId);
       const application = await Get.friendApplication(senderId, receiverId);
-      const receiverSocket = Object.values(io.sockets.sockets).find(
+      const receiverSocket = io.sockets.sockets.find(
         (s) => s.userId === receiverId,
       );
 

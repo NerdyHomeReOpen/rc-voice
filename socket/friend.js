@@ -42,10 +42,8 @@ const friendHandler = {
       const operator = await Get.user(operatorId);
       const user = await Get.user(userId);
       const target = await Get.user(targetId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
-      const targetSocket = Object.values(io.sockets.sockets).find(
+      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
+      const targetSocket = io.sockets.sockets.find(
         (s) => s.userId === target.id,
       );
 
@@ -150,9 +148,7 @@ const friendHandler = {
       const user = await Get.user(userId);
       const target = await Get.user(targetId);
       const friend = await Get.friend(userId, targetId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
+      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
 
       // Validate operation
       if (operator.id !== user.id) {
@@ -172,6 +168,10 @@ const friendHandler = {
       io.to(userSocket.id).emit('friendUpdate', editedFriend);
       io.to(userSocket.id).emit('userUpdate', {
         friends: await Get.userFriends(userId),
+      });
+      io.to(targetSocket.id).emit('friendUpdate', editedFriend);
+      io.to(targetSocket.id).emit('userUpdate', {
+        friends: await Get.userFriends(targetId),
       });
 
       new Logger('Friend').success(
@@ -224,10 +224,8 @@ const friendHandler = {
       const target = await Get.user(targetId);
       const friend = await Get.friend(userId, targetId);
       const friend_ = await Get.friend(targetId, userId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
-      const targetSocket = Object.values(io.sockets.sockets).find(
+      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
+      const targetSocket = io.sockets.sockets.find(
         (s) => s.userId === target.id,
       );
 

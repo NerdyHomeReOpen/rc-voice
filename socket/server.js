@@ -86,9 +86,7 @@ const serverHandler = {
       const user = await Get.user(userId);
       const server = await Get.server(serverId);
       const operatorMember = await Get.member(operator.id, server.id);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
+      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
 
       // Validate operation
       if (operator.id !== user.id) {
@@ -157,7 +155,7 @@ const serverHandler = {
       await Set.user(user.id, user_update);
 
       // Join the server
-      socket.join(`server_${server.id}`);
+      userSocket.join(`server_${server.id}`);
 
       // Emit data (only to the user)
       io.to(userSocket.id).emit('userUpdate', user_update);
@@ -214,9 +212,7 @@ const serverHandler = {
       const user = await Get.user(userId);
       const server = await Get.server(serverId);
       const operatorMember = await Get.member(operator.id, server.id);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
+      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
 
       // Validate operation
       if (operator.id !== user.id) {
@@ -256,7 +252,7 @@ const serverHandler = {
       await Set.user(user.id, user_update);
 
       // Leave the server
-      socket.leave(`server_${server.id}`);
+      userSocket.leave(`server_${server.id}`);
 
       // Emit data (only to the user)
       io.to(userSocket.id).emit('userUpdate', user_update);

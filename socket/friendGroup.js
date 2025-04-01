@@ -40,9 +40,7 @@ const friendGroupHandler = {
       // Get data
       const operator = await Get.user(operatorId);
       const user = await Get.user(userId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
+      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
 
       // Validate operation
       if (operator.id !== user.id) {
@@ -122,9 +120,7 @@ const friendGroupHandler = {
       const operator = await Get.user(operatorId);
       const friendGroup = await Get.friendGroup(friendGroupId);
       const user = await Get.user(friendGroup.userId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === friendGroup.userId,
-      );
+      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
 
       // Validate operation
       if (operator.id !== user.id) {
@@ -193,9 +189,7 @@ const friendGroupHandler = {
       const operator = await Get.user(operatorId);
       const friendGroup = await Get.friendGroup(friendGroupId);
       const user = await Get.user(friendGroup.userId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === friendGroup.userId,
-      );
+      const userSocket = io.sockets.sockets.find((s) => s.userId === user.id);
 
       // Validate operation
       if (operator.id !== user.id) {
