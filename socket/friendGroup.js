@@ -127,7 +127,7 @@ const friendGroupHandler = {
       );
 
       // Validate operation
-      if (operator.id !== friendGroup.userId) {
+      if (operator.id !== user.id) {
         throw new StandardizedError(
           '你沒有權限修改非自己的好友群組',
           'ValidationError',
@@ -198,7 +198,7 @@ const friendGroupHandler = {
       );
 
       // Validate operation
-      if (operator.id !== friendGroup.userId) {
+      if (operator.id !== user.id) {
         throw new StandardizedError(
           '你沒有權限刪除非自己的好友群組',
           'ValidationError',
