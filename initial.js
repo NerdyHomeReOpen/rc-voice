@@ -94,8 +94,8 @@ const deleteExtraUploads = async () => {
 };
 
 const main = async () => {
-  await init();
   await deleteExtraUploads();
+  await init();
 };
 
 main();
