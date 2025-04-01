@@ -149,7 +149,7 @@ const friendHandler = {
       const operator = await Get.user(operatorId);
       const user = await Get.user(userId);
       const target = await Get.user(targetId);
-      const friend = await Get.friend(`fd_${userId}-${targetId}`);
+      const friend = await Get.friend(userId, targetId);
       const userSocket = Object.values(io.sockets.sockets).find(
         (s) => s.userId === user.id,
       );
@@ -222,8 +222,8 @@ const friendHandler = {
       const operator = await Get.user(operatorId);
       const user = await Get.user(userId);
       const target = await Get.user(targetId);
-      const friend = await Get.friend(`fd_${userId}-${targetId}`);
-      const friend_ = await Get.friend(`fd_${targetId}-${userId}`);
+      const friend = await Get.friend(userId, targetId);
+      const friend_ = await Get.friend(targetId, userId);
       const userSocket = Object.values(io.sockets.sockets).find(
         (s) => s.userId === user.id,
       );

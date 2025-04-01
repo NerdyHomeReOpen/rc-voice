@@ -6,16 +6,13 @@ const utils = require('../utils');
 const {
   standardizedError: StandardizedError,
   logger: Logger,
-  // get: Get,
+  get: Get,
   set: Set,
   func: Func,
 } = utils;
 
 const friendApplicationHandler = {
   createFriendApplication: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-
     try {
       // data = {
       //   senderId: string,
@@ -40,29 +37,55 @@ const friendApplicationHandler = {
         _newApplication,
       );
 
-      // Validate operation
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
+
+      // Get data
+      const operator = await Get.user(operatorId);
+      const sender = await Get.user(senderId);
+      const receiver = await Get.user(receiverId);
+      const receiverSocket = Object.values(io.sockets.sockets).find(
+        (s) => s.userId === receiverId,
+      );
+
+      // Validate operation
+      if (operator.id !== sender.id) {
+        throw new StandardizedError(
+          '您沒有權限創建非自己的好友申請',
+          'ValidationError',
+          'CREATEFRIENDAPPLICATION',
+          'PERMISSION_DENIED',
+          403,
+        );
+      }
+      if (sender.id === receiver.id) {
+        throw new StandardizedError(
+          '您不能發送好友申請給自己',
+          'ValidationError',
+          'CREATEFRIENDAPPLICATION',
+          'SELF_OPERATION',
+          403,
+        );
+      }
 
       // Create friend application
       const applicationId = `fa_${senderId}-${receiverId}`;
-      const application = await Set.friendApplication(applicationId, {
+      await Set.friendApplication(applicationId, {
         ...newApplication,
         senderId: senderId,
         receiverId: receiverId,
         createdAt: Date.now(),
       });
 
-      // Emit updated data to receiver
-      // io.to(receiver.id).emit('friendApplicationUpdate', {
-      //   friendApplication: application,
-      // });
+      // Emit updated data (to the receiver)
+      io.to(receiverSocket.id).emit('userUpdate', {
+        friendApplications: await Get.userFriendApplications(receiver.id),
+      });
 
-      new Logger('WebSocket').success(
-        `Friend application(${application.id}) of User(${senderId}) and User(${receiverId}) created by User(${operator.id})`,
+      new Logger('FriendApplication').success(
+        `Friend application(${applicationId}) of User(${sender.id}) and User(${receiver.id}) created by User(${operator.id})`,
       );
     } catch (error) {
-      // Emit error data (only to the user)
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
           `創建申請時發生無法預期的錯誤: ${error.message}`,
@@ -73,20 +96,16 @@ const friendApplicationHandler = {
         );
       }
 
-      // Emit error data (only to the user)
+      // Emit error data (to the operator)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
+      new Logger('FriendApplication').error(
         `Error creating friend application: ${error.error_message}`,
       );
     }
   },
 
   updateFriendApplication: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-    const friendApplications = (await db.get('friendApplications')) || {};
-
     try {
       // data = {
       //   senderId: string,
@@ -114,27 +133,31 @@ const friendApplicationHandler = {
       const editedApplication = await Func.validate.friendApplication(
         _editedApplication,
       );
-      const application = await Func.validate.friendApplication(
-        friendApplications[`fa_${senderId}-${receiverId}`],
-      );
 
       // Validate operation
       const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
+
+      // Get data
+      const operator = await Get.user(operatorId);
+      const sender = await Get.user(senderId);
+      const receiver = await Get.user(receiverId);
+      const application = await Get.friendApplication(senderId, receiverId);
+      const receiverSocket = Object.values(io.sockets.sockets).find(
+        (s) => s.userId === receiverId,
+      );
 
       // Update friend application
       await Set.friendApplication(application.id, editedApplication);
 
-      // Emit updated data to receiver
-      // io.to(receiver.id).emit('friendApplicationUpdate', {
-      //   friendApplication: updatedApplication,
-      // });
+      // Emit updated data (to the receiver)
+      io.to(receiverSocket.id).emit('userUpdate', {
+        friendApplications: await Get.userFriendApplications(receiver.id),
+      });
 
-      new Logger('WebSocket').success(
-        `Friend application(${application.id}) of User(${senderId}) and User(${receiverId}) updated by User(${operator.id})`,
+      new Logger('FriendApplication').success(
+        `Friend application(${application.id}) of User(${sender.id}) and User(${receiver.id}) updated by User(${operator.id})`,
       );
     } catch (error) {
-      // Emit error data (only to the user)
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
           `更新申請時發生無法預期的錯誤: ${error.message}`,
@@ -145,20 +168,21 @@ const friendApplicationHandler = {
         );
       }
 
-      // Emit error data (only to the user)
+      // Emit error data (to the operator)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
+      new Logger('FriendApplication').error(
         `Error updating friend application: ${error.error_message}`,
       );
     }
   },
   deleteFriendApplication: async (io, socket, data) => {
-    // Get database
-    const users = (await db.get('users')) || {};
-    const friendApplications = (await db.get('friendApplications')) || {};
-
     try {
+      // data = {
+      //   senderId: string,
+      //   receiverId: string,
+      // }
+
       const { senderId, receiverId } = data;
       if (!senderId || !receiverId) {
         throw new StandardizedError(
@@ -170,16 +194,19 @@ const friendApplicationHandler = {
         );
       }
 
+      // Validate socket
       const operatorId = await Func.validate.socket(socket);
-      const operator = await Func.validate.user(users[operatorId]);
-      const application = await Func.validate.friendApplication(
-        friendApplications[`fa_${senderId}-${receiverId}`],
-      );
+
+      // Get data
+      const operator = await Get.user(operatorId);
+      const sender = await Get.user(senderId);
+      const receiver = await Get.user(receiverId);
+      const application = await Get.friendApplication(senderId, receiverId);
 
       await db.delete(`friendApplications.${application.id}`);
 
-      new Logger('WebSocket').success(
-        `Friend application(${application.id}) deleted by User(${operator.id})`,
+      new Logger('FriendApplication').success(
+        `Friend application(${application.id}) of User(${sender.id}) and User(${receiver.id}) deleted by User(${operator.id})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -192,9 +219,10 @@ const friendApplicationHandler = {
         );
       }
 
+      // Emit error data (to the operator)
       io.to(socket.id).emit('error', error);
 
-      new Logger('WebSocket').error(
+      new Logger('FriendApplication').error(
         `Error deleting friend application: ${error.error_message}`,
       );
     }
