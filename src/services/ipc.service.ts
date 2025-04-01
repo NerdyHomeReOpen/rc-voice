@@ -227,27 +227,27 @@ const ipcService = {
     },
     get: (
       type: 'input' | 'output',
-      callback: (devices: string | null) => void,
+      callback: (deviceId: string | null) => void,
     ) => {
       if (isElectron) {
         ipcRenderer.send('get-audio-device', type);
         ipcRenderer.once(
           'audio-device-status',
-          (_: any, _type: string, devices: string | null) => {
-            if (_type === type) callback(devices);
+          (_: any, _type: string, _deviceId: string | null) => {
+            if (_type === type) callback(_deviceId);
           },
         );
       }
     },
     update: (
       type: 'input' | 'output',
-      callback: (devices: string | null) => void,
+      callback: (deviceId: string | null) => void,
     ) => {
       if (isElectron) {
         ipcRenderer.on(
           'audio-device-status',
-          (_: any, _type: string, devices: string | null) => {
-            if (_type === type) callback(devices);
+          (_: any, _type: string, _deviceId: string | null) => {
+            if (_type === type) callback(_deviceId);
           },
         );
       }
