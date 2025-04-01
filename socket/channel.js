@@ -48,7 +48,6 @@ const channelHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
           userSocket = _socket;
-          userSocket.id = _socket.userId;
           console.log(`userSocket.id: ${userSocket.id}`);
         }
       });
@@ -228,7 +227,6 @@ const channelHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
           userSocket = _socket;
-          userSocket.id = _socket.userId;
           console.log(`userSocket.id: ${userSocket.id}`);
         }
       });

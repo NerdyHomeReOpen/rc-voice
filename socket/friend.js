@@ -46,7 +46,6 @@ const friendHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
           userSocket = _socket;
-          userSocket.id = _socket.userId;
           console.log(`userSocket.id: ${userSocket.id}`);
         }
       });
@@ -54,7 +53,6 @@ const friendHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === target.id) {
           targetSocket = _socket;
-          targetSocket.id = _socket.userId;
           console.log(`targetSocket.id: ${targetSocket.id}`);
         }
       });
@@ -164,7 +162,6 @@ const friendHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
           userSocket = _socket;
-          userSocket.id = _socket.userId;
           console.log(`userSocket.id: ${userSocket.id}`);
         }
       });
@@ -172,7 +169,6 @@ const friendHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === target.id) {
           targetSocket = _socket;
-          targetSocket.id = _socket.userId;
           console.log(`targetSocket.id: ${targetSocket.id}`);
         }
       });
@@ -255,7 +251,6 @@ const friendHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
           userSocket = _socket;
-          userSocket.id = _socket.userId;
           console.log(`userSocket.id: ${userSocket.id}`);
         }
       });
@@ -263,7 +258,6 @@ const friendHandler = {
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === target.id) {
           targetSocket = _socket;
-          targetSocket.id = _socket.userId;
           console.log(`targetSocket.id: ${targetSocket.id}`);
         }
       });
