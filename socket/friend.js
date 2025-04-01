@@ -42,12 +42,22 @@ const friendHandler = {
       const operator = await Get.user(operatorId);
       const user = await Get.user(userId);
       const target = await Get.user(targetId);
-      const userSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === user.id,
-      );
-      const targetSocket = Object.values(io.sockets.sockets).find(
-        (s) => s.userId === target.id,
-      );
+      let userSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === user.id) {
+          userSocket = _socket;
+          userSocket.id = _socket.userId;
+          console.log(`userSocket.id: ${userSocket.id}`);
+        }
+      });
+      let targetSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === target.id) {
+          targetSocket = _socket;
+          targetSocket.id = _socket.userId;
+          console.log(`targetSocket.id: ${targetSocket.id}`);
+        }
+      });
 
       // Validate operation
       if (operator.id !== user.id) {
