@@ -93,7 +93,7 @@ const channelHandler = {
           );
         if (operatorMember.permissionLevel < 5)
           throw new StandardizedError(
-            '你沒有權限移動其他用戶',
+            '你沒有權限移動其他用戶到該頻道',
             'ValidationError',
             'CONNECTCHANNEL',
             'PERMISSION_DENIED',
@@ -106,7 +106,7 @@ const channelHandler = {
           operatorMember.permissionLevel < 2
         )
           throw new StandardizedError(
-            '你無法移動其他用戶到該頻道',
+            '你沒有權限移動其他用戶到該頻道',
             'ValidationError',
             'CONNECTCHANNEL',
             'PERMISSION_DENIED',
@@ -118,7 +118,7 @@ const channelHandler = {
           operatorMember.permissionLevel < 3
         )
           throw new StandardizedError(
-            '你無法移動其他用戶到該頻道',
+            '你沒有權限移動其他用戶到該頻道',
             'ValidationError',
             'CONNECTCHANNEL',
             'PERMISSION_DENIED',
@@ -227,7 +227,7 @@ const channelHandler = {
       } else {
         if (operatorMember.permissionLevel < 5)
           throw new StandardizedError(
-            '你沒有權限斷線其他用戶',
+            '你沒有權限踢除其他用戶',
             'ValidationError',
             'DISCONNECTCHANNEL',
             'PERMISSION_DENIED',
@@ -318,7 +318,7 @@ const channelHandler = {
       // Validate permission
       if (operatorMember.permissionLevel < 5) {
         throw new StandardizedError(
-          '你沒有足夠的權限',
+          '你沒有足夠的權限創建頻道',
           'ValidationError',
           'CREATECHANNEL',
           'PERMISSION_DENIED',
@@ -408,7 +408,7 @@ const channelHandler = {
       // Validate operation
       if (operatorMember.permissionLevel < 5) {
         throw new StandardizedError(
-          '你沒有足夠的權限',
+          '你沒有足夠的權限編輯頻道',
           'ValidationError',
           'UPDATECHANNEL',
           'PERMISSION_DENIED',
@@ -604,7 +604,7 @@ const channelHandler = {
       // Validate operation
       if (operatorMember.permissionLevel < 5) {
         throw new StandardizedError(
-          '你沒有足夠的權限',
+          '你沒有足夠的權限刪除頻道',
           'ValidationError',
           'DELETECHANNEL',
           'PERMISSION_DENIED',
