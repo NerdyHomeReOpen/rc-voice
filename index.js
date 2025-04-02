@@ -18,6 +18,7 @@ const {
   func: Func,
   jwt: JWT,
   clean: Clean,
+  xp: XP,
 } = utils;
 
 // Constants
@@ -744,9 +745,7 @@ const server = http.createServer((req, res) => {
           message: 'success',
           data: {
             avatar: fileName,
-            avatarUrl: `${
-              SERVER_URL
-            }:${PORT}/images/${Path()}/${fullFileName}`,
+            avatarUrl: `${SERVER_URL}:${PORT}/images/${Path()}/${fullFileName}`,
           },
         });
       } catch (error) {
@@ -826,4 +825,5 @@ process.on('unhandledRejection', (error) => {
 server.listen(PORT, () => {
   new Logger('Server').success(`Server is running on port ${PORT}`);
   Clean.setup();
+  XP.setup();
 });

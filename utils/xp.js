@@ -43,7 +43,13 @@ const xpSystem = {
         xpSystem.elapsedTime.set(socket.userId, newElapsedTime);
       }
       xpSystem.timeFlag.set(socket, Date.now());
+      new Logger('XPSystem').info(
+        `XP interval refreshed for user(${socket.userId})(socket-id: ${socket.id})`,
+      );
     }
+    new Logger('XPSystem').info(
+      `XP interval refreshed complete, ${xpSystem.timeFlag.size} users updated`,
+    );
   },
 
   getRequiredXP: (level) => {
