@@ -20,11 +20,13 @@ const clean = {
       // Ensure uploads directory exists
       await fs.mkdir(UPLOADS_DIR, { recursive: true });
 
-      // Run cleanup
+      // Set up cleanup interval
       setInterval(clean.cleanServerAvatars, CLEANUP_INTERVAL_MS);
 
       // Run initial cleanup
       await clean.cleanServerAvatars();
+
+      new Logger('Cleanup').info(`Cleanup setup complete`);
     } catch (error) {
       new Logger('Cleanup').error(
         `Error setting up cleanup interval: ${error.message}`,
