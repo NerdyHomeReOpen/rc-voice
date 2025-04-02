@@ -5,10 +5,10 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const fs = require('fs').promises;
 
 const XP_SYSTEM = {
-  BASE_XP: 25, // Base XP required for level 2
+  BASE_REQUIRE_XP: 25, // Base XP required for level up
+  BASE_XP: 1, // Base XP gained per update
   GROWTH_RATE: 1.06, // XP requirement increases by 6% per level
-  XP_PER_HOUR: 0.01, // XP gained per hour in voice channel
-  INTERVAL_MS: 60 * 60 * 1000, // 1 hour in milliseconds
+  INTERVAL_MS: 1 * 60 * 1000, // 1 minutes in milliseconds
 };
 
 const CLEANUP_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes in milliseconds

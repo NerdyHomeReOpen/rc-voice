@@ -54,7 +54,7 @@ const xpSystem = {
 
   getRequiredXP: (level) => {
     return Math.ceil(
-      XP_SYSTEM.BASE_XP * Math.pow(XP_SYSTEM.GROWTH_RATE, level),
+      XP_SYSTEM.BASE_REQUIRE_XP * Math.pow(XP_SYSTEM.GROWTH_RATE, level),
     );
   },
 
@@ -84,7 +84,7 @@ const xpSystem = {
       const vipBoost = user.vip ? 1 + user.vip * 0.2 : 1;
 
       // Process XP and level
-      user.xp += XP_SYSTEM.XP_PER_HOUR * vipBoost;
+      user.xp += XP_SYSTEM.BASE_XP * vipBoost;
 
       let requiredXp = 0;
       while (true) {
@@ -105,13 +105,13 @@ const xpSystem = {
 
       // Update member contribution if in a server
       const memberUpdate = {
-        contribution: member.contribution + XP_SYSTEM.XP_PER_HOUR * vipBoost,
+        contribution: member.contribution + XP_SYSTEM.BASE_XP * vipBoost,
       };
       await Set.member(member.id, memberUpdate);
 
       // Update server wealth
       const serverUpdate = {
-        wealth: server.wealth + XP_SYSTEM.XP_PER_HOUR * vipBoost,
+        wealth: server.wealth + XP_SYSTEM.BASE_XP * vipBoost,
       };
       await Set.server(server.id, serverUpdate);
 
@@ -120,15 +120,15 @@ const xpSystem = {
       socket.emit('userUpdate', userUpdate);
 
       new Logger('XPSystem').info(
-        `Server(${server.id}) gain ${XP_SYSTEM.XP_PER_HOUR * vipBoost} wealth`,
+        `Server(${server.id}) gain ${XP_SYSTEM.BASE_XP * vipBoost} wealth`,
       );
       new Logger('XPSystem').info(
         `Member(${member.id}) gain ${
-          XP_SYSTEM.XP_PER_HOUR * vipBoost
+          XP_SYSTEM.BASE_XP * vipBoost
         } contribution`,
       );
       new Logger('XPSystem').info(
-        `User(${user.id}) gain ${XP_SYSTEM.XP_PER_HOUR * vipBoost} XP. Level: ${
+        `User(${user.id}) gain ${XP_SYSTEM.BASE_XP * vipBoost} XP. Level: ${
           user.level
         }`,
       );
