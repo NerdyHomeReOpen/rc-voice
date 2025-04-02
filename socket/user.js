@@ -52,7 +52,7 @@ const userHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('WebSocket').error(
-        `Error searching user: ${error.error_message}`,
+        `Error searching user: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -97,7 +97,7 @@ const userHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('WebSocket').error(
-        `Error connecting user: ${error.error_message}`,
+        `Error connecting user: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -153,7 +153,7 @@ const userHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('WebSocket').error(
-        `Error disconnecting user: ${error.error_message}`,
+        `Error disconnecting user: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -221,7 +221,7 @@ const userHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('WebSocket').error(
-        `Error updating user: ${error.error_message}`,
+        `Error updating user: ${error.error_message} (${socket.id})`,
       );
     }
   },

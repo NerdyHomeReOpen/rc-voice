@@ -108,7 +108,7 @@ const messageHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Message').error(
-        'Error sending message: ' + error.error_message,
+        `Error sending message: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -203,7 +203,7 @@ const messageHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Message').error(
-        'Error sending direct message: ' + error.error_message,
+        `Error sending direct message: ${error.error_message} (${socket.id})`,
       );
     }
   },

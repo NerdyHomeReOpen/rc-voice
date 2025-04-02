@@ -120,7 +120,7 @@ const friendHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Friend').error(
-        `Error creating friend: ${error.error_message}`,
+        `Error creating friend: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -211,7 +211,7 @@ const friendHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Friend').error(
-        `Error updating friend: ${error.error_message}`,
+        `Error updating friend: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -296,7 +296,7 @@ const friendHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Friend').error(
-        `Error deleting friend: ${error.error_message}`,
+        `Error deleting friend: ${error.error_message} (${socket.id})`,
       );
     }
   },

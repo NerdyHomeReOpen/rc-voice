@@ -89,7 +89,7 @@ const friendGroupHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('FriendGroup').error(
-        `Error creating friend group: ${error.error_message}`,
+        `Error creating friend group: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -169,7 +169,7 @@ const friendGroupHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('FriendGroup').error(
-        `Error updating friend group: ${error.error_message}`,
+        `Error updating friend group: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -243,7 +243,7 @@ const friendGroupHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('FriendGroup').error(
-        `Error deleting friend group: ${error.error_message}`,
+        `Error deleting friend group: ${error.error_message} (${socket.id})`,
       );
     }
   },

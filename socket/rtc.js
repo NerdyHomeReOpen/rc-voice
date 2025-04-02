@@ -55,7 +55,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC offer to user(socket-id: ${to}): ${error.error_message}`,
+        `Error sending RTC offer to user(socket-id: ${to}): ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -107,7 +107,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC answer to user(socket-id: ${to}): ${error.error_message}`,
+        `Error sending RTC answer to user(socket-id: ${to}): ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -159,7 +159,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC ICE candidate user(socket-id: ${to}): ${error.error_message}`,
+        `Error sending RTC ICE candidate user(socket-id: ${to}): ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -208,7 +208,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error joining RTC channel(${channelId}): ${error.error_message}`,
+        `Error joining RTC channel(${channelId}): ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -257,7 +257,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error leaving RTC channel(${channelId}): ${error.error_message}`,
+        `Error leaving RTC channel(${channelId}): ${error.error_message} (${socket.id})`,
       );
     }
   },

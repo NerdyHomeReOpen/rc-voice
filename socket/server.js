@@ -54,7 +54,7 @@ const serverHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Server').error(
-        `Error searching servers: ${error.error_message}`,
+        `Error searching servers: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -185,7 +185,7 @@ const serverHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Server').error(
-        `Error connecting server: ${error.error_message}`,
+        `Error connecting server: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -287,7 +287,7 @@ const serverHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Server').error(
-        `Error disconnecting from server: ${error.error_message}`,
+        `Error disconnecting from server: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -400,7 +400,7 @@ const serverHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Server').error(
-        `Error creating server: ${error.error_message}`,
+        `Error creating server: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -470,7 +470,7 @@ const serverHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Server').error(
-        `Error updating server: ${error.error_message}`,
+        `Error updating server: ${error.error_message} (${socket.id})`,
       );
     }
   },

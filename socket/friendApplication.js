@@ -105,7 +105,7 @@ const friendApplicationHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('FriendApplication').error(
-        `Error creating friend application: ${error.error_message}`,
+        `Error creating friend application: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -199,7 +199,7 @@ const friendApplicationHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('FriendApplication').error(
-        `Error updating friend application: ${error.error_message}`,
+        `Error updating friend application: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -270,7 +270,7 @@ const friendApplicationHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('FriendApplication').error(
-        `Error deleting friend application: ${error.error_message}`,
+        `Error deleting friend application: ${error.error_message} (${socket.id})`,
       );
     }
   },
