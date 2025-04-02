@@ -123,7 +123,7 @@ const memberHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Member').error(
-        `Error creating member: ${error.error_message}`,
+        `Error creating member: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -270,7 +270,7 @@ const memberHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Member').error(
-        `Error updating member: ${error.error_message}`,
+        `Error updating member: ${error.error_message} (${socket.id})`,
       );
     }
   },

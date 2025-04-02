@@ -189,7 +189,7 @@ const channelHandler = {
       io.to(socket.id).emit('channelUpdate', null);
 
       new Logger('Channel').error(
-        `Error connecting to channel: ${error.error_message}`,
+        `Error connecting to channel: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -296,7 +296,7 @@ const channelHandler = {
       io.to(socket.id).emit('channelUpdate', null);
 
       new Logger('Channel').error(
-        `Error disconnecting from channel: ${error.error_message}`,
+        `Error disconnecting from channel: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -384,7 +384,7 @@ const channelHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Channel').error(
-        `Error creating channel: ${error.error_message}`,
+        `Error creating channel: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -584,7 +584,7 @@ const channelHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Channel').error(
-        `Error updating channel: ${error.error_message}`,
+        `Error updating channel: ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -672,7 +672,7 @@ const channelHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('Channel').error(
-        `Error deleting channel: ${error.error_message}`,
+        `Error deleting channel: ${error.error_message} (${socket.id})`,
       );
     }
   },
