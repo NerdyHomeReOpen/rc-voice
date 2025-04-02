@@ -164,6 +164,14 @@ const friendApplicationHandler = {
           403,
         );
       }
+      if (application.applicationStatus !== 'pending') {
+        throw new StandardizedError(
+          '無法修改已經被處理過的申請',
+          'ValidationError',
+          'UPDATEFRIENDAPPLICATION',
+          'APPLICATION_ALREADY_PROCESSED',
+        );
+      }
 
       // Update friend application
       await Set.friendApplication(application.id, editedApplication);
@@ -231,6 +239,14 @@ const friendApplicationHandler = {
           'DELETEFRIENDAPPLICATION',
           'PERMISSION_DENIED',
           403,
+        );
+      }
+      if (application.applicationStatus !== 'pending') {
+        throw new StandardizedError(
+          '無法刪除已經被處理過的申請',
+          'ValidationError',
+          'DELETEFRIENDAPPLICATION',
+          'APPLICATION_ALREADY_PROCESSED',
         );
       }
 
