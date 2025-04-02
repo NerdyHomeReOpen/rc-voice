@@ -16,6 +16,8 @@ const messageHandler = {
   sendMessage: async (io, socket, data) => {
     try {
       // data = {
+      //   userId: string,
+      //   serverId: string,
       //   channelId: string,
       //   message: {
       //     ...
@@ -23,8 +25,8 @@ const messageHandler = {
       // };
 
       // Validate data
-      const { message: _newMessage, channelId } = data;
-      if (!_newMessage || !channelId) {
+      const { message: _newMessage, userId, serverId, channelId } = data;
+      if (!_newMessage || !userId || !serverId || !channelId) {
         throw new StandardizedError(
           '無效的資料',
           'SENDMESSAGE',
@@ -40,10 +42,20 @@ const messageHandler = {
 
       // Get data
       const operator = await Get.user(operatorId);
+      const user = await Get.user(userId);
+      const server = await Get.server(serverId);
       const channel = await Get.channel(channelId);
-      const server = await Get.server(channel.serverId);
       const operatorMember = await Get.member(operator.id, server.id);
 
+      // Validate operation
+      if (operator.id !== user.id) {
+        throw new StandardizedError(
+          '無法傳送非自己的訊息',
+          'SENDMESSAGE',
+          'PERMISSION_DENIED',
+          403,
+        );
+      }
       if (channel.forbidGuestUrl && operatorMember.permissionLevel === 1) {
         newMessage.content = newMessage.content.replace(
           /https?:\/\/[^\s]+/g,
@@ -55,7 +67,8 @@ const messageHandler = {
       const messageId = uuidv4();
       await Set.message(messageId, {
         ...newMessage,
-        senderId: operator.id,
+        senderId: user.id,
+        receiverId: server.id,
         channelId: channel.id,
         timestamp: Date.now().valueOf(),
       });
@@ -103,15 +116,16 @@ const messageHandler = {
   sendDirectMessage: async (io, socket, data) => {
     try {
       // data = {
-      //   friendId: string,
+      //   userId: string,
+      //   targetId: string,
       //   message: {
       //     ...
       //   }
       // };
 
       // Validate data
-      const { directMessage: _newDirectMessage, friendId } = data;
-      if (!_newDirectMessage || !friendId) {
+      const { directMessage: _newDirectMessage, userId, targetId } = data;
+      if (!_newDirectMessage || !userId || !targetId) {
         throw new StandardizedError(
           '無效的資料',
           'SENDDIRECTMESSAGE',
@@ -127,24 +141,52 @@ const messageHandler = {
 
       // Get data
       const operator = await Get.user(operatorId);
-      const friend = await Get.friend(friendId);
+      const user = await Get.user(userId);
+      const target = await Get.user(targetId);
+      let userSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === user.id) {
+          userSocket = _socket;
+        }
+      });
+      let targetSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === target.id) {
+          targetSocket = _socket;
+        }
+      });
+
+      // Validate operation
+      if (operator.id !== user.id) {
+        throw new StandardizedError(
+          '無法傳送非自己的私訊',
+          'SENDDIRECTMESSAGE',
+          'PERMISSION_DENIED',
+          403,
+        );
+      }
 
       // Create new message
       const directMessageId = uuidv4();
       await Set.directMessage(directMessageId, {
         ...newDirectMessage,
-        senderId: operator.id,
-        friendId: friend.id,
+        userId: user.id,
+        targetId: target.id,
         timestamp: Date.now().valueOf(),
       });
 
       // Emit updated data (to all users in the friend)
-      io.to(`friend_${friend.id}`).emit('friendUpdate', {
-        directMessages: await Get.friendDirectMessages(friend.id),
-      });
+      io.to(userSocket.id).emit(
+        'directMessage',
+        await Get.directMessages(user.id, target.id),
+      );
+      io.to(targetSocket.id).emit(
+        'directMessage',
+        await Get.directMessages(user.id, target.id),
+      );
 
       new Logger('Message').success(
-        `User(${operator.id}) sent ${newDirectMessage.content} to User(${friend.id})`,
+        `User(${user.id}) sent ${newDirectMessage.content} to User(${target.id})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {

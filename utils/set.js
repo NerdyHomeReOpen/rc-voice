@@ -5,10 +5,7 @@ const db = new QuickDB();
 const xpSystem = require('./xp');
 
 // Constants
-const {
-  PORT,
-  SERVER_URL,
-} = require('../constant');
+const { PORT, SERVER_URL } = require('../constant');
 
 const set = {
   user: async (id, data) => {
@@ -230,9 +227,8 @@ const set = {
     const directMessages = await db.get('directMessages');
     directMessages[id] = {
       content: '',
-      type: 'general',
-      senderId: '',
-      friendId: '',
+      userId: '',
+      targetId: '',
       timestamp: 0,
       ...directMessages[id],
       ...data,
