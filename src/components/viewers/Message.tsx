@@ -182,6 +182,14 @@ const MessageViewer: React.FC<MessageViewerProps> = React.memo(
         const timeDiff = lastGroup && message.timestamp - lastGroup.timestamp;
         const nearTime = lastGroup && timeDiff <= 5 * 60 * 1000;
         const sameType = lastGroup && message.type === lastGroup.type;
+        const sameSender =
+          (lastGroup &&
+            message.type === 'general' &&
+            lastGroup.type === 'general' &&
+            message.senderId === lastGroup.senderId) ||
+          (message.type === 'dm' &&
+            lastGroup.type === 'dm' &&
+            message.userId === lastGroup.userId);
         const isInfo = message.type === 'info';
         const isGeneral = message.type === 'general';
         const isDm = message.type === 'dm';
