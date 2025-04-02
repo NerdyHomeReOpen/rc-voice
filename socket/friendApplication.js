@@ -155,7 +155,7 @@ const friendApplicationHandler = {
       });
 
       // Validate operation
-      if (operator.id !== sender.id) {
+      if (operator.id !== sender.id && operator.id !== receiver.id) {
         throw new StandardizedError(
           '無法修改非自己的好友申請',
           'ValidationError',
@@ -224,9 +224,9 @@ const friendApplicationHandler = {
       const application = await Get.friendApplication(senderId, receiverId);
 
       // Validate operation
-      if (operator.id !== sender.id) {
+      if (operator.id !== sender.id && operator.id !== receiver.id) {
         throw new StandardizedError(
-          '你刪除非自己的好友申請',
+          '無法刪除非自己的好友申請',
           'ValidationError',
           'DELETEFRIENDAPPLICATION',
           'PERMISSION_DENIED',

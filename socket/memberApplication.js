@@ -125,12 +125,12 @@ const memberApplicationHandler = {
       const operator = await Get.user(operatorId);
       const user = await Get.user(userId);
       const server = await Get.server(serverId);
-      const memberApplication = await Get.memberApplication(userId, serverId);
+      const application = await Get.memberApplication(userId, serverId);
       const operatorMember = await Get.member(operator.id, server.id);
 
       // Validate operator
       if (operator.id === user.id) {
-        if (memberApplication.status !== 'pending') {
+        if (application.applicationStatus !== 'pending') {
           throw new StandardizedError(
             '無法更新已經被處理過的申請',
             'ValidationError',
@@ -149,7 +149,7 @@ const memberApplicationHandler = {
             403,
           );
         }
-        if (memberApplication.applicationStatus !== 'pending') {
+        if (application.applicationStatus !== 'pending') {
           throw new StandardizedError(
             '無法更新已經被處理過的申請',
             'ValidationError',
@@ -161,7 +161,7 @@ const memberApplicationHandler = {
       }
 
       // Update member application
-      await Set.memberApplications(memberApplication.id, editedApplication);
+      await Set.memberApplications(application.id, editedApplication);
 
       // Emit updated data to all users in the server
       io.to(`server_${server.id}`).emit('serverUpdate', {
@@ -169,7 +169,7 @@ const memberApplicationHandler = {
       });
 
       new Logger('MemberApplication').success(
-        `Member application(${memberApplication.id}) of User(${user.id}) and server(${server.id}) updated by User(${operator.id})`,
+        `Member application(${application.id}) of User(${user.id}) and server(${server.id}) updated by User(${operator.id})`,
       );
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
@@ -222,7 +222,7 @@ const memberApplicationHandler = {
 
       // Validate operation
       if (operator.id === user.id) {
-        if (application.status !== 'pending') {
+        if (application.applicationStatus !== 'pending') {
           throw new StandardizedError(
             '無法刪除已經被處理過的申請',
             'ValidationError',
