@@ -36,15 +36,13 @@ const xpSystem = {
   refreshAllUsers: async () => {
     for (const [socket, timeFlag] of xpSystem.timeFlag.entries()) {
       try {
-        if (!xpSystem.elapsedTime.has(socket.userId)) {
-          const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
-          const newElapsedTime = elapsedTime + Date.now() - timeFlag;
-          while (newElapsedTime >= XP_SYSTEM.INTERVAL_MS) {
-            xpSystem.obtainXp(socket);
-            newElapsedTime -= XP_SYSTEM.INTERVAL_MS;
-          }
-          xpSystem.elapsedTime.set(socket.userId, newElapsedTime);
+        const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
+        const newElapsedTime = elapsedTime + Date.now() - timeFlag;
+        while (newElapsedTime >= XP_SYSTEM.INTERVAL_MS) {
+          xpSystem.obtainXp(socket);
+          newElapsedTime -= XP_SYSTEM.INTERVAL_MS;
         }
+        xpSystem.elapsedTime.set(socket.userId, newElapsedTime);
         xpSystem.timeFlag.set(socket, Date.now()); // Reset timeFlag
         new Logger('XPSystem').info(
           `XP interval refreshed for user(${socket.userId})(socket-id: ${socket.id})`,
@@ -64,15 +62,13 @@ const xpSystem = {
     try {
       const timeFlag = xpSystem.timeFlag.get(socket);
       if (!timeFlag) {
-        if (!xpSystem.elapsedTime.has(socket.userId)) {
-          const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
-          const newElapsedTime = elapsedTime + Date.now() - timeFlag;
-          while (newElapsedTime >= XP_SYSTEM.INTERVAL_MS) {
-            xpSystem.obtainXp(socket);
-            newElapsedTime -= XP_SYSTEM.INTERVAL_MS;
-          }
-          xpSystem.elapsedTime.set(socket.userId, newElapsedTime);
+        const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
+        const newElapsedTime = elapsedTime + Date.now() - timeFlag;
+        while (newElapsedTime >= XP_SYSTEM.INTERVAL_MS) {
+          xpSystem.obtainXp(socket);
+          newElapsedTime -= XP_SYSTEM.INTERVAL_MS;
         }
+        xpSystem.elapsedTime.set(socket.userId, newElapsedTime);
       }
       new Logger('XPSystem').info(
         `XP interval refreshed for user(${socket.userId})(socket-id: ${socket.id})`,
