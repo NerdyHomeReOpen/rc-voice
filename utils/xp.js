@@ -37,7 +37,7 @@ const xpSystem = {
     for (const [socket, timeFlag] of xpSystem.timeFlag.entries()) {
       try {
         const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
-        const newElapsedTime = elapsedTime + Date.now() - timeFlag;
+        let newElapsedTime = elapsedTime + Date.now() - timeFlag;
         while (newElapsedTime >= XP_SYSTEM.INTERVAL_MS) {
           xpSystem.obtainXp(socket);
           newElapsedTime -= XP_SYSTEM.INTERVAL_MS;
