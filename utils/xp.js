@@ -4,7 +4,7 @@ const { XP_SYSTEM } = require('../constant');
 // Utils
 const Logger = require('./logger');
 const Get = require('./get');
-const SetMoudle = require('./set');
+const Set = require('./set');
 
 const xpSystem = {
   timeFlag: new Map(), // socket -> timeFlag
@@ -63,7 +63,7 @@ const xpSystem = {
       const timeFlag = xpSystem.timeFlag.get(socket);
       if (!timeFlag) {
         const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
-        const newElapsedTime = elapsedTime + Date.now() - timeFlag;
+        let newElapsedTime = elapsedTime + Date.now() - timeFlag;
         while (newElapsedTime >= XP_SYSTEM.INTERVAL_MS) {
           xpSystem.obtainXp(socket);
           newElapsedTime -= XP_SYSTEM.INTERVAL_MS;
@@ -129,19 +129,19 @@ const xpSystem = {
         requiredXp: requiredXp,
         progress: user.xp / requiredXp,
       };
-      await SetMoudle.user(user.id, userUpdate);
+      await Set.user(user.id, userUpdate);
 
       // Update member contribution if in a server
       const memberUpdate = {
         contribution: member.contribution + XP_SYSTEM.BASE_XP * vipBoost,
       };
-      await SetMoudle.member(member.id, memberUpdate);
+      await Set.member(member.id, memberUpdate);
 
       // Update server wealth
       const serverUpdate = {
         wealth: server.wealth + XP_SYSTEM.BASE_XP * vipBoost,
       };
-      await SetMoudle.server(server.id, serverUpdate);
+      await Set.server(server.id, serverUpdate);
 
       // Emit update to client
       socket.emit('memberUpdate', memberUpdate);

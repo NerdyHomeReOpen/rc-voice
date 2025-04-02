@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
-// Utils
-const xpSystem = require('./xp');
 
 // Constants
-const { PORT, SERVER_URL } = require('../constant');
+const { PORT, SERVER_URL, XP_SYSTEM } = require('../constant');
 
 const set = {
   user: async (id, data) => {
@@ -24,7 +22,7 @@ const set = {
       level: 0,
       vip: 0,
       xp: 0,
-      requiredXp: xpSystem.getRequiredXP(0),
+      requiredXp: XP_SYSTEM.BASE_REQUIRE_XP,
       progress: 0,
       currentChannelId: '',
       currentServerId: '',
