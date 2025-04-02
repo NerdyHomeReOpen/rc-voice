@@ -149,7 +149,7 @@ const memberApplicationHandler = {
             403,
           );
         }
-        if (memberApplication.status !== 'pending') {
+        if (memberApplication.applicationStatus !== 'pending') {
           throw new StandardizedError(
             '無法更新已經被處理過的申請',
             'ValidationError',
@@ -241,7 +241,7 @@ const memberApplicationHandler = {
             403,
           );
         }
-        if (application.status !== 'pending') {
+        if (application.applicationStatus !== 'pending') {
           throw new StandardizedError(
             '無法刪除已經被處理過的申請',
             'ValidationError',
