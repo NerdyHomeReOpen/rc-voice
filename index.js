@@ -35,7 +35,7 @@ const {
   BACKUP_DIR,
 } = require('./constant');
 
-const DB_PATH = path.join(__dirname, 'path/to/json.sqlite');
+const DB_PATH = path.join(__dirname, './json.sqlite');
 
 const backupDatabase = async () => {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
