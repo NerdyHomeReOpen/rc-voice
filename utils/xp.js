@@ -4,17 +4,19 @@ const { XP_SYSTEM } = require('../constant');
 // Utils
 const Logger = require('./logger');
 const Get = require('./get');
-const Set = require('./set');
+const SetMoudle = require('./set');
 
 const xpSystem = {
   timeFlag: new Map(), // socket -> timeFlag
   elapsedTime: new Map(), // userId -> elapsedTime
 
-  create: (socket) => {
+  create: async (socket) => {
+    await xpSystem.refreshUser(socket);
     xpSystem.timeFlag.set(socket, Date.now());
   },
 
-  delete: (socket) => {
+  delete: async (socket) => {
+    await xpSystem.refreshUser(socket);
     xpSystem.timeFlag.delete(socket);
   },
 
@@ -33,23 +35,53 @@ const xpSystem = {
 
   refreshAllUsers: async () => {
     for (const [socket, timeFlag] of xpSystem.timeFlag.entries()) {
-      if (Date.now() - timeFlag >= XP_SYSTEM.INTERVAL_MS) {
-        xpSystem.obtainXp(socket);
+      try {
+        if (!xpSystem.elapsedTime.has(socket.userId)) {
+          const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
+          const newElapsedTime = elapsedTime + Date.now() - timeFlag;
+          while (newElapsedTime >= XP_SYSTEM.INTERVAL_MS) {
+            xpSystem.obtainXp(socket);
+            newElapsedTime -= XP_SYSTEM.INTERVAL_MS;
+          }
+          xpSystem.elapsedTime.set(socket.userId, newElapsedTime);
+        }
+        xpSystem.timeFlag.set(socket, Date.now()); // Reset timeFlag
+        new Logger('XPSystem').info(
+          `XP interval refreshed for user(${socket.userId})(socket-id: ${socket.id})`,
+        );
+      } catch (error) {
+        new Logger('XPSystem').error(
+          `Error refreshing XP interval for user(${socket.userId})(socket-id: ${socket.id}): ${error.message}`,
+        );
       }
-      if (!xpSystem.elapsedTime.has(socket.userId)) {
-        const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
-        const newElapsedTime =
-          (elapsedTime + Date.now() - timeFlag) % XP_SYSTEM.INTERVAL_MS;
-        xpSystem.elapsedTime.set(socket.userId, newElapsedTime);
-      }
-      xpSystem.timeFlag.set(socket, Date.now());
-      new Logger('XPSystem').info(
-        `XP interval refreshed for user(${socket.userId})(socket-id: ${socket.id})`,
-      );
     }
     new Logger('XPSystem').info(
       `XP interval refreshed complete, ${xpSystem.timeFlag.size} users updated`,
     );
+  },
+
+  refreshUser: async (socket) => {
+    try {
+      const timeFlag = xpSystem.timeFlag.get(socket);
+      if (!timeFlag) {
+        if (!xpSystem.elapsedTime.has(socket.userId)) {
+          const elapsedTime = xpSystem.elapsedTime.get(socket.userId) || 0;
+          const newElapsedTime = elapsedTime + Date.now() - timeFlag;
+          while (newElapsedTime >= XP_SYSTEM.INTERVAL_MS) {
+            xpSystem.obtainXp(socket);
+            newElapsedTime -= XP_SYSTEM.INTERVAL_MS;
+          }
+          xpSystem.elapsedTime.set(socket.userId, newElapsedTime);
+        }
+      }
+      new Logger('XPSystem').info(
+        `XP interval refreshed for user(${socket.userId})(socket-id: ${socket.id})`,
+      );
+    } catch (error) {
+      new Logger('XPSystem').error(
+        `Error refreshing XP interval for user(${socket.userId})(socket-id: ${socket.id}): ${error.message}`,
+      );
+    }
   },
 
   getRequiredXP: (level) => {
@@ -101,19 +133,19 @@ const xpSystem = {
         requiredXp: requiredXp,
         progress: user.xp / requiredXp,
       };
-      await Set.user(user.id, userUpdate);
+      await SetMoudle.user(user.id, userUpdate);
 
       // Update member contribution if in a server
       const memberUpdate = {
         contribution: member.contribution + XP_SYSTEM.BASE_XP * vipBoost,
       };
-      await Set.member(member.id, memberUpdate);
+      await SetMoudle.member(member.id, memberUpdate);
 
       // Update server wealth
       const serverUpdate = {
         wealth: server.wealth + XP_SYSTEM.BASE_XP * vipBoost,
       };
-      await Set.server(server.id, serverUpdate);
+      await SetMoudle.server(server.id, serverUpdate);
 
       // Emit update to client
       socket.emit('memberUpdate', memberUpdate);
