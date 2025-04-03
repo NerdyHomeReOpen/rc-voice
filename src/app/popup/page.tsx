@@ -226,14 +226,12 @@ const Popup = React.memo(() => {
   }, [lang, initialData]);
 
   return (
-    <WebRTCProvider>
-      <div className="wrapper" ref={windowRef}>
-        {/* Top Nevigation */}
-        {<Header title={headerTitle} buttons={headerButtons} />}
-        {/* Main Content */}
-        {content}
-      </div>
-    </WebRTCProvider>
+    <div className="wrapper" ref={windowRef}>
+      {/* Top Nevigation */}
+      {<Header title={headerTitle} buttons={headerButtons} />}
+      {/* Main Content */}
+      {content}
+    </div>
   );
 });
 
