@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 // Types
-import { User, DirectMessage } from '@/types';
+import { User, DirectMessage, SocketServerEvent } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/Language';
@@ -54,6 +54,11 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
     const [targetVip, setTargetVip] = useState<User['vip']>(
       createDefault.user().vip,
     );
+    const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
+    const [messageInput, setMessageInput] = useState<string>('');
+    const [isComposing, setIsComposing] = useState<boolean>(false);
+    const [isDisabled, setIsDisabled] = useState<boolean>(false);
+    const [isWarning, setIsWarning] = useState<boolean>(false);
 
     // Variables
     const { targetId, userId } = initialData;
@@ -62,10 +67,11 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
     // Handlers
     const handleSendMessage = (
       directMessage: Partial<DirectMessage>,
-      friendId: User['id'],
+      userId: User['id'],
+      targetId: User['id'],
     ) => {
       if (!socket) return;
-      socket.send.directMessage({ directMessage, friendId });
+      socket.send.directMessage({ directMessage, userId, targetId });
     };
 
     const handleTargetUpdate = (data: User | null) => {
@@ -79,6 +85,12 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
     const handleUserUpdate = (data: User | null) => {
       if (!data) data = createDefault.user();
       setUserAvatarUrl(data.avatarUrl);
+    };
+
+    const handleDirectMessageUpdate = (data: DirectMessage[] | null) => {
+      console.log('handleDirectMessageUpdate', data);
+      if (!data) data = [];
+      setDirectMessages(data);
     };
 
     const shakeWindow = (duration = 500) => {
@@ -105,6 +117,24 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
 
     // Effects
     useEffect(() => {
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.DIRECT_MESSAGE_UPDATE]: handleDirectMessageUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
       if (!userId || !targetId || refreshRef.current) return;
       const refresh = async () => {
         refreshRef.current = true;
@@ -115,9 +145,14 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
           refreshService.user({
             userId: userId,
           }),
-        ]).then(([target, user]) => {
+          refreshService.directMessage({
+            userId: userId,
+            targetId: targetId,
+          }),
+        ]).then(([target, user, directMessage]) => {
           handleTargetUpdate(target);
           handleUserUpdate(user);
+          handleDirectMessageUpdate(directMessage);
         });
       };
       refresh();
@@ -170,7 +205,7 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
               <div className={directMessage['serverInName']}>測試</div>
             </div>
             <div className={directMessage['messageArea']}>
-              <MessageViewer messages={[]} />
+              <MessageViewer messages={directMessages} />
             </div>
             <div className={directMessage['inputArea']}>
               <div className={directMessage['topBar']}>
@@ -195,7 +230,44 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
                   </div>
                 </div>
               </div>
-              <textarea className={directMessage['input']} />
+              <textarea
+                className={directMessage['input']}
+                value={messageInput}
+                onChange={(e) => {
+                  if (isDisabled) return;
+                  e.preventDefault();
+                  setMessageInput(e.target.value);
+                }}
+                onPaste={(e) => {
+                  if (isDisabled) return;
+                  e.preventDefault();
+                  setMessageInput(
+                    (prev) => prev + e.clipboardData.getData('text'),
+                  );
+                }}
+                onKeyDown={(e) => {
+                  if (
+                    e.shiftKey ||
+                    e.key !== 'Enter' ||
+                    !messageInput.trim() ||
+                    messageInput.length > 2000 ||
+                    isComposing ||
+                    isDisabled ||
+                    isWarning
+                  )
+                    return;
+                  e.preventDefault();
+                  handleSendMessage(
+                    { content: messageInput },
+                    userId,
+                    targetId,
+                  );
+                  setMessageInput('');
+                }}
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={() => setIsComposing(false)}
+                maxLength={2000}
+              />
             </div>
           </div>
         </div>

@@ -88,6 +88,8 @@ const SocketServerEvent = {
   FRIEND_UPDATE: 'friendUpdate',
   // Friend Application
   FRIEND_APPLICATION_UPDATE: 'friendApplicationUpdate',
+  // Direct Message
+  DIRECT_MESSAGE_UPDATE: 'directMessageUpdate',
   // Popup
   OPEN_POPUP: 'openPopup',
   // RTC

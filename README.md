@@ -4,7 +4,7 @@
   <img src="https://github.com/user-attachments/assets/74f23cae-f3aa-4deb-bbd1-72290d9193f3" width="200px" align="center">
 </div>
 
-<img src="https://img.shields.io/badge/Join-Discord-blue?logo=discord&link=https%3A%2F%2Fdiscord.gg%2FadCWzv6wwS"/> <img src="https://img.shields.io/badge/Current_Version-v0.1.0-green"/>
+<img src="https://img.shields.io/badge/Join-Discord-blue?logo=discord&link=https%3A%2F%2Fdiscord.gg%2FadCWzv6wwS"/> <img src="https://img.shields.io/badge/Latest-v0.1.3-green"/>
 
 RiceCall，RaidCall 的非官方復刻版，使用 react 框架開發，electron 建置
 
@@ -13,32 +13,18 @@ RiceCall，RaidCall 的非官方復刻版，使用 react 框架開發，electron
 - 高度還原 RaidCall 介面和功能
 - 重溫曾經的情懷
 
-## - v0.1.2 更新日誌 (Update Log)
+## - v0.1.3 更新日誌 (Change Log)
 
-- 創建伺服器輸入的口號會正確儲存為 slogan 屬性而不是 description
-- 頻道列表過長時可以正常滾動及顯示底部選單
-- 降低頻道名稱和使用者名稱字體大小
-- 略為增加側邊選單的最小寬度
-- 修復朋友名稱太長導致朋友卡片超出版面
-- 修復使用者名稱太長導致個人卡片超出版面
-
-## - v0.1.1 更新日誌 (Update Log)
-
-- 修復無法更換頭像
-- 修復離開伺服器會卡在伺服器頁面
-- 修復 Tab 字數太多會超出版面
-- 修復主頁伺服器選項名字太長會超出版面
-- 修復伺服器頁面伺服器名稱太長會超出版面
-- 修復頻道名稱太長會超出版面
-
-## - v0.1.0 更新日誌 (Update Log)
-
-- **初版發布**
-- 高度還原的 UI 介面
-- 基本的語音、文字聊天功能
-- 基本的創建群組、頻道功能
-- 基本的會員管理功能
-- 好友功能 (私訊會在近期版本更新)
+- 重新設計 XP 計算系統
+- 改善 WebRTC 邏輯，使其更穩定
+- 新增私訊介面
+- 增強權限驗證，防止利用漏洞竄改資料
+- 增強資料庫資料驗證，防止資料注入
+- 修復靜音模式下新使用者進入仍會發出聲音
+- 修復所有圖片無法顯示
+- 修復使用者卡片顯示超出畫面及顯示當前等級
+- 調整最小視窗大小
+- 調整右鍵選單風格並移除未實裝功能選項
 
 ## - 安裝方法
 

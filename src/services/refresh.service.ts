@@ -10,6 +10,7 @@ import {
   Friend,
   MemberApplication,
   Member,
+  DirectMessage,
 } from '@/types';
 
 export const refreshService = {
@@ -90,6 +91,20 @@ export const refreshService = {
       serverId,
     });
     return member;
+  },
+
+  directMessage: async ({
+    userId,
+    targetId,
+  }: {
+    userId: User['id'];
+    targetId: User['id'];
+  }): Promise<DirectMessage[] | null> => {
+    const directMessage = await apiService.post('/refresh/directMessage', {
+      userId,
+      targetId,
+    });
+    return directMessage;
   },
 };
 

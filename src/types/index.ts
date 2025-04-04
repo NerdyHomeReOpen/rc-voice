@@ -2038,18 +2038,18 @@ export type MemberApplication = User & {
   createdAt: number;
 };
 
-export type Message = {
-  id: string;
-  content: string;
-  type: 'general' | 'info' | 'dm';
-  timestamp: number;
-};
-
 export type Badge = {
   id: string;
   name: string;
   description: string;
   order: number;
+};
+
+export type Message = {
+  id: string;
+  content: string;
+  type: 'general' | 'info' | 'dm';
+  timestamp: number;
 };
 
 export type ChannelMessage = Message &
@@ -2063,8 +2063,9 @@ export type ChannelMessage = Message &
 export type DirectMessage = Message &
   UserFriend & {
     type: 'dm';
-    userId: string;
-    targetId: string;
+    senderId: string;
+    userId1: string;
+    userId2: string;
   };
 
 export type InfoMessage = Message & {
@@ -2189,6 +2190,8 @@ export enum SocketServerEvent {
   FRIEND_UPDATE = 'friendUpdate',
   // Friend Application
   FRIEND_APPLICATION_UPDATE = 'friendApplicationUpdate',
+  // Direct Message
+  DIRECT_MESSAGE_UPDATE = 'directMessageUpdate',
   // RTC
   RTC_OFFER = 'RTCOffer',
   RTC_ANSWER = 'RTCAnswer',
