@@ -115,6 +115,7 @@ const Popup = React.memo(() => {
 
   useEffect(() => {
     if (!initialData) return;
+    const params = new URLSearchParams(window.location.search);
     const type = params.get('type') as PopupType;
     if (!type) return;
 
