@@ -15,9 +15,9 @@
     "electron-dev": "concurrently \"npm run dev\" \"electron . --dev\"",
     "electron-start": "electron .",
     "electron-build": "next build && electron-builder",
-    "electron-build-win": "next build && electron-builder --win",
-    "electron-build-mac": "next build && electron-builder --mac",
-    "electron-build-linux": "next build && electron-builder --linux"
+    "electron-build-win": "next build && electron-builder --win -p always",
+    "electron-build-mac": "next build && electron-builder --mac -p always",
+    "electron-build-linux": "next build && electron-builder --linux -p always"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
