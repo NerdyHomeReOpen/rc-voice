@@ -67,10 +67,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const [member, setMember] = useState<Member>(createDefault.member());
     const [showMicVolume, setShowMicVolume] = useState(false);
     const [showSpeakerVolume, setShowSpeakerVolume] = useState(false);
-    const [micVolume, setMicVolume] = useState(webRTC.micVolume || 100);
-    const [speakerVolume, setSpeakerVolume] = useState(
-      webRTC.speakerVolume || 100,
-    );
     const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
     // Variables
@@ -227,20 +223,6 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       },
       [isResizing],
     );
-
-    const handleMicVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = parseInt(e.target.value);
-      setMicVolume(value);
-      webRTC.updateMicVolume?.(value);
-    };
-
-    const handleSpeakerVolumeChange = (
-      e: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-      const value = parseInt(e.target.value);
-      setSpeakerVolume(value);
-      webRTC.updateSpeakerVolume?.(value);
-    };
 
     const handleClickOutside = useCallback((e: MouseEvent) => {
       const micContainer = document.querySelector(
@@ -604,7 +586,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                 <div className={styles['micVolumeContainer']}>
                   <div
                     className={`${styles['micModeButton']} ${
-                      webRTC.isMute || micVolume === 0
+                      webRTC.isMute || webRTC.micVolume === 0
                         ? styles['muted']
                         : styles['active']
                     }`}
@@ -620,8 +602,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                         type="range"
                         min="0"
                         max="200"
-                        value={micVolume}
-                        onChange={handleMicVolumeChange}
+                        value={webRTC.micVolume}
+                        onChange={(e) => {
+                          webRTC.updateMicVolume?.(parseInt(e.target.value));
+                        }}
                         className={styles['slider']}
                       />
                     </div>
@@ -630,7 +614,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                 <div className={styles['speakerVolumeContainer']}>
                   <div
                     className={`${styles['speakerButton']} ${
-                      speakerVolume === 0 ? styles['muted'] : ''
+                      webRTC.speakerVolume === 0 ? styles['muted'] : ''
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -644,8 +628,12 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                         type="range"
                         min="0"
                         max="100"
-                        value={speakerVolume}
-                        onChange={handleSpeakerVolumeChange}
+                        value={webRTC.speakerVolume}
+                        onChange={(e) => {
+                          webRTC.updateSpeakerVolume?.(
+                            parseInt(e.target.value),
+                          );
+                        }}
                         className={styles['slider']}
                       />
                     </div>
