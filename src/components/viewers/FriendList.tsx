@@ -350,23 +350,24 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className={styles['searchBar']}>
+          <div className={styles['searchIcon']} />
+          <input
+            type="text"
+            placeholder={lang.tr.searchFriend}
+            className={styles['searchInput']}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <div className={styles['prevIcon']} />
+          <div className={styles['nextIcon']} />
+        </div>
+
         {/* Friend List */}
         {selectedTabId == 0 && (
-          <div className={styles['friendList']}>
-            {/* Search Bar */}
-            <div className={styles['searchBar']}>
-              <div className={styles['searchIcon']} />
-              <input
-                type="text"
-                placeholder={lang.tr.searchFriend}
-                className={styles['searchInput']}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <div className={styles['prevIcon']} />
-              <div className={styles['nextIcon']} />
-            </div>
+          <div className={styles['scrollView']}>
             {/* Friend Groups */}
-            <div className={styles['friendGroups']}>
+            <div className={styles['friendList']}>
               {[defaultFriendGroup, ...userFriendGroups]
                 .sort((a, b) => a.order - b.order)
                 .map((friendGroup) => (
@@ -378,28 +379,29 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
                   />
                 ))}
             </div>
-            {/* Bottom Buttons */}
-            <div className={styles['bottomButtons']}>
-              <div
-                className={styles['button']}
-                datatype="addGroup"
-                onClick={() => handleOpenCreateFriendGroup()}
-              >
-                {lang.tr.friendAddGroup}
-              </div>
-              <div
-                className={styles['button']}
-                datatype="addFriend"
-                onClick={() => handleOpenSearchUser(userId)}
-              >
-                {lang.tr.addFriend}
-              </div>
-            </div>
           </div>
         )}
 
         {/* Recent */}
         {selectedTabId == 1 && <div className={styles['recentList']}></div>}
+
+        {/* Bottom Buttons */}
+        <div className={styles['sidebarFooter']}>
+          <div
+            className={styles['button']}
+            datatype="addGroup"
+            onClick={() => handleOpenCreateFriendGroup()}
+          >
+            {lang.tr.friendAddGroup}
+          </div>
+          <div
+            className={styles['button']}
+            datatype="addFriend"
+            onClick={() => handleOpenSearchUser(userId)}
+          >
+            {lang.tr.addFriend}
+          </div>
+        </div>
       </>
     );
   },

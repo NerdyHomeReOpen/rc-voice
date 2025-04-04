@@ -13,6 +13,15 @@
   min-height: 0;
 }
 
+.scrollView {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -184,8 +193,6 @@
   background-size: auto;
 }
 
-/* Channel List */
-
 .saperator-2 {
   background: url('../../public/channel/chn_tree_split.png') no-repeat center
     center;
@@ -248,7 +255,6 @@
 .channelList {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .channelList .channelTab {
@@ -267,8 +273,8 @@
 
 .channelList .tabIcon {
   display: inline-block;
-  background: url('../../public/channel/channelIcon.png') no-repeat center
-    center;
+  background-image: url('../../public/channel/channelIcon.png');
+  background-repeat: no-repeat;
   background-size: auto;
   min-width: 14px;
   min-height: 14px;
@@ -278,19 +284,23 @@
   background-position: 0 0;
 }
 
-.channelList .channelTab:hover .tabIcon.public {
-  background-position: 0 -14px;
+.channelList .tabIcon.public.expanded {
+  background-position: -14px 0;
 }
 
 .channelList .tabIcon.member {
   background-position: 0 -14px;
 }
 
+.channelList .tabIcon.member.expanded {
+  background-position: -14px -14px;
+}
+
 .channelList .tabIcon.private {
   background-position: -28px 0;
 }
 
-.channelList .channelTab:hover .tabIcon.private {
+.channelList .tabIcon.private.expanded {
   background-position: -28px -14px;
 }
 
@@ -298,7 +308,7 @@
   background-position: -42px 0;
 }
 
-.channelList .channelTab:hover .tabIcon.readonly {
+.channelList .tabIcon.readonly.expanded {
   background-position: -42px -14px;
 }
 
@@ -306,16 +316,8 @@
   background-position: -56px 0;
 }
 
-.channelList .channelTab:hover .tabIcon.lobby {
+.channelList .tabIcon.lobby.expanded {
   background-position: -56px -14px;
-}
-
-.channelList .tabIcon.public.expanded {
-  background-position: -14px 0;
-}
-
-.channelList .channelTab:hover .tabIcon.public.expanded {
-  background-position: -14px -14px;
 }
 
 .channelList .channelTab .channelTabLable {
@@ -346,7 +348,6 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .userList .userTab {

@@ -125,9 +125,10 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  background-color: #f4f6fa;
-  border-top: 2px solid #e0e0e4;
-  border-right: 1px solid #ddd;
+  min-height: 0;
+  min-width: 0;
+  background-color: #f1f2f5;
+  border-right: 1px solid #e2e8f0;
 }
 
 .sidebar .navigateTabs {
@@ -179,10 +180,13 @@
   background-position: -64px 0;
 }
 
-.friendList {
+.scrollView {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
 }
 
 .searchBar {
@@ -198,7 +202,7 @@
   background: #fff;
 }
 
-.searchInput {
+.searchBar .searchInput {
   flex: 1;
   padding: 5px;
   border: 1px solid #fff;
@@ -206,7 +210,7 @@
   outline: none;
 }
 
-.searchIcon {
+.searchBar .searchIcon {
   min-width: 20px;
   min-height: 20px;
   background: url('../../public/channel/channel_search.png') no-repeat center
@@ -245,7 +249,7 @@
   background-position: -58px 0;
 }
 
-.bottomButtons {
+.sidebarFooter {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
@@ -256,7 +260,7 @@
   border-bottom-left-radius: 5px;
 }
 
-.bottomButtons .button {
+.sidebarFooter .button {
   flex: 1;
   display: flex;
   border: 1px solid #dbdde0;
@@ -271,11 +275,11 @@
   padding: 5px;
 }
 
-.bottomButtons .button:hover {
+.sidebarFooter .button:hover {
   background-color: #d1d5da5c;
 }
 
-.bottomButtons .button[datatype='addGroup']::before {
+.sidebarFooter .button[datatype='addGroup']::before {
   content: '';
   background: url('../../public/im/add_group.png') no-repeat center center;
   min-height: 16px;
@@ -283,7 +287,7 @@
   margin-right: 5px;
 }
 
-.bottomButtons .button[datatype='addFriend']::before {
+.sidebarFooter .button[datatype='addFriend']::before {
   content: '';
   background: url('../../public/im/add_friend.png') no-repeat center center;
   min-height: 16px;
@@ -291,12 +295,12 @@
   margin-right: 5px;
 }
 
-.friendGroups {
+.friendList {
   flex: 1;
   padding: 0.75rem;
 }
 
-.friendGroups .tab {
+.friendList .tab {
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -305,20 +309,20 @@
   border-radius: 3px;
 }
 
-.friendGroups .tab:hover {
+.friendList .tab:hover {
   background-color: #d1d5da5c;
 }
 
-.friendGroups .tab .tabLable {
+.friendList .tab .tabLable {
   font-size: 1rem;
   margin-right: 5px;
 }
 
-.friendGroups .tab .tabCount {
+.friendList .tab .tabCount {
   font-size: 1rem;
 }
 
-.toggleIcon {
+.friendList .tab .toggleIcon {
   content: '';
   display: inline-block;
   min-width: 14px;
@@ -330,15 +334,15 @@
   margin-right: 5px;
 }
 
-.tab:hover .toggleIcon {
+.friendList .tab:hover .toggleIcon {
   background-position: 0 -14px;
 }
 
-.toggleIcon.expanded {
+.friendList .tab .toggleIcon.expanded {
   background-position: -14px 0;
 }
 
-.tab:hover .toggleIcon.expanded {
+.friendList .tab:hover .toggleIcon.expanded {
   background-position: -14px -14px;
 }
 
