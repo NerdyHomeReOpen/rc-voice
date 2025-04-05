@@ -233,7 +233,7 @@ const Popup = React.memo(() => {
       {/* Top Nevigation */}
       {<Header title={headerTitle} buttons={headerButtons} />}
       {/* Main Content */}
-      {content}
+      <div className="content">{content}</div>
     </div>
   );
 });
