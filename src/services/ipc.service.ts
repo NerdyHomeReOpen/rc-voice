@@ -155,13 +155,14 @@ const ipcService = {
   },
 
   popup: {
-    open: (type: PopupType) => {
+    open: (type: PopupType, additionalData?: any) => {
       if (isElectron) {
         ipcRenderer.send(
           'open-popup',
           type,
           PopupSize[type].height,
           PopupSize[type].width,
+          additionalData,
         );
       }
     },
