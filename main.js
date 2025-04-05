@@ -1,7 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
-import { Menu, Tray, app, BrowserWindow } from 'electron';
+import { Menu, Tray } from 'electron';
 import serve from 'electron-serve';
 import net from 'net';
 import DiscordRPC from 'discord-rpc';
