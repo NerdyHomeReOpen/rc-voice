@@ -269,18 +269,44 @@ async function createMainWindow() {
     
   });
   
-  vartrayMenuTemplate = [{
-      label: "設定",
+  vartrayMenuTemplate = [
+    {
+      label: "打開主視窗",
+      click: function(){
+        mainWindow.show();
+        win.setSkipTaskbar(true);
+        }
+      },
+    {
+      label: "系統設定",
       click: function(){}
-    },
-      label: "關於",
+      },
+    {
+      label: "關於RiceCall",
       click: function(){}
-    },
+      },
+    {
+      label: "官方網站",
+      click: function(){}
+      },
+    {
+      label: "登出",
+      click: function(){
+        if (mainWindow.isVisible() ){
+          mainWindow.hide();
+          authWindow.show();
+          socketInstance.disconnect();
+          socketInstance = disconnectSocket(socketInstance);
+          }else{
+          //leaves for functions
+          } 
+        }
+      },
     {
       label: "退出",
       click: function(){
         app.quit();
-      } 
+        } 
      }
    ];
    //let iconPath = path.join(
@@ -302,7 +328,7 @@ async function createMainWindow() {
     //context menu
     appTray.setContextMenu(contextMenu);
     // click and show window
-    appTray.on('click', function(){
+    appTray.on('double-click', function(){
       //mainWindow show and hide switch
       mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
       mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : win.setSkipTaskbar(true);
