@@ -166,7 +166,7 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
     targetId: User['id'],
     targetName: User['name'],
   ) => {
-    ipcService.popup.open(PopupType.DIRECT_MESSAGE);
+    ipcService.popup.open(PopupType.DIRECT_MESSAGE, { targetId });
     ipcService.initialData.onRequest(PopupType.DIRECT_MESSAGE, {
       userId,
       targetId,

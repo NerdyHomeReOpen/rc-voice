@@ -320,11 +320,17 @@ async function createAuthWindow() {
   return authWindow;
 }
 
-async function createPopup(type, height, width) {
+async function createPopup(type, height, width, additionalData = {}) {
+  // 針對DirectMessage類型，使用targetId來區分不同的對話視窗
+  let windowKey = type;
+  if (type === 'directMessage' && additionalData.targetId) {
+    windowKey = `${type}_${additionalData.targetId}`;
+  }
+
   // Track popup windows
-  if (popups[type] && !popups[type].isDestroyed()) {
-    popups[type].focus();
-    return popups[type];
+  if (popups[windowKey] && !popups[windowKey].isDestroyed()) {
+    popups[windowKey].focus();
+    return popups[windowKey];
   }
 
   if (isDev) {
@@ -337,7 +343,7 @@ async function createPopup(type, height, width) {
     }
   }
 
-  popups[type] = new BrowserWindow({
+  popups[windowKey] = new BrowserWindow({
     width: width ?? 800,
     height: height ?? 600,
     resizable: false,
@@ -353,23 +359,23 @@ async function createPopup(type, height, width) {
   });
 
   if (app.isPackaged || !isDev) {
-    appServe(popups[type]).then(() => {
-      popups[type].loadURL(`app://-/popup.html?type=${type}`);
+    appServe(popups[windowKey]).then(() => {
+      popups[windowKey].loadURL(`app://-/popup.html?type=${type}`);
     });
   } else {
-    popups[type].loadURL(`${baseUri}/popup?type=${type}`);
-    popups[type].webContents.openDevTools();
+    popups[windowKey].loadURL(`${baseUri}/popup?type=${type}`);
+    popups[windowKey].webContents.openDevTools();
   }
 
-  popups[type].webContents.on('resize', (_, width, height) => {
-    popups[type].webContents.setSize(width, height);
+  popups[windowKey].webContents.on('resize', (_, width, height) => {
+    popups[windowKey].webContents.setSize(width, height);
   });
 
-  popups[type].webContents.on('closed', () => {
-    popups[type] = null;
+  popups[windowKey].webContents.on('closed', () => {
+    popups[windowKey] = null;
   });
 
-  return popups[type];
+  return popups[windowKey];
 }
 
 function connectSocket(token) {
@@ -619,13 +625,8 @@ app.on('ready', async () => {
   });
 
   // Popup handlers
-  ipcMain.on('open-popup', async (_, type, height, width) => {
-    if (popups[type] && !popups[type].isDestroyed()) {
-      popups[type].focus();
-      return;
-    }
-
-    createPopup(type, height, width);
+  ipcMain.on('open-popup', (event, type, height, width, additionalData) => {
+    createPopup(type, height, width, additionalData);
   });
   ipcMain.on('popup-submit', (_, to) => {
     BrowserWindow.getAllWindows().forEach((window) => {
