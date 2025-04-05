@@ -270,10 +270,10 @@ async function createMainWindow() {
   });
   
   vartrayMenuTemplate = [{
-      label: "設定"
+      label: "設定",
       click: function(){}
     },
-      label: "關於"
+      label: "關於",
       click: function(){}
     },
     {
