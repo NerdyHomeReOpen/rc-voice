@@ -254,7 +254,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     useEffect(() => {
       if (!webRTC.updateBitrate || !channelBitrate) return;
       webRTC.updateBitrate(channelBitrate);
-    }, [webRTC, webRTC.updateBitrate, channelBitrate]);
+    }, [webRTC.updateBitrate, channelBitrate]);
 
     useEffect(() => {
       const timer = setInterval(() => {
@@ -397,12 +397,23 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                 )}
               </div>
               <div
-                className={`${styles['micButton']} ${
-                  webRTC.isMute ? '' : styles['active']
-                }`}
+                className={`
+                  ${styles['micButton']} 
+                  ${webRTC.isMute ? '' : styles['active']}`}
                 onClick={() => webRTC.toggleMute?.()}
               >
-                <div className={styles['micIcon']} />
+                <div
+                  className={`
+                    ${styles['micIcon']} 
+                    ${
+                      webRTC.volumePercent
+                        ? styles[
+                            `level${Math.ceil(webRTC.volumePercent / 10) - 1}`
+                          ]
+                        : ''
+                    }
+                  `}
+                />
                 <div className={styles['micText']}>
                   {webRTC.isMute ? lang.tr.takeMic : lang.tr.takenMic}
                 </div>
@@ -412,11 +423,13 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                 <div className={styles['saperator']} />
                 <div className={styles['micVolumeContainer']}>
                   <div
-                    className={`${styles['micModeButton']} ${
-                      webRTC.isMute || webRTC.micVolume === 0
-                        ? styles['muted']
-                        : styles['active']
-                    }`}
+                    className={`
+                      ${styles['micModeButton']} 
+                      ${
+                        webRTC.isMute || webRTC.micVolume === 0
+                          ? styles['muted']
+                          : styles['active']
+                      }`}
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowMicVolume(!showMicVolume);

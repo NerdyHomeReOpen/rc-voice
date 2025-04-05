@@ -23,7 +23,7 @@ import { useLanguage } from '@/providers/Language';
 import { useSocket } from '@/providers/Socket';
 import { useContextMenu } from '@/providers/ContextMenu';
 import { useExpandedContext } from '@/providers/Expanded';
-// import { useWebRTC } from '@/providers/WebRTC';
+import { useWebRTC } from '@/providers/WebRTC';
 
 // Components
 import BadgeViewer from '@/components/viewers/Badge';
@@ -421,7 +421,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const lang = useLanguage();
     const contextMenu = useContextMenu();
     const socket = useSocket();
-    // const webRTC = useWebRTC();
+    const webRTC = useWebRTC();
 
     // Variables
     const { id: userId } = user;
@@ -456,11 +456,12 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       permissionLevel > 4 && channelMemberPermission !== 4;
     const canChangeToAdmin =
       permissionLevel > 5 && channelMemberPermission !== 5;
-
-    // const isSpeaking = isCurrentUser
-    //   ? webRTC.speakingUsers?.includes('local')
-    //   : webRTC.speakingUsers?.includes(channelMemberUserId);
-    // console.log(channelMemberUserId, webRTC.speakingUsers);
+    const speakingStatus =
+      webRTC.speakStatus?.[channelMemberUserId] ||
+      (isCurrentUser && webRTC.volumePercent) ||
+      0;
+    const isSpeaking = speakingStatus !== 0;
+    const isMuted = speakingStatus === -1;
 
     // Handlers
     const handleOpenEditNickname = (
@@ -595,7 +596,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(
           ]);
         }}
       >
-        <div className={`${styles['userState']}`} />
+        <div
+          className={`
+            ${styles['userState']} 
+            ${isSpeaking ? styles['play'] : ''} 
+            ${isMuted ? styles['muted'] : ''}
+          `}
+        />
         <div
           className={`
             ${permission[channelMemberGender]} 
@@ -956,17 +963,19 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
         {/* Bottom Navigation */}
         <div className={styles['bottomNav']}>
           <div
-            className={`${styles['navItem']} ${
-              view === 'current' ? styles['active'] : ''
-            }`}
+            className={`
+              ${styles['navItem']} 
+              ${view === 'current' ? styles['active'] : ''}
+            `}
             onClick={() => setView('current')}
           >
             {lang.tr.currentChannel}
           </div>
           <div
-            className={`${styles['navItem']} ${
-              view === 'all' ? styles['active'] : ''
-            }`}
+            className={`
+              ${styles['navItem']} 
+              ${view === 'all' ? styles['active'] : ''}
+            `}
             onClick={() => setView('all')}
           >
             {lang.tr.allChannel}
