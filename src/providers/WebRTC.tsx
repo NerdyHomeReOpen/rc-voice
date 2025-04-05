@@ -98,7 +98,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const gainNode = useRef<GainNode | null>(null);
   const sourceNode = useRef<MediaStreamAudioSourceNode | null>(null);
   const destinationNode = useRef<MediaStreamAudioDestinationNode | null>(null);
-  const volumeThreshold = useRef<number>(0);
+  const volumeThreshold = useRef<number>(1);
   const volumeSilenceDelay = useRef<number>(500);
 
   // Hooks
