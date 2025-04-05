@@ -90,7 +90,21 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
     const handleDirectMessageUpdate = (data: DirectMessage[] | null) => {
       console.log('handleDirectMessageUpdate', data);
       if (!data) data = [];
-      setDirectMessages(data);
+
+      if (data.length > 0) {
+        const currentUsers = [userId, targetId];
+        const userId_1 = data[0].userId1;
+        const userId_2 = data[0].userId2;
+
+        // check if the message array is between the current users
+        const isCurrentMessage = 
+          currentUsers.find((user) => user == userId_1) 
+          && currentUsers.find((user) => user == userId_2);
+
+        if (isCurrentMessage) {
+          setDirectMessages(data);
+        }
+      } 
     };
 
     const shakeWindow = (duration = 500) => {
