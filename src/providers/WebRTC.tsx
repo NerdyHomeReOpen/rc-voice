@@ -98,6 +98,8 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const gainNode = useRef<GainNode | null>(null);
   const sourceNode = useRef<MediaStreamAudioSourceNode | null>(null);
   const destinationNode = useRef<MediaStreamAudioDestinationNode | null>(null);
+  const volumeThreshold = useRef<number>(0);
+  const volumeSilenceDelay = useRef<number>(500);
 
   // Hooks
   const socket = useSocket();
@@ -252,8 +254,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
           gainNode.current = gain;
           destinationNode.current = destination;
 
-          const threshold = 5;
-          const silenceDelay = 500;
           let silenceTimer: ReturnType<typeof setTimeout> | null = null;
 
           const detectSpeaking = () => {
@@ -266,14 +266,18 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
             const volume = Math.sqrt(sum / dataArray.length);
             const volumePercent = Math.floor(Math.min(1, volume / 0.5) * 100);
 
-            if (volumePercent > threshold && volumePercentRef.current !== -1) {
-              volumePercentRef.current = volumePercent;
-              setVolumePercent(volumePercent);
-              if (silenceTimer) clearTimeout(silenceTimer);
-              silenceTimer = setTimeout(() => {
-                volumePercentRef.current = 0;
-                setVolumePercent(0);
-              }, silenceDelay);
+            if (volumePercent > volumeThreshold.current) {
+              if (volumePercentRef.current !== -1) {
+                volumePercentRef.current = volumePercent;
+                setVolumePercent(volumePercent);
+                if (silenceTimer) clearTimeout(silenceTimer);
+                silenceTimer = setTimeout(() => {
+                  if (volumePercentRef.current !== -1) {
+                    volumePercentRef.current = 0;
+                    setVolumePercent(0);
+                  }
+                }, volumeSilenceDelay.current);
+              }
             }
 
             requestAnimationFrame(detectSpeaking);
