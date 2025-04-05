@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
@@ -40,9 +41,23 @@ const PURIFY_CONFIG: PurifyConfig = {
     'em',
     'code',
     'pre',
+    'video',
+    'source',
+    'audio',
+    'iframe',
   ],
-  ALLOWED_ATTR: ['src', 'alt', 'class', 'href'],
-  ALLOWED_URI_REGEXP: /^\/smiles\//,
+  ALLOWED_ATTR: [
+    'src',
+    'alt',
+    'class',
+    'href',
+    'controls',
+    'width',
+    'height',
+    'allowfullscreen',
+    'type',
+  ],
+  ALLOWED_URI_REGEXP: /^(https?:\/\/)|^\/smiles\//,
 };
 
 interface MarkdownProps {
@@ -129,6 +144,43 @@ const Markdown: React.FC<MarkdownProps> = React.memo(
       ),
       hr: ({ node, ...props }: any) => (
         <hr className="my-6 border-t border-gray-200" {...props} />
+      ),
+      video: ({ node, ...props }: any) => <video {...props} />,
+      source: ({ node, ...props }: any) => <source {...props} />,
+      audio: ({ node, ...props }: any) => <audio {...props} />,
+      iframe: ({ node, ...props }: any) => (
+        <iframe
+          className="w-full h-64 border border-gray-200 rounded-lg"
+          {...props}
+        />
+      ),
+      img: ({ node, src, alt, ...props }: any) => {
+        if (isGuest && forbidGuestUrl) {
+          return <div className="text-gray-400" {...props} />;
+        }
+        return (
+          <img
+            className="max-w-full h-auto rounded-lg"
+            src={src}
+            alt={alt}
+            {...props}
+          />
+        );
+      },
+      code: ({ node, ...props }: any) => (
+        <code className="bg-gray-100 text-gray-800 rounded px-1" {...props} />
+      ),
+      pre: ({ node, ...props }: any) => (
+        <pre className="bg-gray-100 text-gray-800 rounded p-2 overflow-x-auto" {...props} />
+      ),
+      strong: ({ node, ...props }: any) => (
+        <strong className="font-semibold text-gray-800" {...props} />
+      ),
+      em: ({ node, ...props }: any) => (
+        <em className="italic text-gray-600" {...props} />
+      ),
+      br: ({ node, ...props }: any) => (
+        <br className="my-2" {...props} />
       ),
     };
 
