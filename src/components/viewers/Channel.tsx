@@ -599,8 +599,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         <div
           className={`
             ${styles['userState']} 
-            ${isSpeaking ? styles['play'] : ''} 
-            ${isMuted ? styles['muted'] : ''}
+            ${isSpeaking && !isMuted ? styles['play'] : ''} 
           `}
         />
         <div
