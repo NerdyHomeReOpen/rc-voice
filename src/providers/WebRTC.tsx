@@ -396,14 +396,14 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
             handleSendRTCIceCandidate(socketId, event.candidate);
         };
         peerConnection.oniceconnectionstatechange = () => {
-          console.log('Connection State:', peerConnection.connectionState);
+          console.log(userId, 'Connection State:', peerConnection.connectionState);
           const isFailed = ['disconnected', 'failed', 'closed'].includes(
             peerConnection.connectionState,
           );
           if (isFailed) removePeerConnection(userId);
         };
         peerConnection.onconnectionstatechange = () => {
-          console.log('Connection State:', peerConnection.connectionState);
+          console.log(userId, 'Connection State:', peerConnection.connectionState);
           const isFailed = ['disconnected', 'failed', 'closed'].includes(
             peerConnection.connectionState,
           );
