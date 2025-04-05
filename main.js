@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { Menu, Tray, app, BrowserWindow } from 'electron';
 import serve from 'electron-serve';
 import net from 'net';
 import DiscordRPC from 'discord-rpc';
@@ -256,10 +257,58 @@ async function createMainWindow() {
     shell.openExternal(url);
     return { action: 'deny' };
   });
-
-  mainWindow.webContents.on('close', () => {
-    app.quit();
+  
+  //close event
+  mainWindow.webContents.on('close', (event) => {
+    //app.quit();  //last one is quit, set as hide here
+    //catch close window event and prevent defailt
+    event.preventDefault();
+    //make action as hide instead, skip taskbar
+    mainWindow.hide();
+    win.setSkipTaskbar(true);
+    
   });
+  
+  vartrayMenuTemplate = [{
+      label: "設定"
+      click: function(){}
+    },
+      label: "關於"
+      click: function(){}
+    },
+    {
+      label: "退出",
+      click: function(){
+        app.quit();
+      } 
+     }
+   ];
+   //let iconPath = path.join(
+   //   __dirname,
+   //   'resources',
+   //   process.platform === 'win32' ? 'icon.ico' : 'icon.png',
+   // );
+   //System Tray Menu
+   let appTray = newTray(
+      path.join(
+      __dirname,
+      'resources',
+      process.platform === 'win32' ? 'icon.ico' : 'icon.png',
+      )
+    );
+    const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
+    //mouse stay tip
+    appTray.setToolTip('RiceCall');
+    //context menu
+    appTray.setContextMenu(contextMenu);
+    // click and show window
+    appTray.on('click', function(){
+      //mainWindow show and hide switch
+      mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
+      mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : win.setSkipTaskbar(true);
+      }
+    );
+    
 
   return mainWindow;
 }
