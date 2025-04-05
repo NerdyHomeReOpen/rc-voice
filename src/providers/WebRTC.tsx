@@ -87,6 +87,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const [volumePercent, setVolumePercent] = useState<number>(0);
 
   // Refs
+  const volumePercentRef = useRef<number>(0);
   const mutedVolume = useRef<number>(0);
   const localStream = useRef<MediaStream | null>(null);
   const peerStreams = useRef<{ [id: string]: MediaStream }>({});
@@ -106,11 +107,13 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     try {
       if (isMute) {
         updateMicVolume(mutedVolume.current);
-        setVolumePercent(-1);
+        volumePercentRef.current = 0;
+        setVolumePercent(0);
       } else {
         mutedVolume.current = micVolume;
         updateMicVolume(0);
-        setVolumePercent(0);
+        volumePercentRef.current = -1;
+        setVolumePercent(-1);
       }
       setIsMute(!isMute);
     } catch (error) {
@@ -263,10 +266,12 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
             const volume = Math.sqrt(sum / dataArray.length);
             const volumePercent = Math.floor(Math.min(1, volume / 0.5) * 100);
 
-            if (volumePercent > threshold && volumePercent !== -1) {
+            if (volumePercent > threshold && volumePercentRef.current !== -1) {
+              volumePercentRef.current = volumePercent;
               setVolumePercent(volumePercent);
               if (silenceTimer) clearTimeout(silenceTimer);
               silenceTimer = setTimeout(() => {
+                volumePercentRef.current = 0;
                 setVolumePercent(0);
               }, silenceDelay);
             }
@@ -617,6 +622,11 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
 
   useEffect(() => {
     console.log('volumePercent: ', volumePercent);
+    for (const dataChannel of Object.values(peerDataChannels.current)) {
+      if (dataChannel && dataChannel.readyState === 'open') {
+        dataChannel.send(JSON.stringify({ volume: volumePercent }));
+      }
+    }
   }, [volumePercent]);
 
   useEffect(() => {
