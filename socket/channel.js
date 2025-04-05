@@ -132,7 +132,7 @@ const channelHandler = {
       // manager(>= 5) can join the channel even if it is full
       if (operatorMember.permissionLevel < 5 && channel.userLimit && channel.userLimit > 0) {
         // Get all users in the server
-        const serverUsers = await Get.serverUsers(server.id);
+        const serverUsers = server.users;
 
         // Filter users who are currently in this channel
         const usersInChannel = serverUsers.filter(
