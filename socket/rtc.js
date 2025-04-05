@@ -56,7 +56,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC offer to user(socket-id: ${to}): ${error.error_message} (${socket.id})`,
+        `Error sending RTC offer to user(socket-id: ${data?.to || 'undefined'}): ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -109,7 +109,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC answer to user(socket-id: ${to}): ${error.error_message} (${socket.id})`,
+        `Error sending RTC answer to user(socket-id: ${data?.to || 'undefined'}): ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -162,7 +162,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error sending RTC ICE candidate user(socket-id: ${to}): ${error.error_message} (${socket.id})`,
+        `Error sending RTC ICE candidate user(socket-id: ${data?.to || 'undefined'}): ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -178,8 +178,8 @@ const rtcHandler = {
       if (!channelId) {
         throw new StandardizedError(
           '無效的資料',
-          'JOINRTCCHANNEL',
           'ValidationError',
+          'JOINRTCCHANNEL',
           'DATA_INVALID',
           401,
         );
@@ -212,7 +212,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error joining RTC channel(${channelId}): ${error.error_message} (${socket.id})`,
+        `Error joining RTC channel(${data?.channelId || 'undefined'}): ${error.error_message} (${socket.id})`,
       );
     }
   },
@@ -262,7 +262,7 @@ const rtcHandler = {
       io.to(socket.id).emit('error', error);
 
       new Logger('RTC').error(
-        `Error leaving RTC channel(${channelId}): ${error.error_message} (${socket.id})`,
+        `Error leaving RTC channel(${data?.channelId || 'undefined'}): ${error.error_message} (${socket.id})`,
       );
     }
   },
