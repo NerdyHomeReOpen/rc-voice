@@ -29,11 +29,11 @@ interface HomePageProps {
   handleUserUpdate: (data: Partial<User> | null) => void;
 }
 
-const ServerListSection: React.FC<ServerListSectionProps> = ({
-  title,
-  servers,
-  user,
-}) => {
+const ServerListSection: React.FC<
+  ServerListSectionProps & {
+    onServerClick?: (server: Server) => void;
+  }
+> = ({ title, servers, user, onServerClick }) => {
   const lang = useLanguage();
 
   const [expanded, setExpanded] = useState(false);
@@ -43,7 +43,11 @@ const ServerListSection: React.FC<ServerListSectionProps> = ({
   return (
     <div className={homePage['myGroupsItem']}>
       <div className={homePage['myGroupsTitle']}>{title}</div>
-      <ServerListViewer user={user} servers={displayedServers} />
+      <ServerListViewer
+        user={user}
+        servers={displayedServers}
+        onServerClick={onServerClick}
+      />
       {hasMore && (
         <button
           className={`
@@ -379,16 +383,28 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
                 title={lang.tr.recentVisits}
                 servers={userRecentServers}
                 user={user}
+                onServerClick={(server) => {
+                  setIsLoading(true);
+                  setLoadingGroupID(server.displayId);
+                }}
               />
               <ServerListSection
                 title={lang.tr.myGroups}
                 servers={userOwnedServers}
                 user={user}
+                onServerClick={(server) => {
+                  setIsLoading(true);
+                  setLoadingGroupID(server.displayId);
+                }}
               />
               <ServerListSection
                 title={lang.tr.favoriteGroups}
                 servers={userFavServers}
                 user={user}
+                onServerClick={(server) => {
+                  setIsLoading(true);
+                  setLoadingGroupID(server.displayId);
+                }}
               />
             </div>
           </div>
