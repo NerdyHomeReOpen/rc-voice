@@ -8,7 +8,6 @@ import { Server, User } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/Socket';
-import { useMainTab } from '@/providers/MainTab';
 
 interface ServerCardProps {
   userId: User['id'];
@@ -20,7 +19,6 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(
   ({ userId, server, onClick }) => {
     // Hooks
     const socket = useSocket();
-    const mainTab = useMainTab();
 
     // Variables
     const {
@@ -37,7 +35,6 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(
     const handleServerSelect = (userId: User['id'], serverId: Server['id']) => {
       if (!socket) return;
       socket.send.connectServer({ userId, serverId });
-      mainTab.setSelectedTabId('server');
       onClick?.();
     };
 

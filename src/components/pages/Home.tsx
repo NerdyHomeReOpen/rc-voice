@@ -19,7 +19,6 @@ import {
 // Providers
 import { useSocket } from '@/providers/Socket';
 import { useLanguage } from '@/providers/Language';
-import { useMainTab } from '@/providers/MainTab';
 
 // Services
 import ipcService from '@/services/ipc.service';
@@ -100,7 +99,6 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
   // Hooks
   const lang = useLanguage();
   const socket = useSocket();
-  const mainTab = useMainTab();
 
   // Refs
   const refreshed = useRef(false);
@@ -138,17 +136,19 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
     setSearchQuery(query);
   };
 
-  const handleConnectServer = (serverId: Server['id']) => {
+  const handleConnectServer = (
+    serverId: Server['id'],
+    serverDisplayId: Server['displayId'],
+  ) => {
     if (!socket) return;
     socket.send.connectServer({
       serverId,
       userId: userId,
     });
-    mainTab.setSelectedTabId('server');
     setShowDropdown(false);
     setSearchQuery('');
     setIsLoading(true);
-    setLoadingGroupID(serverId);
+    setLoadingGroupID(serverDisplayId);
   };
 
   const handleServerSearch = useCallback(
@@ -291,7 +291,7 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && exactMatch) {
-                  handleConnectServer(exactMatch.id);
+                  handleConnectServer(exactMatch.id, exactMatch.displayId);
                 }
               }}
               onFocus={() => setShowDropdown(true)}
@@ -315,7 +315,9 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
                       <SearchResultItem
                         key={server.id}
                         server={server}
-                        onClick={() => handleConnectServer(server.id)}
+                        onClick={() =>
+                          handleConnectServer(server.id, server.displayId)
+                        }
                       />
                     ))}
                   </>
@@ -330,7 +332,9 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
                       <SearchResultItem
                         key={server.id}
                         server={server}
-                        onClick={() => handleConnectServer(server.id)}
+                        onClick={() =>
+                          handleConnectServer(server.id, server.displayId)
+                        }
                       />
                     ))}
                   </>
