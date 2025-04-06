@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 // Types
-import { User, Friend, FriendGroup } from '@/types';
+import { User, Friend, FriendGroup, SocketServerEvent } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/Socket';
@@ -57,9 +57,9 @@ const EditFriendPopup: React.FC<EditFriendPopupProps> = React.memo(
       socket.send.updateFriend({ friend, userId, targetId });
     };
 
-    const handleUserUpdate = (data: User | null) => {
-      if (!data) data = createDefault.user();
-      setUserFriendGroups(data.friendGroups || []);
+    const handleUserFriendGroupsUpdate = (data: FriendGroup[] | null) => {
+      if (!data) data = [];
+      setUserFriendGroups(data);
     };
 
     const handleFriendUpdate = (data: Friend | null) => {
@@ -69,19 +69,38 @@ const EditFriendPopup: React.FC<EditFriendPopupProps> = React.memo(
 
     // Effects
     useEffect(() => {
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.USER_FRIEND_GROUPS_UPDATE]:
+          handleUserFriendGroupsUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
       if (!userId || !targetId || refreshRef.current) return;
       const refresh = async () => {
         refreshRef.current = true;
         Promise.all([
-          refreshService.user({
+          refreshService.userFriendGroups({
             userId: userId,
           }),
           refreshService.friend({
             userId: userId,
             targetId: targetId,
           }),
-        ]).then(([user, friend]) => {
-          handleUserUpdate(user);
+        ]).then(([userFriendGroups, friend]) => {
+          handleUserFriendGroupsUpdate(userFriendGroups);
           handleFriendUpdate(friend);
         });
       };

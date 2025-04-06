@@ -147,17 +147,16 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
     );
 
     // Handlers
-    const handleUpdateUser = useCallback(
-      (user: Partial<User>) => {
-        if (!socket) return;
-        socket.send.updateUser({ user, userId });
-      },
-      [socket, userId],
-    );
+    const handleUpdateUser = (user: Partial<User>) => {
+      if (!socket) return;
+      socket.send.updateUser({ user, userId });
+    };
 
-    const handleUserUpdate = useCallback((data: User | null) => {
+    const handleUserUpdate = (data: User | null) => {
       if (!data) data = createDefault.user();
       setUserName(data.name);
+      setUserAvatar(data.avatar);
+      setUserAvatarUrl(data.avatarUrl);
       setUserGender(data.gender);
       setUserSignature(data.signature);
       setUserLevel(data.level);
@@ -166,9 +165,11 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
       setUserBirthMonth(data.birthMonth);
       setUserBirthDay(data.birthDay);
       setUserCountry(data.country);
-      setUserAvatar(data.avatar);
-      setUserAvatarUrl(data.avatarUrl);
-    }, []);
+    };
+
+    const handleClose = () => {
+      ipcService.window.close();
+    };
 
     // Effects
     useEffect(() => {
@@ -184,7 +185,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
         });
       };
       refresh();
-    }, [userId, handleUserUpdate]);
+    }, [userId]);
 
     useEffect(() => {
       if (isFutureDate(userBirthYear, userBirthMonth, userBirthDay)) {
@@ -229,10 +230,6 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
       getDaysInMonth,
       isFutureDate,
     ]);
-
-    const handleClose = () => {
-      ipcService.window.close();
-    };
 
     return (
       <div className={`${popup['popupContainer']} ${popup['userProfile']}`}>

@@ -6,7 +6,7 @@ import setting from '@/styles/popups/editServer.module.css';
 import createServer from '@/styles/popups/createServer.module.css';
 
 // Types
-import { User, Server, PopupType } from '@/types';
+import { User, Server, PopupType, UserServer } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/Socket';
@@ -50,9 +50,7 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
     ];
 
     // States
-    const [userOwnedServers, setUserOwnedServers] = useState<Server[]>(
-      createDefault.user().ownedServers || [],
-    );
+    const [userServers, setUserServers] = useState<UserServer[]>([]);
     const [userLevel, setUserLevel] = useState<User['level']>(
       createDefault.user().level || 0,
     );
@@ -77,7 +75,8 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
     const { userId } = initialData;
     const MAX_GROUPS =
       userLevel >= 16 ? 5 : userLevel >= 6 && userLevel < 16 ? 4 : 3;
-    const remainingGroups = MAX_GROUPS - userOwnedServers.length;
+    const remainingGroups =
+      MAX_GROUPS - userServers.filter((server) => server.owned).length;
     const canCreate = remainingGroups > 0;
 
     // Handlers
@@ -88,8 +87,12 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
 
     const handleUserUpdate = (data: User | null) => {
       if (!data) data = createDefault.user();
-      setUserOwnedServers(data.ownedServers || []);
-      setUserLevel(data.level || 0);
+      setUserLevel(data.level);
+    };
+
+    const handleUserServersUpdate = (data: UserServer[] | null) => {
+      if (!data) data = [];
+      setUserServers(data);
     };
 
     const handleOpenErrorDialog = (message: string) => {
@@ -105,6 +108,7 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
     };
 
     // Effects
+
     useEffect(() => {
       if (!userId || refreshRef.current) return;
       const refresh = async () => {
@@ -113,8 +117,12 @@ const CreateServerPopup: React.FC<CreateServerPopupProps> = React.memo(
           refreshService.user({
             userId: userId,
           }),
-        ]).then(([user]) => {
+          refreshService.userServers({
+            userId: userId,
+          }),
+        ]).then(([user, userServers]) => {
           handleUserUpdate(user);
+          handleUserServersUpdate(userServers);
         });
       };
       refresh();

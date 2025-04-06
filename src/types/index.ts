@@ -1932,6 +1932,16 @@ export type User = {
   recentServers?: Server[];
   ownedServers?: Server[];
   favServers?: Server[];
+  // userServers?: UserServer[];
+};
+
+export type UserServer = Server & {
+  recent: boolean;
+  owned: boolean;
+  favorite: boolean;
+  userId: string;
+  serverId: string;
+  timestamp: number;
 };
 
 export type Server = {
@@ -1954,8 +1964,6 @@ export type Server = {
   ownerId: string;
   createdAt: number;
   // THESE WERE NOT SAVE IN THE DATABASE
-  lobby?: Channel;
-  owner?: ServerMember;
   channels?: (Channel | Category)[];
   members?: ServerMember[];
   users?: ServerMember[];
@@ -2002,8 +2010,6 @@ export type Friend = {
   userId: string;
   targetId: string;
   createdAt: number;
-  // THESE WERE NOT SAVE IN THE DATABASE
-  directMessages?: DirectMessage[]; // Change to another sheet
 };
 
 export type FriendApplication = User & {
@@ -2096,12 +2102,6 @@ export type ContextMenuItem = {
   onClick?: () => void;
 };
 
-export type ServerListSectionProps = {
-  title: string;
-  servers: Server[];
-  user: User;
-};
-
 export type Emoji = {
   id: number;
   alt: string;
@@ -2178,11 +2178,20 @@ export enum SocketServerEvent {
   // User
   USER_SEARCH = 'userSearch',
   USER_UPDATE = 'userUpdate',
+  USER_FRIENDS_UPDATE = 'userFriendsUpdate',
+  USER_FRIEND_GROUPS_UPDATE = 'userFriendGroupsUpdate',
+  USER_FRIEND_APPLICATIONS_UPDATE = 'userFriendApplicationsUpdate',
+  USER_SERVERS_UPDATE = 'userServersUpdate',
   // Server
   SERVER_SEARCH = 'serverSearch',
   SERVER_UPDATE = 'serverUpdate',
+  SERVER_CHANNELS_UPDATE = 'serverChannelsUpdate',
+  SERVER_MEMBERS_UPDATE = 'serverMembersUpdate',
+  SERVER_ACTIVE_MEMBERS_UPDATE = 'serverActiveMembersUpdate',
+  SERVER_MEMBER_APPLICATIONS_UPDATE = 'serverMemberApplicationsUpdate',
   // Channel
   CHANNEL_UPDATE = 'channelUpdate',
+  CHANNEL_MESSAGES_UPDATE = 'channelMessagesUpdate',
   // Category
   CATEGORY_UPDATE = 'categoryUpdate',
   // Friend Group
