@@ -47,7 +47,7 @@
   justify-content: center;
 }
 
-.contextMenu .option:not([data-type=''], .language-select .option)::before {
+.contextMenu .option:not([data-type=''])::before {
   content: '';
   min-width: 16px;
   min-height: 16px;
