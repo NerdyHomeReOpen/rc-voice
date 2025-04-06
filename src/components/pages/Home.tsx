@@ -263,7 +263,6 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
         }
         setShowDropdown(false);
         setSearchQuery('');
-        // setIsLoading(false);
       };
 
       const hasResults =
