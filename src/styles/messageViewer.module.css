@@ -48,10 +48,15 @@
 .messageBox .header .timestamp {
   margin-left: 0.5rem;
   color: #888;
+  font-size: 12px;
 }
 
 .messageBox .content {
   color: #4a5568;
   user-select: text;
   word-break: break-all;
+}
+
+.username {
+  color: #4471be;
 }

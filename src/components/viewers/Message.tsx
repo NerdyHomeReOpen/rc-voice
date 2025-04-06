@@ -3,6 +3,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 // CSS
 import styles from '@/styles/messageViewer.module.css';
 import permission from '@/styles/common/permission.module.css';
+import vip from '@/styles/common/vip.module.css';
 
 // Components
 import MarkdownViewer from '@/components/viewers/Markdown';
@@ -69,16 +70,20 @@ const ChannelMessageTab: React.FC<ChannelMessageTabProps> = React.memo(
     // Hooks
     const lang = useLanguage();
 
+    console.log(messageGroup);
+
     // Variables
     const {
       gender: senderGender,
       name: senderName,
+      vip: senderVip,
       nickname: senderNickname,
       permissionLevel: messagePermission,
       contents: messageContents,
       timestamp: messageTimestamp,
     } = messageGroup;
     const timestamp = lang.getFormatTimestamp(messageTimestamp);
+    console.log(timestamp, messageTimestamp);
 
     const processContent = (content: string) => {
       return content.replace(
@@ -96,7 +101,14 @@ const ChannelMessageTab: React.FC<ChannelMessageTabProps> = React.memo(
         />
         <div className={styles['messageBox']}>
           <div className={styles['header']}>
-            <div className={styles['name']}>{senderNickname || senderName}</div>
+            {senderVip > 0 && (
+              <div
+                className={`${vip['vipIcon']} ${vip[`vip-small-${senderVip}`]}`}
+              ></div>
+            )}
+            <div className={styles['username']}>
+              {senderNickname || senderName}
+            </div>
             <div className={styles['timestamp']}>{timestamp}</div>
           </div>
           {messageContents.map((content, index) => (

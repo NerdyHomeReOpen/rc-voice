@@ -67,26 +67,17 @@ const LanguageProvider = ({ children }: LanguageProviderProps) => {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
+    const hours = messageDate.getHours().toString().padStart(2, '0');
+    const minutes = messageDate.getMinutes().toString().padStart(2, '0');
+    const seconds = messageDate.getSeconds().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}:${seconds}`;
+
     if (messageDay.getTime() === today.getTime()) {
-      return messageDate.toLocaleTimeString(timezoneLang, {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      return timeString;
     } else if (messageDay.getTime() === yesterday.getTime()) {
-      return `${translation.yesterday} ${messageDate.toLocaleTimeString(
-        timezoneLang,
-        {
-          hour: '2-digit',
-          minute: '2-digit',
-        },
-      )}`;
+      return `${translation.yesterday} ${timeString}`;
     }
-    return `${messageDate.toLocaleDateString(
-      timezoneLang,
-    )} ${messageDate.toLocaleTimeString(timezoneLang, {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`;
+    return `${messageDate.toLocaleDateString(timezoneLang)} ${timeString}`;
   };
 
   return (
