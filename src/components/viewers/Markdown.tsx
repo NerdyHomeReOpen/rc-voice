@@ -83,29 +83,29 @@ const Markdown: React.FC<MarkdownProps> = React.memo(
     const sanitized = DOMPurify.sanitize(withEmojis, PURIFY_CONFIG);
     const components: Components = {
       h1: ({ node, ...props }: any) => (
-        <h1 className="text-2xl font-bold mb-2 text-gray-900" {...props} />
+        <h1 className="text-2xl font-bold mb-2" {...props} />
       ),
       h2: ({ node, ...props }: any) => (
-        <h2 className="text-xl font-bold mb-1 text-gray-800" {...props} />
+        <h2 className="text-xl font-bold mb-1" {...props} />
       ),
       h3: ({ node, ...props }: any) => (
-        <h3 className="text-lg font-bold text-gray-700" {...props} />
+        <h3 className="text-lg font-bold" {...props} />
       ),
       p: ({ node, ...props }: any) => (
-        <div className="leading-relaxed text-gray-600" {...props} />
+        <div className="leading-relaxed" {...props} />
       ),
       ul: ({ node, ...props }: any) => (
-        <ul className="list-disc list-inside text-gray-600" {...props} />
+        <ul className="list-disc list-inside" {...props} />
       ),
       li: ({ node, ...props }: any) => (
         <li className="leading-normal" {...props} />
       ),
       ol: ({ node, ...props }: any) => (
-        <ol className="list-decimal list-inside text-gray-600" {...props} />
+        <ol className="list-decimal list-inside" {...props} />
       ),
       blockquote: ({ node, ...props }: any) => (
         <blockquote
-          className="border-l-4 border-gray-300 pl-4 italic text-gray-600 overflow-x-auto"
+          className="border-l-4 border-gray-300 pl-4 italic overflow-x-auto"
           {...props}
         />
       ),
@@ -171,7 +171,10 @@ const Markdown: React.FC<MarkdownProps> = React.memo(
         <code className="bg-gray-100 text-gray-800 rounded px-1" {...props} />
       ),
       pre: ({ node, ...props }: any) => (
-        <pre className="bg-gray-100 text-gray-800 rounded p-2 overflow-x-auto" {...props} />
+        <pre
+          className="bg-gray-100 text-gray-800 rounded p-2 overflow-x-auto"
+          {...props}
+        />
       ),
       strong: ({ node, ...props }: any) => (
         <strong className="font-semibold text-gray-800" {...props} />
@@ -179,9 +182,7 @@ const Markdown: React.FC<MarkdownProps> = React.memo(
       em: ({ node, ...props }: any) => (
         <em className="italic text-gray-600" {...props} />
       ),
-      br: ({ node, ...props }: any) => (
-        <br className="my-2" {...props} />
-      ),
+      br: ({ node, ...props }: any) => <br className="my-2" {...props} />,
     };
 
     return (
