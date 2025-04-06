@@ -281,7 +281,7 @@
   right: 10px;
   min-width: 15px;
   min-height: 15px;
-  background-image: url('../../../public/tapCloseBtn.png');
+  background-image: url('../../../public/ctrl/tabitem_button.png');
   background-repeat: no-repeat;
   background-position: 0 0;
 }

@@ -498,7 +498,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <textarea
-                    style={{ minHeight: '200px' }}
+                    style={{ minHeight: '330px' }}
                     value={serverAnnouncement}
                     onChange={(e) => setServerAnnouncement(e.target.value)}
                   />
@@ -740,7 +740,12 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
               </div>
             ) : activeTabIndex === 3 ? (
               <div className={popup['col']}>
-                <div className={popup['label']}>{lang.tr.accessPermission}</div>
+                <div className={popup['pageHeaderText']}>
+                  <div className={popup['label']}>
+                    {lang.tr.accessPermission}
+                  </div>
+                  <div className={popup['textLineSplit']}></div>
+                </div>
                 <div className={popup['inputGroup']}>
                   <div className={`${popup['inputBox']} ${popup['row']}`}>
                     <input
