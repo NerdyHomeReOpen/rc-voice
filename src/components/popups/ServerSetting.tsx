@@ -231,51 +231,10 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
       ipcService.window.close();
     };
 
-    // const handleUserMove = () => {};
-
-    // const handleKickServer = (member: ServerMember) => {
-    //   if (!socket) return;
-    //   ipcService.popup.open(PopupType.DIALOG_WARNING);
-    //   ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
-    //     iconType: 'warning',
-    //     title: `確定要踢出 ${member.name} 嗎？使用者可以再次加入。`,
-    //     submitTo: PopupType.DIALOG_WARNING,
-    //   });
-    //   ipcService.popup.onSubmit(PopupType.DIALOG_WARNING, () => {
-    //     handleUpdateMember(
-    //       {
-    //         id: member.id,
-    //         permissionLevel: Permission.Guest,
-    //         createdAt: 0,
-    //         nickname: '',
-    //       },
-    //       member.userId,
-    //       member.serverId,
-    //     );
-    //   });
-    // };
-
-    // const handleBlockUser = (member: ServerMember) => {
-    //   if (!socket) return;
-    //   ipcService.popup.open(PopupType.DIALOG_WARNING);
-    //   ipcService.initialData.onRequest(PopupType.DIALOG_WARNING, {
-    //     iconType: 'warning',
-    //     title: `確定要封鎖 ${member.name} 嗎？使用者將無法再次加入。`,
-    //     submitTo: PopupType.DIALOG_WARNING,
-    //   });
-    //   ipcService.popup.onSubmit(PopupType.DIALOG_WARNING, () => {
-    //     handleUpdateMember(
-    //       {
-    //         id: member.id,
-    //         permissionLevel: Permission.Guest,
-    //         nickname: '',
-    //         isBlocked: true,
-    //       },
-    //       member.userId,
-    //       member.serverId,
-    //     );
-    //   });
-    // };
+    const handleKickUser = (userId: User['id'], serverId: Server['id']) => {
+      if (!socket) return;
+      socket.send.disconnectServer({ userId, serverId });
+    };
 
     const handleOpenMemberApplySetting = () => {
       ipcService.popup.open(PopupType.MEMBERAPPLY_SETTING);
@@ -311,6 +270,19 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
       ipcService.initialData.onRequest(PopupType.DIALOG_ERROR, {
         title: message,
         submitTo: PopupType.DIALOG_ERROR,
+      });
+    };
+
+    const handleOpenDirectMessage = (
+      userId: User['id'],
+      targetId: User['id'],
+      targetName: User['name'],
+    ) => {
+      ipcService.popup.open(PopupType.DIRECT_MESSAGE);
+      ipcService.initialData.onRequest(PopupType.DIRECT_MESSAGE, {
+        userId,
+        targetId,
+        targetName,
       });
     };
 
@@ -613,6 +585,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                           permissionLevel > 4 && memberPermissionLevel !== 4;
                         const canChangeToAdmin =
                           permissionLevel > 5 && memberPermissionLevel !== 5;
+                        const canKick = permissionLevel > 4 && !isCurrentUser;
 
                         return (
                           <tr
@@ -620,18 +593,6 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                             onContextMenu={(e) => {
                               const isCurrentUser = memberUserId === userId;
                               contextMenu.showContextMenu(e.pageX, e.pageY, [
-                                // {
-                                //   id: 'send-message',
-                                //   label: '傳送即時訊息',
-                                //   onClick: () => {},
-                                //   show: !isCurrentUser,
-                                // },
-                                // {
-                                //   id: 'view-profile',
-                                //   label: '檢視個人檔案',
-                                //   onClick: () => {},
-                                //   show: !isCurrentUser,
-                                // },
                                 {
                                   id: 'apply-friend',
                                   label: lang.tr.addFriend,
@@ -639,60 +600,41 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                                     handleOpenApplyFriend(userId, memberUserId),
                                   show: !isCurrentUser,
                                 },
-                                // {
-                                //   label: '拒聽此人語音',
-                                //   onClick: () => {},
-                                // },
+                                {
+                                  id: 'direct-message',
+                                  label: lang.tr.directMessage,
+                                  onClick: () =>
+                                    handleOpenDirectMessage(
+                                      userId,
+                                      memberUserId,
+                                      memberName,
+                                    ),
+                                  show: !isCurrentUser,
+                                },
                                 {
                                   id: 'edit-nickname',
                                   label: lang.tr.editNickname,
-                                  show: canEditNickname,
                                   onClick: () =>
                                     handleOpenEditNickname(
                                       memberServerId,
                                       memberUserId,
                                     ),
+                                  show: canEditNickname,
                                 },
-                                // {
-                                //   id: 'separator',
-                                //   label: '',
-                                //   show: !isCurrentUser,
-                                // },
-                                // {
-                                //   id: 'move-to-my-channel',
-                                //   label: lang.tr.moveToMyChannel,
-                                //   onClick: () => handleUserMove(),
-                                //   show: !isCurrentUser,
-                                // },
-                                // {
-                                //   id: 'separator',
-                                //   label: '',
-                                //   show: !isCurrentUser,
-                                // },
-                                // {
-                                //   label: '禁止此人語音',
-                                //   onClick: () => {},
-                                // },
-                                // {
-                                //   label: '禁止文字',
-                                //   onClick: () => {},
-                                // },
-                                // {
-                                //   id: 'kick',
-                                //   label: lang.tr.kickOut,
-                                //   onClick: () => handleKickServer(member),
-                                //   show: !isCurrentUser,
-                                // },
-                                // {
-                                //   id: 'block',
-                                //   label: lang.tr.block,
-                                //   onClick: () => handleBlockUser(member),
-                                //   show: !isCurrentUser,
-                                // },
                                 {
                                   id: 'separator',
                                   label: '',
                                   show: canManageMember,
+                                },
+                                {
+                                  id: 'kick',
+                                  label: lang.tr.kick,
+                                  show: canKick,
+                                  onClick: () =>
+                                    handleKickUser(
+                                      memberUserId,
+                                      memberServerId,
+                                    ),
                                 },
                                 {
                                   id: 'member-management',
