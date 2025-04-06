@@ -43,7 +43,7 @@ const DirectMessageTab: React.FC<DirectMessageTabProps> = React.memo(
     return (
       <div className={styles['messageBox']}>
         <div className={styles['header']}>
-          <div className={styles['name']}>{senderName}</div>
+          <div className={styles['username']}>{senderName}</div>
           <div className={styles['timestamp']}>{timestamp}</div>
         </div>
         {messageContents.map((content, index) => (

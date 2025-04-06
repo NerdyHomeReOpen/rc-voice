@@ -54,6 +54,10 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
     const [targetVip, setTargetVip] = useState<User['vip']>(
       createDefault.user().vip,
     );
+    const [targetCurrentServerName, setTargetCurrentServerName] =
+      useState<string>();
+    const [targetCurrentServerId, setTargetCurrentServerId] =
+      useState<string>();
     const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
     const [messageInput, setMessageInput] = useState<string>('');
     const [isComposing, setIsComposing] = useState<boolean>(false);
@@ -80,6 +84,8 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
       setTargetLevel(data.level);
       setTargetSignature(data.signature);
       setTargetVip(data.vip);
+      data.currentServerId;
+      currentServer(data.currentServerId);
     };
 
     const handleUserUpdate = (data: User | null) => {
@@ -88,7 +94,6 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
     };
 
     const handleDirectMessageUpdate = (data: DirectMessage[] | null) => {
-      console.log('handleDirectMessageUpdate', data);
       if (!data) data = [];
 
       if (data.length > 0) {
@@ -97,14 +102,14 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
         const userId_2 = data[0].userId2;
 
         // check if the message array is between the current users
-        const isCurrentMessage = 
-          currentUsers.find((user) => user == userId_1) 
-          && currentUsers.find((user) => user == userId_2);
+        const isCurrentMessage =
+          currentUsers.find((user) => user == userId_1) &&
+          currentUsers.find((user) => user == userId_2);
 
         if (isCurrentMessage) {
           setDirectMessages(data);
         }
-      } 
+      }
     };
 
     const shakeWindow = (duration = 500) => {
@@ -172,6 +177,16 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
       refresh();
     }, [userId, targetId]);
 
+    const currentServer = async (serverId: string) => {
+      Promise.all([
+        refreshService.server({
+          serverId: serverId,
+        }),
+      ]).then(([server]) => {
+        setTargetCurrentServerName(server?.name);
+        setTargetCurrentServerId(server?.id);
+      });
+    };
     return (
       <div className={popup['popupContainer']}>
         <div className={directMessage['header']}>
@@ -216,7 +231,9 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
           <div className={directMessage['mainContent']}>
             <div className={directMessage['serverInArea']}>
               <div className={directMessage['serverInIcon']} />
-              <div className={directMessage['serverInName']}>測試</div>
+              <div className={directMessage['serverInName']}>
+                {targetCurrentServerName || ''}
+              </div>
             </div>
             <div className={directMessage['messageArea']}>
               <MessageViewer messages={directMessages} />
