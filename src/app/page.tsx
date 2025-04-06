@@ -79,7 +79,6 @@ const Header: React.FC<HeaderProps> = React.memo(
     const handleLeaveServer = (userId: User['id'], serverId: Server['id']) => {
       if (!socket) return;
       socket.send.disconnectServer({ userId, serverId });
-      mainTab.setSelectedTabId('home');
     };
 
     const handleUpdateStatus = (status: User['status'], userId: User['id']) => {
@@ -316,6 +315,11 @@ const Home = () => {
   };
 
   const handleServerUpdate = (data: Partial<Server> | null) => {
+    if (data != null) {
+      if (data.id) mainTab.setSelectedTabId('server');
+    } else {
+      mainTab.setSelectedTabId('home');
+    }
     if (!data) data = createDefault.server();
     setServer((prev) => ({ ...prev, ...data }));
   };
