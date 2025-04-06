@@ -222,7 +222,7 @@
 }
 
 .inputArea .topBar .buttons .button.nudge {
-  background-image: url(../../../public/im/Nudge.png);
+  background: url(../../../public/im/Nudge.png) no-repeat;
 }
 
 .inputArea .topBar .historyMessage {

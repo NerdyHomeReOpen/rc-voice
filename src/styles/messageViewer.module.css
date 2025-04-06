@@ -46,7 +46,7 @@
 }
 
 .messageBox .header .timestamp {
-  margin-left: 0.5rem;
+  margin-left: 0.2rem;
   color: #888;
   font-size: 12px;
 }
@@ -58,5 +58,5 @@
 }
 
 .username {
-  color: #4471be;
+  color: #2f94db;
 }
