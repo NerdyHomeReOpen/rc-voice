@@ -462,6 +462,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       0;
     const isSpeaking = speakingStatus !== 0;
     const isMuted = speakingStatus === -1;
+    const canKick = permissionLevel > 4 && !isCurrentUser;
 
     // Handlers
     const handleOpenEditNickname = (
@@ -486,6 +487,19 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       });
     };
 
+    const handleOpenDirectMessage = (
+      userId: User['id'],
+      targetId: User['id'],
+      targetName: User['name'],
+    ) => {
+      ipcService.popup.open(PopupType.DIRECT_MESSAGE);
+      ipcService.initialData.onRequest(PopupType.DIRECT_MESSAGE, {
+        userId,
+        targetId,
+        targetName,
+      });
+    };
+
     const handleUpdateMember = (
       member: Partial<Member>,
       userId: User['id'],
@@ -497,6 +511,11 @@ const UserTab: React.FC<UserTabProps> = React.memo(
         userId,
         serverId,
       });
+    };
+
+    const handleKickUser = (userId: User['id'], serverId: Server['id']) => {
+      if (!socket) return;
+      socket.send.disconnectServer({ userId, serverId });
     };
 
     return (
@@ -515,6 +534,17 @@ const UserTab: React.FC<UserTabProps> = React.memo(
               show: !isCurrentUser,
             },
             {
+              id: 'direct-message',
+              label: lang.tr.directMessage,
+              onClick: () =>
+                handleOpenDirectMessage(
+                  userId,
+                  channelMemberUserId,
+                  channelMemberName,
+                ),
+              show: !isCurrentUser,
+            },
+            {
               id: 'edit-nickname',
               label: lang.tr.editNickname,
               onClick: () =>
@@ -528,6 +558,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(
               id: 'separator',
               label: '',
               show: canManageMember,
+            },
+            {
+              id: 'kick',
+              label: lang.tr.kick,
+              show: canKick,
+              onClick: () =>
+                handleKickUser(channelMemberUserId, channelMemberServerId),
             },
             {
               id: 'member-management',
