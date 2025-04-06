@@ -410,3 +410,70 @@
 .serverId {
   color: #666;
 }
+
+.loadingWrapper {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loadingBox {
+  flex-direction: column;
+  pointer-events: auto;
+  width: 300px;
+  height: 100px;
+  border-radius: 2px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  background: white;
+  border: 1px solid #d3d8db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.loadingTitleContain {
+  display: flex;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.loadingGroupID {
+  margin-left: 5px;
+}
+
+.loadingGif {
+  background: url(../../public/icon_loading.gif) no-repeat center center;
+  background-position: 0 0;
+  width: 256px;
+  height: 12px;
+  background-size: contain;
+  margin-top: 15px;
+}
+
+.loadingCloseBtn {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  background: url(../../public/loading_close.png) no-repeat center center;
+  background-size: cover;
+  border: none;
+  cursor: pointer;
+  background-position: 0 0;
+}
+
+.loadingCloseBtn:hover {
+  background-position: -18px 0;
+}
+
+.loadingCloseBtn:active {
+  background-position: -36px 0;
+}

@@ -97,6 +97,8 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
     const [exactMatch, setExactMatch] = useState<Server | null>(null);
     const [personalResults, setPersonalResults] = useState<Server[]>([]);
     const [relatedResults, setRelatedResults] = useState<Server[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [loadingGroupID, setLoadingGroupID] = useState<string>();
 
     // Variables
     const {
@@ -246,8 +248,10 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
 
     // 優化後的 renderSearchBar
     const renderSearchBar = () => {
-      const handleServerConnect = (serverId: string) => {
+      const handleServerConnect = (serverId: string, displayId: string) => {
         if (socket) {
+          setIsLoading(true);
+          setLoadingGroupID(displayId);
           socket.send.connectServer({
             serverId,
             userId: user.id,
@@ -255,6 +259,7 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
         }
         setShowDropdown(false);
         setSearchQuery('');
+        // setIsLoading(false);
       };
 
       const hasResults =
@@ -275,7 +280,8 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && exactMatch) {
-                handleServerConnect(exactMatch.id);
+                setIsLoading(true);
+                handleServerConnect(exactMatch.id, exactMatch.displayId);
               }
             }}
             onFocus={() => setShowDropdown(true)}
@@ -299,7 +305,9 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
                     <SearchResultItem
                       key={server.id}
                       server={server}
-                      onClick={() => handleServerConnect(server.id)}
+                      onClick={() =>
+                        handleServerConnect(server.id, server.displayId)
+                      }
                     />
                   ))}
                 </>
@@ -314,7 +322,9 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
                     <SearchResultItem
                       key={server.id}
                       server={server}
-                      onClick={() => handleServerConnect(server.id)}
+                      onClick={() =>
+                        handleServerConnect(server.id, server.displayId)
+                      }
                     />
                   ))}
                 </>
@@ -383,6 +393,23 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(
             </div>
           </div>
         </main>
+        {isLoading && (
+          <div className={homePage['loadingWrapper']}>
+            <div className={homePage['loadingBox']}>
+              <div className={homePage['loadingTitleContain']}>
+                <div>正在連接</div>
+                <div className={homePage['loadingGroupID']}>
+                  {loadingGroupID}
+                </div>
+              </div>
+              <div className={homePage['loadingGif']}></div>
+              <div
+                className={homePage['loadingCloseBtn']}
+                onClick={() => setIsLoading(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   },
