@@ -30,11 +30,10 @@ import refreshService from '@/services/refresh.service';
 interface FriendGroupTabProps {
   friendGroup: FriendGroup;
   friends: UserFriend[];
-  user: User;
 }
 
 const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
-  ({ friendGroup, friends, user }) => {
+  ({ friendGroup, friends }) => {
     // Hooks
     const lang = useLanguage();
     const contextMenu = useContextMenu();
@@ -113,7 +112,7 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
         {expanded && friends && (
           <div className={styles['tabContent']}>
             {friendGroupFriends.map((friend) => (
-              <FriendCard key={friend.id} user={user} friend={friend} />
+              <FriendCard key={friend.id} friend={friend} />
             ))}
           </div>
         )}
@@ -125,7 +124,6 @@ const FriendGroupTab: React.FC<FriendGroupTabProps> = React.memo(
 FriendGroupTab.displayName = 'FriendGroupTab';
 
 interface FriendCardProps {
-  user: User;
   friend: UserFriend;
 }
 
@@ -175,9 +173,9 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
   };
 
   // Handlers
-  const handleServerUpdate = (server: Server | null) => {
-    if (!server) return;
-    setFriendServerName(server.name);
+  const handleServerUpdate = (data: Server | null) => {
+    if (!data) data = createDefault.server();
+    setFriendServerName(data.name);
   };
 
   const handleOpenEditFriend = (userId: User['id'], targetId: User['id']) => {
@@ -281,11 +279,13 @@ const FriendCard: React.FC<FriendCardProps> = React.memo(({ friend }) => {
 FriendCard.displayName = 'FriendCard';
 
 interface FriendListViewerProps {
-  user: User;
+  friendGroups: FriendGroup[];
+  friends: UserFriend[];
+  userId: string;
 }
 
 const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
-  ({ user }) => {
+  ({ friendGroups, friends, userId }) => {
     // Hooks
     const lang = useLanguage();
 
@@ -294,17 +294,12 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
     const [selectedTabId, setSelectedTabId] = useState<number>(0);
 
     // Variables
-    const {
-      id: userId,
-      friends: userFriends = [],
-      friendGroups: userFriendGroups = [],
-    } = user;
-    userFriends.sort((a, b) => {
+    friends.sort((a, b) => {
       if (a.currentServerId && !b.currentServerId) return -1;
       if (!a.currentServerId && b.currentServerId) return 1;
       return 0;
     });
-    const filteredFriends = userFriends.filter((fd) =>
+    const filteredFriends = friends.filter((fd) =>
       fd.name.includes(searchQuery),
     );
     const defaultFriendGroup: FriendGroup = createDefault.friendGroup({
@@ -368,12 +363,11 @@ const FriendListViewer: React.FC<FriendListViewerProps> = React.memo(
           <div className={styles['scrollView']}>
             {/* Friend Groups */}
             <div className={styles['friendList']}>
-              {[defaultFriendGroup, ...userFriendGroups]
+              {[defaultFriendGroup, ...friendGroups]
                 .sort((a, b) => a.order - b.order)
                 .map((friendGroup) => (
                   <FriendGroupTab
                     key={friendGroup.id}
-                    user={user}
                     friendGroup={friendGroup}
                     friends={filteredFriends}
                   />

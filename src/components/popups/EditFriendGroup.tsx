@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 // Types
-import { FriendGroup, PopupType, SocketServerEvent, User } from '@/types';
+import { FriendGroup } from '@/types';
 
 // Providers
 import { useSocket } from '@/providers/Socket';
@@ -42,36 +42,9 @@ const EditFriendGroupPopup: React.FC<EditFriendGroupPopupProps> = React.memo(
       socket.send.updateFriendGroup({ group, friendGroupId });
     };
 
-    const handleUserSearch = useCallback((name: User | null) => {
-      if (!name) return;
-      ipcService.popup.open(PopupType.APPLY_FRIEND);
-      ipcService.initialData.onRequest(PopupType.APPLY_FRIEND, {}, () =>
-        handleClose(),
-      );
-    }, []);
-
     const handleClose = () => {
       ipcService.window.close();
     };
-
-    // Effects
-    useEffect(() => {
-      if (!socket) return;
-
-      const eventHandlers = {
-        [SocketServerEvent.USER_SEARCH]: handleUserSearch,
-      };
-      const unsubscribe: (() => void)[] = [];
-
-      Object.entries(eventHandlers).map(([event, handler]) => {
-        const unsub = socket.on[event as SocketServerEvent](handler);
-        unsubscribe.push(unsub);
-      });
-
-      return () => {
-        unsubscribe.forEach((unsub) => unsub());
-      };
-    }, [socket, handleUserSearch]);
 
     return (
       <div className={popup['popupContainer']}>

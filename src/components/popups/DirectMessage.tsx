@@ -95,7 +95,6 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
 
     const handleDirectMessageUpdate = (data: DirectMessage[] | null) => {
       if (!data) data = [];
-
       if (data.length > 0) {
         const currentUsers = [userId, targetId];
         const userId_1 = data[0].userId1;
