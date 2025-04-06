@@ -91,7 +91,9 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const localStream = useRef<MediaStream | null>(null);
   const peerStreams = useRef<{ [id: string]: MediaStream }>({});
   const peerAudioRefs = useRef<{ [id: string]: HTMLAudioElement }>({});
-  const peerConnections = useRef<{ [id: string]: RTCPeerConnection }>({});
+  const peerConnections = useRef<{
+    [userId: string]: RTCPeerConnection & { answerProcessed?: boolean };
+  }>({});
   const peerDataChannels = useRef<{ [id: string]: RTCDataChannel }>({});
   const audioContext = useRef<AudioContext | null>(null);
   const gainNode = useRef<GainNode | null>(null);
@@ -542,17 +544,34 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const handleRTCAnswer = useCallback(async ({ userId, answer }: Answer) => {
     try {
       if (!peerConnections.current[userId]) return;
-      // Check if connection is already in stable state
-      if (peerConnections.current[userId].signalingState === 'stable') {
-        console.warn('Connection already in stable state, ignoring answer');
+
+      const connection = peerConnections.current[userId];
+
+      // 檢查是否已經處理過 answer
+      if (connection.answerProcessed) {
+        console.warn(`Answer for user ${userId} already processed, skipping...`);
         return;
       }
-      // Receive answer
+
+      console.log(`handleRTCAnswer for user ${userId}, current signaling state: ${connection.signalingState}`);
+
+      if (connection.signalingState === 'stable') {
+        console.warn(`Connection for user ${userId} is already in stable state, ignoring answer`);
+        return;
+      }
+
       const answerDes = new RTCSessionDescription({
         type: answer.type,
         sdp: answer.sdp,
       });
-      await peerConnections.current[userId].setRemoteDescription(answerDes);
+
+      console.log(`Setting remote description for user ${userId}, type: ${answer.type}`);
+      await connection.setRemoteDescription(answerDes);
+      console.log(`Remote description set successfully for user ${userId}, new signaling state: ${connection.signalingState}`);
+
+      // 標記 answer 已處理
+      connection.answerProcessed = true;
+
     } catch (error) {
       console.error('Error setting remote description:', error);
     }
