@@ -411,7 +411,11 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
           if (isFailed) removePeerConnection(userId);
         };
         peerConnection.onsignalingstatechange = () => {
-          console.log('Signaling State:', peerConnection.signalingState);
+          console.log(
+            userId,
+            'Signaling State:',
+            peerConnection.signalingState
+          );
           const isFailed = ['disconnected', 'failed', 'closed'].includes(
             peerConnection.signalingState,
           );
