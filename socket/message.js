@@ -210,6 +210,86 @@ const messageHandler = {
       );
     }
   },
+
+  shakeDirectMessage: async (io, socket, data) => {
+    try {
+      // Validate data
+      const { userId, targetId } = data;
+      console.log("shakeDirectMessage")
+      console.log("userId", userId)
+      console.log("targetId", targetId)
+      if (!userId || !targetId) {
+        throw new StandardizedError(
+          '無效的資料',
+          'SHAKE_DIRECT_MESSAGE',
+          'ValidationError',
+          'DATA_INVALID',
+          401,
+        );
+      }
+      // Validate operation
+      const operatorId = await Func.validate.socket(socket);
+
+      // Get data
+      const operator = await Get.user(operatorId);
+      const user = await Get.user(userId);
+      const target = await Get.user(targetId);
+      let userSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === user.id) {
+          userSocket = _socket;
+        }
+      });
+      let targetSocket;
+      io.sockets.sockets.forEach((_socket) => {
+        if (_socket.userId === target.id) {
+          targetSocket = _socket;
+        }
+      });
+
+      // Validate operation
+      if (operator.id !== user.id) {
+        throw new StandardizedError(
+          '無法震動非自己的用戶',
+          'SHAKE_DIRECT_MESSAGE',
+          'PERMISSION_DENIED',
+          403,
+        );
+      }
+
+      if (targetSocket) {
+        io.to(targetSocket.id).emit(
+          'shakeDirectMessage',
+          {
+            userId: user.id,
+            targetId: target.id,
+            targetName: user.name,
+          }
+        );
+      }
+
+      new Logger('Message').success(
+        `User(${user.id}) shake User(${target.id})`,
+      );
+    } catch (error) {
+      if (!(error instanceof StandardizedError)) {
+        error = new StandardizedError(
+          `震動用戶時發生無法預期的錯誤: ${error.message}`,
+          'ServerError',
+          'SHAKE_DIRECT_MESSAGE',
+          'EXCEPTION_ERROR',
+          500,
+        );
+      }
+
+      // Emit error data (to the operator)
+      io.to(socket.id).emit('error', error);
+
+      new Logger('Message').error(
+        `Error shaking user: ${error.error_message} (${socket.id})`,
+      );
+    }
+  },
 };
 
 module.exports = { ...messageHandler };

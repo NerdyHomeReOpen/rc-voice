@@ -183,6 +183,9 @@ module.exports = (io) => {
     socket.on('directMessage', async (data) =>
       messageHandler.sendDirectMessage(io, socket, data),
     );
+    socket.on('shakeDirectMessage', async (data) =>
+      messageHandler.shakeDirectMessage(io, socket, data),
+    );
     // RTC
     socket.on('RTCOffer', async (data) => rtcHandler.offer(io, socket, data));
     socket.on('RTCAnswer', async (data) => rtcHandler.answer(io, socket, data));
