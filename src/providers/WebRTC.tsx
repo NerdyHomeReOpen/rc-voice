@@ -88,7 +88,6 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
 
   // Refs
   const volumePercentRef = useRef<number>(0);
-  const mutedVolume = useRef<number>(0);
   const localStream = useRef<MediaStream | null>(null);
   const peerStreams = useRef<{ [id: string]: MediaStream }>({});
   const peerAudioRefs = useRef<{ [id: string]: HTMLAudioElement }>({});
@@ -98,6 +97,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const gainNode = useRef<GainNode | null>(null);
   const sourceNode = useRef<MediaStreamAudioSourceNode | null>(null);
   const destinationNode = useRef<MediaStreamAudioDestinationNode | null>(null);
+  const analyserNode = useRef<AnalyserNode | null>(null);
   const volumeThreshold = useRef<number>(1);
   const volumeSilenceDelay = useRef<number>(500);
 
@@ -107,16 +107,9 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   // Handlers
   const toggleMute = () => {
     try {
-      if (isMute) {
-        updateMicVolume(mutedVolume.current);
-        volumePercentRef.current = 0;
-        setVolumePercent(0);
-      } else {
-        mutedVolume.current = micVolume;
-        updateMicVolume(0);
-        volumePercentRef.current = -1;
-        setVolumePercent(-1);
-      }
+      localStream.current?.getAudioTracks().forEach((track) => {
+        track.enabled = isMute;
+      });
       setIsMute(!isMute);
     } catch (error) {
       console.error('Error toggling mute:', error);
@@ -243,21 +236,21 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
           analyser.fftSize = 512;
           const dataArray = new Uint8Array(analyser.fftSize);
 
-          console.log('analyser: ', analyser);
-
           source.connect(gain);
           gain.connect(analyser);
-          analyser.connect(destination);
+          gain.connect(destination);
 
           // Set nodes
           sourceNode.current = source;
           gainNode.current = gain;
           destinationNode.current = destination;
+          analyserNode.current = analyser;
 
           let silenceTimer: ReturnType<typeof setTimeout> | null = null;
 
           const detectSpeaking = () => {
-            analyser.getByteTimeDomainData(dataArray);
+            if (!analyserNode.current) return;
+            analyserNode.current.getByteTimeDomainData(dataArray);
             let sum = 0;
             for (let i = 0; i < dataArray.length; i++) {
               const v = (dataArray[i] - 128) / 128;
@@ -396,14 +389,22 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
             handleSendRTCIceCandidate(socketId, event.candidate);
         };
         peerConnection.oniceconnectionstatechange = () => {
-          console.log(userId, 'Connection State:', peerConnection.connectionState);
+          console.log(
+            userId,
+            'Connection State:',
+            peerConnection.connectionState,
+          );
           const isFailed = ['disconnected', 'failed', 'closed'].includes(
             peerConnection.connectionState,
           );
           if (isFailed) removePeerConnection(userId);
         };
         peerConnection.onconnectionstatechange = () => {
-          console.log(userId, 'Connection State:', peerConnection.connectionState);
+          console.log(
+            userId,
+            'Connection State:',
+            peerConnection.connectionState,
+          );
           const isFailed = ['disconnected', 'failed', 'closed'].includes(
             peerConnection.connectionState,
           );
@@ -616,16 +617,16 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log('speakerVolume: ', speakerVolume);
-  }, [speakerVolume]);
+  // useEffect(() => {
+  //   console.log('speakerVolume: ', speakerVolume);
+  // }, [speakerVolume]);
+
+  // useEffect(() => {
+  //   console.log('micVolume: ', micVolume);
+  // }, [micVolume]);
 
   useEffect(() => {
-    console.log('micVolume: ', micVolume);
-  }, [micVolume]);
-
-  useEffect(() => {
-    console.log('volumePercent: ', volumePercent);
+    // console.log('volumePercent: ', volumePercent);
     for (const dataChannel of Object.values(peerDataChannels.current)) {
       if (dataChannel && dataChannel.readyState === 'open') {
         dataChannel.send(JSON.stringify({ volume: volumePercent }));
