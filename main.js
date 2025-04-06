@@ -265,8 +265,7 @@ async function createMainWindow() {
     event.preventDefault();
     //make action as hide instead, skip taskbar
     mainWindow.hide();
-    win.setSkipTaskbar(true);
-    
+    mainWindow.setSkipTaskbar(true);
   });
   
   vartrayMenuTemplate = [
@@ -274,7 +273,7 @@ async function createMainWindow() {
       label: "打開主視窗",
       click: function(){
         mainWindow.show();
-        win.setSkipTaskbar(true);
+        mainWindow.setSkipTaskbar(true);
         }
       },
     {
@@ -331,7 +330,7 @@ async function createMainWindow() {
     appTray.on('double-click', function(){
       //mainWindow show and hide switch
       mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
-      mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : win.setSkipTaskbar(true);
+      mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
       }
     );
     
