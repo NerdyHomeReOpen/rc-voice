@@ -2170,6 +2170,9 @@ export enum SocketClientEvent {
   RTC_OFFER = 'RTCOffer',
   RTC_ANSWER = 'RTCAnswer',
   RTC_ICE_CANDIDATE = 'RTCIceCandidate',
+
+  // Direct Message Shake
+  SHAKE_DIRECT_MESSAGE = 'shakeDirectMessage',
 }
 
 export enum SocketServerEvent {
@@ -2203,6 +2206,9 @@ export enum SocketServerEvent {
   RTC_ICE_CANDIDATE = 'RTCIceCandidate',
   RTC_JOIN = 'RTCJoin',
   RTC_LEAVE = 'RTCLeave',
+
+  // Direct Message Shake
+  SHAKE_DIRECT_MESSAGE = 'shakeDirectMessage',
 }
 
 export enum PopupType {
