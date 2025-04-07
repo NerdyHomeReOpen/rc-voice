@@ -45,6 +45,7 @@ const PURIFY_CONFIG: PurifyConfig = {
     'source',
     'audio',
     'iframe',
+    'font',
   ],
   ALLOWED_ATTR: [
     'src',
