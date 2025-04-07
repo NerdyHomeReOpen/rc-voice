@@ -819,7 +819,7 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
         measureLatency().then((latency) => {
           setLatency(latency);
         });
-      }, 1000);
+      }, 10000);
       return () => clearInterval(measure);
     }, []);
 
