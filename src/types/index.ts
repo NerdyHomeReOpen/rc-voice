@@ -2212,6 +2212,8 @@ export enum SocketServerEvent {
   RTC_ICE_CANDIDATE = 'RTCIceCandidate',
   RTC_JOIN = 'RTCJoin',
   RTC_LEAVE = 'RTCLeave',
+  // Play
+  PLAY_SOUND = 'playSound',
 }
 
 export enum PopupType {
