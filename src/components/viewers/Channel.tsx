@@ -444,15 +444,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     } = channelMember;
     const channelMemberGrade = Math.min(56, channelMemberLevel); // 56 is max leve
     const isCurrentUser = userId === channelMemberUserId;
-    const canEditNickname =
-      (isCurrentUser && permissionLevel > 1) ||
-      (permissionLevel > 4 &&
-        channelMemberPermission > 1 &&
-        permissionLevel > channelMemberPermission);
+
     const canManageMember =
       !isCurrentUser &&
       permissionLevel > channelMemberPermission &&
       (channelMemberPermission > 1 || permissionLevel > 5);
+    const canEditNickname =
+      (isCurrentUser && permissionLevel > 1) || canManageMember;
     const canChangeToGuest =
       permissionLevel > 5 && channelMemberPermission !== 1;
     const canChangeToMember =
