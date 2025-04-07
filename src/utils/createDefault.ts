@@ -43,6 +43,7 @@ export const createDefault = {
     name: '',
     type: 'channel',
     visibility: 'public',
+    password: '',
     voiceMode: 'free',
     isLobby: false,
     isRoot: false,

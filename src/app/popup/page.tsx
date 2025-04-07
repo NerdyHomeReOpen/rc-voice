@@ -14,6 +14,7 @@ import UserSetting from '@/components/popups/UserSetting';
 import ServerSetting from '@/components/popups/ServerSetting';
 import ChannelSetting from '@/components/popups/ChannelSetting';
 import SystemSetting from '@/components/popups/SystemSetting';
+import ChannelPassword from '@/components/popups/ChannelPassword';
 import MemberApplySetting from '@/components/popups/MemberApplySetting';
 import CreateServer from '@/components/popups/CreateServer';
 import CreateChannel from '@/components/popups/CreateChannel';
@@ -122,6 +123,11 @@ const Popup = React.memo(() => {
     if (!initialData || !type) return;
 
     switch (type) {
+      case PopupType.CHANNEL_PASSWORD:
+        setHeaderTitle(lang.tr.pleaseEnterTheChannelPassword);
+        setHeaderButtons(['close']);
+        setContent(<ChannelPassword {...initialData} />);
+        break;
       case PopupType.USER_SETTING:
         setHeaderTitle(lang.tr.editUser);
         setHeaderButtons(['close']);
@@ -173,7 +179,7 @@ const Popup = React.memo(() => {
         setContent(<EditFriendGroup {...initialData} />);
         break;
       case PopupType.EDIT_FRIEND:
-        setHeaderTitle('編輯好友');
+        setHeaderTitle(lang.tr.editFriend);
         setHeaderButtons(['close']);
         setContent(<EditFriend {...initialData} />);
         break;
