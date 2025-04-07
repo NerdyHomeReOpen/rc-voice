@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 // CSS
@@ -293,7 +294,7 @@ const Header: React.FC<HeaderProps> = React.memo(
 
 Header.displayName = 'Header';
 
-const Home = () => {
+const RootPageComponent = () => {
   // Hooks
   const socket = useSocket();
   const lang = useLanguage();
@@ -429,6 +430,11 @@ const Home = () => {
   );
 };
 
-Home.displayName = 'Home';
+RootPageComponent.displayName = 'RootPageComponent';
 
-export default Home;
+// use dynamic import to disable SSR
+const RootPage = dynamic(() => Promise.resolve(RootPageComponent), {
+  ssr: false,
+});
+
+export default RootPage;
