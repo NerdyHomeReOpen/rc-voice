@@ -4,7 +4,7 @@
   <img src="https://github.com/user-attachments/assets/74f23cae-f3aa-4deb-bbd1-72290d9193f3" width="200px" align="center">
 </div>
 
-<img src="https://img.shields.io/badge/Join-Discord-blue?logo=discord&link=https%3A%2F%2Fdiscord.gg%2FadCWzv6wwS"/> <img src="https://img.shields.io/badge/Latest-v0.1.3-green"/>
+<img src="https://img.shields.io/badge/Join-Discord-blue?logo=discord&link=https%3A%2F%2Fdiscord.gg%2FadCWzv6wwS"/> <img src="https://img.shields.io/badge/Latest-v0.1.4-green"/>
 
 RiceCall，RaidCall 的非官方復刻版，使用 react 框架開發，electron 建置
 
