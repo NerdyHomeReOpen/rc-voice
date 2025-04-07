@@ -5,7 +5,7 @@ import popup from '@/styles/common/popup.module.css';
 import setting from '@/styles/popups/editServer.module.css';
 
 // Types
-import { Channel, Server } from '@/types';
+import { Channel, PopupType, Server } from '@/types';
 
 // Providers
 import { useLanguage } from '@/providers/Language';
@@ -46,6 +46,9 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
     const [channelVisibility, setChannelVisibility] = useState<
       Channel['visibility']
     >(createDefault.channel().visibility);
+    const [channelPassword, setChannelPassword] = useState<Channel['password']>(
+      createDefault.channel().password,
+    );
     const [channelForbidText, setChannelForbidText] = useState<
       Channel['forbidText']
     >(createDefault.channel().forbidText);
@@ -90,6 +93,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       setChannelOrder(data.order);
       setChannelIsLobby(data.isLobby);
       setChannelVisibility(data.visibility);
+      setChannelPassword(data.password);
       setChannelUserLimit(data.userLimit);
       setChannelVoiceMode(data.voiceMode);
       setChannelForbidText(data.forbidText);
@@ -331,14 +335,14 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                     <input
                       type="radio"
                       name="voiceQuality"
-                      checked={channelVisibility === 'private'}
+                      checked={channelVisibility === 'readonly'}
                       onChange={() => {
-                        setChannelVisibility('private');
+                        setChannelVisibility('readonly');
                       }}
                     />
                     <div>
                       <label className={popup['label']}>
-                        {lang.tr.channelPrivate}
+                        {lang.tr.channelReadonly}
                       </label>
                     </div>
                   </div>
@@ -351,14 +355,33 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                     <input
                       type="radio"
                       name="voiceQuality"
-                      checked={channelVisibility === 'readonly'}
+                      checked={channelVisibility === 'private'}
                       onChange={() => {
-                        setChannelVisibility('readonly');
+                        ipcService.popup.open(PopupType.CHANNEL_PASSWORD);
+                        ipcService.initialData.onRequest(
+                          PopupType.CHANNEL_PASSWORD,
+                          {
+                            userId: '',
+                            channelId,
+                            isSettingPassword: true,
+                            submitTo: PopupType.CHANNEL_SETTING,
+                          },
+                        );
+                        ipcService.popup.onSubmit(
+                          PopupType.CHANNEL_PASSWORD,
+                          (password: string | null) => {
+                            console.log(password);
+                            if (password !== undefined) {
+                              setChannelPassword(password);
+                              setChannelVisibility('private');
+                            }
+                          },
+                        );
                       }}
                     />
                     <div>
                       <label className={popup['label']}>
-                        {lang.tr.channelReadonly}
+                        {lang.tr.channelPrivate}
                       </label>
                     </div>
                   </div>
@@ -502,6 +525,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                 {
                   name: channelName,
                   visibility: channelVisibility,
+                  password: channelPassword,
                   userLimit: channelUserLimit,
                   voiceMode: channelVoiceMode,
                   order: channelOrder,

@@ -335,7 +335,19 @@ const ChannelTab: React.FC<ChannelTabProps> = React.memo(
           key={channelId}
           className={`${styles['channelTab']} `}
           onDoubleClick={() => {
-            if (canJoin) handleJoinChannel(userId, channelId);
+            if (
+              // channel?.password &&
+              channelVisibility === 'private' &&
+              permissionLevel < 3
+            ) {
+              ipcService.popup.open(PopupType.CHANNEL_PASSWORD);
+              ipcService.initialData.onRequest(PopupType.CHANNEL_PASSWORD, {
+                channelId,
+                userId,
+                isSettingPassword: false,
+                submitTo: PopupType.CHANNEL_PASSWORD,
+              });
+            } else if (canJoin) handleJoinChannel(userId, channelId);
           }}
           onContextMenu={(e) => {
             contextMenu.showContextMenu(e.pageX, e.pageY, [
