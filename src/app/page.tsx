@@ -307,7 +307,7 @@ const Home = () => {
   leaveAudioRef.current = new Audio('./sounds/Ydisconnect.wav');
   leaveAudioRef.current.volume = 0.5;
   const recieveAudioRef = useRef<HTMLAudioElement>(null);
-  recieveAudioRef.current = new Audio('./sounds/ReceiveChannelMessage.wav');
+  recieveAudioRef.current = new Audio('./sounds/ReceiveChannelMsg.wav');
   recieveAudioRef.current.volume = 0.5;
 
   // States
