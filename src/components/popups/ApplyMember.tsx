@@ -88,7 +88,7 @@ const ApplyMemberPopup: React.FC<ApplyMemberPopupProps> = React.memo(
         submitTo: PopupType.DIALOG_SUCCESS,
       });
       ipcService.popup.onSubmit(PopupType.DIALOG_SUCCESS, () => {
-        setSection(1);
+        handleClose();
       });
     };
 
