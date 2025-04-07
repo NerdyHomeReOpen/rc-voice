@@ -446,7 +446,9 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const isCurrentUser = userId === channelMemberUserId;
     const canEditNickname =
       (isCurrentUser && permissionLevel > 1) ||
-      (permissionLevel > 4 && permissionLevel > channelMemberPermission);
+      (permissionLevel > 4 &&
+        channelMemberPermission > 1 &&
+        permissionLevel > channelMemberPermission);
     const canManageMember =
       !isCurrentUser &&
       permissionLevel > channelMemberPermission &&
@@ -468,7 +470,10 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const isSpeaking = speakingStatus !== 0;
     const isMuted = speakingStatus === -1;
     const isMutedByUser = webRTC.muteList?.includes(channelMemberUserId);
-    const canKick = permissionLevel > 4 && !isCurrentUser;
+    const canKick =
+      permissionLevel > 4 &&
+      !isCurrentUser &&
+      channelMemberPermission < permissionLevel;
 
     // Handlers
     const handleOpenEditNickname = (
