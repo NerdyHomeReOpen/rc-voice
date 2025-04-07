@@ -607,13 +607,13 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                           createdAt: memberJoinDate,
                         } = member;
                         const isCurrentUser = memberUserId === userId;
-                        const canEditNickname =
-                          (isCurrentUser && permissionLevel > 1) ||
-                          permissionLevel > 4;
                         const canManageMember =
                           !isCurrentUser &&
                           permissionLevel > memberPermissionLevel &&
-                          (memberPermissionLevel > 1 || permissionLevel > 5);
+                          (memberPermissionLevel > 1 || permissionLevel > 4);
+                        const canEditNickname =
+                          (isCurrentUser && permissionLevel > 1) ||
+                          canManageMember;
                         const canChangeToGuest =
                           permissionLevel > 5 && memberPermissionLevel !== 1;
                         const canChangeToMember =
@@ -624,7 +624,10 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                           permissionLevel > 4 && memberPermissionLevel !== 4;
                         const canChangeToAdmin =
                           permissionLevel > 5 && memberPermissionLevel !== 5;
-                        const canKick = permissionLevel > 4 && !isCurrentUser;
+                        const canKick =
+                          !isCurrentUser &&
+                          permissionLevel > 4 &&
+                          memberPermissionLevel < permissionLevel;
 
                         return (
                           <tr
