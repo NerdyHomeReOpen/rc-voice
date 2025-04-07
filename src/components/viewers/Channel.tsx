@@ -31,6 +31,9 @@ import BadgeViewer from '@/components/viewers/Badge';
 // Services
 import ipcService from '@/services/ipc.service';
 
+// Utils
+import { measureLatency } from '@/utils/measureLatency';
+
 interface CategoryTabProps {
   userId: User['id'];
   userCurrentChannelId: Channel['id'];
@@ -722,9 +725,10 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
     // States
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
     const [view, setView] = useState<'all' | 'current'>('all');
+    const [latency, setLatency] = useState<string>('0');
 
     // Variables
-    const connectStatus = 3;
+    const connectStatus = 4 - Math.floor(Number(latency) / 50);
     const { id: userId } = user;
     const {
       id: serverId,
@@ -807,6 +811,15 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
         }));
       }
     }, [serverChannels]);
+
+    useEffect(() => {
+      const measure = setInterval(() => {
+        measureLatency().then((latency) => {
+          setLatency(latency);
+        });
+      }, 1000);
+      return () => clearInterval(measure);
+    }, []);
 
     return (
       <>
@@ -912,9 +925,11 @@ const ChannelViewer: React.FC<ChannelViewerProps> = React.memo(
         {/* Current Channel */}
         <div className={styles['currentChannelBox']}>
           <div
-            className={`${styles['currentChannelIcon']} ${
-              styles[`status${connectStatus}`]
-            }`}
+            className={`
+              ${styles['currentChannelIcon']} 
+              ${styles[`status${connectStatus}`]}
+            `}
+            title={`${latency}ms`}
           />
           <div className={styles['currentChannelText']}>{channelName}</div>
         </div>
