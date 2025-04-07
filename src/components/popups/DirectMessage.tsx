@@ -84,8 +84,7 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
       setTargetLevel(data.level);
       setTargetSignature(data.signature);
       setTargetVip(data.vip);
-      data.currentServerId;
-      currentServer(data.currentServerId);
+      setTargetCurrentServerId(data.currentServerId);
     };
 
     const handleUserUpdate = (data: User | null) => {
@@ -96,18 +95,16 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
     const handleDirectMessageUpdate = (data: DirectMessage[] | null) => {
       if (!data) data = [];
       if (data.length > 0) {
-        const currentUsers = [userId, targetId];
-        const userId_1 = data[0].userId1;
-        const userId_2 = data[0].userId2;
+        // !! THIS IS IMPORTANT !!
+        const userId1 = userId.localeCompare(targetId) < 0 ? userId : targetId;
+        const userId2 = userId.localeCompare(targetId) < 0 ? targetId : userId;
 
         // check if the message array is between the current users
         const isCurrentMessage =
-          currentUsers.find((user) => user == userId_1) &&
-          currentUsers.find((user) => user == userId_2);
+          data.find((msg) => msg.userId1 === userId1) &&
+          data.find((msg) => msg.userId2 === userId2);
 
-        if (isCurrentMessage) {
-          setDirectMessages(data);
-        }
+        if (isCurrentMessage) setDirectMessages(data);
       }
     };
 
@@ -176,16 +173,17 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
       refresh();
     }, [userId, targetId]);
 
-    const currentServer = async (serverId: string) => {
+    useEffect(() => {
+      if (!targetCurrentServerId) return;
       Promise.all([
         refreshService.server({
-          serverId: serverId,
+          serverId: targetCurrentServerId,
         }),
       ]).then(([server]) => {
         setTargetCurrentServerName(server?.name);
-        setTargetCurrentServerId(server?.id);
       });
-    };
+    }, [targetCurrentServerId]);
+
     return (
       <div className={popup['popupContainer']}>
         <div className={directMessage['header']}>
