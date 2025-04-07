@@ -109,6 +109,8 @@ const SocketServerEvent = {
   RTC_LEAVE: 'RTCLeave',
   // Error
   ERROR: 'error',
+  // Play
+  PLAY_SOUND: 'playSound',
 };
 
 let isDev = process.argv.includes('--dev');

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // CSS
 import header from '@/styles/common/header.module.css';
@@ -299,6 +299,17 @@ const Home = () => {
   const lang = useLanguage();
   const mainTab = useMainTab();
 
+  // Refs
+  const joinAudioRef = useRef<HTMLAudioElement>(null);
+  joinAudioRef.current = new Audio('./sounds/Yconnect.wav');
+  joinAudioRef.current.volume = 0.5;
+  const leaveAudioRef = useRef<HTMLAudioElement>(null);
+  leaveAudioRef.current = new Audio('./sounds/Ydisconnect.wav');
+  leaveAudioRef.current.volume = 0.5;
+  const recieveAudioRef = useRef<HTMLAudioElement>(null);
+  recieveAudioRef.current = new Audio('./sounds/ReceiveChannelMessage.wav');
+  recieveAudioRef.current.volume = 0.5;
+
   // States
   const [user, setUser] = useState<User>(createDefault.user());
   const [server, setServer] = useState<Server>(createDefault.server());
@@ -329,6 +340,20 @@ const Home = () => {
     setChannel((prev) => ({ ...prev, ...data }));
   };
 
+  const handlePlaySound = (sound: string) => {
+    switch (sound) {
+      case 'leave':
+        leaveAudioRef.current?.play();
+        break;
+      case 'join':
+        joinAudioRef.current?.play();
+        break;
+      case 'recieveChannelMessage':
+        recieveAudioRef.current?.play();
+        break;
+    }
+  };
+
   // Effects
   useEffect(() => {
     if (!socket) return;
@@ -337,6 +362,7 @@ const Home = () => {
       [SocketServerEvent.USER_UPDATE]: handleUserUpdate,
       [SocketServerEvent.SERVER_UPDATE]: handleServerUpdate,
       [SocketServerEvent.CHANNEL_UPDATE]: handleCurrentChannelUpdate,
+      [SocketServerEvent.PLAY_SOUND]: handlePlaySound,
     };
     const unsubscribe: (() => void)[] = [];
 
