@@ -46,6 +46,9 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
     const [channelVisibility, setChannelVisibility] = useState<
       Channel['visibility']
     >(createDefault.channel().visibility);
+    const [channelPassword, setChannelPassword] = useState<Channel['password']>(
+      createDefault.channel().password,
+    );
     const [channelForbidText, setChannelForbidText] = useState<
       Channel['forbidText']
     >(createDefault.channel().forbidText);
@@ -90,6 +93,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       setChannelOrder(data.order);
       setChannelIsLobby(data.isLobby);
       setChannelVisibility(data.visibility);
+      setChannelPassword(data.password);
       setChannelUserLimit(data.userLimit);
       setChannelVoiceMode(data.voiceMode);
       setChannelForbidText(data.forbidText);
@@ -331,26 +335,6 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                     <input
                       type="radio"
                       name="voiceQuality"
-                      checked={channelVisibility === 'private'}
-                      onChange={() => {
-                        setChannelVisibility('private');
-                      }}
-                    />
-                    <div>
-                      <label className={popup['label']}>
-                        {lang.tr.channelPrivate}
-                      </label>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`${popup['inputBox']} ${
-                      channelIsLobby ? popup['disabled'] : ''
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="voiceQuality"
                       checked={channelVisibility === 'readonly'}
                       onChange={() => {
                         setChannelVisibility('readonly');
@@ -361,6 +345,41 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                         {lang.tr.channelReadonly}
                       </label>
                     </div>
+                  </div>
+
+                  <div
+                    className={`${popup['inputBox']} ${
+                      channelIsLobby ? popup['disabled'] : ''
+                    } ${popup['col']}`}
+                  >
+                    <div className={popup['row']}>
+                      <input
+                        type="radio"
+                        name="voiceQuality"
+                        checked={channelVisibility === 'private'}
+                        onChange={() => {
+                          setChannelVisibility('private');
+                        }}
+                      />
+                      <div>
+                        <label className={popup['label']}>
+                          {lang.tr.channelPrivate}
+                        </label>
+                      </div>
+                    </div>
+                    {channelVisibility === 'private' && (
+                      <input
+                        className={popup['input']}
+                        type="text"
+                        value={channelPassword || ''}
+                        maxLength={4}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (isNaN(parseInt(value))) setChannelPassword(null);
+                          else setChannelPassword(value);
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -502,6 +521,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                 {
                   name: channelName,
                   visibility: channelVisibility,
+                  password: channelPassword,
                   userLimit: channelUserLimit,
                   voiceMode: channelVoiceMode,
                   order: channelOrder,

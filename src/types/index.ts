@@ -362,6 +362,11 @@ export interface Translation {
   myFriends: string;
   acceptApplication: string;
   denyApplication: string;
+  pleaseEnterTheChannelPassword: string;
+  setChannelPassword: string;
+  setChannelPasswordDescription: string;
+  editFriend: string;
+  connectingServer: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -512,7 +517,7 @@ export const translations: Record<LanguageKey, Translation> = {
     channelPermission: '頻道權限',
     channelPublic: '任何人可以訪問',
     channelMember: '禁止遊客訪問',
-    channelPrivate: '禁止非管理員訪問',
+    channelPrivate: '訪問時輸入密碼',
     channelReadonly: '該頻道只用於訊息顯示',
     serverApply: '申請已送出，請等待管理員審核',
     serverApplyNotice: '申請須知',
@@ -737,6 +742,11 @@ export const translations: Record<LanguageKey, Translation> = {
     myFriends: '我的好友',
     acceptApplication: '接受申請',
     denyApplication: '拒絕申請',
+    pleaseEnterTheChannelPassword: '請輸入頻道密碼',
+    setChannelPassword: '設定頻道密碼',
+    setChannelPasswordDescription: '請輸入頻道密碼 (限1-4位數字)',
+    editFriend: '編輯好友',
+    connectingServer: '正在連接',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -882,9 +892,9 @@ export const translations: Record<LanguageKey, Translation> = {
     category: '类别',
     channelPermission: '频道权限',
     channelPublic: '任何人可以访问',
-    channelMember: '禁止遊客訪問',
-    channelPrivate: '禁止非管理員訪問',
-    channelReadonly: '該頻道只用於訊息顯示',
+    channelMember: '禁止游客访问',
+    channelPrivate: '访问时输入密码',
+    channelReadonly: '该频道只用於訊息顯示',
     serverApply: '申請已送出，請等待管理員審核',
     serverApplyNotice: '申請須知',
     serverApplyDescription: '申請說明',
@@ -1107,6 +1117,11 @@ export const translations: Record<LanguageKey, Translation> = {
     myFriends: '我的好友',
     acceptApplication: '接受申请',
     denyApplication: '拒绝申请',
+    pleaseEnterTheChannelPassword: '请输入频道密码',
+    setChannelPassword: '设置频道密码',
+    setChannelPasswordDescription: '请输入频道密码 (限1-4位数字)',
+    editFriend: '编辑好友',
+    connectingServer: '正向连接',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -1255,7 +1270,7 @@ export const translations: Record<LanguageKey, Translation> = {
     channelPermission: 'Channel permission',
     channelPublic: 'Anyone can access',
     channelMember: 'Only members can access',
-    channelPrivate: 'Only admins can access',
+    channelPrivate: 'Enter password to access',
     channelReadonly: 'This channel is only for message display',
     serverApply: 'Application submitted, please wait for admin review',
     serverApplyNotice: 'Application notice',
@@ -1500,6 +1515,12 @@ export const translations: Record<LanguageKey, Translation> = {
     myFriends: 'My Friends',
     acceptApplication: 'Accept application',
     denyApplication: 'Deny application',
+    pleaseEnterTheChannelPassword: 'Please enter the channel password',
+    setChannelPassword: 'Set channel password',
+    setChannelPasswordDescription:
+      'Please enter the channel password (1-4 digits)',
+    editFriend: 'Edit friend',
+    connectingServer: 'Connecting',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1646,7 +1667,7 @@ export const translations: Record<LanguageKey, Translation> = {
     channelPermission: 'チャンネルの権限',
     channelPublic: '誰でもアクセス可能',
     channelMember: 'メンバーのみがアクセス可能',
-    channelPrivate: '管理者のみがアクセス可能',
+    channelPrivate: 'アクセス時にパスワードを入力してください',
     channelReadonly: '読み取り専用',
     serverApply: '申請が送信されました。管理者のレビューをお待ちください',
     serverApplyNotice: '申請通知',
@@ -1888,6 +1909,12 @@ export const translations: Record<LanguageKey, Translation> = {
     myFriends: '友達',
     acceptApplication: '申請を承認',
     denyApplication: '申請を拒否',
+    pleaseEnterTheChannelPassword: 'チャンネルパスワードを入力してください',
+    setChannelPassword: 'チャンネルパスワードを設定',
+    setChannelPasswordDescription:
+      'チャンネルパスワードを入力してください (1-4位数字)',
+    editFriend: '編輯友達',
+    connectingServer: '接続中',
   },
 };
 
@@ -1988,6 +2015,7 @@ export type BaseChannel = {
   type: 'category' | 'channel';
   visibility: 'public' | 'member' | 'private' | 'readonly';
   voiceMode: 'free' | 'queue' | 'forbidden';
+  password: string | null;
   categoryId: string | null;
   serverId: string;
   createdAt: number;
@@ -2219,6 +2247,7 @@ export enum SocketServerEvent {
 export enum PopupType {
   USER_SETTING = 'userSetting',
   CHANNEL_SETTING = 'channelSetting',
+  CHANNEL_PASSWORD = 'channelPassword',
   SERVER_SETTING = 'serverSetting',
   SYSTEM_SETTING = 'systemSetting',
   MEMBERAPPLY_SETTING = 'memberApplySetting',
@@ -2243,6 +2272,7 @@ export enum PopupType {
 export const PopupSize = {
   [PopupType.USER_SETTING]: { height: 650, width: 500 },
   [PopupType.CHANNEL_SETTING]: { height: 450, width: 600 },
+  [PopupType.CHANNEL_PASSWORD]: { height: 220, width: 400 },
   [PopupType.SERVER_SETTING]: { height: 500, width: 600 },
   [PopupType.SYSTEM_SETTING]: { height: 450, width: 600 },
   [PopupType.MEMBERAPPLY_SETTING]: { height: 320, width: 500 },

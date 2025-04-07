@@ -213,7 +213,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     useEffect(() => {
       if (!webRTC.handleUpdateBitrate || !channelBitrate) return;
       webRTC.handleUpdateBitrate(channelBitrate);
-    }, [webRTC.handleUpdateBitrate, channelBitrate]);
+    }, [webRTC, channelBitrate]);
 
     useEffect(() => {
       const timer = setInterval(() => {
