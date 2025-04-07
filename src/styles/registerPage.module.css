@@ -67,11 +67,10 @@
   height: 29px;
   padding: 8px;
   border: 1px solid #ccc;
-  box-shadow: 2px 2px 5px rgb(0 0 0 / 10%);
+  box-shadow: 1px 1px 3px rgb(0 0 0 / 10%) inset;
   transition: box-shadow 0.3s ease;
   background: #fcfcfc;
   font-size: 12px;
-  font-family: SimSun, sans-serif;
 }
 
 .input:focus {
