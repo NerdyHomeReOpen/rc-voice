@@ -52,10 +52,15 @@ type IceCandidate = {
 };
 
 interface WebRTCContextType {
-  toggleMute?: () => void;
-  updateBitrate?: (newBitrate: number) => void;
-  updateMicVolume?: (volume: number) => void;
-  updateSpeakerVolume?: (volume: number) => void;
+  handleMute?: (userId: string) => void;
+  handleUnmute?: (userId: string) => void;
+  handleToggleMute?: () => void;
+  handleUpdateBitrate?: (newBitrate: number) => void;
+  handleUpdateMicVolume?: (volume: number) => void;
+  handleUpdateSpeakerVolume?: (volume: number) => void;
+  handleUpdateInputStream?: (deviceId: string) => void;
+  handleUpdateOutputStream?: (deviceId: string) => void;
+  muteList?: string[];
   isMute?: boolean;
   bitrate?: number;
   micVolume?: number;
@@ -85,6 +90,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const [speakerVolume, setSpeakerVolume] = useState<number>(100);
   const [speakStatus, setSpeakStatus] = useState<{ [id: string]: number }>({});
   const [volumePercent, setVolumePercent] = useState<number>(0);
+  const [muteList, setMuteList] = useState<string[]>([]);
 
   // Refs
   const volumePercentRef = useRef<number>(0);
@@ -105,7 +111,25 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   const socket = useSocket();
 
   // Handlers
-  const toggleMute = () => {
+  const handleMute = (userId: string) => {
+    setMuteList((prev) => [...prev, userId]);
+    Object.entries(peerAudioRefs.current).forEach(([key, audio]) => {
+      if (key === userId) {
+        audio.volume = 0;
+      }
+    });
+  };
+
+  const handleUnmute = (userId: string) => {
+    setMuteList((prev) => prev.filter((id) => id !== userId));
+    Object.entries(peerAudioRefs.current).forEach(([key, audio]) => {
+      if (key === userId) {
+        audio.volume = speakerVolume / 100;
+      }
+    });
+  };
+
+  const handleToggleMute = () => {
     try {
       localStream.current?.getAudioTracks().forEach((track) => {
         track.enabled = isMute;
@@ -116,7 +140,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     }
   };
 
-  const updateBitrate = useCallback(
+  const handleUpdateBitrate = useCallback(
     (newBitrate: number) => {
       try {
         if (newBitrate === bitrate) {
@@ -143,7 +167,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     [bitrate],
   );
 
-  const updateMicVolume = useCallback(
+  const handleUpdateMicVolume = useCallback(
     (volume: number | null) => {
       try {
         if (!audioContext.current) {
@@ -200,7 +224,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     [micVolume],
   );
 
-  const updateSpeakerVolume = useCallback(
+  const handleUpdateSpeakerVolume = useCallback(
     (volume: number | null) => {
       try {
         // Set volume
@@ -216,7 +240,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
     [speakerVolume],
   );
 
-  const updateInputStream = useCallback(
+  const handleUpdateInputStream = useCallback(
     (deviceId: string) => {
       navigator.mediaDevices
         .getUserMedia({
@@ -278,21 +302,21 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
           detectSpeaking();
         })
         .catch((err) => console.error('Error accessing microphone', err));
-      updateMicVolume(null);
+      handleUpdateMicVolume(null);
     },
-    [updateMicVolume],
+    [handleUpdateMicVolume],
   );
 
-  const updateOutputStream = useCallback(
+  const handleUpdateOutputStream = useCallback(
     async (deviceId: string) => {
       Object.values(peerAudioRefs.current).forEach((audio) =>
         audio
           .setSinkId(deviceId)
           .catch((err) => console.error('Error accessing speaker:', err)),
       );
-      updateSpeakerVolume(null);
+      handleUpdateSpeakerVolume(null);
     },
-    [updateSpeakerVolume],
+    [handleUpdateSpeakerVolume],
   );
 
   const handleSendRTCOffer = useCallback(
@@ -414,7 +438,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
           console.log(
             userId,
             'Signaling State:',
-            peerConnection.signalingState
+            peerConnection.signalingState,
           );
           const isFailed = ['disconnected', 'failed', 'closed'].includes(
             peerConnection.signalingState,
@@ -428,7 +452,7 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
             );
             peerAudioRefs.current[userId].autoplay = true;
             peerAudioRefs.current[userId].oncanplay = () =>
-              updateSpeakerVolume(null);
+              handleUpdateSpeakerVolume(null);
           }
           peerAudioRefs.current[userId].srcObject = event.streams[0];
           peerStreams.current[userId] = event.streams[0];
@@ -476,7 +500,11 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         console.error('Error creating peer connection:', error);
       }
     },
-    [removePeerConnection, updateSpeakerVolume, handleSendRTCIceCandidate],
+    [
+      removePeerConnection,
+      handleUpdateSpeakerVolume,
+      handleSendRTCIceCandidate,
+    ],
   );
 
   const handleRTCJoin = useCallback(
@@ -582,22 +610,22 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   );
 
   useEffect(() => {
-    updateInputStream('');
-    updateOutputStream('');
+    handleUpdateInputStream('');
+    handleUpdateOutputStream('');
 
     ipcService.audio.get('input', async (deviceId) => {
       // Get device info
       const devices = await navigator.mediaDevices.enumerateDevices();
       const deviceInfo = devices.find((d) => d.deviceId === deviceId);
       console.log('New input stream device info:', deviceInfo);
-      updateInputStream(deviceId || '');
+      handleUpdateInputStream(deviceId || '');
     });
     ipcService.audio.get('output', async (deviceId) => {
       // Get device info
       const devices = await navigator.mediaDevices.enumerateDevices();
       const deviceInfo = devices.find((d) => d.deviceId === deviceId);
       console.log('New output stream device info:', deviceInfo);
-      updateOutputStream(deviceId || '');
+      handleUpdateOutputStream(deviceId || '');
     });
 
     return () => {
@@ -674,10 +702,15 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
   return (
     <WebRTCContext.Provider
       value={{
-        toggleMute,
-        updateBitrate,
-        updateMicVolume,
-        updateSpeakerVolume,
+        handleMute,
+        handleUnmute,
+        handleToggleMute,
+        handleUpdateBitrate,
+        handleUpdateMicVolume,
+        handleUpdateSpeakerVolume,
+        handleUpdateInputStream,
+        handleUpdateOutputStream,
+        muteList,
         isMute,
         bitrate,
         micVolume,
@@ -686,11 +719,11 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
         speakStatus,
       }}
     >
-      {Object.keys(peerStreams).map((rtcConnection) => (
+      {Object.keys(peerStreams).map((userId) => (
         <audio
-          key={rtcConnection}
+          key={userId}
           ref={(el) => {
-            if (el) el.srcObject = peerStreams.current[rtcConnection];
+            if (el) el.srcObject = peerStreams.current[userId];
           }}
           autoPlay
           controls
