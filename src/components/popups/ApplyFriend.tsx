@@ -11,6 +11,7 @@ import {
   FriendApplication,
   FriendGroup,
   PopupType,
+  SocketServerEvent,
   User,
 } from '@/types';
 
@@ -94,13 +95,13 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
       socket.send.createFriend({ friend, userId, targetId });
     };
 
-    const handleUserUpdate = (data: User | null) => {
-      if (!data) return;
-      setUserFriendGroups(data.friendGroups || []);
+    const handleUserFriendGroupsUpdate = (data: FriendGroup[] | null) => {
+      if (!data) data = [];
+      setUserFriendGroups(data);
     };
 
     const handleTargetUpdate = (data: User | null) => {
-      if (!data) return;
+      if (!data) data = createDefault.user();
       setTargetName(data.name);
       setTargetAvatarUrl(data.avatarUrl);
     };
@@ -140,11 +141,30 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
 
     // Effects
     useEffect(() => {
+      if (!socket) return;
+
+      const eventHandlers = {
+        [SocketServerEvent.USER_FRIEND_GROUPS_UPDATE]:
+          handleUserFriendGroupsUpdate,
+      };
+      const unsubscribe: (() => void)[] = [];
+
+      Object.entries(eventHandlers).map(([event, handler]) => {
+        const unsub = socket.on[event as SocketServerEvent](handler);
+        unsubscribe.push(unsub);
+      });
+
+      return () => {
+        unsubscribe.forEach((unsub) => unsub());
+      };
+    }, [socket]);
+
+    useEffect(() => {
       if (!userId || !targetId || refreshRef.current) return;
       const refresh = async () => {
         refreshRef.current = true;
         Promise.all([
-          refreshService.user({
+          refreshService.userFriendGroups({
             userId: userId,
           }),
           refreshService.user({
@@ -158,12 +178,19 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
             senderId: targetId,
             receiverId: userId,
           }),
-        ]).then(([user, target, sentApplication, receivedApplication]) => {
-          handleUserUpdate(user);
-          handleTargetUpdate(target);
-          handleSentApplicationUpdate(sentApplication);
-          handleReceivedApplicationUpdate(receivedApplication);
-        });
+        ]).then(
+          ([
+            userFriendGroups,
+            target,
+            sentApplication,
+            receivedApplication,
+          ]) => {
+            handleUserFriendGroupsUpdate(userFriendGroups);
+            handleTargetUpdate(target);
+            handleSentApplicationUpdate(sentApplication);
+            handleReceivedApplicationUpdate(receivedApplication);
+          },
+        );
       };
       refresh();
     }, [userId, targetId, socket]);

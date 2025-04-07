@@ -6,6 +6,7 @@ import React from 'react';
 import SocketProvider from '@/providers/Socket';
 import ContextMenuProvider from '@/providers/ContextMenu';
 import LanguageProvider from '@/providers/Language';
+import MainTabProvider from '@/providers/MainTab';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -15,7 +16,9 @@ const Providers = ({ children }: ProvidersProps) => {
   return (
     <LanguageProvider>
       <SocketProvider>
-        <ContextMenuProvider>{children}</ContextMenuProvider>
+        <MainTabProvider>
+          <ContextMenuProvider>{children}</ContextMenuProvider>
+        </MainTabProvider>
       </SocketProvider>
     </LanguageProvider>
   );

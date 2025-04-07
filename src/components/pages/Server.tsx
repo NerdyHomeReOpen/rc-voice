@@ -17,6 +17,8 @@ import {
   Message,
   Channel,
   Member,
+  ServerMember,
+  ChannelMessage,
   SocketServerEvent,
 } from '@/types';
 
@@ -36,11 +38,11 @@ import { createDefault } from '@/utils/createDefault';
 interface ServerPageProps {
   user: User;
   server: Server;
-  handleServerUpdate: (data: Partial<Server> | null) => void;
+  channel: Channel;
 }
 
 const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
-  ({ user, server, handleServerUpdate }) => {
+  ({ user, server, channel }) => {
     // Hooks
     const lang = useLanguage();
     const socket = useSocket();
@@ -51,12 +53,19 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     const refreshed = useRef(false);
 
     // States
-    const [sidebarWidth, setSidebarWidth] = useState<number>(270);
-    const [isResizing, setIsResizing] = useState<boolean>(false);
+    const [serverChannels, setServerChannels] = useState<Channel[]>([]);
+    const [serverActiveMembers, setServerActiveMembers] = useState<
+      ServerMember[]
+    >([]);
+    const [channelMessages, setChannelMessages] = useState<ChannelMessage[]>(
+      [],
+    );
     const [currentChannel, setCurrentChannel] = useState<Channel>(
       createDefault.channel(),
     );
     const [member, setMember] = useState<Member>(createDefault.member());
+    const [sidebarWidth, setSidebarWidth] = useState<number>(270);
+    const [isResizing, setIsResizing] = useState<boolean>(false);
     const [showMicVolume, setShowMicVolume] = useState(false);
     const [showSpeakerVolume, setShowSpeakerVolume] = useState(false);
     const [currentTime, setCurrentTime] = useState<number>(Date.now());
@@ -68,11 +77,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       id: serverId,
       name: serverName,
       announcement: serverAnnouncement,
-      users: serverUsers = [],
     } = server;
     const {
-      id: currentChannelId,
-      messages: channelMessages = [],
+      id: channelId,
       bitrate: channelBitrate,
       voiceMode: channelVoiceMode,
       forbidText: channelForbidText,
@@ -80,7 +87,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       guestTextMaxLength: channelGuestTextMaxLength,
       guestTextWaitTime: channelGuestTextWaitTime,
       guestTextGapTime: channelGuestTextGapTime,
-    } = currentChannel;
+    } = channel;
 
     const [channelLastVisitTimes, setChannelLastVisitTimes] = useState<
       Record<string, number>
@@ -88,10 +95,11 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       [userCurrentChannelId]: Date.now(),
     });
 
+    member.lastJoinChannelTime = member.lastJoinChannelTime > 0 ? member.lastJoinChannelTime : Date.now();
     const {
       permissionLevel: memberPermissionLevel,
-      lastMessageTime: memberLastMessageTime,
       lastJoinChannelTime: memberLastJoinChannelTime,
+      lastMessageTime: memberLastMessageTime,
     } = member;
     const leftGapTime =
       channelGuestTextGapTime -
@@ -148,6 +156,25 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
       setMember((prev) => ({ ...prev, ...data }));
     };
 
+    const handleServerChannelsUpdate = (data: Channel[] | null): void => {
+      if (!data) data = [];
+      setServerChannels(data);
+    };
+
+    const handleServerActiveMembersUpdate = (
+      data: ServerMember[] | null,
+    ): void => {
+      if (!data) data = [];
+      setServerActiveMembers(data);
+    };
+
+    const handleChannelMessagesUpdate = (
+      data: ChannelMessage[] | null,
+    ): void => {
+      if (!data) data = [];
+      setChannelMessages(data);
+    };
+
     const handleStartResizing = useCallback((e: React.MouseEvent) => {
       e.preventDefault();
       setIsResizing(true);
@@ -202,11 +229,27 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     }, [handleResize, handleStopResizing]);
 
     useEffect(() => {
+      if (!webRTC.updateBitrate || !channelBitrate) return;
+      webRTC.updateBitrate(channelBitrate);
+    }, [webRTC.updateBitrate, channelBitrate]);
+
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setCurrentTime(Date.now());
+      }, 1000);
+      return () => clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
       if (!socket) return;
 
       const eventHandlers = {
-        [SocketServerEvent.CHANNEL_UPDATE]: handleChannelUpdate,
         [SocketServerEvent.MEMBER_UPDATE]: handleMemberUpdate,
+        [SocketServerEvent.SERVER_CHANNELS_UPDATE]: handleServerChannelsUpdate,
+        [SocketServerEvent.SERVER_ACTIVE_MEMBERS_UPDATE]:
+          handleServerActiveMembersUpdate,
+        [SocketServerEvent.CHANNEL_MESSAGES_UPDATE]:
+          handleChannelMessagesUpdate,
       };
       const unsubscribe: (() => void)[] = [];
 
@@ -221,36 +264,43 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     }, [socket]);
 
     useEffect(() => {
-      if (!userId || !serverId || !userCurrentChannelId || refreshed.current)
-        return;
+      if (!userId || !serverId || !channelId || refreshed.current) return;
       const refresh = async () => {
         refreshed.current = true;
         Promise.all([
-          refreshService.server({
-            serverId: serverId,
-          }),
-          refreshService.channel({
-            channelId: userCurrentChannelId,
-          }),
           refreshService.member({
             userId: userId,
             serverId: serverId,
           }),
-        ]).then(([server, channel, member]) => {
-          handleServerUpdate(server);
-          handleChannelUpdate(channel);
-          handleMemberUpdate(member);
-        });
+          refreshService.serverActiveMembers({
+            serverId: serverId,
+          }),
+          refreshService.serverChannels({
+            serverId: serverId,
+          }),
+          refreshService.channelMessages({
+            channelId: channelId,
+          }),
+        ]).then(
+          ([member, serverActiveMembers, serverChannels, channelMessages]) => {
+            console.log('refresh', channelId);
+            handleChannelUpdate(serverChannels?.find((c) => c.id === channelId) || null);
+            handleMemberUpdate(member);
+            handleServerActiveMembersUpdate(serverActiveMembers);
+            handleServerChannelsUpdate(serverChannels);
+            handleChannelMessagesUpdate(channelMessages);
+          },
+        );
       };
       refresh();
-    }, [userId, serverId, userCurrentChannelId, handleServerUpdate]);
+    }, [userId, serverId, channelId]);
 
     useEffect(() => {
       ipcService.discord.updatePresence({
         details: `${lang.tr.in} ${serverName}`,
         state: `${lang.tr.chatWithMembers.replace(
           '{0}',
-          serverUsers.length.toString(),
+          serverActiveMembers.length.toString(),
         )}`,
         largeImageKey: 'app_icon',
         largeImageText: 'RC Voice',
@@ -264,19 +314,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
           },
         ],
       });
-    }, [lang, serverName, serverUsers]);
-
-    useEffect(() => {
-      if (!webRTC.updateBitrate || !channelBitrate) return;
-      webRTC.updateBitrate(channelBitrate);
-    }, [webRTC.updateBitrate, channelBitrate]);
-
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setCurrentTime(Date.now());
-      }, 1000);
-      return () => clearInterval(timer);
-    }, []);
+    }, [lang, serverName, serverActiveMembers]);
 
     useEffect(() => {
       // Double check the visit time is set for the new channel
@@ -289,11 +327,14 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     }, [currentChannel.id]);
 
     useEffect(() => {
+      console.log('memberLastJoinChannelTime', memberLastJoinChannelTime);
+      console.log('channelMessages', channelMessages);
+      console.log('currentChannel', currentChannel.id);
       if (channelMessages && channelMessages.length > 0) {
         setDisplayChannelMessages((prevMessages) => {
-          const lastVisitTime =
-            channelLastVisitTimes[currentChannel.id] || Date.now();
+          const lastVisitTime = memberLastJoinChannelTime === 0 ? Date.now() : memberLastJoinChannelTime;
 
+          console.log('lastVisitTime', lastVisitTime);
           const currentChannelMessages = channelMessages.filter(
             (msg) => msg.timestamp >= lastVisitTime,
           );
@@ -304,7 +345,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
           );
         });
       }
-    }, [channelMessages, currentChannel.id, channelLastVisitTimes]);
+    }, [channelMessages, currentChannel.id, memberLastJoinChannelTime]);
 
     return (
       <div className={styles['serverWrapper']}>
@@ -318,8 +359,10 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
             <ChannelViewer
               user={user}
               server={server}
-              member={member}
-              currentChannel={currentChannel}
+              channel={channel}
+              serverActiveMembers={serverActiveMembers}
+              serverChannels={serverChannels}
+              permissionLevel={memberPermissionLevel}
             />
           </div>
           {/* Resize Handle */}
@@ -345,7 +388,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                     { type: 'general', content: msg },
                     userId,
                     serverId,
-                    currentChannelId,
+                    channelId,
                   );
                 }}
                 disabled={
@@ -381,7 +424,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                           onClick: () => {
                             handleUpdateChannel(
                               { voiceMode: 'free' },
-                              currentChannelId,
+                              channelId,
                               serverId,
                             );
                           },
@@ -392,7 +435,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                           onClick: () => {
                             handleUpdateChannel(
                               { voiceMode: 'forbidden' },
-                              currentChannelId,
+                              channelId,
                               serverId,
                             );
                           },
@@ -405,7 +448,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                           onClick: () => {
                             handleUpdateChannel(
                               { voiceMode: 'queue' },
-                              currentChannelId,
+                              channelId,
                               serverId,
                             );
                           },
@@ -461,6 +504,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                 />
                 <div className={styles['micText']}>
                   {webRTC.isMute ? lang.tr.takeMic : lang.tr.takenMic}
+                  <div className={styles['micSubText']}>
+                    {!webRTC.isMute && webRTC.micVolume === 0 ? '麥已靜音' : ''}
+                  </div>
                 </div>
               </div>
               <div className={styles['buttons']}>

@@ -460,14 +460,14 @@
 .micButton {
   min-width: 154px;
   min-height: 50px;
-  background: url('../../public/channel/mic_state_menu.png') no-repeat center
-    center;
-  background-size: auto;
-  background-position: 0 2px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-image: url('../../public/channel/mic_state_menu.png');
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-position: 0 2px;
+  cursor: pointer;
 }
 
 .micButton:hover {
@@ -530,10 +530,19 @@
 }
 
 .micText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   margin-left: 5px;
   font-size: 1.25rem;
   color: #28a0da;
-  font-family: 'Noto Sans TC', '微軟正黑體', sans-serif;
+  font-family: 'Noto Sans TC';
+}
+
+.micSubText {
+  font-size: 0.875rem;
+  color: #777;
 }
 
 .micButton.active .micText {

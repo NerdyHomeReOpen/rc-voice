@@ -71,11 +71,20 @@ const SocketServerEvent = {
   // User
   USER_SEARCH: 'userSearch',
   USER_UPDATE: 'userUpdate',
+  USER_SERVERS_UPDATE: 'userServersUpdate',
+  USER_FRIEND_GROUPS_UPDATE: 'userFriendGroupsUpdate',
+  USER_FRIENDS_UPDATE: 'userFriendsUpdate',
+  USER_FRIEND_APPLICATIONS_UPDATE: 'userFriendApplicationsUpdate',
   // Server
   SERVER_SEARCH: 'serverSearch',
   SERVER_UPDATE: 'serverUpdate',
+  SERVER_CHANNELS_UPDATE: 'serverChannelsUpdate',
+  SERVER_ACTIVE_MEMBERS_UPDATE: 'serverActiveMembersUpdate',
+  SERVER_MEMBER_APPLICATIONS_UPDATE: 'serverMemberApplicationsUpdate',
+  SERVER_MEMBERS_UPDATE: 'serverMembersUpdate',
   // Channel
   CHANNEL_UPDATE: 'channelUpdate',
+  CHANNEL_MESSAGES_UPDATE: 'channelMessagesUpdate',
   // Category
   CATEGORY_UPDATE: 'categoryUpdate',
   // Friend Group

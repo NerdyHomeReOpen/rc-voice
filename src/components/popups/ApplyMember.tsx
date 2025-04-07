@@ -68,7 +68,7 @@ const ApplyMemberPopup: React.FC<ApplyMemberPopupProps> = React.memo(
     };
 
     const handleServerUpdate = (data: Server | null) => {
-      if (!data) return;
+      if (!data) data = createDefault.server();
       setServerName(data.name);
       setServerDisplayId(data.displayId);
       setServerAvatarUrl(data.avatarUrl);
@@ -88,7 +88,7 @@ const ApplyMemberPopup: React.FC<ApplyMemberPopupProps> = React.memo(
         submitTo: PopupType.DIALOG_SUCCESS,
       });
       ipcService.popup.onSubmit(PopupType.DIALOG_SUCCESS, () => {
-        setSection(1);
+        handleClose();
       });
     };
 
@@ -97,6 +97,7 @@ const ApplyMemberPopup: React.FC<ApplyMemberPopupProps> = React.memo(
     };
 
     // UseEffect
+
     useEffect(() => {
       if (!serverId || !userId || refreshRef.current) return;
       const refresh = async () => {

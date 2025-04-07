@@ -87,6 +87,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
     const handleChannelUpdate = (data: Channel | null) => {
       if (!data) data = createDefault.channel();
       setChannelName(data.name);
+      setChannelOrder(data.order);
       setChannelIsLobby(data.isLobby);
       setChannelVisibility(data.visibility);
       setChannelUserLimit(data.userLimit);
@@ -97,7 +98,6 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
       setChannelGuestTextMaxLength(data.guestTextMaxLength);
       setChannelGuestTextWaitTime(data.guestTextWaitTime);
       setChannelGuestTextGapTime(data.guestTextGapTime);
-      setChannelOrder(data.order);
     };
 
     const handleClose = () => {
