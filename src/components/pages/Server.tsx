@@ -205,9 +205,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     }, [handleResize, handleStopResizing]);
 
     useEffect(() => {
-      if (!webRTC.updateBitrate || !channelBitrate) return;
-      webRTC.updateBitrate(channelBitrate);
-    }, [webRTC.updateBitrate, channelBitrate]);
+      if (!webRTC.handleUpdateBitrate || !channelBitrate) return;
+      webRTC.handleUpdateBitrate(channelBitrate);
+    }, [webRTC.handleUpdateBitrate, channelBitrate]);
 
     useEffect(() => {
       const timer = setInterval(() => {
@@ -429,7 +429,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                 className={`
                   ${styles['micButton']} 
                   ${webRTC.isMute ? '' : styles['active']}`}
-                onClick={() => webRTC.toggleMute?.()}
+                onClick={() => webRTC.handleToggleMute?.()}
               >
                 <div
                   className={`
@@ -476,7 +476,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                         max="200"
                         value={webRTC.micVolume}
                         onChange={(e) => {
-                          webRTC.updateMicVolume?.(parseInt(e.target.value));
+                          webRTC.handleUpdateMicVolume?.(
+                            parseInt(e.target.value),
+                          );
                         }}
                         className={styles['slider']}
                       />
@@ -502,7 +504,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                         max="100"
                         value={webRTC.speakerVolume}
                         onChange={(e) => {
-                          webRTC.updateSpeakerVolume?.(
+                          webRTC.handleUpdateSpeakerVolume?.(
                             parseInt(e.target.value),
                           );
                         }}

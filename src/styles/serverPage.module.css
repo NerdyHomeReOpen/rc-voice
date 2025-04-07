@@ -378,7 +378,7 @@
 .userList .userTab .userState {
   min-height: 12px;
   min-width: 12px;
-  background-image: url('../../public/channel/mic_queue_state.png');
+  background-image: url('../../public/channel/audioState.png');
   background-size: auto;
   background-repeat: no-repeat;
   background-position: -36px 0;
@@ -386,15 +386,15 @@
 }
 
 .userList .userTab .userState.play {
-  background-position: 0 0;
-}
-
-.userList .userTab .userState.unplay {
-  background-position: -12px 0;
+  background-position: -24 0;
 }
 
 .userList .userTab .userState.muted {
-  background-position: -24px 0;
+  background-position: -12px 0;
+}
+
+.userList .userTab .userState.notext {
+  background-position: 0 0;
 }
 
 .myLocationIcon {
