@@ -166,16 +166,16 @@ const ipcService = {
         );
       }
     },
-    submit: (to: string) => {
+    submit: (to: string, data?: any) => {
       if (isElectron) {
-        ipcRenderer.send('popup-submit', to);
+        ipcRenderer.send('popup-submit', to, data);
       }
     },
-    onSubmit: (host: string, callback: () => void) => {
+    onSubmit: (host: string, callback: (data: any) => void) => {
       if (isElectron) {
-        ipcRenderer.on('popup-submit', (_: any, to: string) => {
+        ipcRenderer.on('popup-submit', (_: any, to: string, data?: any) => {
           if (to != host) return;
-          callback();
+          callback(data);
           ipcRenderer.removeAllListeners('popup-submit');
         });
       }

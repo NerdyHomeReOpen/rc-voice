@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 // CSS
 import header from '@/styles/common/header.module.css';
@@ -293,7 +294,7 @@ const Header: React.FC<HeaderProps> = React.memo(
 
 Header.displayName = 'Header';
 
-const Home = () => {
+const RootPageComponent = () => {
   // Hooks
   const socket = useSocket();
   const lang = useLanguage();
@@ -325,15 +326,18 @@ const Home = () => {
     setUser((prev) => ({ ...prev, ...data }));
   };
 
-  const handleServerUpdate = (data: Partial<Server> | null) => {
-    if (data != null) {
-      if (data.id) mainTab.setSelectedTabId('server');
-    } else {
-      mainTab.setSelectedTabId('home');
-    }
-    if (!data) data = createDefault.server();
-    setServer((prev) => ({ ...prev, ...data }));
-  };
+  const handleServerUpdate = useCallback(
+    (data: Partial<Server> | null) => {
+      if (data != null) {
+        if (data.id) mainTab.setSelectedTabId('server');
+      } else {
+        mainTab.setSelectedTabId('home');
+      }
+      if (!data) data = createDefault.server();
+      setServer((prev) => ({ ...prev, ...data }));
+    },
+    [mainTab],
+  );
 
   const handleCurrentChannelUpdate = (data: Partial<Channel> | null) => {
     if (!data) data = createDefault.channel();
@@ -374,7 +378,7 @@ const Home = () => {
     return () => {
       unsubscribe.forEach((unsub) => unsub());
     };
-  }, [socket]);
+  }, [socket, handleServerUpdate]);
 
   useEffect(() => {
     if (socket.isConnected) {
@@ -385,7 +389,7 @@ const Home = () => {
       setServer(createDefault.server());
       setChannel(createDefault.channel());
     }
-  }, [socket.isConnected]);
+  }, [socket.isConnected, mainTab]);
 
   useEffect(() => {
     if (!lang) return;
@@ -426,6 +430,11 @@ const Home = () => {
   );
 };
 
-Home.displayName = 'Home';
+RootPageComponent.displayName = 'RootPageComponent';
 
-export default Home;
+// use dynamic import to disable SSR
+const RootPage = dynamic(() => Promise.resolve(RootPageComponent), {
+  ssr: false,
+});
+
+export default RootPage;
