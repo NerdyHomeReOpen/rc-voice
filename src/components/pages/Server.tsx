@@ -410,6 +410,8 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                           id: 'queue',
                           label: lang.tr.queue,
                           icon: 'submenu',
+                          show: false,
+                          disabled: true,
                           hasSubmenu: true,
                           onClick: () => {
                             handleUpdateChannel(
