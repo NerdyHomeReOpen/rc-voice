@@ -478,7 +478,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
       0;
     const isSpeaking = speakingStatus !== 0;
     const isMuted = speakingStatus === -1;
-    const isMutedByUser = webRTC.muteList?.includes(channelMemberUserId);
+    const isMutedByUser = webRTC.muteList.includes(channelMemberUserId);
     const canKick =
       permissionLevel > 4 &&
       !isCurrentUser &&
@@ -567,13 +567,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(
             {
               id: 'mute',
               label: '拒聽此人語音',
-              onClick: () => webRTC.handleMute?.(channelMemberUserId),
+              onClick: () => webRTC.handleMute(channelMemberUserId),
               show: !isMutedByUser && !isCurrentUser,
             },
             {
               id: 'unmute',
               label: '接受此人語音',
-              onClick: () => webRTC.handleUnmute?.(channelMemberUserId),
+              onClick: () => webRTC.handleUnmute(channelMemberUserId),
               show: isMutedByUser && !isCurrentUser,
             },
             {

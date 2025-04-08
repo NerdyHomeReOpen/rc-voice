@@ -211,9 +211,9 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
     }, [handleResize, handleStopResizing]);
 
     useEffect(() => {
-      if (!webRTC.handleUpdateBitrate || !channelBitrate) return;
+      if (!webRTC || !channelBitrate) return;
       webRTC.handleUpdateBitrate(channelBitrate);
-    }, [webRTC, channelBitrate]);
+    }, [channelBitrate]); // Please ignore this warrning
 
     useEffect(() => {
       const timer = setInterval(() => {
@@ -454,7 +454,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                 className={`
                   ${styles['micButton']} 
                   ${webRTC.isMute ? '' : styles['active']}`}
-                onClick={() => webRTC.handleToggleMute?.()}
+                onClick={() => webRTC.handleToggleMute()}
               >
                 <div
                   className={`
@@ -529,7 +529,7 @@ const ServerPageComponent: React.FC<ServerPageProps> = React.memo(
                         max="100"
                         value={webRTC.speakerVolume}
                         onChange={(e) => {
-                          webRTC.handleUpdateSpeakerVolume?.(
+                          webRTC.handleUpdateSpeakerVolume(
                             parseInt(e.target.value),
                           );
                         }}
