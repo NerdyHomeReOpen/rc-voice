@@ -92,26 +92,21 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
       setUserAvatarUrl(data.avatarUrl);
     };
 
-    const handleDirectMessageUpdate = useCallback(
-      (data: DirectMessage[] | null) => {
-        if (!data) data = [];
-        if (data.length > 0) {
-          // !! THIS IS IMPORTANT !!
-          const userId1 =
-            userId.localeCompare(targetId) < 0 ? userId : targetId;
-          const userId2 =
-            userId.localeCompare(targetId) < 0 ? targetId : userId;
+    const handleDirectMessageUpdate = (data: DirectMessage[] | null) => {
+      if (!data) data = [];
+      if (data.length > 0) {
+        // !! THIS IS IMPORTANT !!
+        const userId1 = userId.localeCompare(targetId) < 0 ? userId : targetId;
+        const userId2 = userId.localeCompare(targetId) < 0 ? targetId : userId;
 
-          // check if the message array is between the current users
-          const isCurrentMessage =
-            data.find((msg) => msg.userId1 === userId1) &&
-            data.find((msg) => msg.userId2 === userId2);
+        // check if the message array is between the current users
+        const isCurrentMessage =
+          data.find((msg) => msg.userId1 === userId1) &&
+          data.find((msg) => msg.userId2 === userId2);
 
-          if (isCurrentMessage) setDirectMessages(data);
-        }
-      },
-      [userId, targetId],
-    );
+        if (isCurrentMessage) setDirectMessages(data);
+      }
+    };
 
     const shakeWindow = (duration = 500) => {
       const el = initialData.windowRef.current;
@@ -152,7 +147,7 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
       return () => {
         unsubscribe.forEach((unsub) => unsub());
       };
-    }, [socket, handleDirectMessageUpdate]);
+    }, [socket]);
 
     useEffect(() => {
       if (!userId || !targetId || refreshRef.current) return;
@@ -176,7 +171,7 @@ const DirectMessagePopup: React.FC<DirectMessagePopupProps> = React.memo(
         });
       };
       refresh();
-    }, [userId, targetId, handleDirectMessageUpdate]);
+    }, [userId, targetId]);
 
     useEffect(() => {
       if (!targetCurrentServerId) return;
