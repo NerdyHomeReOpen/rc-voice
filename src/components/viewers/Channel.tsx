@@ -566,13 +566,13 @@ const UserTab: React.FC<UserTabProps> = React.memo(
             },
             {
               id: 'mute',
-              label: '拒聽此人語音',
+              label: lang.tr.mute,
               onClick: () => webRTC.handleMute(channelMemberUserId),
               show: !isMutedByUser && !isCurrentUser,
             },
             {
               id: 'unmute',
-              label: '接受此人語音',
+              label: lang.tr.unmute,
               onClick: () => webRTC.handleUnmute(channelMemberUserId),
               show: isMutedByUser && !isCurrentUser,
             },
