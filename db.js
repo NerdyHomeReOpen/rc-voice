@@ -1,33 +1,348 @@
 const { query } = require('./database');
 
+function camelToSnake(str) {
+  return str.replace(/([A-Z])/g, '_$1').toLowerCase();
+}
+
+function snakeToCamel(str) {
+  return str.replace(/(_\w)/g, (_, letter) => letter.toUpperCase());
+}
+
+function convertToSnakeCase(obj) {
+  const snakeCaseObj = {};
+  for (const [key, value] of Object.entries(obj)) {
+    snakeCaseObj[camelToSnake(key)] = value;
+  }
+  return snakeCaseObj;
+}
+
+function convertToCamelCase(obj) {
+  const camelCaseObj = {};
+  for (const [key, value] of Object.entries(obj)) {
+    camelCaseObj[snakeToCamel(key)] = value;
+  }
+  return camelCaseObj;
+}
+
 // Helper functions to match quick.db API
 class Database {
-  async set(table, data) {
-    const entries = Object.entries(data);
-    for (const [key, value] of entries) {
-      // Ensure value is a valid object that can be converted to JSON
-      let jsonValue;
-      try {
-        // If value is already a string, try parsing it first to validate JSON
-        if (typeof value === 'string') {
-          JSON.parse(value);
-          jsonValue = value;
-        } else {
-          // If value is an object, stringify it
-          jsonValue = JSON.stringify(value);
-        }
-      } catch (error) {
-        throw new Error(`Invalid data format for key ${key}: ${error.message}`);
-      }
+  // async set(table, data) {
+  //   const entries = Object.entries(data);
+  //   for (const [key, value] of entries) {
+  //     // Ensure value is a valid object that can be converted to JSON
+  //     let jsonValue;
+  //     try {
+  //       // If value is already a string, try parsing it first to validate JSON
+  //       if (typeof value === 'string') {
+  //         JSON.parse(value);
+  //         jsonValue = value;
+  //       } else {
+  //         // If value is an object, stringify it
+  //         jsonValue = JSON.stringify(value);
+  //       }
+  //     } catch (error) {
+  //       throw new Error(`Invalid data format for key ${key}: ${error.message}`);
+  //     }
 
-      await query(
-        `INSERT INTO ${table} (${table.slice(0, -1)}_id, data)
-         VALUES (?, ?)
-         ON DUPLICATE KEY UPDATE data = ?`,
-        [key, jsonValue, jsonValue],
-      );
-    }
-  }
+  //     await query(
+  //       `INSERT INTO ${table} (${table.slice(0, -1)}_id, data)
+  //        VALUES (?, ?)
+  //        ON DUPLICATE KEY UPDATE data = ?`,
+  //       [key, jsonValue, jsonValue],
+  //     );
+  //   }
+  // }
+
+  set = {
+    user: async (userId, data) => {
+      const ALLOWED_FIELDS = [
+        'name',
+        'avatar',
+        'avatar_url',
+        'signature',
+        'country',
+        'level',
+        'vip',
+        'xp',
+        'required_xp',
+        'progress',
+        'birth_year',
+        'birth_month',
+        'birth_day',
+        'status',
+        'gender',
+        'current_channel_id',
+        'current_server_id',
+        'last_active_at',
+        'created_at',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO users (user_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [userId, value, value],
+        );
+      }
+    },
+
+    badge: async (badgeId, data) => {
+      const ALLOWED_FIELDS = ['name', 'description', 'image'];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO badges (badge_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [badgeId, value, value],
+        );
+      }
+    },
+
+    userBadge: async (userId, badgeId, data) => {
+      const ALLOWED_FIELDS = ['user_id', 'badge_id', 'order', 'created_at'];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO user_badges (user_id, badge_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [userId, badgeId, value, value],
+        );
+      }
+    },
+
+    userServer: async (userId, serverId, data) => {
+      const ALLOWED_FIELDS = [
+        'recent',
+        'owned',
+        'favorite',
+        'user_id',
+        'server_id',
+        'timestamp',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO user_servers (user_id, server_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [userId, serverId, value, value],
+        );
+      }
+    },
+
+    server: async (serverId, data) => {
+      const ALLOWED_FIELDS = [
+        'name',
+        'avatar',
+        'avatar_url',
+        'announcement',
+        'apply_notice',
+        'description',
+        'display_id',
+        'slogan',
+        'level',
+        'wealth',
+        'receive_apply',
+        'allow_direct_message',
+        'type',
+        'visibility',
+        'lobby_id',
+        'owner_id',
+        'created_at',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO servers (server_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [serverId, value, value],
+        );
+      }
+    },
+
+    channel: async (channelId, data) => {
+      const ALLOWED_FIELDS = [
+        'name',
+        'order',
+        'bitrate',
+        'user_limit',
+        'guest_text_gap_time',
+        'guest_text_wait_time',
+        'guest_text_max_length',
+        'is_root',
+        'is_lobby',
+        'slowmode',
+        'forbid_text',
+        'forbid_guest_text',
+        'forbid_guest_url',
+        'type',
+        'visibility',
+        'password',
+        'voice_mode',
+        'category_id',
+        'server_id',
+        'created_at',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO channels (channel_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [channelId, value, value],
+        );
+      }
+    },
+
+    friendGroup: async (friendGroupId, data) => {
+      const ALLOWED_FIELDS = ['name', 'order', 'user_id', 'created_at'];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO friend_groups (friend_group_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [friendGroupId, value, value],
+        );
+      }
+    },
+
+    friend: async (friendId, data) => {
+      const ALLOWED_FIELDS = [
+        'isBlocked',
+        'friend_group_id',
+        'user_id',
+        'target_id',
+        'created_at',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO friends (friend_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [friendId, value, value],
+        );
+      }
+    },
+
+    friendApplication: async (friendApplicationId, data) => {
+      const ALLOWED_FIELDS = [
+        'description',
+        'application_status',
+        'sender_id',
+        'receiver_id',
+        'created_at',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO friend_applications (friend_application_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [friendApplicationId, value, value],
+        );
+      }
+    },
+
+    member: async (memberId, data) => {
+      const ALLOWED_FIELDS = [
+        'nickname',
+        'contribution',
+        'last_message_time',
+        'last_join_channel_time',
+        'is_blocked',
+        'permission_level',
+        'user_id',
+        'server_id',
+        'created_at',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO members (member_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [memberId, value, value],
+        );
+      }
+    },
+
+    memberApplication: async (memberApplicationId, data) => {
+      const ALLOWED_FIELDS = [
+        'description',
+        'application_status',
+        'user_id',
+        'server_id',
+        'created_at',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO member_applications (member_application_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [memberApplicationId, value, value],
+        );
+      }
+    },
+
+    message: async (messageId, data) => {
+      const ALLOWED_FIELDS = [
+        'content',
+        'type',
+        'sender_id',
+        'server_id',
+        'channel_id',
+        'timestamp',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO messages (message_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [messageId, value, value],
+        );
+      }
+    },
+
+    directMessage: async (directMessageId, data) => {
+      const ALLOWED_FIELDS = [
+        'content',
+        'sender_id',
+        'user_id_1',
+        'user_id_2',
+        'timestamp',
+      ];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
+        }
+        await query(
+          `INSERT INTO direct_messages (direct_message_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [directMessageId, value, value],
+        );
+      }
+    },
+  };
 
   get = {
     // Avatar
@@ -50,7 +365,7 @@ class Database {
       );
       const user = await query(`SELECT * FROM users WHERE id = ?`, [userId]);
       if (!user) return null;
-      return user;
+      return convertToCamelCase(user);
     },
     user: async (userId) => {
       // const users = (await db.get('users')) || {};
@@ -78,8 +393,8 @@ class Database {
       );
       if (!user) return null;
       return {
-        ...user,
-        badges: userBadges,
+        ...convertToCamelCase(user),
+        badges: convertToCamelCase(userBadges),
       };
     },
     userFriendGroups: async (userId) => {
@@ -110,7 +425,7 @@ class Database {
         [userId],
       );
       if (!userBadges) return null;
-      return userBadges;
+      return convertToCamelCase(userBadges);
     },
     userServers: async (userId) => {
       // const userServers = (await db.get('userServers')) || {};
@@ -130,7 +445,7 @@ class Database {
         [userId],
       );
       if (!userServers) return null;
-      return userServers;
+      return convertToCamelCase(userServers);
     },
     // // Will be deprecated
     // userJoinedServers: async (userId) => {
@@ -191,7 +506,7 @@ class Database {
         [userId],
       );
       if (!userMembers) return null;
-      return userMembers;
+      return convertToCamelCase(userMembers);
     },
     userFriends: async (userId) => {
       // const friends = (await db.get('friends')) || {};
@@ -211,7 +526,7 @@ class Database {
         [userId],
       );
       if (!userFriends) return null;
-      return userFriends;
+      return convertToCamelCase(userFriends);
     },
     userFriendApplications: async (userId) => {
       // const applications = (await db.get('friendApplications')) || {};
@@ -234,7 +549,7 @@ class Database {
         [userId],
       );
       if (!userFriendApplications) return null;
-      return userFriendApplications;
+      return convertToCamelCase(userFriendApplications);
     },
 
     // Server
@@ -303,7 +618,7 @@ class Database {
         [serverId],
       );
       if (!serverUsers) return null;
-      return serverUsers;
+      return convertToCamelCase(serverUsers);
     },
     serverChannels: async (serverId) => {
       // const channels = (await db.get('channels')) || {};
@@ -319,7 +634,7 @@ class Database {
         [serverId],
       );
       if (!serverChannels) return null;
-      return serverChannels;
+      return convertToCamelCase(serverChannels);
     },
     serverMembers: async (serverId) => {
       // const members = (await db.get('members')) || {};
@@ -339,7 +654,7 @@ class Database {
         [serverId],
       );
       if (!serverMembers) return null;
-      return serverMembers;
+      return convertToCamelCase(serverMembers);
     },
     serverMemberApplications: async (serverId) => {
       // const applications = (await db.get('memberApplications')) || {};
@@ -362,7 +677,7 @@ class Database {
         [serverId],
       );
       if (!serverMemberApplications) return null;
-      return serverMemberApplications;
+      return convertToCamelCase(serverMemberApplications);
     },
 
     // Category
@@ -398,7 +713,7 @@ class Database {
         [channelId],
       );
       if (!channel) return null;
-      return channel;
+      return convertToCamelCase(channel);
     },
     channelMessages: async (channelId) => {
       // const messages = (await db.get('messages')) || {};
@@ -418,7 +733,7 @@ class Database {
         [channelId],
       );
       if (!channelMessages) return null;
-      return channelMessages;
+      return convertToCamelCase(channelMessages);
     },
     channelInfoMessages: async (channelId) => {
       // const messages = (await db.get('messages')) || {};
@@ -433,7 +748,7 @@ class Database {
         [channelId],
       );
       if (!channelInfoMessages) return null;
-      return channelInfoMessages;
+      return convertToCamelCase(channelInfoMessages);
     },
 
     // Friend Group
@@ -449,7 +764,7 @@ class Database {
         [friendGroupId],
       );
       if (!friendGroup) return null;
-      return friendGroup;
+      return convertToCamelCase(friendGroup);
     },
 
     // Member
@@ -465,7 +780,7 @@ class Database {
         [userId, serverId],
       );
       if (!member) return null;
-      return member;
+      return convertToCamelCase(member);
     },
 
     // Member Application
@@ -481,7 +796,7 @@ class Database {
         [userId, serverId],
       );
       if (!memberApplication) return null;
-      return memberApplication;
+      return convertToCamelCase(memberApplication);
     },
 
     // Friend
@@ -497,7 +812,7 @@ class Database {
         [userId, targetId],
       );
       if (!friend) return null;
-      return friend;
+      return convertToCamelCase(friend);
     },
 
     // Friend Application
@@ -513,7 +828,7 @@ class Database {
         [senderId, receiverId],
       );
       if (!friendApplication) return null;
-      return friendApplication;
+      return convertToCamelCase(friendApplication);
     },
 
     // Message
@@ -529,7 +844,7 @@ class Database {
         [messageId],
       );
       if (!message) return null;
-      return message;
+      return convertToCamelCase(message);
     },
 
     directMessages: async (userId, targetId) => {
@@ -553,7 +868,7 @@ class Database {
         [userId1, userId2],
       );
       if (!directMessages) return null;
-      return directMessages;
+      return convertToCamelCase(directMessages);
     },
   };
 
@@ -621,9 +936,9 @@ class Database {
       await query(`DELETE FROM messages WHERE messages.id = ?`, [messageId]);
     },
 
-    directMessage: async (userId1, userId2) => {
-      const userId1 = userId1.localeCompare(userId2) < 0 ? userId1 : userId2;
-      const userId2 = userId1.localeCompare(userId2) < 0 ? userId2 : userId1;
+    directMessage: async (userId, targetId) => {
+      const userId1 = userId.localeCompare(targetId) < 0 ? userId : targetId;
+      const userId2 = userId.localeCompare(targetId) < 0 ? targetId : userId;
       await query(
         `DELETE FROM direct_messages WHERE direct_messages.user_id1 = ? AND direct_messages.user_id2 = ?`,
         [userId1, userId2],
