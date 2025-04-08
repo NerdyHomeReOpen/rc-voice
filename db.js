@@ -89,7 +89,7 @@ class Database {
       //   .sort((a, b) => b.order - a.order)
       //   .filter((fg) => fg);
       const friendGroups = await query(
-        `SELECT * FROM friend_groups WHERE user_id = ?`,
+        `SELECT * FROM friend_groups WHERE user_id = ? ORDER BY friend_groups.order DESC`,
         [userId],
       );
       if (!friendGroups) return null;
@@ -106,7 +106,7 @@ class Database {
       const userBadges = await query(
         `SELECT * FROM badges
         LEFT JOIN user_badges ON badges.id = user_badges.badge_id
-        WHERE user_badges.user_id = ?`,
+        WHERE user_badges.user_id = ? ORDER BY badges.order DESC`,
         [userId],
       );
       if (!userBadges) return null;
@@ -126,7 +126,7 @@ class Database {
       const userServers = await query(
         `SELECT * FROM user_servers 
         LEFT JOIN servers ON user_servers.server_id = servers.id
-        WHERE user_servers.user_id = ?`,
+        WHERE user_servers.user_id = ? ORDER BY user_servers.timestamp DESC`,
         [userId],
       );
       if (!userServers) return null;
@@ -187,7 +187,7 @@ class Database {
       const userMembers = await query(
         `SELECT * FROM members 
         LEFT JOIN servers ON members.server_id = servers.id
-        WHERE members.user_id = ?`,
+        WHERE members.user_id = ? ORDER BY members.created_at DESC`,
         [userId],
       );
       if (!userMembers) return null;
@@ -207,7 +207,7 @@ class Database {
       const userFriends = await query(
         `SELECT * FROM friends 
         LEFT JOIN users ON friends.target_id = users.id
-        WHERE friends.user_id = ?`,
+        WHERE friends.user_id = ? ORDER BY friends.created_at DESC`,
         [userId],
       );
       if (!userFriends) return null;
@@ -230,7 +230,7 @@ class Database {
       const userFriendApplications = await query(
         `SELECT * FROM friend_applications 
         LEFT JOIN users ON friend_applications.sender_id = users.id
-        WHERE friend_applications.receiver_id = ? AND friend_applications.application_status = 'pending'`,
+        WHERE friend_applications.receiver_id = ? AND friend_applications.application_status = 'pending' ORDER BY friend_applications.created_at DESC`,
         [userId],
       );
       if (!userFriendApplications) return null;
@@ -241,7 +241,7 @@ class Database {
     searchServer: async (query) => {
       const servers = await query(
         `SELECT * FROM servers 
-        WHERE servers.name LIKE ? OR servers.display_id LIKE ?`,
+        WHERE servers.name LIKE ? OR servers.display_id LIKE ? ORDER BY servers.created_at DESC`,
         [`%${query}%`, `${query}`],
       );
       if (!servers) return null;
@@ -299,7 +299,7 @@ class Database {
       const serverUsers = await query(
         `SELECT * FROM members 
         LEFT JOIN users ON members.user_id = users.id
-        WHERE members.server_id = ?`,
+        WHERE members.server_id = ? ORDER BY members.created_at DESC`,
         [serverId],
       );
       if (!serverUsers) return null;
@@ -315,7 +315,7 @@ class Database {
       const serverChannels = await query(
         `SELECT * FROM channels 
         LEFT JOIN categories ON channels.category_id = categories.id
-        WHERE channels.server_id = ?`,
+        WHERE channels.server_id = ? ORDER BY channels.order ASC`,
         [serverId],
       );
       if (!serverChannels) return null;
@@ -335,7 +335,7 @@ class Database {
       const serverMembers = await query(
         `SELECT * FROM members 
         LEFT JOIN users ON members.user_id = users.id
-        WHERE members.server_id = ?`,
+        WHERE members.server_id = ? ORDER BY members.created_at DESC`,
         [serverId],
       );
       if (!serverMembers) return null;
@@ -358,7 +358,7 @@ class Database {
       const serverMemberApplications = await query(
         `SELECT * FROM member_applications 
         LEFT JOIN users ON member_applications.user_id = users.id
-        WHERE member_applications.server_id = ? AND member_applications.application_status = 'pending'`,
+        WHERE member_applications.server_id = ? AND member_applications.application_status = 'pending' ORDER BY member_applications.created_at DESC`,
         [serverId],
       );
       if (!serverMemberApplications) return null;
@@ -374,7 +374,7 @@ class Database {
       //   ...category,
       // };
       const category = await query(
-        `SELECT * FROM categories WHERE categories.id = ?`,
+        `SELECT * FROM categories WHERE categories.id = ? ORDER BY categories.order ASC`,
         [categoryId],
       );
       if (!category) return null;
@@ -394,7 +394,7 @@ class Database {
       //   ],
       // };
       const channel = await query(
-        `SELECT * FROM channels WHERE channels.id = ?`,
+        `SELECT * FROM channels WHERE channels.id = ? ORDER BY channels.order ASC`,
         [channelId],
       );
       if (!channel) return null;
@@ -414,7 +414,7 @@ class Database {
       //   })
       //   .filter((msg) => msg);
       const channelMessages = await query(
-        `SELECT * FROM messages WHERE messages.channel_id = ? AND messages.type = 'general'`,
+        `SELECT * FROM messages WHERE messages.channel_id = ? AND messages.type = 'general' ORDER BY messages.created_at DESC`,
         [channelId],
       );
       if (!channelMessages) return null;
@@ -429,7 +429,7 @@ class Database {
       //   })
       //   .filter((msg) => msg);
       const channelInfoMessages = await query(
-        `SELECT * FROM messages WHERE messages.channel_id = ? AND messages.type = 'info'`,
+        `SELECT * FROM messages WHERE messages.channel_id = ? AND messages.type = 'info' ORDER BY messages.created_at DESC`,
         [channelId],
       );
       if (!channelInfoMessages) return null;
@@ -445,7 +445,7 @@ class Database {
       //   ...friendGroup,
       // };
       const friendGroup = await query(
-        `SELECT * FROM friend_groups WHERE friend_groups.id = ?`,
+        `SELECT * FROM friend_groups WHERE friend_groups.id = ? ORDER BY friend_groups.order DESC`,
         [friendGroupId],
       );
       if (!friendGroup) return null;
@@ -461,7 +461,7 @@ class Database {
       //   ...member,
       // };
       const member = await query(
-        `SELECT * FROM members WHERE members.user_id = ? AND members.server_id = ?`,
+        `SELECT * FROM members WHERE members.user_id = ? AND members.server_id = ? ORDER BY members.created_at DESC`,
         [userId, serverId],
       );
       if (!member) return null;
@@ -477,7 +477,7 @@ class Database {
       //   ...application,
       // };
       const memberApplication = await query(
-        `SELECT * FROM member_applications WHERE member_applications.user_id = ? AND member_applications.server_id = ?`,
+        `SELECT * FROM member_applications WHERE member_applications.user_id = ? AND member_applications.server_id = ? ORDER BY member_applications.created_at DESC`,
         [userId, serverId],
       );
       if (!memberApplication) return null;
@@ -493,7 +493,7 @@ class Database {
       //   ...friend,
       // };
       const friend = await query(
-        `SELECT * FROM friends WHERE friends.user_id = ? AND friends.target_id = ?`,
+        `SELECT * FROM friends WHERE friends.user_id = ? AND friends.target_id = ? ORDER BY friends.created_at DESC`,
         [userId, targetId],
       );
       if (!friend) return null;
@@ -509,7 +509,7 @@ class Database {
       //   ...application,
       // };
       const friendApplication = await query(
-        `SELECT * FROM friend_applications WHERE friend_applications.sender_id = ? AND friend_applications.receiver_id = ?`,
+        `SELECT * FROM friend_applications WHERE friend_applications.sender_id = ? AND friend_applications.receiver_id = ? ORDER BY friend_applications.created_at DESC`,
         [senderId, receiverId],
       );
       if (!friendApplication) return null;
@@ -525,7 +525,7 @@ class Database {
       //   ...message,
       // };
       const message = await query(
-        `SELECT * FROM messages WHERE messages.id = ?`,
+        `SELECT * FROM messages WHERE messages.id = ? ORDER BY messages.created_at DESC`,
         [messageId],
       );
       if (!message) return null;
@@ -549,7 +549,7 @@ class Database {
       const directMessages = await query(
         `SELECT * FROM direct_messages 
         LEFT JOIN users ON direct_messages.sender_id = users.id
-        WHERE direct_messages.user_id1 = ? AND direct_messages.user_id2 = ?`,
+        WHERE direct_messages.user_id1 = ? AND direct_messages.user_id2 = ? ORDER BY direct_messages.created_at DESC`,
         [userId1, userId2],
       );
       if (!directMessages) return null;
