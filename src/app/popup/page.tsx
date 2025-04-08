@@ -89,7 +89,6 @@ Header.displayName = 'Header';
 const Popup = React.memo(() => {
   // Language
   const lang = useLanguage();
-  const params = new URLSearchParams(window.location.search);
 
   // Refs
   const windowRef = useRef<HTMLDivElement>(null);
