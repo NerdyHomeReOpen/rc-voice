@@ -56,44 +56,45 @@ class Database {
   set = {
     user: async (userId, data) => {
       const ALLOWED_FIELDS = [
+        'id',
         'name',
         'avatar',
-        'avatar_url',
+        'avatarUrl',
         'signature',
         'country',
         'level',
         'vip',
         'xp',
-        'required_xp',
+        'requiredXp',
         'progress',
-        'birth_year',
-        'birth_month',
-        'birth_day',
+        'birthYear',
+        'birthMonth',
+        'birthDay',
         'status',
         'gender',
-        'current_channel_id',
-        'current_server_id',
-        'last_active_at',
-        'created_at',
+        'currentChannelId',
+        'currentServerId',
+        'lastActiveAt',
+        'createdAt',
       ];
       const snakeCaseData = convertToSnakeCase(data);
       const userDataToStore = {};
 
       for (const key in snakeCaseData) {
-          if (ALLOWED_FIELDS.includes(key)) {
-              userDataToStore[key] = snakeCaseData[key];
-          }
+        if (ALLOWED_FIELDS.includes(key) && snakeCaseData[key] !== undefined) {
+          userDataToStore[key] = snakeCaseData[key];
+        }
       }
 
       const jsonData = JSON.stringify(userDataToStore);
 
       await query(
-          `
-          INSERT INTO users (user_id, data)
-          VALUES (?, ?)
-          ON DUPLICATE KEY UPDATE data = ?
-          `,
-          [userId, jsonData, jsonData]
+        `
+        INSERT INTO users (user_id, data)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE data = ?
+        `,
+        [userId, jsonData, jsonData]
       );
     },
 
@@ -352,7 +353,11 @@ class Database {
       }
     },
     userVip: async (userId, vip) => {
-      const sql = `INSERT INTO users (user_id, vip) VALUES (?, ?) ON DUPLICATE KEY UPDATE vip = ?`;
+      const sql = `
+          INSERT INTO users (user_id, data)
+          VALUES (?, JSON_OBJECT('vip', ?))
+          ON DUPLICATE KEY UPDATE data = JSON_MERGE_PATCH(data, JSON_OBJECT('vip', ?))
+      `;
       const params = [userId, vip, vip];
       await query(sql, params);
     },
@@ -371,11 +376,23 @@ class Database {
   get = {
     // All
     all: async (querys) => {
-      const all = await query(
+      const result = await query(
         `SELECT * FROM ${querys}`,
       );
-      if (!all) return {};
-      return all;
+      if (!result || result.length === 0) {
+        return {};
+      }
+
+      const transformedResult = {};
+      const firstColumnName = Object.keys(result[0])[0];
+
+      for (const row of result) {
+        if (row.hasOwnProperty(firstColumnName)) {
+            transformedResult[row[firstColumnName]] = row;
+        }
+      }
+
+      return transformedResult;
     },
     // Avatar
     avatar: async (avatarUrl) => {

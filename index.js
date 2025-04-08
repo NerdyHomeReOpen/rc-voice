@@ -140,7 +140,7 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        if (password !== accountPasswords[account]) {
+        if (password !== accountPasswords[account].password) {
           throw new StandardizedError(
             '帳號或密碼錯誤',
             'ValidationError',
@@ -149,7 +149,7 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        const userId = accountUserIds[account];
+        const userId = accountUserIds[account].user_id;
         if (!userId) {
           throw new StandardizedError(
             '用戶不存在',
@@ -171,13 +171,14 @@ const server = http.createServer((req, res) => {
         }
 
         // Update user
-        await Set.user(user.id, {
+        await Set.user(userId, {
+          ...user.data,
           lastActiveAt: Date.now(),
         });
 
         // Generate JWT token
         const token = JWT.generateToken({
-          userId: user.id,
+          userId,
         });
 
         sendSuccess(res, {
