@@ -557,6 +557,80 @@ class Database {
     },
   };
 
+  delete = {
+    user: async (userId) => {
+      await query(`DELETE FROM users WHERE users.id = ?`, [userId]);
+    },
+
+    badge: async (badgeId) => {
+      await query(`DELETE FROM badges WHERE badges.id = ?`, [badgeId]);
+    },
+
+    userBadge: async (userId, badgeId) => {
+      await query(`DELETE FROM user_badges WHERE user_badges.id = ?`, [
+        `ub_${userId}-${badgeId}`,
+      ]);
+    },
+
+    userServer: async (userId, serverId) => {
+      await query(`DELETE FROM user_servers WHERE user_servers.id = ?`, [
+        `us_${userId}-${serverId}`,
+      ]);
+    },
+
+    server: async (serverId) => {
+      await query(`DELETE FROM servers WHERE servers.id = ?`, [serverId]);
+    },
+
+    channel: async (channelId) => {
+      await query(`DELETE FROM channels WHERE channels.id = ?`, [channelId]);
+    },
+
+    friendGroup: async (friendGroupId) => {
+      await query(`DELETE FROM friend_groups WHERE friend_groups.id = ?`, [
+        friendGroupId,
+      ]);
+    },
+
+    member: async (userId, serverId) => {
+      await query(`DELETE FROM members WHERE members.id = ?`, [
+        `mb_${userId}-${serverId}`,
+      ]);
+    },
+
+    memberApplication: async (userId, serverId) => {
+      await query(
+        `DELETE FROM member_applications WHERE member_applications.id = ?`,
+        [`ma_${userId}-${serverId}`],
+      );
+    },
+    friend: async (userId, targetId) => {
+      await query(`DELETE FROM friends WHERE friends.id = ?`, [
+        `fd_${userId}-${targetId}`,
+      ]);
+    },
+
+    friendApplication: async (senderId, receiverId) => {
+      await query(
+        `DELETE FROM friend_applications WHERE friend_applications.id = ?`,
+        [`fa_${senderId}-${receiverId}`],
+      );
+    },
+
+    message: async (messageId) => {
+      await query(`DELETE FROM messages WHERE messages.id = ?`, [messageId]);
+    },
+
+    directMessage: async (userId1, userId2) => {
+      const userId1 = userId1.localeCompare(userId2) < 0 ? userId1 : userId2;
+      const userId2 = userId1.localeCompare(userId2) < 0 ? userId2 : userId1;
+      await query(
+        `DELETE FROM direct_messages WHERE direct_messages.user_id1 = ? AND direct_messages.user_id2 = ?`,
+        [userId1, userId2],
+      );
+    },
+  };
+
   async deleteAll() {
     const tables = [
       'account_passwords',
