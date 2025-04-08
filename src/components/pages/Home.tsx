@@ -118,6 +118,15 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
   const { id: userId, name: userName } = user;
   const hasResults =
     exactMatch || personalResults.length > 0 || relatedResults.length > 0;
+  const recentServers = userServers
+    .filter((s) => s.recent)
+    .sort((a, b) => b.timestamp - a.timestamp);
+  const favoriteServers = userServers
+    .filter((s) => s.favorite)
+    .sort((a, b) => b.timestamp - a.timestamp);
+  const ownedServers = userServers
+    .filter((s) => s.owned)
+    .sort((a, b) => b.timestamp - a.timestamp);
 
   // Handlers
   const handleUserServersUpdate = (data: UserServer[] | null) => {
@@ -375,7 +384,7 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
       <main className={homePage['homeContent']}>
         <ServerListSection
           title={lang.tr.recentVisits}
-          servers={userServers.filter((s) => s.recent)}
+          servers={recentServers}
           userId={userId}
           onServerClick={(server) => {
             setIsLoading(true);
@@ -384,7 +393,7 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
         />
         <ServerListSection
           title={lang.tr.myGroups}
-          servers={userServers.filter((s) => s.owned)}
+          servers={ownedServers}
           userId={userId}
           onServerClick={(server) => {
             setIsLoading(true);
@@ -393,7 +402,7 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
         />
         <ServerListSection
           title={lang.tr.favoriteGroups}
-          servers={userServers.filter((s) => s.favorite)}
+          servers={favoriteServers}
           userId={userId}
           onServerClick={(server) => {
             setIsLoading(true);
