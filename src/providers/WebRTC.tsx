@@ -229,8 +229,8 @@ const WebRTCProvider = ({ children }: WebRTCProviderProps) => {
       try {
         // Set volume
         const newVolume = volume !== null ? volume : speakerVolume;
-        Object.values(peerAudioRefs.current).forEach((audio) => {
-          audio.volume = newVolume / 100;
+        Object.entries(peerAudioRefs.current).forEach(([userId, audio]) => {
+          if (!muteList.includes(userId)) audio.volume = newVolume / 100;
         });
         setSpeakerVolume(newVolume);
       } catch (error) {
