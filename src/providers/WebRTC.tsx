@@ -52,24 +52,24 @@ type IceCandidate = {
 };
 
 interface WebRTCContextType {
-  handleMute?: (userId: string) => void;
-  handleUnmute?: (userId: string) => void;
-  handleToggleMute?: () => void;
-  handleUpdateBitrate?: (newBitrate: number) => void;
-  handleUpdateMicVolume?: (volume: number) => void;
-  handleUpdateSpeakerVolume?: (volume: number) => void;
-  handleUpdateInputStream?: (deviceId: string) => void;
-  handleUpdateOutputStream?: (deviceId: string) => void;
-  muteList?: string[];
-  isMute?: boolean;
-  bitrate?: number;
-  micVolume?: number;
-  speakerVolume?: number;
-  volumePercent?: number;
-  speakStatus?: { [id: string]: number };
+  handleMute: (userId: string) => void;
+  handleUnmute: (userId: string) => void;
+  handleToggleMute: () => void;
+  handleUpdateBitrate: (newBitrate: number) => void;
+  handleUpdateMicVolume: (volume: number) => void;
+  handleUpdateSpeakerVolume: (volume: number) => void;
+  handleUpdateInputStream: (deviceId: string) => void;
+  handleUpdateOutputStream: (deviceId: string) => void;
+  muteList: string[];
+  isMute: boolean;
+  bitrate: number;
+  micVolume: number;
+  speakerVolume: number;
+  volumePercent: number;
+  speakStatus: { [id: string]: number };
 }
 
-const WebRTCContext = createContext<WebRTCContextType>({});
+const WebRTCContext = createContext<WebRTCContextType>({} as WebRTCContextType);
 
 export const useWebRTC = (): WebRTCContextType => {
   const context = useContext(WebRTCContext);
