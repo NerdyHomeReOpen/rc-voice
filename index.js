@@ -2,8 +2,8 @@
 const http = require('http');
 const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
+const db = require('./db');
+
 const fs = require('fs').promises;
 const path = require('path');
 const formidable = require('formidable');

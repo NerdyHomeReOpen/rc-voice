@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { QuickDB } = require('quick.db');
-const db = new QuickDB({ filePath: './json.sqlite' });
+const db = require('./db');
+
 const fs = require('fs/promises');
 const path = require('path');
 
