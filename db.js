@@ -76,16 +76,25 @@ class Database {
         'last_active_at',
         'created_at',
       ];
-      const entries = Object.entries(convertToSnakeCase(data));
-      for (const [key, value] of entries) {
-        if (!ALLOWED_FIELDS.includes(key)) {
-          throw new Error(`Invalid field: ${key}`);
-        }
-        await query(
-          `INSERT INTO users (user_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
-          [userId, value, value],
-        );
+      const snakeCaseData = convertToSnakeCase(data);
+      const userDataToStore = {};
+
+      for (const key in snakeCaseData) {
+          if (ALLOWED_FIELDS.includes(key)) {
+              userDataToStore[key] = snakeCaseData[key];
+          }
       }
+
+      const jsonData = JSON.stringify(userDataToStore);
+
+      await query(
+          `
+          INSERT INTO users (user_id, data)
+          VALUES (?, ?)
+          ON DUPLICATE KEY UPDATE data = ?
+          `,
+          [userId, jsonData, jsonData]
+      );
     },
 
     badge: async (badgeId, data) => {
@@ -345,25 +354,28 @@ class Database {
     userVip: async (userId, vip) => {
       const sql = `INSERT INTO users (user_id, vip) VALUES (?, ?) ON DUPLICATE KEY UPDATE vip = ?`;
       const params = [userId, vip, vip];
-      console.log('Executing SQL:', sql);
-      console.log('Parameters:', params);
       await query(sql, params);
+    },
+    accountPasswords: async (account, password) => {
+      const sql = `INSERT INTO account_passwords (account_id, password) VALUES (?, ?) ON DUPLICATE KEY UPDATE password = ?`;
+      const params = [account, password, password];
+      await query(sql, params);
+    },
+    accountUserIds: async (account, userId) => {
+        const sql = `INSERT INTO account_user_ids (account_id, user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE user_id = ?`;
+        const params = [account, userId, userId];
+        await query(sql, params);
     },
   };
 
   get = {
     // All
     all: async (querys) => {
-      try {
-        const all = await query(
-          `SELECT * FROM ${querys}`,
-        );
-        if (!all) return null;
-        return all;
-      } catch (error) {
-        console.error("查詢錯誤:", error);
-        return null;
-      }
+      const all = await query(
+        `SELECT * FROM ${querys}`,
+      );
+      if (!all) return {};
+      return all;
     },
     // Avatar
     avatar: async (avatarUrl) => {

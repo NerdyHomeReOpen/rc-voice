@@ -116,9 +116,9 @@ const server = http.createServer((req, res) => {
 
         // Get database
         const { account, password } = data;
-        const accountPasswords = (await db.get(`accountPasswords`)) || {};
-        const accountUserIds = (await db.get(`accountUserIds`)) || {};
-        const users = (await db.get(`users`)) || {};
+        const accountPasswords = (await Get.all(`account_passwords`)) || {};
+        const accountUserIds = (await Get.all(`account_user_ids`)) || {};
+        const users = (await Get.all(`users`)) || {};
 
         // Validate data
         if (!account || !password) {
@@ -219,7 +219,7 @@ const server = http.createServer((req, res) => {
 
         // Get database
         const { account, confirmPassword, password, username } = data;
-        const accountPasswords = (await db.get(`accountPasswords`)) || {};
+        const accountPasswords = (await Get.all(`account_passwords`)) || {};
 
         // Validate data
         Func.validate.account(account.trim());
@@ -239,15 +239,18 @@ const server = http.createServer((req, res) => {
 
         // Create user data
         const userId = uuidv4();
+        console.log(username);
         await Set.user(userId, {
           name: username,
           avatar: userId,
           createdAt: Date.now(),
         });
 
+        console.log(userId);
+
         // Create account password list
-        await db.set(`accountPasswords.${account}`, password);
-        await db.set(`accountUserIds.${account}`, userId);
+        await Set.accountPasswords(account, password);
+        await Set.accountUserIds(account, userId);
 
         sendSuccess(res, {
           message: '註冊成功',
@@ -1105,7 +1108,7 @@ const io = new Server(server, {
   },
 });
 
-require('./socket/index')(io, db);
+require('./socket/index')(io);
 
 // Error Handling
 server.on('error', (error) => {
