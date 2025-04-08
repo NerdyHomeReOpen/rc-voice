@@ -40,27 +40,27 @@ const ServerCard: React.FC<ServerCardProps> = React.memo(
 
     return (
       <div
-        className={homePage['myGroupsRoomItemBox']}
+        className={homePage['serverCard']}
         onClick={() => handleServerSelect(userId, serverId)}
       >
         <div
-          className={homePage['myGroupsRoomAvatarPicture']}
+          className={homePage['serverAvatarPicture']}
           style={{ backgroundImage: `url(${serverAvatarUrl})` }}
         ></div>
-        <div className={homePage['myGroupsRoomInfo']}>
-          <div className={homePage['myGroupsRoomName']}>{serverName}</div>
-          <div className={homePage['myGroupsRoomIDBox']}>
+        <div className={homePage['serverInfoText']}>
+          <div className={homePage['serverNameText']}>{serverName}</div>
+          <div className={homePage['serverIdBox']}>
             <div
               className={`
-                ${homePage['myGroupsRoomIDTitle']} 
+                ${homePage['serverIdText']} 
                 ${isOwner ? homePage['IsOwner'] : ''}
               `}
             >
               ID:
             </div>
-            <div className={homePage['myGroupsRoomID']}>{serverDisplayId}</div>
+            <div className={homePage['serverIdText']}>{serverDisplayId}</div>
           </div>
-          <div className={homePage['myGroupsRoomSlogen']}>{serverSlogan}</div>
+          <div className={homePage['serverSlogen']}>{serverSlogan}</div>
         </div>
       </div>
     );
@@ -79,7 +79,7 @@ interface ServerListViewerProps {
 const ServerListViewer: React.FC<ServerListViewerProps> = React.memo(
   ({ userId, servers, onServerClick }) => {
     return (
-      <div className={homePage['myGroupsRoomItems']}>
+      <div className={homePage['serverCards']}>
         {servers.map((server) => (
           <ServerCard
             key={server.id}

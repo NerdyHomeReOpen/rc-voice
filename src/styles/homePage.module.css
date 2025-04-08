@@ -145,62 +145,46 @@
 }
 
 /* Content */
-.myGroupsWrapper {
+.homeContent {
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: scroll;
+  padding: 25px 100px;
+  max-height: 100%;
+  gap: 10px;
   background: #f4f6fa;
 }
 
-.myGroupsContain {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  overflow: auto;
-  max-height: calc(100vh - 1rem);
-  padding: 25px;
-}
-
-.myGroupsView {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.myGroupsTitle {
+.serverListTitle {
   font-weight: bold;
   font-size: 1.5rem;
+  margin-bottom: 10px;
 }
 
-.myGroupsRoomItems {
+.serverCards {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
   justify-content: flex-start;
-  width: 100%;
+  width: 620px;
+  gap: 10px;
 }
 
-.myGroupsView div:not(:last-child) .myGroupsRoomItems {
-  margin-bottom: 1rem;
-}
-
-.myGroupsRoomItemBox {
-  border: 1px solid #e0e0e4;
-  padding: 12px;
-  width: 15rem;
-  display: flex;
-  padding-bottom: 10px;
-  padding-top: 10px;
-  height: 5.5rem;
-  cursor: pointer;
-  background: #fff;
-  align-items: center;
+.serverCard {
   min-width: 200px;
-  max-width: 320px;
+  max-width: 200px;
+  display: flex;
+  padding: 10px;
+  cursor: pointer;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e0e0e4;
 }
 
-.myGroupsRoomAvatarPicture {
+.serverAvatarPicture {
   position: relative;
   cursor: pointer;
   object-fit: cover;
@@ -212,7 +196,7 @@
   background-position: center center;
 }
 
-.myGroupsRoomInfo {
+.serverInfoText {
   display: flex;
   flex-direction: column;
   margin-left: 7px;
@@ -221,31 +205,31 @@
   flex: 1;
 }
 
-.myGroupsRoomName {
+.serverNameText {
   color: #10469e;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
 
-.myGroupsRoomIDBox {
+.serverIdBox {
   color: #777;
   display: flex;
 }
 
-.myGroupsRoomIDTitle {
+.serverIdText {
   display: flex;
   align-items: flex-start;
 }
 
-.myGroupsRoomSlogen {
+.serverSlogen {
   color: #777;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.myGroupsRoomIDTitle.IsOwner::before {
+.serverIdText.IsOwner::before {
   content: '';
   width: 13px;
   height: 15px;
@@ -341,7 +325,7 @@
 }
 
 .dropdownHeader {
-  padding: 6px 12px 3px;
+  padding: 6px;
   color: #000;
   border-top: 1px solid #eee;
 }
@@ -362,14 +346,13 @@
   transition: background-color 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
 }
 
 .dropdownItem:hover {
   background-color: #f5f5f5;
 }
 
-.serverAvatar {
+/* .serverAvatar {
   width: 40px;
   height: 40px;
   background-image: url('../../public/logo_server_def.png');
@@ -409,7 +392,7 @@
 
 .serverId {
   color: #666;
-}
+} */
 
 .loadingWrapper {
   height: 100%;

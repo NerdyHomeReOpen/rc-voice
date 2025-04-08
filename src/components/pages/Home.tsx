@@ -48,8 +48,8 @@ const ServerListSection: React.FC<ServerListSectionProps> = ({
   const canExpand = servers.length > 6;
 
   return (
-    <div className={homePage['myGroupsItem']}>
-      <div className={homePage['myGroupsTitle']}>{title}</div>
+    <div className={homePage['serverList']}>
+      <div className={homePage['serverListTitle']}>{title}</div>
       <ServerListViewer
         userId={userId}
         servers={displayedServers}
@@ -76,16 +76,16 @@ const SearchResultItem: React.FC<{
 }> = ({ server, onClick }) => (
   <div className={homePage['dropdownItem']} onClick={onClick}>
     <div
-      className={homePage['serverAvatar']}
+      className={homePage['serverAvatarPicture']}
       style={{
         backgroundImage: `url(${server.avatarUrl})`,
       }}
     />
-    <div className={homePage['serverInfo']}>
-      <div className={homePage['serverName']}>{server.name}</div>
+    <div className={homePage['serverInfoText']}>
+      <div className={homePage['serverNameText']}>{server.name}</div>
       <div className={homePage['serverIdBox']}>
         <div className={homePage['idIcon']} />
-        <div className={homePage['serverId']}>{server.displayId}</div>
+        <div className={homePage['serverIdText']}>{server.displayId}</div>
       </div>
     </div>
   </div>
@@ -370,40 +370,39 @@ const HomePageComponent: React.FC<HomePageProps> = React.memo(({ user }) => {
           </button>
         </div>
       </header>
+
       {/* Main Content */}
-      <main className={homePage['myGroupsWrapper']}>
-        <div className={homePage['myGroupsContain']}>
-          <div className={homePage['myGroupsView']}>
-            <ServerListSection
-              title={lang.tr.recentVisits}
-              servers={userServers.filter((s) => s.recent)}
-              userId={userId}
-              onServerClick={(server) => {
-                setIsLoading(true);
-                setLoadingGroupID(server.displayId);
-              }}
-            />
-            <ServerListSection
-              title={lang.tr.myGroups}
-              servers={userServers.filter((s) => s.owned)}
-              userId={userId}
-              onServerClick={(server) => {
-                setIsLoading(true);
-                setLoadingGroupID(server.displayId);
-              }}
-            />
-            <ServerListSection
-              title={lang.tr.favoriteGroups}
-              servers={userServers.filter((s) => s.favorite)}
-              userId={userId}
-              onServerClick={(server) => {
-                setIsLoading(true);
-                setLoadingGroupID(server.displayId);
-              }}
-            />
-          </div>
-        </div>
+      <main className={homePage['homeContent']}>
+        <ServerListSection
+          title={lang.tr.recentVisits}
+          servers={userServers.filter((s) => s.recent)}
+          userId={userId}
+          onServerClick={(server) => {
+            setIsLoading(true);
+            setLoadingGroupID(server.displayId);
+          }}
+        />
+        <ServerListSection
+          title={lang.tr.myGroups}
+          servers={userServers.filter((s) => s.owned)}
+          userId={userId}
+          onServerClick={(server) => {
+            setIsLoading(true);
+            setLoadingGroupID(server.displayId);
+          }}
+        />
+        <ServerListSection
+          title={lang.tr.favoriteGroups}
+          servers={userServers.filter((s) => s.favorite)}
+          userId={userId}
+          onServerClick={(server) => {
+            setIsLoading(true);
+            setLoadingGroupID(server.displayId);
+          }}
+        />
       </main>
+
+      {/* Loading */}
       {isLoading && (
         <div className={homePage['loadingWrapper']}>
           <div className={homePage['loadingBox']}>
