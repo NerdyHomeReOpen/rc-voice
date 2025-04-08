@@ -431,12 +431,12 @@ class Database {
       //   ownedServers: await get.userOwnedServers(userId),
       //   favServers: await get.userFavServers(userId),
       // };
-      const user = await query(`SELECT * FROM users WHERE users.id = ?`, [
+      const user = await query(`SELECT * FROM users WHERE user_id = ?`, [
         userId,
       ]);
       const userBadges = await query(
         `SELECT * FROM badges
-        LEFT JOIN user_badges ON badges.id = user_badges.badge_id
+        LEFT JOIN user_badges ON badges.badge_id = user_badges.badge_id
         WHERE user_badges.user_id = ?`,
         [userId],
       );
