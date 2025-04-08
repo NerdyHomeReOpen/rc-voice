@@ -386,7 +386,7 @@
 }
 
 .userList .userTab .userState.play {
-  background-position: -24 0;
+  background-position: -24px 0;
 }
 
 .userList .userTab .userState.muted {
