@@ -367,6 +367,8 @@ export interface Translation {
   setChannelPasswordDescription: string;
   editFriend: string;
   connectingServer: string;
+  mute: string;
+  unmute: string;
 }
 
 export type LanguageKey = 'tw' | 'cn' | 'en' | 'jp';
@@ -747,6 +749,8 @@ export const translations: Record<LanguageKey, Translation> = {
     setChannelPasswordDescription: '請輸入頻道密碼 (限1-4位數字)',
     editFriend: '編輯好友',
     connectingServer: '正在連接',
+    mute: '拒聽此人語音',
+    unmute: '接受此人語音',
   },
   cn: {
     RPCHomePage: '正在浏览主页',
@@ -1122,6 +1126,8 @@ export const translations: Record<LanguageKey, Translation> = {
     setChannelPasswordDescription: '请输入频道密码 (限1-4位数字)',
     editFriend: '编辑好友',
     connectingServer: '正向连接',
+    mute: '拒听此人语音',
+    unmute: '接受此人语音',
   },
   en: {
     RPCHomePage: 'Browsing Homepage',
@@ -1521,6 +1527,8 @@ export const translations: Record<LanguageKey, Translation> = {
       'Please enter the channel password (1-4 digits)',
     editFriend: 'Edit friend',
     connectingServer: 'Connecting',
+    mute: 'Mute this user',
+    unmute: 'Unmute this user',
   },
   jp: {
     RPCHomePage: 'ホームページを閲覧中',
@@ -1915,6 +1923,8 @@ export const translations: Record<LanguageKey, Translation> = {
       'チャンネルパスワードを入力してください (1-4位数字)',
     editFriend: '編輯友達',
     connectingServer: '接続中',
+    mute: 'このユーザーの音声を拒聴',
+    unmute: 'このユーザーの音声を受聴',
   },
 };
 
