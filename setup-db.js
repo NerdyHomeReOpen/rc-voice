@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 const fs = require('fs').promises;
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 async function setupDatabase() {
   const config = {
@@ -8,16 +9,16 @@ async function setupDatabase() {
     port: process.env.DB_PORT || '3306',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'chat_app',
   };
+  const database = process.env.DB_NAME || 'chat_app';
 
   try {
     // Create connection
     const connection = await mysql.createConnection(config);
 
     // Create database if it doesn't exist
-    await connection.query(`CREATE DATABASE IF NOT EXISTS ${config.database}`);
-    await connection.query(`USE ${config.database}`);
+    await connection.query(`CREATE DATABASE IF NOT EXISTS ${database}`);
+    await connection.query(`USE ${database}`);
 
     // Read and execute schema
     const schema = await fs.readFile(path.join(__dirname, 'schema.sql'), 'utf8');

@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // MySQL Configuration
 const dbConfig = {
