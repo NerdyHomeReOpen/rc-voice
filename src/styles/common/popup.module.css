@@ -164,6 +164,7 @@
   display: inline-block;
   width: 100%;
   height: 2rem;
+  border-radius: 3px;
 }
 
 .inputBox table {
@@ -246,9 +247,9 @@
 }
 
 .inputBox .selectBox {
-  display: flex;
-  width: fit-content;
   position: relative;
+  display: inline-block;
+  width: 100%;
 }
 
 .inputBox .selectBox select {
@@ -258,10 +259,10 @@
   background: #fff;
   position: relative;
   display: inline-block;
-  min-width: 100px;
-  max-width: 100%;
+  width: 100%;
   height: 2rem;
   appearance: none;
+  border-radius: 3px;
 }
 
 .inputBox .selectBox::before {
@@ -362,6 +363,7 @@
   background-image: url('../../../public/im/wallpaper.png');
   background-size: cover;
   gap: 5px;
+  -webkit-app-region: drag;
 }
 
 .userProfile .avatar {
@@ -375,6 +377,7 @@
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center center;
+  margin-bottom: 10px;
 }
 
 .userProfile .avatar::after {
@@ -396,6 +399,7 @@
   bottom: 0;
   position: absolute;
   display: flex;
+  z-index: 1;
 }
 
 .userProfile .tab .item {
@@ -449,4 +453,8 @@
   flex-direction: row;
   align-items: center;
   text-align: left;
+}
+
+.noDrag {
+  -webkit-app-region: no-drag;
 }

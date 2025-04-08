@@ -236,7 +236,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
         <div className={`${popup['popupBody']} ${popup['col']}`}>
           <div className={popup['header']}>
             <div
-              className={popup['avatar']}
+              className={`${popup['avatar']} ${popup['noDrag']}`}
               style={{ backgroundImage: `url(${userAvatarUrl})` }}
               onClick={() => {
                 const fileInput = document.createElement('input');
@@ -305,6 +305,28 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
             </div>
           </div>
           <div className={setting['body']}>
+            <div className={setting['buttonsBar']}>
+              <div
+                className={`${setting['confirmedButton']} ${setting['blueBtn']}`}
+                onClick={() => {
+                  handleUpdateUser({
+                    avatar: userAvatar,
+                    avatarUrl: userAvatarUrl,
+                    name: userName,
+                    gender: userGender,
+                    country: userCountry,
+                    birthYear: userBirthYear,
+                    birthMonth: userBirthMonth,
+                    birthDay: userBirthDay,
+                    signature: userSignature,
+                  });
+                  handleClose();
+                }}
+              >
+                確定
+              </div>
+              <div className={setting['cancelButton']}>取消</div>
+            </div>
             <div className={popup['col']}>
               <div className={popup['row']}>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
@@ -509,35 +531,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
 
         <div className={popup['popupFooter']}>
           <div className={popup['button']} onClick={() => handleClose()}>
-            {lang.tr.cancel}
-          </div>
-          <div
-            className={`${popup['button']} ${
-              !userName ||
-              !userGender ||
-              !userCountry ||
-              !userBirthYear ||
-              !userBirthMonth ||
-              !userBirthDay
-                ? popup['disabled']
-                : ''
-            }`}
-            onClick={() => {
-              handleUpdateUser({
-                avatar: userAvatar,
-                avatarUrl: userAvatarUrl,
-                name: userName,
-                gender: userGender,
-                country: userCountry,
-                birthYear: userBirthYear,
-                birthMonth: userBirthMonth,
-                birthDay: userBirthDay,
-                signature: userSignature,
-              });
-              handleClose();
-            }}
-          >
-            {lang.tr.confirm}
+            {lang.tr.close}
           </div>
         </div>
       </div>

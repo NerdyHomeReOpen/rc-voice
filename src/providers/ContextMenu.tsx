@@ -8,7 +8,12 @@ import ContextMenu from '@/components/ContextMenu';
 import UserInfoCard from '@/components/UserInfoCard';
 
 interface ContextMenuContextType {
-  showContextMenu: (x: number, y: number, items: ContextMenuItem[]) => void;
+  showContextMenu: (
+    x: number,
+    y: number,
+    items: ContextMenuItem[],
+    className?: string,
+  ) => void;
   showUserInfoBlock: (x: number, y: number, member: ServerMember) => void;
   closeContextMenu: () => void;
 }
