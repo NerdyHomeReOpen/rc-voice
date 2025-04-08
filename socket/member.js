@@ -4,10 +4,13 @@ const utils = require('../utils');
 const {
   standardizedError: StandardizedError,
   logger: Logger,
-  get: Get,
-  set: Set,
   func: Func,
 } = utils;
+const db = require('../db');
+const {
+  get: Get,
+  set: Set,
+} = db;
 
 const memberHandler = {
   createMember: async (io, socket, data) => {

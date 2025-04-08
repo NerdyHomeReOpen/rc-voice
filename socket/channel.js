@@ -5,11 +5,14 @@ const utils = require('../utils');
 const {
   standardizedError: StandardizedError,
   logger: Logger,
-  get: Get,
-  set: Set,
   func: Func,
   xp: XP,
 } = utils;
+const db = require('../db');
+const {
+  get: Get,
+  set: Set,
+} = db;
 // Handlers
 const rtcHandler = require('./rtc');
 const messageHandler = require('./message');

@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
+const db = require('../db');
+const {
+  get: Get,
+} = db;
 const sharp = require('sharp');
 // Utils
 const StandardizedError = require('./standardizedError');
@@ -40,7 +42,7 @@ const func = {
   },
 
   generateUniqueDisplayId: async (baseId = 20000000) => {
-    const servers = (await db.get('servers')) || {};
+    const servers = (await Get.all('servers')) || {};
     let displayId = baseId + Object.keys(servers).length;
     // Ensure displayId is unique
     while (

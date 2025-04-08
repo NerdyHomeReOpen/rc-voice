@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
 // Utils
 const utils = require('../utils');
 const {
   standardizedError: StandardizedError,
   logger: Logger,
-  get: Get,
-  set: Set,
   func: Func,
 } = utils;
+const db = require('../db');
+const {
+  get: Get,
+  set: Set,
+} = db;
 
 const friendHandler = {
   createFriend: async (io, socket, data) => {

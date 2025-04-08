@@ -2,7 +2,6 @@
 const http = require('http');
 const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
-const db = require('./db');
 
 const fs = require('fs').promises;
 const path = require('path');
@@ -13,13 +12,16 @@ const utils = require('./utils');
 const {
   standardizedError: StandardizedError,
   logger: Logger,
-  get: Get,
-  set: Set,
   func: Func,
   jwt: JWT,
   clean: Clean,
   xp: XP,
 } = utils;
+const db = require('./db');
+const {
+  get: Get,
+  set: Set,
+} = db;
 
 // Constants
 const {
@@ -33,48 +35,48 @@ const {
   UPLOADS_DIR,
   SERVER_AVATAR_DIR,
   USER_AVATAR_DIR,
-  BACKUP_DIR,
+  // BACKUP_DIR,
 } = require('./constant');
 
-const DB_PATH = path.join(__dirname, './json.sqlite');
+// const DB_PATH = path.join(__dirname, './json.sqlite');
 
-const backupDatabase = async () => {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const backupFileName = `json_backup_${timestamp}.sqlite`;
-  const backupFilePath = path.join(BACKUP_DIR, backupFileName);
+// const backupDatabase = async () => {
+//   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+//   const backupFileName = `json_backup_${timestamp}.sqlite`;
+//   const backupFilePath = path.join(BACKUP_DIR, backupFileName);
 
-  try {
-    await fs.copyFile(DB_PATH, backupFilePath);
-    console.log(`備份成功: ${backupFilePath}`);
-  } catch (err) {
-    console.error('備份失敗:', err);
-  }
+//   try {
+//     await fs.copyFile(DB_PATH, backupFilePath);
+//     console.log(`備份成功: ${backupFilePath}`);
+//   } catch (err) {
+//     console.error('備份失敗:', err);
+//   }
 
-  try {
-    const files = await fs.readdir(BACKUP_DIR);
-    const now = Date.now();
-    const expirationTime = 8 * 60 * 60 * 1000;
+//   try {
+//     const files = await fs.readdir(BACKUP_DIR);
+//     const now = Date.now();
+//     const expirationTime = 8 * 60 * 60 * 1000;
 
-    await Promise.all(
-      files.map(async (file) => {
-        const filePath = path.join(BACKUP_DIR, file);
-        const stats = await fs.stat(filePath);
-        const fileAge = now - stats.mtimeMs;
+//     await Promise.all(
+//       files.map(async (file) => {
+//         const filePath = path.join(BACKUP_DIR, file);
+//         const stats = await fs.stat(filePath);
+//         const fileAge = now - stats.mtimeMs;
 
-        if (fileAge > expirationTime) {
-          await fs.unlink(filePath);
-          console.log(`刪除過期備份: ${filePath}`);
-        }
-      }),
-    );
-  } catch (err) {
-    console.error('刪除過期備份文件時發生錯誤:', err);
-  }
-};
+//         if (fileAge > expirationTime) {
+//           await fs.unlink(filePath);
+//           console.log(`刪除過期備份: ${filePath}`);
+//         }
+//       }),
+//     );
+//   } catch (err) {
+//     console.error('刪除過期備份文件時發生錯誤:', err);
+//   }
+// };
 
-const BACKUP_INTERVAL_MS = 60 * 60 * 1000;
+// const BACKUP_INTERVAL_MS = 60 * 60 * 1000;
 
-setInterval(backupDatabase, BACKUP_INTERVAL_MS);
+// setInterval(backupDatabase, BACKUP_INTERVAL_MS);
 
 // Send Error/Success Response
 const sendError = (res, statusCode, message) => {
@@ -1148,6 +1150,6 @@ process.on('unhandledRejection', (error) => {
 // Start Server
 server.listen(PORT, () => {
   new Logger('Server').success(`Server is running on port ${PORT}`);
-  Clean.setup();
+  // Clean.setup();
   XP.setup();
 });

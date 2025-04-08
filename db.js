@@ -342,16 +342,36 @@ class Database {
         );
       }
     },
+    userVip: async (userId, vip) => {
+      const sql = `INSERT INTO users (user_id, vip) VALUES (?, ?) ON DUPLICATE KEY UPDATE vip = ?`;
+      const params = [userId, vip, vip];
+      console.log('Executing SQL:', sql);
+      console.log('Parameters:', params);
+      await query(sql, params);
+    },
   };
 
   get = {
+    // All
+    all: async (querys) => {
+      try {
+        const all = await query(
+          `SELECT * FROM ${querys}`,
+        );
+        if (!all) return null;
+        return all;
+      } catch (error) {
+        console.error("查詢錯誤:", error);
+        return null;
+      }
+    },
     // Avatar
     avatar: async (avatarUrl) => {
       return `data:image/png;base64,${avatarUrl}`;
     },
 
     // User
-    searchUser: async (query) => {
+    searchUser: async (querys) => {
       // const users = (await db.get('users')) || {};
       // const accountUserIds = (await db.get('accountUserIds')) || {};
       // const target = Object.values(users).find(
@@ -361,7 +381,7 @@ class Database {
       // return target;
       const userId = await query(
         `SELECT id FROM account_user_ids WHERE id = ?`,
-        [query],
+        [querys],
       );
       const user = await query(`SELECT * FROM users WHERE id = ?`, [userId]);
       if (!user) return null;
@@ -553,11 +573,11 @@ class Database {
     },
 
     // Server
-    searchServer: async (query) => {
+    searchServer: async (querys) => {
       const servers = await query(
         `SELECT * FROM servers 
         WHERE servers.name LIKE ? OR servers.display_id LIKE ? ORDER BY servers.created_at DESC`,
-        [`%${query}%`, `${query}`],
+        [`%${querys}%`, `${querys}`],
       );
       if (!servers) return null;
       return servers;

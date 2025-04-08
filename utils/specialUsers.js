@@ -2,8 +2,11 @@
 const path = require('path');
 const fs = require('fs').promises;
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-const { QuickDB } = require('quick.db');
-const db = new QuickDB();
+const db = require('../db');
+const {
+  get: Get,
+  set: Set,
+} = db;
 const Logger = require('./logger');
 
 const specialUsers = {
@@ -81,7 +84,7 @@ const specialUsers = {
         return;
       }
 
-      const users = (await db.get('users')) || {};
+      const users = (await Get.all('users')) || {};
 
       let updatedCount = 0;
       for (const vipEntry of vipData.vips) {
@@ -92,7 +95,7 @@ const specialUsers = {
         const user = users[userId];
         if (user) {
           if (user.vip !== level) {
-            await db.set(`users.${userId}.vip`, level);
+            await Set.userVip(userId, level);
             updatedCount++;
             new Logger('VIPSystem').info(
               `User(${userId}) VIP updated to ${level}`,

@@ -3,8 +3,11 @@
 const { XP_SYSTEM } = require('../constant');
 // Utils
 const Logger = require('./logger');
-const Get = require('./get');
-const Set = require('./set');
+const db = require('../db');
+const {
+  get: Get,
+  set: Set,
+} = db;
 
 const xpSystem = {
   timeFlag: new Map(), // socket -> timeFlag
