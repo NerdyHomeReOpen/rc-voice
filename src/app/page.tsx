@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // CSS
 import header from '@/styles/common/header.module.css';
@@ -326,18 +326,15 @@ const RootPageComponent = () => {
     setUser((prev) => ({ ...prev, ...data }));
   };
 
-  const handleServerUpdate = useCallback(
-    (data: Partial<Server> | null) => {
-      if (data != null) {
-        if (data.id) mainTab.setSelectedTabId('server');
-      } else {
-        mainTab.setSelectedTabId('home');
-      }
-      if (!data) data = createDefault.server();
-      setServer((prev) => ({ ...prev, ...data }));
-    },
-    [mainTab],
-  );
+  const handleServerUpdate = (data: Partial<Server> | null) => {
+    if (data != null) {
+      if (data.id) mainTab.setSelectedTabId('server');
+    } else {
+      mainTab.setSelectedTabId('home');
+    }
+    if (!data) data = createDefault.server();
+    setServer((prev) => ({ ...prev, ...data }));
+  };
 
   const handleCurrentChannelUpdate = (data: Partial<Channel> | null) => {
     if (!data) data = createDefault.channel();
@@ -378,7 +375,7 @@ const RootPageComponent = () => {
     return () => {
       unsubscribe.forEach((unsub) => unsub());
     };
-  }, [socket, handleServerUpdate]);
+  }, [socket]);
 
   useEffect(() => {
     if (socket.isConnected) {
@@ -389,7 +386,7 @@ const RootPageComponent = () => {
       setServer(createDefault.server());
       setChannel(createDefault.channel());
     }
-  }, [socket.isConnected, mainTab]);
+  }, [socket.isConnected]);
 
   useEffect(() => {
     if (!lang) return;
