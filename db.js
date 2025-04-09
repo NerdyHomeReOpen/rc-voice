@@ -77,25 +77,16 @@ class Database {
         'lastActiveAt',
         'createdAt',
       ];
-      const snakeCaseData = convertToSnakeCase(data);
-      const userDataToStore = {};
-
-      for (const key in snakeCaseData) {
-        if (ALLOWED_FIELDS.includes(key) && snakeCaseData[key] !== undefined) {
-          userDataToStore[key] = snakeCaseData[key];
+      const entries = Object.entries(convertToSnakeCase(data));
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error(`Invalid field: ${key}`);
         }
+        await query(
+          `INSERT INTO users (user_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+          [userId, value, value],
+        );
       }
-
-      const jsonData = JSON.stringify(userDataToStore);
-
-      await query(
-        `
-        INSERT INTO users (user_id, data)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE data = ?
-        `,
-        [userId, jsonData, jsonData],
-      );
     },
 
     badge: async (badgeId, data) => {
