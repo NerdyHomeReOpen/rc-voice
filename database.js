@@ -11,7 +11,7 @@ const dbConfig = {
   database: process.env.DB_NAME || 'chat_app',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 };
 
 // Create connection pool
@@ -25,5 +25,5 @@ async function query(sql, params) {
 
 module.exports = {
   pool,
-  query
+  query,
 };

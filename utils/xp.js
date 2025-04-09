@@ -3,11 +3,7 @@
 const { XP_SYSTEM } = require('../constant');
 // Utils
 const Logger = require('./logger');
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const DB = require('../db');
 
 const xpSystem = {
   timeFlag: new Map(), // socket -> timeFlag
@@ -135,21 +131,21 @@ const xpSystem = {
 
   obtainXp: async (userId) => {
     try {
-      const user = await Get.user(userId);
+      const user = await DB.get.user(userId);
       if (!user) {
         new Logger('XPSystem').warn(
           `User(${userId}) not found, cannot obtain XP`,
         );
         return;
       }
-      const server = await Get.server(user.currentServerId);
+      const server = await DB.get.server(user.currentServerId);
       if (!server) {
         new Logger('XPSystem').warn(
           `Server(${user.currentServerId}) not found, cannot obtain XP`,
         );
         return;
       }
-      const member = await Get.member(user.id, server.id);
+      const member = await DB.get.member(user.id, server.id);
       if (!member) {
         new Logger('XPSystem').warn(
           `User(${user.id}) not found in server(${server.id}), cannot update contribution`,
@@ -176,7 +172,7 @@ const xpSystem = {
         requiredXp: requiredXp,
         progress: user.xp / requiredXp,
       };
-      await Set.user(user.id, userUpdate);
+      await DB.set.user(user.id, userUpdate);
 
       // Update member contribution if in a server
       const memberUpdate = {
@@ -185,7 +181,7 @@ const xpSystem = {
             (member.contribution + XP_SYSTEM.BASE_XP * vipBoost) * 100,
           ) / 100,
       };
-      await Set.member(member.id, memberUpdate);
+      await DB.set.member(member.id, memberUpdate);
 
       // Update server wealth
       const serverUpdate = {
@@ -193,7 +189,7 @@ const xpSystem = {
           Math.round((server.wealth + XP_SYSTEM.BASE_XP * vipBoost) * 100) /
           100,
       };
-      await Set.server(server.id, serverUpdate);
+      await DB.set.server(server.id, serverUpdate);
     } catch (error) {
       new Logger('XPSystem').error(
         `Error obtaining user(${userId}) XP: ${error.message}`,

@@ -2,17 +2,8 @@
 const { v4: uuidv4 } = require('uuid');
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-  xp: XP,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Func, Xp } = utils;
+const DB = require('../db');
 // Handlers
 const rtcHandler = require('./rtc');
 const messageHandler = require('./message');
@@ -41,11 +32,11 @@ const channelHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const channel = await Get.channel(channelId);
-      const server = await Get.server(channel.serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const channel = await DB.get.channel(channelId);
+      const server = await DB.get.server(channel.serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -162,16 +153,16 @@ const channelHandler = {
         currentChannelId: channel.id,
         lastActiveAt: Date.now(),
       };
-      await Set.user(user.id, user_update);
+      await DB.set.user(user.id, user_update);
 
       // Update Member
       const member_update = {
         lastJoinChannelTime: Date.now(),
       };
-      await Set.member(operatorMember.id, member_update);
+      await DB.set.member(operatorMember.id, member_update);
 
       // Setup user interval for accumulate contribution
-      XP.create(user.id);
+      Xp.create(user.id);
 
       // Join RTC channel
       rtcHandler.join(io, userSocket, { channelId: channel.id });
@@ -185,16 +176,19 @@ const channelHandler = {
       // Emit updated data (to the user)
       io.to(userSocket.id).emit('userUpdate', user_update);
       io.to(userSocket.id).emit('memberUpdate', member_update);
-      io.to(userSocket.id).emit('channelUpdate', await Get.channel(channel.id));
+      io.to(userSocket.id).emit(
+        'channelUpdate',
+        await DB.get.channel(channel.id),
+      );
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        members: await Get.serverMembers(server.id),
-        users: await Get.serverUsers(server.id),
+        members: await DB.get.serverMembers(server.id),
+        users: await DB.get.serverUsers(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverActiveMembersUpdate',
-        await Get.serverUsers(server.id),
+        await DB.get.serverUsers(server.id),
       );
 
       new Logger('Channel').success(
@@ -243,12 +237,12 @@ const channelHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const channel = await Get.channel(channelId);
-      const server = await Get.server(channel.serverId);
-      const userMember = await Get.member(user.id, server.id);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const channel = await DB.get.channel(channelId);
+      const server = await DB.get.server(channel.serverId);
+      const userMember = await DB.get.member(user.id, server.id);
+      const operatorMember = await DB.get.member(operator.id, server.id);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -291,10 +285,10 @@ const channelHandler = {
         currentChannelId: null,
         lastActiveAt: Date.now(),
       };
-      await Set.user(userId, user_update);
+      await DB.set.user(userId, user_update);
 
       // Clear user contribution interval
-      XP.delete(user.id);
+      Xp.delete(user.id);
 
       // Leave RTC channel
       await rtcHandler.leave(io, userSocket, { channelId: channel.id });
@@ -311,12 +305,12 @@ const channelHandler = {
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        members: await Get.serverMembers(server.id),
-        users: await Get.serverUsers(server.id),
+        members: await DB.get.serverMembers(server.id),
+        users: await DB.get.serverUsers(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverActiveMembersUpdate',
-        await Get.serverUsers(server.id),
+        await DB.get.serverUsers(server.id),
       );
 
       new Logger('Channel').success(
@@ -369,9 +363,9 @@ const channelHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const server = await Get.server(serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const server = await DB.get.server(serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
 
       // Validate permission
       if (operatorMember.permissionLevel < 5) {
@@ -386,17 +380,17 @@ const channelHandler = {
 
       // Create new channel
       const channelId = uuidv4();
-      const channel = await Set.channel(channelId, {
+      const channel = await DB.set.channel(channelId, {
         ...newChannel,
         serverId: server.id,
-        order: await Get.serverChannels(server.id).length,
+        order: await DB.get.serverChannels(server.id).length,
         createdAt: Date.now().valueOf(),
       });
 
       if (newChannel.categoryId) {
-        const parentChannel = await Get.channel(newChannel.categoryId);
+        const parentChannel = await DB.get.channel(newChannel.categoryId);
         if (parentChannel) {
-          await Set.channel(parentChannel.id, {
+          await DB.set.channel(parentChannel.id, {
             isRoot: true,
             type: 'category',
           });
@@ -405,11 +399,11 @@ const channelHandler = {
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        channels: await Get.serverChannels(server.id),
+        channels: await DB.get.serverChannels(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverChannelsUpdate',
-        await Get.serverChannels(server.id),
+        await DB.get.serverChannels(server.id),
       );
 
       new Logger('Channel').success(
@@ -462,10 +456,10 @@ const channelHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const server = await Get.server(serverId);
-      const channel = await Get.channel(channelId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const server = await DB.get.server(serverId);
+      const channel = await DB.get.channel(channelId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
 
       // Validate operation
       if (operatorMember.permissionLevel < 5) {
@@ -602,18 +596,18 @@ const channelHandler = {
       }
 
       // Update channel
-      await Set.channel(channel.id, editedChannel);
+      await DB.set.channel(channel.id, editedChannel);
 
       // Emit updated data (to all users in the channel)
       io.to(`channel_${channel.id}`).emit('channelUpdate', editedChannel);
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        channels: await Get.serverChannels(server.id),
+        channels: await DB.get.serverChannels(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverChannelsUpdate',
-        await Get.serverChannels(server.id),
+        await DB.get.serverChannels(server.id),
       );
 
       new Logger('Channel').success(
@@ -662,10 +656,10 @@ const channelHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const channel = await Get.channel(channelId);
-      const server = await Get.server(serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const channel = await DB.get.channel(channelId);
+      const server = await DB.get.server(serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
 
       // Validate operation
       if (operatorMember.permissionLevel < 5) {
@@ -679,18 +673,18 @@ const channelHandler = {
       }
 
       // Update channel
-      await Set.channel(channelId, { serverId: null });
+      await DB.set.channel(channelId, { serverId: null });
 
       // If the deleted channel has a parent channel, update the parent channel status
       if (channel.categoryId) {
-        const serverChannels = await Get.serverChannels(server.id);
-        const parentChannel = await Get.channel(channel.categoryId);
+        const serverChannels = await DB.get.serverChannels(server.id);
+        const parentChannel = await DB.get.channel(channel.categoryId);
         const parentChannelHasChildren = serverChannels.some(
           (c) => c.categoryId === parentChannel.id && c.id !== channel.id,
         );
 
         if (!parentChannelHasChildren) {
-          await Set.channel(parentChannel.id, {
+          await DB.set.channel(parentChannel.id, {
             isRoot: true,
             type: 'channel',
             categoryId: null,
@@ -701,11 +695,11 @@ const channelHandler = {
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        channels: await Get.serverChannels(server.id),
+        channels: await DB.get.serverChannels(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverChannelsUpdate',
-        await Get.serverChannels(server.id),
+        await DB.get.serverChannels(server.id),
       );
 
       new Logger('Channel').info(

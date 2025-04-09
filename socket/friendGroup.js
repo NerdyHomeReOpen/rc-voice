@@ -1,16 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Func } = utils;
+const DB = require('../db');
 
 const friendGroupHandler = {
   createFriendGroup: async (io, socket, data) => {
@@ -39,8 +31,8 @@ const friendGroupHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -61,7 +53,7 @@ const friendGroupHandler = {
 
       // Create friend group
       const friendGroupId = uuidv4();
-      await Set.friendGroup(friendGroupId, {
+      await DB.set.friendGroup(friendGroupId, {
         ...newFriendGroup,
         userId: user.id,
         createdAt: Date.now(),
@@ -69,11 +61,11 @@ const friendGroupHandler = {
 
       // Emit updated data (to the user)
       io.to(userSocket.id).emit('userUpdate', {
-        friendGroups: await Get.userFriendGroups(user.id),
+        friendGroups: await DB.get.userFriendGroups(user.id),
       });
       io.to(userSocket.id).emit(
         'userFriendGroupsUpdate',
-        await Get.userFriendGroups(user.id),
+        await DB.get.userFriendGroups(user.id),
       );
 
       new Logger('FriendGroup').success(
@@ -127,9 +119,9 @@ const friendGroupHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const friendGroup = await Get.friendGroup(friendGroupId);
-      const user = await Get.user(friendGroup.userId);
+      const operator = await DB.get.user(operatorId);
+      const friendGroup = await DB.get.friendGroup(friendGroupId);
+      const user = await DB.get.user(friendGroup.userId);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -149,15 +141,15 @@ const friendGroupHandler = {
       }
 
       // Update friend group
-      await Set.friendGroup(friendGroup.id, editedFriendGroup);
+      await DB.set.friendGroup(friendGroup.id, editedFriendGroup);
 
       // Emit updated data (to the user)
       io.to(userSocket.id).emit('userUpdate', {
-        friendGroups: await Get.userFriendGroups(user.id),
+        friendGroups: await DB.get.userFriendGroups(user.id),
       });
       io.to(userSocket.id).emit(
         'userFriendGroupsUpdate',
-        await Get.userFriendGroups(user.id),
+        await DB.get.userFriendGroups(user.id),
       );
 
       new Logger('FriendGroup').success(
@@ -205,9 +197,9 @@ const friendGroupHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const friendGroup = await Get.friendGroup(friendGroupId);
-      const user = await Get.user(friendGroup.userId);
+      const operator = await DB.get.user(operatorId);
+      const friendGroup = await DB.get.friendGroup(friendGroupId);
+      const user = await DB.get.user(friendGroup.userId);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -227,15 +219,15 @@ const friendGroupHandler = {
       }
 
       // Delete friend group
-      await db.delete(`friendGroups.${friendGroup.id}`);
+      await DB.delete(`friendGroups.${friendGroup.id}`);
 
       // Emit updated data (to the user)
       io.to(userSocket.id).emit('userUpdate', {
-        friendGroups: await Get.userFriendGroups(user.id),
+        friendGroups: await DB.get.userFriendGroups(user.id),
       });
       io.to(userSocket.id).emit(
         'userFriendGroupsUpdate',
-        await Get.userFriendGroups(user.id),
+        await DB.get.userFriendGroups(user.id),
       );
 
       new Logger('FriendGroup').success(

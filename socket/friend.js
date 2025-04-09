@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Func } = utils;
+const DB = require('../db');
 
 const friendHandler = {
   createFriend: async (io, socket, data) => {
@@ -40,9 +32,9 @@ const friendHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const target = await Get.user(targetId);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const target = await DB.get.user(targetId);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -78,7 +70,7 @@ const friendHandler = {
 
       // Create friend
       const friendId = `fd_${userId}-${targetId}`;
-      await Set.friend(friendId, {
+      await DB.set.friend(friendId, {
         ...newFriend,
         userId: user.id,
         targetId: target.id,
@@ -87,7 +79,7 @@ const friendHandler = {
 
       // Create reverse friend
       const friend_ = `fd_${targetId}-${userId}`;
-      await Set.friend(friend_, {
+      await DB.set.friend(friend_, {
         ...newFriend,
         friendGroupId: '',
         userId: target.id,
@@ -97,18 +89,18 @@ const friendHandler = {
 
       // Emit data (to the user and target)
       io.to(userSocket.id).emit('userUpdate', {
-        friends: await Get.userFriends(user.id),
+        friends: await DB.get.userFriends(user.id),
       });
       io.to(userSocket.id).emit(
         'userFriendsUpdate',
-        await Get.userFriends(user.id),
+        await DB.get.userFriends(user.id),
       );
       io.to(targetSocket.id).emit('userUpdate', {
-        friends: await Get.userFriends(target.id),
+        friends: await DB.get.userFriends(target.id),
       });
       io.to(targetSocket.id).emit(
         'userFriendsUpdate',
-        await Get.userFriends(target.id),
+        await DB.get.userFriends(target.id),
       );
 
       new Logger('Friend').success(
@@ -161,10 +153,10 @@ const friendHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const target = await Get.user(targetId);
-      const friend = await Get.friend(userId, targetId);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const target = await DB.get.user(targetId);
+      const friend = await DB.get.friend(userId, targetId);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -190,24 +182,24 @@ const friendHandler = {
       }
 
       // Update friend
-      await Set.friend(friend.id, editedFriend);
+      await DB.set.friend(friend.id, editedFriend);
 
       // Emit data (to the user and target)
       io.to(userSocket.id).emit('friendUpdate', editedFriend);
       io.to(userSocket.id).emit('userUpdate', {
-        friends: await Get.userFriends(userId),
+        friends: await DB.get.userFriends(userId),
       });
       io.to(userSocket.id).emit(
         'userFriendsUpdate',
-        await Get.userFriends(userId),
+        await DB.get.userFriends(userId),
       );
       io.to(targetSocket.id).emit('friendUpdate', editedFriend);
       io.to(targetSocket.id).emit('userUpdate', {
-        friends: await Get.userFriends(targetId),
+        friends: await DB.get.userFriends(targetId),
       });
       io.to(targetSocket.id).emit(
         'userFriendsUpdate',
-        await Get.userFriends(targetId),
+        await DB.get.userFriends(targetId),
       );
 
       new Logger('Friend').success(
@@ -255,11 +247,11 @@ const friendHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const target = await Get.user(targetId);
-      const friend = await Get.friend(userId, targetId);
-      const friend_ = await Get.friend(targetId, userId);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const target = await DB.get.user(targetId);
+      const friend = await DB.get.friend(userId, targetId);
+      const friend_ = await DB.get.friend(targetId, userId);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -284,23 +276,23 @@ const friendHandler = {
         );
       }
 
-      await db.delete(`friends.${`fd_${friend.userId}-${friend.targetId}`}`);
-      await db.delete(`friends.${`fd_${friend_.userId}-${friend_.targetId}`}`);
+      await DB.delete(`friends.${`fd_${friend.userId}-${friend.targetId}`}`);
+      await DB.delete(`friends.${`fd_${friend_.userId}-${friend_.targetId}`}`);
 
       // Emit data (to the user and target)
       io.to(userSocket.id).emit('userUpdate', {
-        friends: await Get.userFriends(userId),
+        friends: await DB.get.userFriends(userId),
       });
       io.to(userSocket.id).emit(
         'userFriendsUpdate',
-        await Get.userFriends(userId),
+        await DB.get.userFriends(userId),
       );
       io.to(targetSocket.id).emit('userUpdate', {
-        friends: await Get.userFriends(targetId),
+        friends: await DB.get.userFriends(targetId),
       });
       io.to(targetSocket.id).emit(
         'userFriendsUpdate',
-        await Get.userFriends(targetId),
+        await DB.get.userFriends(targetId),
       );
 
       new Logger('Friend').success(

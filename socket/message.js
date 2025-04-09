@@ -2,16 +2,8 @@
 const { v4: uuidv4 } = require('uuid');
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Func } = utils;
+const DB = require('../db');
 
 const messageHandler = {
   sendMessage: async (io, socket, data) => {
@@ -42,11 +34,11 @@ const messageHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const server = await Get.server(serverId);
-      const channel = await Get.channel(channelId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const server = await DB.get.server(serverId);
+      const channel = await DB.get.channel(channelId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
 
       // Validate operation
       if (operator.id !== user.id) {
@@ -66,7 +58,7 @@ const messageHandler = {
 
       // Create new message
       const messageId = uuidv4();
-      await Set.message(messageId, {
+      await DB.set.message(messageId, {
         ...newMessage,
         senderId: user.id,
         serverId: server.id,
@@ -78,7 +70,7 @@ const messageHandler = {
       const member_update = {
         lastMessageTime: Date.now().valueOf(),
       };
-      await Set.member(operatorMember.id, member_update);
+      await DB.set.member(operatorMember.id, member_update);
 
       // Play sound
       io.to(`channel_${channel.id}`).emit('playSound', 'recieveChannelMessage');
@@ -89,13 +81,13 @@ const messageHandler = {
       // Emit updated data (to all users in the channel)
       io.to(`channel_${channel.id}`).emit('channelUpdate', {
         messages: [
-          ...(await Get.channelMessages(channel.id)),
-          ...(await Get.channelInfoMessages(channel.id)),
+          ...(await DB.get.channelMessages(channel.id)),
+          ...(await DB.get.channelInfoMessages(channel.id)),
         ],
       });
       io.to(`channel_${channel.id}`).emit('channelMessagesUpdate', [
-        ...(await Get.channelMessages(channel.id)),
-        ...(await Get.channelInfoMessages(channel.id)),
+        ...(await DB.get.channelMessages(channel.id)),
+        ...(await DB.get.channelInfoMessages(channel.id)),
       ]);
 
       new Logger('Message').success(
@@ -148,9 +140,9 @@ const messageHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const target = await Get.user(targetId);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const target = await DB.get.user(targetId);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -176,7 +168,7 @@ const messageHandler = {
 
       // Create new message
       const directMessageId = uuidv4();
-      await Set.directMessage(directMessageId, {
+      await DB.set.directMessage(directMessageId, {
         ...newDirectMessage,
         senderId: user.id,
         userId1: user.id.localeCompare(target.id) < 0 ? user.id : target.id,
@@ -187,12 +179,12 @@ const messageHandler = {
       // Emit updated data (to user and target *if online*)
       io.to(userSocket.id).emit(
         'directMessageUpdate',
-        await Get.directMessages(user.id, target.id),
+        await DB.get.directMessages(user.id, target.id),
       );
       if (targetSocket) {
         io.to(targetSocket.id).emit(
           'directMessageUpdate',
-          await Get.directMessages(user.id, target.id),
+          await DB.get.directMessages(user.id, target.id),
         );
       }
 

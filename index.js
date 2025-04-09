@@ -9,16 +9,8 @@ const formidable = require('formidable');
 
 // Utils
 const utils = require('./utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-  jwt: JWT,
-  clean: Clean,
-  xp: XP,
-} = utils;
-const db = require('./db');
-const { get: Get, set: Set } = db;
+const { StandardizedError, Logger, Func, JWT, Clean, Xp } = utils;
+const DB = require('./db');
 
 // Constants
 const {
@@ -124,7 +116,7 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        const accountData = await Get.account(account);
+        const accountData = await DB.get.account(account);
         if (!accountData) {
           throw new StandardizedError(
             '找不到此帳號',
@@ -153,7 +145,7 @@ const server = http.createServer((req, res) => {
             404,
           );
         }
-        const user = await Get.user(userId);
+        const user = await DB.get.user(userId);
         if (!user) {
           throw new StandardizedError(
             '用戶不存在',
@@ -165,7 +157,7 @@ const server = http.createServer((req, res) => {
         }
 
         // Update user
-        await Set.user(userId, {
+        await DB.set.user(userId, {
           ...user.data,
           lastActiveAt: Date.now(),
         });
@@ -213,14 +205,14 @@ const server = http.createServer((req, res) => {
         // }
 
         // Get database
-        const { account, confirmPassword, password, username } = data;
+        const { account, password, username } = data;
 
         // Validate data
         Func.validate.account(account.trim());
-        Func.validate.password(confirmPassword.trim());
+        Func.validate.password(password.trim());
         Func.validate.nickname(username.trim());
 
-        const accountData = await Get.account(account);
+        const accountData = await DB.get.account(account);
         if (accountData) {
           throw new StandardizedError(
             '帳號已存在',
@@ -233,14 +225,14 @@ const server = http.createServer((req, res) => {
 
         // Create user data
         const userId = uuidv4();
-        await Set.user(userId, {
+        await DB.set.user(userId, {
           name: username,
           avatar: userId,
           createdAt: Date.now(),
         });
 
         // Create account password list
-        await Set.account(account, {
+        await DB.set.account(account, {
           password,
           user_id: userId,
         });
@@ -291,7 +283,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.user(userId),
+            data: await DB.get.user(userId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -325,7 +317,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.userFriends(userId),
+            data: await DB.get.userFriends(userId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -360,7 +352,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.userFriendGroups(userId),
+            data: await DB.get.userFriendGroups(userId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -395,7 +387,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.userFriendApplications(userId),
+            data: await DB.get.userFriendApplications(userId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -430,7 +422,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.userServers(userId),
+            data: await DB.get.userServers(userId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -464,7 +456,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.server(serverId),
+            data: await DB.get.server(serverId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -499,7 +491,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.serverChannels(serverId),
+            data: await DB.get.serverChannels(serverId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -534,7 +526,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.serverUsers(serverId),
+            data: await DB.get.serverUsers(serverId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -569,7 +561,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.serverMembers(serverId),
+            data: await DB.get.serverMembers(serverId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -604,7 +596,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.serverMemberApplications(serverId),
+            data: await DB.get.serverMemberApplications(serverId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -638,7 +630,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.channel(channelId),
+            data: await DB.get.channel(channelId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -673,7 +665,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.channelMessages(channelId),
+            data: await DB.get.channelMessages(channelId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -707,7 +699,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.member(userId, serverId),
+            data: await DB.get.member(userId, serverId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -741,7 +733,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.memberApplication(userId, serverId),
+            data: await DB.get.memberApplication(userId, serverId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -775,7 +767,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.friend(userId, targetId),
+            data: await DB.get.friend(userId, targetId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -809,7 +801,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.friendApplication(senderId, receiverId),
+            data: await DB.get.friendApplication(senderId, receiverId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -843,7 +835,7 @@ const server = http.createServer((req, res) => {
           }
           sendSuccess(res, {
             message: 'success',
-            data: await Get.directMessages(userId, targetId),
+            data: await DB.get.directMessages(userId, targetId),
           });
         } catch (error) {
           if (!(error instanceof StandardizedError)) {
@@ -1147,5 +1139,5 @@ process.on('unhandledRejection', (error) => {
 server.listen(PORT, () => {
   new Logger('Server').success(`Server is running on port ${PORT}`);
   // Clean.setup();
-  XP.setup();
+  Xp.setup();
 });

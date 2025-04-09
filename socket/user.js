@@ -1,18 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  map: Map,
-  func: Func,
-  xp: XP,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Map, Func, Xp } = utils;
+const DB = require('../db');
 // Handlers
 const rtcHandler = require('./rtc');
 const serverHandler = require('./server');
@@ -41,7 +31,7 @@ const userHandler = {
       await Func.validate.socket(socket);
 
       // Emit data (to the operator)
-      io.to(socket.id).emit('userSearch', await Get.searchUser(query));
+      io.to(socket.id).emit('userSearch', await DB.get.searchUser(query));
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
@@ -68,7 +58,7 @@ const userHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
+      const operator = await DB.get.user(operatorId);
 
       // Check if user is already connected
       io.sockets.sockets.forEach((_socket) => {
@@ -127,7 +117,7 @@ const userHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
+      const operator = await DB.get.user(operatorId);
 
       // Disconnect server or channel
       const serverId = operator.currentServerId;
@@ -137,7 +127,7 @@ const userHandler = {
           currentServerId: null,
           lastActiveAt: Date.now(),
         };
-        await Set.user(operatorId, user_update);
+        await DB.set.user(operatorId, user_update);
 
         // Leave the server
         socket.leave(`server_${serverId}`);
@@ -150,10 +140,10 @@ const userHandler = {
           currentChannelId: null,
           lastActiveAt: Date.now(),
         };
-        await Set.user(operatorId, user_update);
+        await DB.set.user(operatorId, user_update);
 
         // Clear user contribution interval
-        XP.delete(operatorId);
+        Xp.delete(operatorId);
 
         // Leave RTC channel
         await rtcHandler.leave(io, socket, {
@@ -168,8 +158,8 @@ const userHandler = {
 
         // Emit updated data (to all users in the server)
         io.to(`server_${serverId}`).emit('serverUpdate', {
-          members: await Get.serverMembers(serverId),
-          users: await Get.serverUsers(serverId),
+          members: await DB.get.serverMembers(serverId),
+          users: await DB.get.serverUsers(serverId),
         });
       }
 
@@ -181,7 +171,7 @@ const userHandler = {
       const user_update = {
         lastActiveAt: Date.now(),
       };
-      await Set.user(operator.id, user_update);
+      await DB.set.user(operator.id, user_update);
 
       // Emit data (to the operator)
       io.to(socket.id).emit('userUpdate', user_update);
@@ -227,8 +217,8 @@ const userHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -275,7 +265,7 @@ const userHandler = {
       }
 
       // Update user data
-      await Set.user(user.id, editedUser);
+      await DB.set.user(user.id, editedUser);
 
       // Emit data (to the operator)
       io.to(userSocket.id).emit('userUpdate', editedUser);

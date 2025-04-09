@@ -1,3 +1,9 @@
+CREATE TABLE IF NOT EXISTS accounts (
+  account VARCHAR(255) PRIMARY KEY,
+  password VARCHAR(255) NOT NULL,
+  user_id VARCHAR(255) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS account_passwords (
   account_id VARCHAR(255) PRIMARY KEY,
   password VARCHAR(255) NOT NULL

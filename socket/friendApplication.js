@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Func } = utils;
+const DB = require('../db');
 
 const friendApplicationHandler = {
   createFriendApplication: async (io, socket, data) => {
@@ -42,9 +34,9 @@ const friendApplicationHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const sender = await Get.user(senderId);
-      const receiver = await Get.user(receiverId);
+      const operator = await DB.get.user(operatorId);
+      const sender = await DB.get.user(senderId);
+      const receiver = await DB.get.user(receiverId);
       let receiverSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === receiverId) {
@@ -74,7 +66,7 @@ const friendApplicationHandler = {
 
       // Create friend application
       const applicationId = `fa_${senderId}-${receiverId}`;
-      await Set.friendApplication(applicationId, {
+      await DB.set.friendApplication(applicationId, {
         ...newApplication,
         senderId: senderId,
         receiverId: receiverId,
@@ -84,11 +76,11 @@ const friendApplicationHandler = {
       // Emit updated data (to the receiver)
       if (receiverSocket) {
         io.to(receiverSocket.id).emit('userUpdate', {
-          friendApplications: await Get.userFriendApplications(receiverId),
+          friendApplications: await DB.get.userFriendApplications(receiverId),
         });
         io.to(receiverSocket.id).emit(
           'userFriendApplicationsUpdate',
-          await Get.userFriendApplications(receiverId),
+          await DB.get.userFriendApplications(receiverId),
         );
       }
 
@@ -148,10 +140,10 @@ const friendApplicationHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const sender = await Get.user(senderId);
-      const receiver = await Get.user(receiverId);
-      const application = await Get.friendApplication(senderId, receiverId);
+      const operator = await DB.get.user(operatorId);
+      const sender = await DB.get.user(senderId);
+      const receiver = await DB.get.user(receiverId);
+      const application = await DB.get.friendApplication(senderId, receiverId);
       let receiverSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === receiverId) {
@@ -179,16 +171,16 @@ const friendApplicationHandler = {
       }
 
       // Update friend application
-      await Set.friendApplication(application.id, editedApplication);
+      await DB.set.friendApplication(application.id, editedApplication);
 
       // Emit updated data (to the receiver)
       if (receiverSocket) {
         io.to(receiverSocket.id).emit('userUpdate', {
-          friendApplications: await Get.userFriendApplications(receiver.id),
+          friendApplications: await DB.get.userFriendApplications(receiver.id),
         });
         io.to(receiverSocket.id).emit(
           'userFriendApplicationsUpdate',
-          await Get.userFriendApplications(receiver.id),
+          await DB.get.userFriendApplications(receiver.id),
         );
       }
 
@@ -237,10 +229,10 @@ const friendApplicationHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const sender = await Get.user(senderId);
-      const receiver = await Get.user(receiverId);
-      const application = await Get.friendApplication(senderId, receiverId);
+      const operator = await DB.get.user(operatorId);
+      const sender = await DB.get.user(senderId);
+      const receiver = await DB.get.user(receiverId);
+      const application = await DB.get.friendApplication(senderId, receiverId);
       let receiverSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === receiverId) {
@@ -267,15 +259,15 @@ const friendApplicationHandler = {
         );
       }
 
-      await db.delete(`friendApplications.${application.id}`);
+      await DB.delete(`friendApplications.${application.id}`);
 
       if (receiverSocket) {
         io.to(receiverSocket.id).emit('userUpdate', {
-          friendApplications: await Get.userFriendApplications(receiver.id),
+          friendApplications: await DB.get.userFriendApplications(receiver.id),
         });
         io.to(receiverSocket.id).emit(
           'userFriendApplicationsUpdate',
-          await Get.userFriendApplications(receiver.id),
+          await DB.get.userFriendApplications(receiver.id),
         );
       }
       new Logger('FriendApplication').success(

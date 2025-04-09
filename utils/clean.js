@@ -1,8 +1,4 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const db = require('../db');
-const {
-  get: Get,
-} = db;
 const fs = require('fs').promises;
 const path = require('path');
 // Constants
@@ -15,6 +11,7 @@ const {
 } = require('../constant');
 // Utils
 const Logger = require('./logger');
+const DB = require('../db');
 
 const clean = {
   setup: async () => {
@@ -48,8 +45,8 @@ const cleanAvatars = async (TYPE) => {
     const files = await fs.readdir(DIR);
     const data =
       TYPE === 'server'
-        ? (await Get.all('servers')) || {}
-        : (await Get.all('users')) || {};
+        ? (await DB.get.all('servers')) || {}
+        : (await DB.get.all('users')) || {};
     const avatarMap = {};
 
     Object.values(data).forEach((item) => {

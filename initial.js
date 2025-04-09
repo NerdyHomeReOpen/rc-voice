@@ -23,32 +23,41 @@ const directMessages = {};
 const voicePresences = {};
 
 const init = async () => {
-  await db.deleteAll();
-  await db.set('accountPasswords', accountPasswords);
-  await db.set('accountUserIds', accountUserIds);
-  await db.set('users', users);
-  await db.set('badges', badges);
-  await db.set('userBadges', userBadges);
-  await db.set('userServers', userServers);
-  await db.set('servers', servers);
-  await db.set('channels', channels);
-  await db.set('channelRelations', channelRelations);
-  await db.set('friendGroups', friendGroups);
-  await db.set('members', members);
-  await db.set('memberApplications', memberApplications);
-  await db.set('friends', friends);
-  await db.set('friendApplications', friendApplications);
-  await db.set('messages', messages);
-  await db.set('directMessages', directMessages);
-  await db.set('voicePresences', voicePresences);
-  console.log('Database initialized');
+  await db.initialize();
+  // await db.deleteAll();
+  // await db.set('accountPasswords', accountPasswords);
+  // await db.set('accountUserIds', accountUserIds);
+  // await db.set('users', users);
+  // await db.set('badges', badges);
+  // await db.set('userBadges', userBadges);
+  // await db.set('userServers', userServers);
+  // await db.set('servers', servers);
+  // await db.set('channels', channels);
+  // await db.set('channelRelations', channelRelations);
+  // await db.set('friendGroups', friendGroups);
+  // await db.set('members', members);
+  // await db.set('memberApplications', memberApplications);
+  // await db.set('friends', friends);
+  // await db.set('friendApplications', friendApplications);
+  // await db.set('messages', messages);
+  // await db.set('directMessages', directMessages);
+  // await db.set('voicePresences', voicePresences);
+  // console.log('Database initialized');
 };
 
 const deleteExtraUploads = async () => {
   const serverAvatarDir = path.join(__dirname, 'uploads', 'serverAvatars');
   const userAvatarDir = path.join(__dirname, 'uploads', 'userAvatars');
-  const defaultServerAvatar = path.join('uploads', 'serverAvatars', '__default.png');
-  const defaultUserAvatar = path.join('uploads', 'userAvatars', '__default.png');
+  const defaultServerAvatar = path.join(
+    'uploads',
+    'serverAvatars',
+    '__default.png',
+  );
+  const defaultUserAvatar = path.join(
+    'uploads',
+    'userAvatars',
+    '__default.png',
+  );
 
   try {
     const serverAvatarFiles = await fs.readdir(serverAvatarDir);

@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const db = require('../db');
-const {
-  get: Get,
-} = db;
 const sharp = require('sharp');
 // Utils
 const StandardizedError = require('./standardizedError');
 const Map = require('./map');
 const JWT = require('./jwt');
+const DB = require('../db');
 
 const func = {
   calculateSimilarity: (str1, str2) => {
@@ -42,7 +39,7 @@ const func = {
   },
 
   generateUniqueDisplayId: async (baseId = 20000000) => {
-    const servers = (await Get.all('servers')) || {};
+    const servers = (await DB.get.all('servers')) || {};
     let displayId = baseId + Object.keys(servers).length;
     // Ensure displayId is unique
     while (
@@ -92,7 +89,7 @@ const func = {
   },
 
   validate: {
-    account: async (account) => {
+    account: (account) => {
       if (!account) {
         throw new StandardizedError(
           '帳號不可為空',
@@ -141,7 +138,7 @@ const func = {
       return account;
     },
 
-    password: async (password) => {
+    password: (password) => {
       if (!password) {
         throw new StandardizedError(
           '密碼不可為空',
@@ -169,15 +166,16 @@ const func = {
           400,
         );
       }
-      if (!/^[A-Za-z0-9@$!%*#?&]+$/.test(password)) {
-        throw new StandardizedError(
-          '密碼只能包含英文字母、數字和特殊字符(@$!%*#?&)',
-          'ValidationError',
-          'PASSWORD',
-          'PASSWORD_INVALID',
-          400,
-        );
-      }
+      // FIXME: Password is base64 encoded, use another method to validate
+      // if (!/^[a-zA-Z0-9@$!%*#?&]+$/.test(password)) {
+      //   throw new StandardizedError(
+      //     '密碼只能包含英文字母、數字和特殊字符(@$!%*#?&)',
+      //     'ValidationError',
+      //     'PASSWORD',
+      //     'PASSWORD_INVALID',
+      //     400,
+      //   );
+      // }
       if (/\./.test(password)) {
         throw new StandardizedError(
           '密碼不能包含點號',
@@ -190,7 +188,7 @@ const func = {
       return password;
     },
 
-    nickname: async (nickname) => {
+    nickname: (nickname) => {
       if (!nickname) {
         throw new StandardizedError(
           '暱稱不可為空',
@@ -221,7 +219,7 @@ const func = {
       return nickname;
     },
 
-    socket: async (socket) => {
+    socket: (socket) => {
       if (!socket) {
         throw new StandardizedError(
           '無可用的 socket',
@@ -291,7 +289,7 @@ const func = {
       return userId;
     },
 
-    user: async (user) => {
+    user: (user) => {
       if (!user) {
         throw new StandardizedError(
           '使用者不存在',

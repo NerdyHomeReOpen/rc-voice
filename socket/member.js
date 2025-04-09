@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Func } = utils;
+const DB = require('../db');
 
 const memberHandler = {
   createMember: async (io, socket, data) => {
@@ -40,10 +32,10 @@ const memberHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const server = await Get.server(serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const server = await DB.get.server(serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
 
       if (operator.id === user.id) {
         if (newMember.permissionLevel !== 1 && server.ownerId != operator.id) {
@@ -96,7 +88,7 @@ const memberHandler = {
 
       // Create member
       const memberId = `mb_${userId}-${serverId}`;
-      const member = await Set.member(memberId, {
+      const member = await DB.set.member(memberId, {
         ...newMember,
         userId: user.id,
         serverId: server.id,
@@ -105,15 +97,15 @@ const memberHandler = {
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        members: await Get.serverMembers(server.id),
+        members: await DB.get.serverMembers(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverMembersUpdate',
-        await Get.serverMembers(server.id),
+        await DB.get.serverMembers(server.id),
       );
       io.to(`server_${server.id}`).emit(
         'serverActiveMembersUpdate',
-        await Get.serverUsers(server.id),
+        await DB.get.serverUsers(server.id),
       );
 
       new Logger('Member').success(
@@ -166,11 +158,11 @@ const memberHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const server = await Get.server(serverId);
-      const member = await Get.member(userId, serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const server = await DB.get.server(serverId);
+      const member = await DB.get.member(userId, serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -262,19 +254,19 @@ const memberHandler = {
       }
 
       // Update member
-      await Set.member(member.id, editedMember);
+      await DB.set.member(member.id, editedMember);
 
       // Emit updated data (to all users in the server)
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        members: await Get.serverMembers(server.id),
+        members: await DB.get.serverMembers(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverMembersUpdate',
-        await Get.serverMembers(server.id),
+        await DB.get.serverMembers(server.id),
       );
       io.to(`server_${server.id}`).emit(
         'serverActiveMembersUpdate',
-        await Get.serverUsers(server.id),
+        await DB.get.serverUsers(server.id),
       );
 
       // Emit updated data (to the user *if the user is in the server*)

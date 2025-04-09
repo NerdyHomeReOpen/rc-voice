@@ -2,17 +2,8 @@
 const { v4: uuidv4 } = require('uuid');
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-  specialUsers,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Func } = utils;
+const DB = require('../db');
 // Handlers
 const channelHandler = require('./channel');
 const memberHandler = require('./member');
@@ -39,7 +30,7 @@ const serverHandler = {
       // Validate socket
       await Func.validate.socket(socket);
 
-      io.to(socket.id).emit('serverSearch', await Get.searchServer(query));
+      io.to(socket.id).emit('serverSearch', await DB.get.searchServer(query));
     } catch (error) {
       if (!(error instanceof StandardizedError)) {
         error = new StandardizedError(
@@ -83,10 +74,10 @@ const serverHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const server = await Get.server(serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const server = await DB.get.server(serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -148,7 +139,7 @@ const serverHandler = {
       }
 
       // Update user-server
-      await Set.userServer(`us_${user.id}-${server.id}`, {
+      await DB.set.userServer(`us_${user.id}-${server.id}`, {
         userId: user.id,
         serverId: server.id,
         recent: true,
@@ -160,7 +151,7 @@ const serverHandler = {
         currentServerId: server.id,
         lastActiveAt: Date.now(),
       };
-      await Set.user(user.id, user_update);
+      await DB.set.user(user.id, user_update);
 
       // Join the server
       userSocket.join(`server_${server.id}`);
@@ -173,7 +164,7 @@ const serverHandler = {
 
       // Emit data (only to the user)
       io.to(userSocket.id).emit('userUpdate', user_update);
-      io.to(userSocket.id).emit('serverUpdate', await Get.server(server.id));
+      io.to(userSocket.id).emit('serverUpdate', await DB.get.server(server.id));
 
       new Logger('Server').success(
         `User(${user.id}) connected to server(${server.id}) by User(${operator.id})`,
@@ -222,11 +213,11 @@ const serverHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const server = await Get.server(serverId);
-      const userMember = await Get.member(user.id, server.id);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const server = await DB.get.server(serverId);
+      const userMember = await DB.get.member(user.id, server.id);
+      const operatorMember = await DB.get.member(operator.id, server.id);
       let userSocket;
       io.sockets.sockets.forEach((_socket) => {
         if (_socket.userId === user.id) {
@@ -270,7 +261,7 @@ const serverHandler = {
         currentServerId: null,
         lastActiveAt: Date.now(),
       };
-      await Set.user(user.id, user_update);
+      await DB.set.user(user.id, user_update);
 
       // Leave the server
       userSocket.leave(`server_${server.id}`);
@@ -336,7 +327,7 @@ const serverHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
+      const operator = await DB.get.user(operatorId);
       const MAX_GROUPS = Math.min(3 + operator.level / 5, 10);
 
       // Validate operation
@@ -355,7 +346,7 @@ const serverHandler = {
       const channelId = uuidv4();
 
       // Create server
-      await Set.server(serverId, {
+      await DB.set.server(serverId, {
         ...newServer,
         name: newServer.name.trim(),
         slogan: newServer.slogan.trim(),
@@ -366,7 +357,7 @@ const serverHandler = {
       });
 
       // Create channel (lobby)
-      await Set.channel(channelId, {
+      await DB.set.channel(channelId, {
         name: '大廳',
         isLobby: true,
         isRoot: true,
@@ -387,7 +378,7 @@ const serverHandler = {
       });
 
       // Create user-server
-      await Set.userServer(`us_${operator.id}-${serverId}`, {
+      await DB.set.userServer(`us_${operator.id}-${serverId}`, {
         recent: true,
         owned: true,
         userId: operator.id,
@@ -450,9 +441,9 @@ const serverHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const server = await Get.server(serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const server = await DB.get.server(serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
 
       // Validate operation
       if (operatorMember.permissionLevel < 5) {
@@ -466,7 +457,7 @@ const serverHandler = {
       }
 
       // Update server
-      await Set.server(server.id, editedServer);
+      await DB.set.server(server.id, editedServer);
 
       // Emit updated data to all users in the server
       io.to(`server_${server.id}`).emit('serverUpdate', editedServer);

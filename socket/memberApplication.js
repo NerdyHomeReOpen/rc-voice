@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 // Utils
 const utils = require('../utils');
-const {
-  standardizedError: StandardizedError,
-  logger: Logger,
-  func: Func,
-} = utils;
-const db = require('../db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { StandardizedError, Logger, Func } = utils;
+const DB = require('../db');
 
 const memberApplicationHandler = {
   createMemberApplication: async (io, socket, data) => {
@@ -42,9 +34,9 @@ const memberApplicationHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const server = await Get.server(serverId);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const server = await DB.get.server(serverId);
 
       // Validate operator
       if (operator.id !== user.id) {
@@ -59,7 +51,7 @@ const memberApplicationHandler = {
 
       // Create member application
       const applicationId = `ma_${user.id}-${server.id}`;
-      await Set.memberApplication(applicationId, {
+      await DB.set.memberApplication(applicationId, {
         ...memberApplication,
         userId: user.id,
         serverId: server.id,
@@ -68,11 +60,11 @@ const memberApplicationHandler = {
 
       // Emit updated data to all users in the server
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        memberApplications: await Get.serverMemberApplications(server.id),
+        memberApplications: await DB.get.serverMemberApplications(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverMemberApplicationsUpdate',
-        await Get.serverMemberApplications(server.id),
+        await DB.get.serverMemberApplications(server.id),
       );
 
       new Logger('MemberApplication').success(
@@ -127,11 +119,11 @@ const memberApplicationHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const server = await Get.server(serverId);
-      const application = await Get.memberApplication(userId, serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const server = await DB.get.server(serverId);
+      const application = await DB.get.memberApplication(userId, serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
 
       // Validate operator
       if (operator.id === user.id) {
@@ -166,15 +158,15 @@ const memberApplicationHandler = {
       }
 
       // Update member application
-      await Set.memberApplication(application.id, editedApplication);
+      await DB.set.memberApplication(application.id, editedApplication);
 
       // Emit updated data to all users in the server
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        memberApplications: await Get.serverMemberApplications(server.id),
+        memberApplications: await DB.get.serverMemberApplications(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverMemberApplicationsUpdate',
-        await Get.serverMemberApplications(server.id),
+        await DB.get.serverMemberApplications(server.id),
       );
 
       new Logger('MemberApplication').success(
@@ -223,11 +215,11 @@ const memberApplicationHandler = {
       const operatorId = await Func.validate.socket(socket);
 
       // Get data
-      const operator = await Get.user(operatorId);
-      const user = await Get.user(userId);
-      const server = await Get.server(serverId);
-      const application = await Get.memberApplication(userId, serverId);
-      const operatorMember = await Get.member(operator.id, server.id);
+      const operator = await DB.get.user(operatorId);
+      const user = await DB.get.user(userId);
+      const server = await DB.get.server(serverId);
+      const application = await DB.get.memberApplication(userId, serverId);
+      const operatorMember = await DB.get.member(operator.id, server.id);
 
       // Validate operation
       if (operator.id === user.id) {
@@ -262,15 +254,15 @@ const memberApplicationHandler = {
       }
 
       // Delete member application
-      await db.delete(`memberApplications.${application.id}`);
+      await DB.delete(`memberApplications.${application.id}`);
 
       // Emit updated data to all users in the server
       io.to(`server_${server.id}`).emit('serverUpdate', {
-        memberApplications: await Get.serverMemberApplications(server.id),
+        memberApplications: await DB.get.serverMemberApplications(server.id),
       });
       io.to(`server_${server.id}`).emit(
         'serverMemberApplicationsUpdate',
-        await Get.serverMemberApplications(server.id),
+        await DB.get.serverMemberApplications(server.id),
       );
 
       new Logger('MemberApplication').success(
