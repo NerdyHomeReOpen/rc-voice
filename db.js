@@ -94,7 +94,7 @@ class Database {
         VALUES (?, ?)
         ON DUPLICATE KEY UPDATE data = ?
         `,
-        [userId, jsonData, jsonData]
+        [userId, jsonData, jsonData],
       );
     },
 
@@ -367,18 +367,16 @@ class Database {
       await query(sql, params);
     },
     accountUserIds: async (account, userId) => {
-        const sql = `INSERT INTO account_user_ids (account_id, user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE user_id = ?`;
-        const params = [account, userId, userId];
-        await query(sql, params);
+      const sql = `INSERT INTO account_user_ids (account_id, user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE user_id = ?`;
+      const params = [account, userId, userId];
+      await query(sql, params);
     },
   };
 
   get = {
     // All
     all: async (querys) => {
-      const result = await query(
-        `SELECT * FROM ${querys}`,
-      );
+      const result = await query(`SELECT * FROM ${querys}`);
       if (!result || result.length === 0) {
         return {};
       }
@@ -388,12 +386,23 @@ class Database {
 
       for (const row of result) {
         if (row.hasOwnProperty(firstColumnName)) {
-            transformedResult[row[firstColumnName]] = row;
+          transformedResult[row[firstColumnName]] = row;
         }
       }
 
       return transformedResult;
     },
+    // Account
+    account: async (account) => {
+      const data = await query(
+        `SELECT * FROM account_passwords WHERE account_id = ?`,
+        [account],
+      );
+      return data;
+    },
+
+    //
+
     // Avatar
     avatar: async (avatarUrl) => {
       return `data:image/png;base64,${avatarUrl}`;

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS account_passwords (
   password VARCHAR(255) NOT NULL
 );
 
+-- WILL BE DEPRECATED
 CREATE TABLE IF NOT EXISTS account_user_ids (
   account_id VARCHAR(255) PRIMARY KEY,
   user_id VARCHAR(255) NOT NULL
@@ -47,6 +48,7 @@ CREATE TABLE IF NOT EXISTS friend_groups (
   data JSON NOT NULL
 );
 
+-- NOT USED
 CREATE TABLE IF NOT EXISTS channel_relations (
   channel_id VARCHAR(255) PRIMARY KEY,
   data JSON NOT NULL
@@ -82,6 +84,7 @@ CREATE TABLE IF NOT EXISTS direct_messages (
   data JSON NOT NULL
 );
 
+-- NOT USED
 CREATE TABLE IF NOT EXISTS voice_presences (
   presence_id VARCHAR(255) PRIMARY KEY,
   data JSON NOT NULL

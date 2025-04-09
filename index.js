@@ -18,10 +18,7 @@ const {
   xp: XP,
 } = utils;
 const db = require('./db');
-const {
-  get: Get,
-  set: Set,
-} = db;
+const { get: Get, set: Set } = db;
 
 // Constants
 const {
@@ -116,9 +113,6 @@ const server = http.createServer((req, res) => {
 
         // Get database
         const { account, password } = data;
-        const accountPasswords = (await Get.all(`account_passwords`)) || {};
-        const accountUserIds = (await Get.all(`account_user_ids`)) || {};
-        const users = (await Get.all(`users`)) || {};
 
         // Validate data
         if (!account || !password) {
@@ -130,8 +124,8 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        const exist = accountPasswords[account];
-        if (!exist) {
+        const accountData = await Get.account(account);
+        if (!accountData) {
           throw new StandardizedError(
             '找不到此帳號',
             'ValidationError',
@@ -140,7 +134,7 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        if (password !== accountPasswords[account].password) {
+        if (password !== accountData.password) {
           throw new StandardizedError(
             '帳號或密碼錯誤',
             'ValidationError',
@@ -149,7 +143,7 @@ const server = http.createServer((req, res) => {
             401,
           );
         }
-        const userId = accountUserIds[account].user_id;
+        const userId = accountData.user_id;
         if (!userId) {
           throw new StandardizedError(
             '用戶不存在',
@@ -159,7 +153,7 @@ const server = http.createServer((req, res) => {
             404,
           );
         }
-        const user = users[userId];
+        const user = await Get.user(userId);
         if (!user) {
           throw new StandardizedError(
             '用戶不存在',
@@ -220,15 +214,14 @@ const server = http.createServer((req, res) => {
 
         // Get database
         const { account, confirmPassword, password, username } = data;
-        const accountPasswords = (await Get.all(`account_passwords`)) || {};
 
         // Validate data
         Func.validate.account(account.trim());
         Func.validate.password(confirmPassword.trim());
         Func.validate.nickname(username.trim());
 
-        const exists = accountPasswords[account];
-        if (exists) {
+        const accountData = await Get.account(account);
+        if (accountData) {
           throw new StandardizedError(
             '帳號已存在',
             'ValidationError',
@@ -240,18 +233,17 @@ const server = http.createServer((req, res) => {
 
         // Create user data
         const userId = uuidv4();
-        console.log(username);
         await Set.user(userId, {
           name: username,
           avatar: userId,
           createdAt: Date.now(),
         });
 
-        console.log(userId);
-
         // Create account password list
-        await Set.accountPasswords(account, password);
-        await Set.accountUserIds(account, userId);
+        await Set.account(account, {
+          password,
+          user_id: userId,
+        });
 
         sendSuccess(res, {
           message: '註冊成功',
