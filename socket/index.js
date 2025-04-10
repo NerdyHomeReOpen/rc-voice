@@ -2,7 +2,7 @@
 const { v4: uuidv4 } = require('uuid');
 // Utils
 const utils = require('../utils');
-const { StandardizedError, Map, JWT } = utils;
+const { StandardizedError, Session, JWT } = utils;
 // Handlers
 const userHandler = require('./user');
 const serverHandler = require('./server');
@@ -63,8 +63,7 @@ module.exports = (io) => {
       socket.sessionId = sessionId;
 
       // Save maps
-      Map.createUserIdSessionIdMap(userId, socket.sessionId);
-      Map.createUserIdSocketIdMap(userId, socket.id);
+      Session.createUserIdSessionIdMap(userId, socket.sessionId);
 
       return next();
     } catch (error) {

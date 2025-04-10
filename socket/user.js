@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 // Utils
 const utils = require('../utils');
-const { StandardizedError, Logger, Map, Func, Xp } = utils;
+const { StandardizedError, Logger, Session, Func, Xp } = utils;
 const DB = require('../db');
 // Handlers
 const rtcHandler = require('./rtc');
@@ -164,8 +164,7 @@ const userHandler = {
       }
 
       // Remove maps
-      Map.deleteUserIdSessionIdMap(operator.id, socket.sessionId);
-      Map.deleteUserIdSocketIdMap(operator.id, socket.id);
+      Session.deleteUserIdSessionIdMap(operator.id, socket.sessionId);
 
       // Update user
       const user_update = {

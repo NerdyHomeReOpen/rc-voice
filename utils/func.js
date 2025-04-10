@@ -2,7 +2,7 @@
 const sharp = require('sharp');
 // Utils
 const StandardizedError = require('./standardizedError');
-const Map = require('./map');
+const Session = require('./session');
 const JWT = require('./jwt');
 const DB = require('../db');
 
@@ -247,7 +247,7 @@ const func = {
           401,
         );
       }
-      if (!Map.sessionToUser.get(socket.sessionId)) {
+      if (!session.sessionToUser.get(socket.sessionId)) {
         throw new StandardizedError(
           `無效的 session ID(${socket.sessionId})`,
           'ValidationError',

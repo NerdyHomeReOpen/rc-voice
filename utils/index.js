@@ -3,7 +3,7 @@ const StandardizedError = require('./standardizedError');
 const Logger = require('./logger');
 const func = require('./func');
 const xp = require('./xp');
-const map = require('./map');
+const session = require('./session');
 const jwt = require('./jwt');
 const clean = require('./clean');
 const specialUsers = require('./specialUsers');
@@ -13,7 +13,7 @@ module.exports = {
   Logger,
   Func: func,
   Xp: xp,
-  Map: map,
+  Session: session,
   JWT: jwt,
   Clean: clean,
   SpecialUsers: specialUsers,
