@@ -98,7 +98,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO users (user_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO users (user_id, ${key}) 
+            VALUES (?, ?)
+            ON DUPLICATE KEY
+            UPDATE ${key} = ?`,
             [userId, value, value],
           );
         }
@@ -131,7 +134,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO badges (badge_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO badges (badge_id, ${key}) 
+            VALUES (?, ?)
+            ON DUPLICATE KEY
+            UPDATE ${key} = ?`,
             [badgeId, value, value],
           );
         }
@@ -164,7 +170,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO user_badges (user_id, badge_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO user_badges (user_id, badge_id, ${key}) 
+            VALUES (?, ?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [userId, badgeId, value, value],
           );
         }
@@ -204,7 +213,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO user_servers (user_id, server_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO user_servers (user_id, server_id, ${key}) 
+            VALUES (?, ?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [userId, serverId, value, value],
           );
         }
@@ -255,7 +267,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO servers (server_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO servers (server_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [serverId, value, value],
           );
         }
@@ -279,6 +294,7 @@ const Database = {
           'name',
           'order',
           'bitrate',
+          'password',
           'user_limit',
           'guest_text_gap_time',
           'guest_text_wait_time',
@@ -291,7 +307,6 @@ const Database = {
           'forbid_guest_url',
           'type',
           'visibility',
-          'password',
           'voice_mode',
           'category_id',
           'server_id',
@@ -309,7 +324,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO channels (channel_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO channels (channel_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [channelId, value, value],
           );
         }
@@ -342,7 +360,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO friend_groups (friend_group_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO friend_groups (friend_group_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [friendGroupId, value, value],
           );
         }
@@ -381,7 +402,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO friends (friend_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO friends (friend_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [friendId, value, value],
           );
         }
@@ -420,7 +444,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO friend_applications (friend_application_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO friend_applications (friend_application_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [friendApplicationId, value, value],
           );
         }
@@ -463,7 +490,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO members (member_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO members (member_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [memberId, value, value],
           );
         }
@@ -502,7 +532,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO member_applications (member_application_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO member_applications (member_application_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [memberApplicationId, value, value],
           );
         }
@@ -542,7 +575,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO messages (message_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO messages (message_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [messageId, value, value],
           );
         }
@@ -581,7 +617,10 @@ const Database = {
             );
           }
           await query(
-            `INSERT INTO direct_messages (direct_message_id, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
+            `INSERT INTO direct_messages (direct_message_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY 
+            UPDATE ${key} = ?`,
             [directMessageId, value, value],
           );
         }
@@ -623,9 +662,12 @@ const Database = {
 
     account: async (account) => {
       try {
-        const res = await query(`SELECT * FROM accounts WHERE account = ?`, [
-          account,
-        ]);
+        const res = await query(
+          `SELECT *
+          FROM accounts
+          WHERE account = ?`,
+          [account],
+        );
         const data = res[0];
         if (!data) return null;
         return data;
@@ -657,13 +699,14 @@ const Database = {
       // return target;
       try {
         const res = await query(
-          `SELECT id FROM account_user_ids WHERE id = ?`,
+          `SELECT user_id 
+          FROM accounts
+          WHERE account = ?`,
           [querys],
         );
         const data = res[0];
-        const user = await query(`SELECT * FROM users WHERE id = ?`, [data]);
-        if (!user) return null;
-        return convertToCamelCase(user);
+        if (!data) return null;
+        return convertToCamelCase(data);
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -694,21 +737,15 @@ const Database = {
       //   favServers: await get.userFavServers(userId),
       // };
       try {
-        const res_user = await query(`SELECT * FROM users WHERE user_id = ?`, [
-          userId,
-        ]);
-        const data_user = res_user[0];
-        if (!data_user) return null;
-        const badges = await query(
-          `SELECT * FROM badges
-        LEFT JOIN user_badges ON badges.badge_id = user_badges.badge_id
-        WHERE user_badges.user_id = ?`,
+        const res = await query(
+          `SELECT *
+          FROM users
+          WHERE user_id = ?`,
           [userId],
         );
-        return {
-          ...convertToCamelCase(data_user),
-          badges: convertToCamelCase(badges),
-        };
+        const data = res[0];
+        if (!data) return null;
+        return convertToCamelCase(data);
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -731,7 +768,10 @@ const Database = {
       //   .filter((fg) => fg);
       try {
         const friendGroups = await query(
-          `SELECT * FROM friend_groups WHERE user_id = ? ORDER BY friend_groups.order DESC`,
+          `SELECT * 
+          FROM friend_groups
+          WHERE user_id = ?
+          ORDER BY order DESC`,
           [userId],
         );
         if (!friendGroups) return null;
@@ -760,9 +800,12 @@ const Database = {
       //   .filter((b) => b);
       try {
         const userBadges = await query(
-          `SELECT * FROM badges
-        LEFT JOIN user_badges ON badges.id = user_badges.badge_id
-        WHERE user_badges.user_id = ? ORDER BY badges.order DESC`,
+          `SELECT * 
+          FROM user_badges
+          LEFT JOIN badges
+          ON user_badges.badge_id = badges.badge_id
+          WHERE user_id = ?
+          ORDER BY order DESC`,
           [userId],
         );
         if (!userBadges) return null;
@@ -794,9 +837,12 @@ const Database = {
       //   .filter((s) => s);
       try {
         const userServers = await query(
-          `SELECT * FROM user_servers 
-        LEFT JOIN servers ON user_servers.server_id = servers.id
-        WHERE user_servers.user_id = ? ORDER BY user_servers.timestamp DESC`,
+          `SELECT *
+          FROM user_servers
+          LEFT JOIN servers
+          ON user_servers.server_id = servers.server_id
+          WHERE user_id = ?
+          ORDER BY timestamp DESC`,
           [userId],
         );
         if (!userServers) return null;
@@ -828,9 +874,12 @@ const Database = {
       //   .filter((mb) => mb);
       try {
         const userMembers = await query(
-          `SELECT * FROM members 
-        LEFT JOIN servers ON members.server_id = servers.id
-        WHERE members.user_id = ? ORDER BY members.created_at DESC`,
+          `SELECT * 
+          FROM members 
+          LEFT JOIN servers
+          ON members.server_id = servers.server_id
+          WHERE user_id = ?
+          ORDER BY created_at DESC`,
           [userId],
         );
         if (!userMembers) return null;
@@ -862,9 +911,12 @@ const Database = {
       //   .filter((fd) => fd);
       try {
         const userFriends = await query(
-          `SELECT * FROM friends 
-        LEFT JOIN users ON friends.target_id = users.id
-        WHERE friends.user_id = ? ORDER BY friends.created_at DESC`,
+          `SELECT * 
+          FROM friends 
+          LEFT JOIN users 
+          ON friends.target_id = users.id
+          WHERE user_id = ?
+          ORDER BY created_at DESC`,
           [userId],
         );
         if (!userFriends) return null;
@@ -899,9 +951,13 @@ const Database = {
       //   .filter((app) => app);
       try {
         const userFriendApplications = await query(
-          `SELECT * FROM friend_applications 
-        LEFT JOIN users ON friend_applications.sender_id = users.id
-        WHERE friend_applications.receiver_id = ? AND friend_applications.application_status = 'pending' ORDER BY friend_applications.created_at DESC`,
+          `SELECT * 
+          FROM friend_applications 
+          LEFT JOIN users 
+          ON friend_applications.sender_id = users.id
+          WHERE receiver_id = ?
+          AND application_status = 'pending'
+          ORDER BY created_at DESC`,
           [userId],
         );
         if (!userFriendApplications) return null;
@@ -923,8 +979,11 @@ const Database = {
     searchServer: async (querys) => {
       try {
         const servers = await query(
-          `SELECT * FROM servers 
-        WHERE servers.name LIKE ? OR servers.display_id LIKE ? ORDER BY servers.created_at DESC`,
+          `SELECT * 
+          FROM servers 
+          WHERE name LIKE ? OR display_id = ?
+          ORDER BY created_at DESC
+          LIMIT 10`,
           [`%${querys}%`, `${querys}`],
         );
         if (!servers) return null;
@@ -941,24 +1000,6 @@ const Database = {
         }
         throw error;
       }
-      // const isServerMatch = (server, query) => {
-      //   const _query = String(query).trim().toLowerCase();
-      //   const _name = String(server.name).trim().toLowerCase();
-      //   const _displayId = String(server.displayId).trim().toLowerCase();
-
-      //   if (server.visibility === 'invisible' && _displayId !== _query)
-      //     return false;
-      //   return (
-      //     Func.calculateSimilarity(_name, _query) >= 0.5 ||
-      //     _name.includes(_query) ||
-      //     _displayId === _query
-      //   );
-      // };
-
-      // return Object.values(servers)
-      //   .filter((s) => isServerMatch(s, query))
-      //   .filter((s) => s)
-      //   .slice(0, 10);
     },
 
     server: async (serverId) => {
@@ -974,7 +1015,9 @@ const Database = {
       // };
       try {
         const server = await query(
-          `SELECT * FROM servers WHERE servers.id = ?`,
+          `SELECT * 
+          FROM servers 
+          WHERE server_id = ?`,
           [serverId],
         );
         if (!server) return null;
@@ -1007,9 +1050,12 @@ const Database = {
       //   .filter((mb) => mb);
       try {
         const serverUsers = await query(
-          `SELECT * FROM members 
-        LEFT JOIN users ON members.user_id = users.id
-        WHERE members.server_id = ? ORDER BY members.created_at DESC`,
+          `SELECT * 
+          FROM members 
+          LEFT JOIN users 
+          ON members.user_id = users.id
+          WHERE server_id = ?
+          ORDER BY created_at DESC`,
           [serverId],
         );
         if (!serverUsers) return null;
@@ -1037,9 +1083,10 @@ const Database = {
       //   .filter((ch) => ch);
       try {
         const serverChannels = await query(
-          `SELECT * FROM channels 
-        LEFT JOIN categories ON channels.category_id = categories.id
-        WHERE channels.server_id = ? ORDER BY channels.order ASC`,
+          `SELECT * 
+          FROM channels
+          WHERE server_id = ?
+          ORDER BY order DESC`,
           [serverId],
         );
         if (!serverChannels) return null;
@@ -1071,9 +1118,12 @@ const Database = {
       //   .filter((mb) => mb);
       try {
         const serverMembers = await query(
-          `SELECT * FROM members 
-        LEFT JOIN users ON members.user_id = users.id
-        WHERE members.server_id = ? ORDER BY members.created_at DESC`,
+          `SELECT * 
+          FROM members 
+          LEFT JOIN users 
+          ON members.user_id = users.id
+          WHERE server_id = ?
+          ORDER BY created_at DESC`,
           [serverId],
         );
         if (!serverMembers) return null;
@@ -1108,9 +1158,13 @@ const Database = {
       //   .filter((app) => app);
       try {
         const serverMemberApplications = await query(
-          `SELECT * FROM member_applications 
-        LEFT JOIN users ON member_applications.user_id = users.id
-        WHERE member_applications.server_id = ? AND member_applications.application_status = 'pending' ORDER BY member_applications.created_at DESC`,
+          `SELECT * 
+          FROM member_applications 
+          LEFT JOIN users 
+          ON member_applications.user_id = users.id
+          WHERE server_id = ?
+          AND application_status = 'pending'
+          ORDER BY created_at DESC`,
           [serverId],
         );
         if (!serverMemberApplications) return null;
@@ -1138,7 +1192,10 @@ const Database = {
       // };
       try {
         const category = await query(
-          `SELECT * FROM categories WHERE categories.id = ? ORDER BY categories.order ASC`,
+          `SELECT * 
+          FROM categories 
+          WHERE category_id = ?
+          ORDER BY order DESC`,
           [categoryId],
         );
         if (!category) return null;
@@ -1170,7 +1227,10 @@ const Database = {
       // };
       try {
         const channel = await query(
-          `SELECT * FROM channels WHERE channels.id = ? ORDER BY channels.order ASC`,
+          `SELECT * 
+          FROM channels 
+          WHERE channel_id = ?
+          ORDER BY order DESC`,
           [channelId],
         );
         if (!channel) return null;
@@ -1204,7 +1264,11 @@ const Database = {
       //   .filter((msg) => msg);
       try {
         const channelMessages = await query(
-          `SELECT * FROM messages WHERE messages.channel_id = ? AND messages.type = 'general' ORDER BY messages.created_at DESC`,
+          `SELECT * 
+          FROM messages 
+          WHERE channel_id = ?
+          AND type = 'general'
+          ORDER BY created_at DESC`,
           [channelId],
         );
         if (!channelMessages) return null;
@@ -1233,7 +1297,11 @@ const Database = {
       //   .filter((msg) => msg);
       try {
         const channelInfoMessages = await query(
-          `SELECT * FROM messages WHERE messages.channel_id = ? AND messages.type = 'info' ORDER BY messages.created_at DESC`,
+          `SELECT * 
+          FROM messages 
+          WHERE channel_id = ?
+          AND type = 'info'
+          ORDER BY created_at DESC`,
           [channelId],
         );
         if (!channelInfoMessages) return null;
@@ -1261,7 +1329,10 @@ const Database = {
       // };
       try {
         const friendGroup = await query(
-          `SELECT * FROM friend_groups WHERE friend_groups.id = ? ORDER BY friend_groups.order DESC`,
+          `SELECT * 
+          FROM friend_groups 
+          WHERE friend_group_id = ?
+          ORDER BY order DESC`,
           [friendGroupId],
         );
         if (!friendGroup) return null;
@@ -1289,7 +1360,11 @@ const Database = {
       // };
       try {
         const member = await query(
-          `SELECT * FROM members WHERE members.user_id = ? AND members.server_id = ? ORDER BY members.created_at DESC`,
+          `SELECT * 
+          FROM members 
+          WHERE user_id = ?
+          AND server_id = ?
+          ORDER BY created_at DESC`,
           [userId, serverId],
         );
         if (!member) return null;
@@ -1317,7 +1392,11 @@ const Database = {
       // };
       try {
         const memberApplication = await query(
-          `SELECT * FROM member_applications WHERE member_applications.user_id = ? AND member_applications.server_id = ? ORDER BY member_applications.created_at DESC`,
+          `SELECT * 
+          FROM member_applications 
+          WHERE user_id = ?
+          AND server_id = ?
+          ORDER BY created_at DESC`,
           [userId, serverId],
         );
         if (!memberApplication) return null;
@@ -1345,7 +1424,11 @@ const Database = {
       // };
       try {
         const friend = await query(
-          `SELECT * FROM friends WHERE friends.user_id = ? AND friends.target_id = ? ORDER BY friends.created_at DESC`,
+          `SELECT * 
+          FROM friends 
+          WHERE user_id = ?
+          AND target_id = ?
+          ORDER BY created_at DESC`,
           [userId, targetId],
         );
         if (!friend) return null;
@@ -1373,7 +1456,11 @@ const Database = {
       // };
       try {
         const friendApplication = await query(
-          `SELECT * FROM friend_applications WHERE friend_applications.sender_id = ? AND friend_applications.receiver_id = ? ORDER BY friend_applications.created_at DESC`,
+          `SELECT * 
+          FROM friend_applications 
+          WHERE sender_id = ?
+          AND receiver_id = ?
+          ORDER BY created_at DESC`,
           [senderId, receiverId],
         );
         if (!friendApplication) return null;
@@ -1401,7 +1488,10 @@ const Database = {
       // };
       try {
         const message = await query(
-          `SELECT * FROM messages WHERE messages.id = ? ORDER BY messages.created_at DESC`,
+          `SELECT * 
+          FROM messages 
+          WHERE message_id = ?
+          ORDER BY created_at DESC`,
           [messageId],
         );
         if (!message) return null;
@@ -1436,9 +1526,13 @@ const Database = {
         const userId1 = userId.localeCompare(targetId) < 0 ? userId : targetId;
         const userId2 = userId.localeCompare(targetId) < 0 ? targetId : userId;
         const directMessages = await query(
-          `SELECT * FROM direct_messages 
-        LEFT JOIN users ON direct_messages.sender_id = users.id
-        WHERE direct_messages.user_id1 = ? AND direct_messages.user_id2 = ? ORDER BY direct_messages.created_at DESC`,
+          `SELECT * 
+          FROM direct_messages 
+          LEFT JOIN users 
+          ON direct_messages.sender_id = users.id
+          WHERE user_id_1 = ?
+          AND user_id_2 = ?
+          ORDER BY created_at DESC`,
           [userId1, userId2],
         );
         if (!directMessages) return null;
@@ -1461,7 +1555,11 @@ const Database = {
   delete: {
     user: async (userId) => {
       try {
-        await query(`DELETE FROM users WHERE users.id = ?`, [userId]);
+        await query(
+          `DELETE FROM users 
+          WHERE user_id = ?`,
+          [userId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1478,7 +1576,11 @@ const Database = {
 
     badge: async (badgeId) => {
       try {
-        await query(`DELETE FROM badges WHERE badges.id = ?`, [badgeId]);
+        await query(
+          `DELETE FROM badges 
+          WHERE badge_id = ?`,
+          [badgeId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1495,9 +1597,12 @@ const Database = {
 
     userBadge: async (userId, badgeId) => {
       try {
-        await query(`DELETE FROM user_badges WHERE user_badges.id = ?`, [
-          `ub_${userId}-${badgeId}`,
-        ]);
+        await query(
+          `DELETE FROM user_badges 
+          WHERE user_id = ?
+          AND badge_id = ?`,
+          [userId, badgeId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1514,9 +1619,12 @@ const Database = {
 
     userServer: async (userId, serverId) => {
       try {
-        await query(`DELETE FROM user_servers WHERE user_servers.id = ?`, [
-          `us_${userId}-${serverId}`,
-        ]);
+        await query(
+          `DELETE FROM user_servers 
+          WHERE user_id = ?
+          AND server_id = ?`,
+          [userId, serverId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1533,7 +1641,11 @@ const Database = {
 
     server: async (serverId) => {
       try {
-        await query(`DELETE FROM servers WHERE servers.id = ?`, [serverId]);
+        await query(
+          `DELETE FROM servers 
+          WHERE server_id = ?`,
+          [serverId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1550,7 +1662,11 @@ const Database = {
 
     channel: async (channelId) => {
       try {
-        await query(`DELETE FROM channels WHERE channels.id = ?`, [channelId]);
+        await query(
+          `DELETE FROM channels 
+          WHERE channel_id = ?`,
+          [channelId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1567,9 +1683,11 @@ const Database = {
 
     friendGroup: async (friendGroupId) => {
       try {
-        await query(`DELETE FROM friend_groups WHERE friend_groups.id = ?`, [
-          friendGroupId,
-        ]);
+        await query(
+          `DELETE FROM friend_groups 
+          WHERE friend_group_id = ?`,
+          [friendGroupId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1586,9 +1704,12 @@ const Database = {
 
     member: async (userId, serverId) => {
       try {
-        await query(`DELETE FROM members WHERE members.id = ?`, [
-          `mb_${userId}-${serverId}`,
-        ]);
+        await query(
+          `DELETE FROM members 
+          WHERE user_id = ?
+          AND server_id = ?`,
+          [userId, serverId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1606,8 +1727,10 @@ const Database = {
     memberApplication: async (userId, serverId) => {
       try {
         await query(
-          `DELETE FROM member_applications WHERE member_applications.id = ?`,
-          [`ma_${userId}-${serverId}`],
+          `DELETE FROM member_applications 
+          WHERE user_id = ?
+          AND server_id = ?`,
+          [userId, serverId],
         );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
@@ -1625,9 +1748,12 @@ const Database = {
 
     friend: async (userId, targetId) => {
       try {
-        await query(`DELETE FROM friends WHERE friends.id = ?`, [
-          `fd_${userId}-${targetId}`,
-        ]);
+        await query(
+          `DELETE FROM friends 
+          WHERE user_id = ?
+          AND target_id = ?`,
+          [userId, targetId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1645,8 +1771,10 @@ const Database = {
     friendApplication: async (senderId, receiverId) => {
       try {
         await query(
-          `DELETE FROM friend_applications WHERE friend_applications.id = ?`,
-          [`fa_${senderId}-${receiverId}`],
+          `DELETE FROM friend_applications 
+          WHERE sender_id = ?
+          AND receiver_id = ?`,
+          [senderId, receiverId],
         );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
@@ -1664,7 +1792,11 @@ const Database = {
 
     message: async (messageId) => {
       try {
-        await query(`DELETE FROM messages WHERE messages.id = ?`, [messageId]);
+        await query(
+          `DELETE FROM messages 
+          WHERE message_id = ?`,
+          [messageId],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -1684,7 +1816,9 @@ const Database = {
         const userId1 = userId.localeCompare(targetId) < 0 ? userId : targetId;
         const userId2 = userId.localeCompare(targetId) < 0 ? targetId : userId;
         await query(
-          `DELETE FROM direct_messages WHERE direct_messages.user_id1 = ? AND direct_messages.user_id2 = ?`,
+          `DELETE FROM direct_messages 
+          WHERE user_id_1 = ?
+          AND user_id_2 = ?`,
           [userId1, userId2],
         );
       } catch (error) {
@@ -1704,7 +1838,7 @@ const Database = {
 
   async initialize() {
     const tables = [
-      'account',
+      'accounts',
       'users',
       'badges',
       'user_badges',
@@ -1729,7 +1863,7 @@ const Database = {
 
   async deleteAll() {
     const tables = [
-      'account',
+      'accounts',
       'users',
       'badges',
       'user_badges',
