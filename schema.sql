@@ -6,14 +6,14 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 -- WILL BE DEPRECATED
 -- CREATE TABLE IF NOT EXISTS account_passwords (
---   account_id VARCHAR(255) PRIMARY KEY,
---   password VARCHAR(255) NOT NULL
+--  account_id VARCHAR(255) PRIMARY KEY,
+--  password VARCHAR(255) NOT NULL
 -- );
 
 -- WILL BE DEPRECATED
 -- CREATE TABLE IF NOT EXISTS account_user_ids (
---   account_id VARCHAR(255) PRIMARY KEY,
---   user_id VARCHAR(255) NOT NULL
+--  account_id VARCHAR(255) PRIMARY KEY,
+--  user_id VARCHAR(255) NOT NULL
 -- );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -42,25 +42,25 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS badges (
   badge_id VARCHAR(255) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  description VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_badges (
   user_id VARCHAR(255),
   badge_id VARCHAR(255),
-  PRIMARY KEY (user_id, badge_id)
-  order INT NOT NULL,
+  PRIMARY KEY (user_id, badge_id),
+  `order` INT NOT NULL,
   created_at INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_servers (
   user_id VARCHAR(255),
   server_id VARCHAR(255),
-  PRIMARY KEY (user_id, server_id)
+  PRIMARY KEY (user_id, server_id),
   owned BOOLEAN NOT NULL,
   recent BOOLEAN NOT NULL,
   favorite BOOLEAN NOT NULL,
-  timestamp INT NOT NULL
+  `timestamp` INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS servers (
@@ -87,9 +87,9 @@ CREATE TABLE IF NOT EXISTS servers (
 CREATE TABLE IF NOT EXISTS channels (
   channel_id VARCHAR(255) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  order INT NOT NULL,
+  `order` INT NOT NULL,
   bitrate INT NOT NULL,
-  password INT NOT NULL,
+  `password` INT NOT NULL,
   user_limit INT NOT NULL,
   guest_text_gap_time INT NOT NULL,
   guest_text_wait_time INT NOT NULL,
@@ -109,16 +109,16 @@ CREATE TABLE IF NOT EXISTS channels (
 
 CREATE TABLE IF NOT EXISTS friend_groups (
   friend_group_id VARCHAR(255) PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,  
-  order INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  `order` INT NOT NULL,
   user_id VARCHAR(255) NOT NULL,
   created_at INT NOT NULL
 );
 
 -- NOT USED
 -- CREATE TABLE IF NOT EXISTS channel_relations (
---   channel_id VARCHAR(255) PRIMARY KEY,
---   data JSON NOT NULL
+--  channel_id VARCHAR(255) PRIMARY KEY,
+--  data JSON NOT NULL
 -- );
 
 CREATE TABLE IF NOT EXISTS members (
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS messages (
   sender_id VARCHAR(255) NOT NULL,
   server_id VARCHAR(255) NOT NULL,
   channel_id VARCHAR(255) NOT NULL,
-  timestamp INT NOT NULL
+  `timestamp` INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS direct_messages (
@@ -178,11 +178,11 @@ CREATE TABLE IF NOT EXISTS direct_messages (
   sender_id VARCHAR(255) NOT NULL,
   user_id_1 VARCHAR(255) NOT NULL,
   user_id_2 VARCHAR(255) NOT NULL,
-  timestamp INT NOT NULL
+  `timestamp` INT NOT NULL
 );
 
 -- NOT USED
 -- CREATE TABLE IF NOT EXISTS voice_presences (
---   presence_id VARCHAR(255) PRIMARY KEY,
---   data JSON NOT NULL
+--  presence_id VARCHAR(255) PRIMARY KEY,
+--  data JSON NOT NULL
 -- );
