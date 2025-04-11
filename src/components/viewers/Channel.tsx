@@ -489,7 +489,7 @@ const UserTab: React.FC<UserTabProps> = React.memo(
     const canManageMember =
       !isCurrentUser &&
       permissionLevel > channelMemberPermission &&
-      (channelMemberPermission > 1 || permissionLevel > 5);
+      channelMemberPermission > 1;
     const canEditNickname =
       (isCurrentUser && permissionLevel > 1) || canManageMember;
     const canChangeToGuest =
