@@ -17,7 +17,7 @@ CREATE TABLE `accounts` (
   `account` varchar(255) NOT NULL,
   `password` char(60) NOT NULL COMMENT 'BCRYPT',
   `user_id` char(36) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `accounts`:
@@ -35,7 +35,7 @@ CREATE TABLE `badges` (
   `badge_id` char(36) NOT NULL,
   `name` varchar(255) NOT NULL,
   `description` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `badges`:
@@ -68,7 +68,7 @@ CREATE TABLE `channels` (
   `category_id` char(36) NOT NULL,
   `server_id` char(36) NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `channels`:
@@ -88,7 +88,7 @@ CREATE TABLE `direct_messages` (
   `user_id_1` char(36) NOT NULL,
   `user_id_2` char(36) NOT NULL,
   `timestamp` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `direct_messages`:
@@ -111,7 +111,7 @@ CREATE TABLE `friends` (
   `user_id` char(36) NOT NULL,
   `target_id` char(36) NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `friends`:
@@ -136,7 +136,7 @@ CREATE TABLE `friend_applications` (
   `sender_id` char(36) NOT NULL,
   `reciever_id` char(36) NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `friend_applications`:
@@ -158,7 +158,7 @@ CREATE TABLE `friend_groups` (
   `order` int(10) UNSIGNED NOT NULL,
   `user_id` char(36) NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `friend_groups`:
@@ -183,7 +183,7 @@ CREATE TABLE `members` (
   `user_id` char(36) NOT NULL,
   `server_id` char(36) NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `members`:
@@ -206,7 +206,7 @@ CREATE TABLE `member_applications` (
   `user_id` char(36) NOT NULL,
   `server_id` char(36) NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `member_applications`:
@@ -230,7 +230,7 @@ CREATE TABLE `messages` (
   `server_id` char(36) NOT NULL,
   `channel_id` char(36) NOT NULL,
   `timestamp` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `messages`:
@@ -267,7 +267,7 @@ CREATE TABLE `servers` (
   `lobby_id` char(36) NOT NULL,
   `owner_id` char(36) NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `servers`:
@@ -304,7 +304,7 @@ CREATE TABLE `users` (
   `current_server_id` char(36) DEFAULT NULL,
   `last_active_at` bigint(20) UNSIGNED NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `users`:
@@ -325,7 +325,7 @@ CREATE TABLE `user_badges` (
   `badge_id` char(36) NOT NULL,
   `order` int(10) UNSIGNED NOT NULL,
   `created_at` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `user_badges`:
@@ -348,7 +348,7 @@ CREATE TABLE `user_servers` (
   `recent` tinyint(3) UNSIGNED NOT NULL,
   `favorite` tinyint(3) UNSIGNED NOT NULL,
   `timestamp` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 --
 -- 資料表的關聯 `user_servers`:
