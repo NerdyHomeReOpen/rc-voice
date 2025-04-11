@@ -353,7 +353,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
                   >
                     {lang.tr.gender}
                   </label>
-                  <div className={`${popup['selectBox']} ${popup['small']}`}>
+                  <div className={popup['selectBox']}>
                     <select
                       value={userGender}
                       onChange={(e) =>
@@ -375,7 +375,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
                   >
                     {lang.tr.country}
                   </label>
-                  <div className={`${popup['selectBox']} ${popup['small']}`}>
+                  <div className={popup['selectBox']}>
                     <select
                       value={userCountry}
                       onChange={(e) => setUserCountry(e.target.value)}
@@ -431,7 +431,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
                     {lang.tr.birthdate}
                   </label>
                   <div className={popup['row']}>
-                    <div className={`${popup['selectBox']} ${popup['small']}`}>
+                    <div className={popup['selectBox']}>
                       <select
                         id="birthYear"
                         value={userBirthYear}
@@ -450,7 +450,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
                         ))}
                       </select>
                     </div>
-                    <div className={`${popup['selectBox']} ${popup['small']}`}>
+                    <div className={popup['selectBox']}>
                       <select
                         className={popup['input']}
                         id="birthMonth"
@@ -473,7 +473,7 @@ const UserSettingPopup: React.FC<UserSettingPopupProps> = React.memo(
                         ))}
                       </select>
                     </div>
-                    <div className={`${popup['selectBox']} ${popup['small']}`}>
+                    <div className={popup['selectBox']}>
                       <select
                         className={popup['input']}
                         id="birthDay"

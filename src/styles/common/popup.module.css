@@ -258,6 +258,16 @@
   padding-right: 30px;
 }
 
+.inputBox .selectBox.small::before {
+  right: 25px;
+  left: unset;
+}
+
+.inputBox .selectBox.small::after {
+  right: 28px;
+  left: unset;
+}
+
 .inputBox .selectBox select {
   border: 1px solid #ddd;
   padding: 2px;
@@ -274,8 +284,8 @@
 .inputBox .selectBox::before {
   content: '';
   position: absolute;
-  top: 0px;
-  right: 25px;
+  bottom: 0;
+  right: 0;
   height: 2rem;
   width: 25px;
   z-index: 1;
@@ -284,15 +294,11 @@
   background-size: contain;
   pointer-events: none;
 }
-
-.inputBox .selectBox.small::before {
-}
-
 .inputBox .selectBox::after {
   content: '';
   position: absolute;
-  top: 8px;
-  right: 28px;
+  bottom: 8px;
+  right: 0;
   width: 26px;
   height: 12px;
   z-index: 1;
