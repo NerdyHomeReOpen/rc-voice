@@ -292,8 +292,8 @@ async function createAuthWindow() {
   }
 
   authWindow = new BrowserWindow({
-    width: 600,
-    height: 450,
+    width: 612,
+    height: 452,
     resizable: false,
     frame: false,
     transparent: true,

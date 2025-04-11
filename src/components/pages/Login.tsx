@@ -116,7 +116,6 @@ const LoginPage: React.FC<LoginPageProps> = React.memo(({ setSection }) => {
                   value={formData.password}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  placeholder={lang.tr.pleaseInputPassword}
                   className={styles['input']}
                   style={{
                     borderColor: errors.password ? '#f87171' : '#d1d5db',

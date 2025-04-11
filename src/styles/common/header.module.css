@@ -15,7 +15,7 @@
 .appIcon {
   position: absolute;
   display: inline-block;
-  min-width: 60px;
+  min-width: 80px;
   min-height: 24px;
   background: url('../../../public/login_logo_title.png') no-repeat center
     center;

@@ -89,12 +89,13 @@
   display: block;
   width: auto;
   text-align: left;
+  font-size: 12px;
 }
 
-.inputBox label::after {
+/* .inputBox label::after {
   content: '*';
   color: red;
-}
+} */
 
 .inputBox .warning {
   color: red;
