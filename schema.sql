@@ -17,7 +17,13 @@ CREATE TABLE `accounts` (
   `account` varchar(255) NOT NULL,
   `password` char(60) NOT NULL COMMENT 'BCRYPT',
   `user_id` char(36) NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `accounts`:
+--   `user_id`
+--       `users` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -27,9 +33,13 @@ CREATE TABLE `accounts` (
 
 CREATE TABLE `badges` (
   `badge_id` char(36) NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT 'Unknown',
-  `description` varchar(255) NOT NULL DEFAULT ''
-);
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `badges`:
+--
 
 -- --------------------------------------------------------
 
@@ -39,26 +49,30 @@ CREATE TABLE `badges` (
 
 CREATE TABLE `channels` (
   `channel_id` char(36) NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `password` varchar(255) NOT NULL DEFAULT '',
-  `order` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `bitrate` int(10) UNSIGNED NOT NULL DEFAULT 64000,
-  `user_limit` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `guest_text_gap_time` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `guest_text_wait_time` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `guest_text_max_length` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `is_root` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `is_lobby` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `slowmode` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `forbid_text` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `forbid_guest_text` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `forbid_guest_url` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `type` varchar(255) NOT NULL DEFAULT 'channel',
-  `voice_mode` varchar(255) NOT NULL DEFAULT 'free',
+  `name` varchar(255) NOT NULL,
+  `order` int(10) UNSIGNED NOT NULL,
+  `bitrate` int(10) UNSIGNED NOT NULL,
+  `password` int(10) UNSIGNED NOT NULL,
+  `user_limit` int(10) UNSIGNED NOT NULL,
+  `guest_text_gap_time` bigint(20) UNSIGNED NOT NULL,
+  `guest_text_wait_time` bigint(20) UNSIGNED NOT NULL,
+  `guest_text_max_length` int(10) UNSIGNED NOT NULL,
+  `is_root` tinyint(3) UNSIGNED NOT NULL,
+  `is_lobby` tinyint(3) UNSIGNED NOT NULL,
+  `slowmode` tinyint(3) UNSIGNED NOT NULL,
+  `forbid_text` tinyint(3) UNSIGNED NOT NULL,
+  `forbid_guest_text` tinyint(3) UNSIGNED NOT NULL,
+  `forbid_guest_url` tinyint(3) UNSIGNED NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `voice_mode` varchar(255) NOT NULL,
   `category_id` char(36) NOT NULL,
   `server_id` char(36) NOT NULL,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `channels`:
+--
 
 -- --------------------------------------------------------
 
@@ -68,13 +82,21 @@ CREATE TABLE `channels` (
 
 CREATE TABLE `direct_messages` (
   `message_id` char(36) NOT NULL,
-  `content` text NOT NULL DEFAULT '',
-  `type` varchar(255) NOT NULL DEFAULT 'dm',
+  `content` text NOT NULL,
+  `type` varchar(255) NOT NULL,
   `sender_id` char(36) NOT NULL,
   `user_id_1` char(36) NOT NULL,
   `user_id_2` char(36) NOT NULL,
-  `timestamp` BIGINT NOT NULL DEFAULT 0
-);
+  `timestamp` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `direct_messages`:
+--   `user_id_1`
+--       `users` -> `user_id`
+--   `user_id_2`
+--       `users` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -84,12 +106,22 @@ CREATE TABLE `direct_messages` (
 
 CREATE TABLE `friends` (
   `friend_id` char(36) NOT NULL,
-  `is_blocked` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `friend_group_id` char(36) NOT NULL DEFAULT '',
+  `is_blocked` tinyint(3) UNSIGNED NOT NULL,
+  `friend_group_id` char(36) NOT NULL,
   `user_id` char(36) NOT NULL,
   `target_id` char(36) NOT NULL,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `friends`:
+--   `friend_group_id`
+--       `friend_groups` -> `friend_group_id`
+--   `user_id`
+--       `users` -> `user_id`
+--   `target_id`
+--       `users` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -99,12 +131,20 @@ CREATE TABLE `friends` (
 
 CREATE TABLE `friend_applications` (
   `application_id` char(36) NOT NULL,
-  `description` varchar(255) NOT NULL DEFAULT '',
-  `application_status` varchar(255) NOT NULL DEFAULT '',
+  `description` varchar(255) NOT NULL,
+  `application_status` varchar(255) NOT NULL,
   `sender_id` char(36) NOT NULL,
   `reciever_id` char(36) NOT NULL,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `friend_applications`:
+--   `sender_id`
+--       `users` -> `user_id`
+--   `reciever_id`
+--       `users` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -114,11 +154,17 @@ CREATE TABLE `friend_applications` (
 
 CREATE TABLE `friend_groups` (
   `friend_group_id` char(36) NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `order` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL,
+  `order` int(10) UNSIGNED NOT NULL,
   `user_id` char(36) NOT NULL,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `friend_groups`:
+--   `user_id`
+--       `users` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -129,15 +175,23 @@ CREATE TABLE `friend_groups` (
 CREATE TABLE `members` (
   `member_id` char(36) NOT NULL,
   `nickname` varchar(255) DEFAULT NULL,
-  `contribution` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `last_message_time` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `last_join_channel_time` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `permission_level` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `is_blocked` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+  `contribution` int(10) UNSIGNED NOT NULL,
+  `last_message_time` bigint(20) UNSIGNED NOT NULL,
+  `last_join_channel_time` bigint(20) UNSIGNED NOT NULL,
+  `permission_level` int(10) UNSIGNED NOT NULL,
+  `is_blocked` tinyint(3) UNSIGNED NOT NULL,
   `user_id` char(36) NOT NULL,
   `server_id` char(36) NOT NULL,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `members`:
+--   `server_id`
+--       `servers` -> `server_id`
+--   `user_id`
+--       `users` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -147,12 +201,20 @@ CREATE TABLE `members` (
 
 CREATE TABLE `member_applications` (
   `application_id` char(36) NOT NULL,
-  `description` varchar(255) NOT NULL DEFAULT '',
-  `application_status` varchar(255) NOT NULL DEFAULT '',
+  `description` varchar(255) NOT NULL,
+  `application_status` varchar(255) NOT NULL,
   `user_id` char(36) NOT NULL,
   `server_id` char(36) NOT NULL,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `member_applications`:
+--   `server_id`
+--       `servers` -> `server_id`
+--   `user_id`
+--       `users` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -162,13 +224,23 @@ CREATE TABLE `member_applications` (
 
 CREATE TABLE `messages` (
   `message_id` char(36) NOT NULL,
-  `content` text NOT NULL DEFAULT '',
-  `type` varchar(255) NOT NULL DEFAULT 'general',
+  `content` text NOT NULL,
+  `type` varchar(255) NOT NULL,
   `sender_id` char(36) NOT NULL,
   `server_id` char(36) NOT NULL,
   `channel_id` char(36) NOT NULL,
-  `timestamp` BIGINT NOT NULL DEFAULT 0
-);
+  `timestamp` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `messages`:
+--   `channel_id`
+--       `channels` -> `channel_id`
+--   `sender_id`
+--       `users` -> `user_id`
+--   `server_id`
+--       `servers` -> `server_id`
+--
 
 -- --------------------------------------------------------
 
@@ -178,24 +250,32 @@ CREATE TABLE `messages` (
 
 CREATE TABLE `servers` (
   `server_id` char(36) NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `avatar` varchar(255) NOT NULL DEFAULT '',
-  `avatar_url` varchar(255) NOT NULL DEFAULT '',
-  `announcement` text NOT NULL DEFAULT '',
-  `apply_notice` varchar(255) NOT NULL DEFAULT '',
-  `description` varchar(255) NOT NULL DEFAULT '',
-  `display_id` varchar(24) NOT NULL DEFAULT '',
-  `slogan` varchar(255) NOT NULL DEFAULT '',
-  `level` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `wealth` int(1) UNSIGNED NOT NULL DEFAULT 0,
-  `receive_apply` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `allow_direct_message` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `type` varchar(255) NOT NULL DEFAULT 'game',
-  `visibility` varchar(255) NOT NULL DEFAULT 'public',
+  `name` varchar(255) NOT NULL,
+  `avatar` varchar(255) NOT NULL,
+  `avatar_url` varchar(255) NOT NULL,
+  `announcement` text NOT NULL,
+  `apply_notice` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `display_id` varchar(24) NOT NULL,
+  `slogan` varchar(255) NOT NULL,
+  `level` int(10) UNSIGNED NOT NULL,
+  `wealth` int(10) UNSIGNED NOT NULL,
+  `receive_apply` tinyint(3) UNSIGNED NOT NULL,
+  `allow_direct_message` tinyint(3) UNSIGNED NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `visibility` varchar(255) NOT NULL,
   `lobby_id` char(36) NOT NULL,
   `owner_id` char(36) NOT NULL,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `servers`:
+--   `owner_id`
+--       `users` -> `user_id`
+--   `lobby_id`
+--       `channels` -> `channel_id`
+--
 
 -- --------------------------------------------------------
 
@@ -205,26 +285,34 @@ CREATE TABLE `servers` (
 
 CREATE TABLE `users` (
   `user_id` char(36) NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `avatar` varchar(255) NOT NULL DEFAULT '',
-  `avatar_url` varchar(255) NOT NULL DEFAULT '',
-  `signature` varchar(255) NOT NULL DEFAULT '',
-  `country` varchar(48) NOT NULL DEFAULT '',
-  `level` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `vip` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `xp` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `required_xp` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `progress` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `birth_year` smallint(5) UNSIGNED NOT NULL DEFAULT 0,
-  `birth_month` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `birth_day` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `status` varchar(255) NOT NULL DEFAULT 'offline',
-  `gender` varchar(255) NOT NULL DEFAULT 'Male',
+  `name` varchar(255) NOT NULL,
+  `avatar` varchar(255) NOT NULL,
+  `avatar_url` varchar(255) NOT NULL,
+  `signature` varchar(255) NOT NULL,
+  `country` varchar(48) NOT NULL,
+  `level` smallint(5) UNSIGNED NOT NULL,
+  `vip` smallint(5) UNSIGNED NOT NULL,
+  `xp` int(10) UNSIGNED NOT NULL,
+  `required_xp` int(10) UNSIGNED NOT NULL,
+  `progress` int(10) UNSIGNED NOT NULL,
+  `birth_year` smallint(5) UNSIGNED NOT NULL,
+  `birth_month` tinyint(3) UNSIGNED NOT NULL,
+  `birth_day` tinyint(3) UNSIGNED NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `gender` varchar(255) NOT NULL,
   `current_channel_id` char(36) DEFAULT NULL,
   `current_server_id` char(36) DEFAULT NULL,
-  `last_active_at` BIGINT NOT NULL DEFAULT 0,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `last_active_at` bigint(20) UNSIGNED NOT NULL,
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `users`:
+--   `current_channel_id`
+--       `channels` -> `channel_id`
+--   `current_server_id`
+--       `servers` -> `server_id`
+--
 
 -- --------------------------------------------------------
 
@@ -235,9 +323,17 @@ CREATE TABLE `users` (
 CREATE TABLE `user_badges` (
   `user_id` char(36) NOT NULL,
   `badge_id` char(36) NOT NULL,
-  `order` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `created_at` BIGINT NOT NULL DEFAULT 0
-);
+  `order` int(10) UNSIGNED NOT NULL,
+  `created_at` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `user_badges`:
+--   `badge_id`
+--       `badges` -> `badge_id`
+--   `user_id`
+--       `users` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -248,11 +344,19 @@ CREATE TABLE `user_badges` (
 CREATE TABLE `user_servers` (
   `user_id` char(36) NOT NULL,
   `server_id` char(36) NOT NULL,
-  `owned` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `recent` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `favorite` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
-  `timestamp` BIGINT NOT NULL DEFAULT 0
-);
+  `owned` tinyint(3) UNSIGNED NOT NULL,
+  `recent` tinyint(3) UNSIGNED NOT NULL,
+  `favorite` tinyint(3) UNSIGNED NOT NULL,
+  `timestamp` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表的關聯 `user_servers`:
+--   `server_id`
+--       `servers` -> `server_id`
+--   `user_id`
+--       `users` -> `user_id`
+--
 
 --
 -- 已傾印資料表的索引
@@ -346,7 +450,9 @@ ALTER TABLE `servers`
 -- 資料表索引 `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`user_id`);
+  ADD PRIMARY KEY (`user_id`),
+  ADD KEY `current_channel_id` (`current_channel_id`),
+  ADD KEY `current_server_id` (`current_server_id`);
 
 --
 -- 資料表索引 `user_badges`
@@ -428,6 +534,13 @@ ALTER TABLE `messages`
 ALTER TABLE `servers`
   ADD CONSTRAINT `servers_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`user_id`),
   ADD CONSTRAINT `servers_ibfk_2` FOREIGN KEY (`lobby_id`) REFERENCES `channels` (`channel_id`);
+
+--
+-- 資料表的限制式 `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`current_channel_id`) REFERENCES `channels` (`channel_id`),
+  ADD CONSTRAINT `users_ibfk_2` FOREIGN KEY (`current_server_id`) REFERENCES `servers` (`server_id`);
 
 --
 -- 資料表的限制式 `user_badges`
