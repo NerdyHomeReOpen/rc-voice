@@ -604,7 +604,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                   </div>
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
-                  <table style={{ height: '260px' }}>
+                  <table style={{ height: '335px' }}>
                     <thead>
                       <tr>
                         {MEMBER_FIELDS.map((field) => (
@@ -912,7 +912,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                   </div>
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
-                  <table style={{ height: '260px' }}>
+                  <table style={{ height: '335px' }}>
                     <thead>
                       <tr>
                         {APPLICATION_FIELDS.map((field) => (
@@ -1023,7 +1023,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                   </div>
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
-                  <table style={{ height: '260px' }}>
+                  <table style={{ height: '335px' }}>
                     <thead>
                       <tr>
                         {BLOCK_MEMBER_FIELDS.map((field) => (
