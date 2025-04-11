@@ -442,7 +442,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                     <div className={`${popup['inputBox']} ${popup['col']}`}>
                       <div className={popup['label']}>{lang.tr.type}</div>
                       <div
-                        className={`${popup['selectBox']} ${popup['small']} `}
+                        className={`${popup['selectBox']} ${popup['small']}`}
                       >
                         <select
                           value={serverType}

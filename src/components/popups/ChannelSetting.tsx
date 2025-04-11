@@ -209,7 +209,7 @@ const ChannelSettingPopup: React.FC<ChannelSettingPopupProps> = React.memo(
                   </div>
                   <div className={`${popup['inputBox']} ${popup['col']}`}>
                     <div className={popup['label']}>{lang.tr.channelMode}</div>
-                    <div className={popup['selectBox']}>
+                    <div className={`${popup['selectBox']} ${popup['small']}`}>
                       <select
                         value={channelVoiceMode}
                         onChange={(e) =>

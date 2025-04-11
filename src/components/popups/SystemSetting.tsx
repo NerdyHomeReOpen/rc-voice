@@ -162,7 +162,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
               <div className={popup['inputGroup']}>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <div className={popup['label']}>{lang.tr.inputDevice}</div>
-                  <div className={popup['selectBox']}>
+                  <div className={`${popup['selectBox']} ${popup['small']}`}>
                     <select
                       value={selectedInput}
                       onChange={(e) => setSelectedInput(e.target.value)}
@@ -187,7 +187,7 @@ const SystemSettingPopup: React.FC = React.memo(() => {
                 </div>
                 <div className={`${popup['inputBox']} ${popup['col']}`}>
                   <div className={popup['label']}>{lang.tr.outputDevice}</div>
-                  <div className={popup['selectBox']}>
+                  <div className={`${popup['selectBox']} ${popup['small']}`}>
                     <select
                       value={selectedOutput}
                       onChange={(e) => setSelectedOutput(e.target.value)}

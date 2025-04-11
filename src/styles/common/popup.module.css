@@ -275,7 +275,7 @@
   content: '';
   position: absolute;
   top: 0px;
-  left: 40px;
+  right: 25px;
   height: 2rem;
   width: 25px;
   z-index: 1;
@@ -292,7 +292,7 @@
   content: '';
   position: absolute;
   top: 8px;
-  left: 36px;
+  right: 28px;
   width: 26px;
   height: 12px;
   z-index: 1;

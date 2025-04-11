@@ -116,7 +116,7 @@ const EditFriendPopup: React.FC<EditFriendPopupProps> = React.memo(
                 <div className={popup['label']}>
                   {lang.tr.friendSelectGroup}
                 </div>
-                <div className={popup['selectBox']}>
+                <div className={`${popup['selectBox']} ${popup['small']}`}>
                   <select
                     className={popup['input']}
                     value={friendGroup}

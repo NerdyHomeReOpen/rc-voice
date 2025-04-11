@@ -322,7 +322,9 @@ const ApplyFriendPopup: React.FC<ApplyFriendPopupProps> = React.memo(
                       {lang.tr.friendSelectGroup}
                     </div>
                     <div className={popup['row']}>
-                      <div className={popup['selectBox']}>
+                      <div
+                        className={`${popup['selectBox']} ${popup['small']}`}
+                      >
                         <select
                           className={popup['select']}
                           value={selectedFriendGroupId}
