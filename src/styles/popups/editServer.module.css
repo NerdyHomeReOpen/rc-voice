@@ -56,7 +56,7 @@
   padding: 15px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .headerBar {

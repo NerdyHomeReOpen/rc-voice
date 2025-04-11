@@ -6,6 +6,7 @@ import { marked } from 'marked';
 import setting from '@/styles/popups/editServer.module.css';
 import popup from '@/styles/common/popup.module.css';
 import permission from '@/styles/common/permission.module.css';
+import markdown from '@/styles/common/markdown.module.css';
 
 // Types
 import {
@@ -571,7 +572,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                         style={{ minHeight: '330px' }}
                         className={`${
                           showPreview ? setting['previewModeArea'] : ''
-                        } ${popup['previewArea']}`}
+                        } ${markdown['markdownContent']}`}
                         dangerouslySetInnerHTML={{
                           __html: announcementPreview,
                         }}

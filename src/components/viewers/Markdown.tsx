@@ -209,15 +209,11 @@ interface MarkdownViewerProps {
 const MarkdownViewer: React.FC<MarkdownViewerProps> = React.memo(
   ({ markdownText, isGuest = false, forbidGuestUrl = false }) => {
     return (
-      <div className="flex-1 overflow-x-hidden">
-        <div className="max-w-full overflow-x-auto">
-          <Markdown
-            markdownText={markdownText}
-            isGuest={isGuest}
-            forbidGuestUrl={forbidGuestUrl}
-          />
-        </div>
-      </div>
+      <Markdown
+        markdownText={markdownText}
+        isGuest={isGuest}
+        forbidGuestUrl={forbidGuestUrl}
+      />
     );
   },
 );
