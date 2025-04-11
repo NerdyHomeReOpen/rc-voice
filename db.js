@@ -26,28 +26,56 @@ function convertToCamelCase(obj) {
   return camelCaseObj;
 }
 
+function validateData(data, allowedFields) {
+  const convertedData = convertToSnakeCase(data);
+  const keys = Object.keys(convertedData);
+  const values = keys.map((k) => convertedData[k]);
+  if (keys.length === 0 || values.length === 0) {
+    throw new StandardizedError(
+      'No fields to update',
+      'AccessDatabaseError',
+      'SET',
+      'DATA_INVALID',
+      401,
+    );
+  }
+  if (keys.length !== values.length) {
+    throw new StandardizedError(
+      'Keys and values length mismatch',
+      'AccessDatabaseError',
+      'SET',
+      'DATA_INVALID',
+      401,
+    );
+  }
+  for (const key of keys) {
+    if (!allowedFields.includes(key)) {
+      throw new StandardizedError(
+        `Invalid field: ${key}`,
+        'AccessDatabaseError',
+        'SET',
+        'DATA_INVALID',
+        401,
+      );
+    }
+  }
+  return { keys, values };
+}
+
 // Helper functions to match quick.db API
 const Database = {
   set: {
     account: async (account, data) => {
       try {
         const ALLOWED_FIELDS = ['password', 'user_id'];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO accounts (account, ${key}) VALUES (?) ON DUPLICATE KEY UPDATE ${key} = ?`,
-            [account, value, value],
-          );
-        }
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO accounts (account, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
+            ON DUPLICATE KEY 
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [account, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -86,25 +114,14 @@ const Database = {
           'last_active_at',
           'created_at',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO users (user_id, ${key}) 
-            VALUES (?, ?)
-            ON DUPLICATE KEY
-            UPDATE ${key} = ?`,
-            [userId, value, value],
-          );
-        }
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO users (user_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
+            ON DUPLICATE KEY 
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [userId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -122,25 +139,14 @@ const Database = {
     badge: async (badgeId, data) => {
       try {
         const ALLOWED_FIELDS = ['name', 'description', 'image'];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO badges (badge_id, ${key}) 
-            VALUES (?, ?)
-            ON DUPLICATE KEY
-            UPDATE ${key} = ?`,
-            [badgeId, value, value],
-          );
-        }
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO badges (badge_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
+            ON DUPLICATE KEY 
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [badgeId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -158,25 +164,14 @@ const Database = {
     userBadge: async (userId, badgeId, data) => {
       try {
         const ALLOWED_FIELDS = ['user_id', 'badge_id', 'order', 'created_at'];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO user_badges (user_id, badge_id, ${key}) 
-            VALUES (?, ?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO user_badges (user_id, badge_id, ${keys.join(', ')}) 
+            VALUES (?, ?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [userId, badgeId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [userId, badgeId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -201,25 +196,14 @@ const Database = {
           'server_id',
           'timestamp',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO user_servers (user_id, server_id, ${key}) 
-            VALUES (?, ?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO user_servers (user_id, server_id, ${keys.join(', ')}) 
+            VALUES (?, ?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [userId, serverId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [userId, serverId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -255,25 +239,14 @@ const Database = {
           'owner_id',
           'created_at',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO servers (server_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO servers (server_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [serverId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [serverId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -312,25 +285,14 @@ const Database = {
           'server_id',
           'created_at',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO channels (channel_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO channels (channel_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [channelId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [channelId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -348,25 +310,14 @@ const Database = {
     friendGroup: async (friendGroupId, data) => {
       try {
         const ALLOWED_FIELDS = ['name', 'order', 'user_id', 'created_at'];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO friend_groups (friend_group_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO friend_groups (friend_group_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [friendGroupId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [friendGroupId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -390,25 +341,14 @@ const Database = {
           'target_id',
           'created_at',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO friends (friend_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO friends (friend_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [friendId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [friendId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -432,25 +372,16 @@ const Database = {
           'receiver_id',
           'created_at',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO friend_applications (friend_application_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO friend_applications (friend_application_id, ${keys.join(
+            ', ',
+          )}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [friendApplicationId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [friendApplicationId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -478,25 +409,14 @@ const Database = {
           'server_id',
           'created_at',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO members (member_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO members (member_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [memberId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [memberId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -520,25 +440,16 @@ const Database = {
           'server_id',
           'created_at',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO member_applications (member_application_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO member_applications (member_application_id, ${keys.join(
+            ', ',
+          )}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [memberApplicationId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [memberApplicationId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -563,25 +474,14 @@ const Database = {
           'channel_id',
           'timestamp',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO messages (message_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO messages (message_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [messageId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [messageId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(
@@ -605,25 +505,14 @@ const Database = {
           'user_id_2',
           'timestamp',
         ];
-        const entries = Object.entries(convertToSnakeCase(data));
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.includes(key)) {
-            throw new StandardizedError(
-              `Invalid field: ${key}`,
-              'AccessDatabaseError',
-              'SET',
-              'DATA_INVALID',
-              400,
-            );
-          }
-          await query(
-            `INSERT INTO direct_messages (direct_message_id, ${key}) 
-            VALUES (?, ?) 
+        const { keys, values } = validateData(data, ALLOWED_FIELDS);
+        await query(
+          `INSERT INTO direct_messages (direct_message_id, ${keys.join(', ')}) 
+            VALUES (?, ${keys.map(() => '?').join(', ')})
             ON DUPLICATE KEY 
-            UPDATE ${key} = ?`,
-            [directMessageId, value, value],
-          );
-        }
+            UPDATE ${keys.map((k) => `${k} = VALUES(${k})`).join(', ')}`,
+          [directMessageId, ...values],
+        );
       } catch (error) {
         if (!(error instanceof StandardizedError)) {
           error = new StandardizedError(

@@ -17,12 +17,16 @@ async function setupDatabase() {
     const connection = await mysql.createConnection(config);
 
     // Create database if it doesn't exist
+    await connection.query(`DROP DATABASE IF EXISTS ${database}`);
     await connection.query(`CREATE DATABASE IF NOT EXISTS ${database}`);
     await connection.query(`USE ${database}`);
 
     // Read and execute schema
-    const schema = await fs.readFile(path.join(__dirname, 'schema.sql'), 'utf8');
-    const statements = schema.split(';').filter(stmt => stmt.trim());
+    const schema = await fs.readFile(
+      path.join(__dirname, 'schema.sql'),
+      'utf8',
+    );
+    const statements = schema.split(';').filter((stmt) => stmt.trim());
 
     for (const statement of statements) {
       if (statement.trim()) {
