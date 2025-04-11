@@ -146,14 +146,16 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
 
     // Variables
     const { serverId, userId } = initialData;
-    const filteredMembers = serverMembers.filter((member) => {
-      const searchLower = searchText.toLowerCase();
-      return (
-        member.permissionLevel > 1 &&
-        (member.nickname?.toLowerCase().includes(searchLower) ||
-          member.name.toLowerCase().includes(searchLower))
-      );
-    });
+    const filteredMembers = serverMembers
+      .filter((member) => {
+        const searchLower = searchText.toLowerCase();
+        return (
+          member.permissionLevel > 1 &&
+          (member.nickname?.toLowerCase().includes(searchLower) ||
+            member.name.toLowerCase().includes(searchLower))
+        );
+      })
+      .sort((a, b) => b.permissionLevel - a.permissionLevel);
     const filteredApplications = serverApplications.filter((application) => {
       const searchLower = searchText.toLowerCase();
       return (
