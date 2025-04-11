@@ -155,7 +155,12 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
             member.name.toLowerCase().includes(searchLower))
         );
       })
-      .sort((a, b) => b.permissionLevel - a.permissionLevel);
+      .sort((a, b) => {
+        if (!sortField) {
+          return b.permissionLevel - a.permissionLevel;
+        }
+        return createSorter(sortField, sortState)(a, b);
+      });
     const filteredApplications = serverApplications.filter((application) => {
       const searchLower = searchText.toLowerCase();
       return (
@@ -631,6 +636,7 @@ const ServerSettingPopup: React.FC<ServerSettingPopupProps> = React.memo(
                     </thead>
                     <tbody className={setting['tableContainer']}>
                       {filteredMembers.map((member) => {
+                        // console.log(member);
                         const {
                           id: memberId,
                           name: memberName,
