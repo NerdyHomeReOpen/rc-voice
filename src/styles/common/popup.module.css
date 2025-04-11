@@ -252,6 +252,12 @@
   width: 100%;
 }
 
+.inputBox .selectBox.small,
+.inputBox .selectBox.small select {
+  width: fit-content;
+  padding-right: 30px;
+}
+
 .inputBox .selectBox select {
   border: 1px solid #ddd;
   padding: 2px;
@@ -268,8 +274,8 @@
 .inputBox .selectBox::before {
   content: '';
   position: absolute;
-  bottom: 0;
-  right: 0;
+  top: 0px;
+  left: 40px;
   height: 2rem;
   width: 25px;
   z-index: 1;
@@ -279,13 +285,17 @@
   pointer-events: none;
 }
 
+.inputBox .selectBox.small::before {
+}
+
 .inputBox .selectBox::after {
   content: '';
   position: absolute;
-  bottom: 8px;
-  right: 0;
+  top: 8px;
+  left: 36px;
   width: 26px;
   height: 12px;
+  z-index: 1;
   background-image: url('../../../public/login_combobox_triangle.png');
   background-repeat: no-repeat;
   background-size: cover;
