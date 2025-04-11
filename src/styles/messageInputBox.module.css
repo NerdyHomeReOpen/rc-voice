@@ -24,6 +24,7 @@
   resize: none;
   border: none;
   outline: none;
+  background: #fbfbfb;
 }
 
 .messageInputBox textarea:focus {
